@@ -219,18 +219,13 @@ let field_project_path fields path =
     let field_name = Option.value ~default:("." ^ Int.to_string i) field_name in
     let field_name_with_projection = field_name_with_path field_name subpath in
     ( Some field_name_with_projection,
-      Type_shape.Type_shape.Ts_other
-        Type_shape.Type_shape.Layout_to_be_determined,
+      Shape.Ts_other Shape.Layout_to_be_determined,
       (* CR sspies: To properly support unboxed records in mixed records, we we
          need to propagate the right shape information here. *)
       project_layout field_layout subpath )
 
 let flatten_fields_in_mixed_record ~(mixed_block_shapes : Layout.t array)
-    (fields :
-      (string option
-      * Type_shape.Type_shape.without_layout Type_shape.Type_shape.ts
-      * Layout.t)
-      list) =
+    (fields : (string option * Shape.without_layout Shape.ts * Layout.t) list) =
   (* We go into arrays and back, because it makes the reordering of the fields
      via accesses O(n) instead of O(n^2) *)
   let fields = Array.of_list fields in
@@ -644,7 +639,7 @@ let create_type_shape_to_dwarf_die_poly_variant ~reference ~parent_proto_die
   let simple_constructors, complex_constructors =
     List.partition_map
       (fun ({ pv_constr_name; pv_constr_args } :
-             _ Type_shape.Type_shape.poly_variant_constructor) ->
+             _ Shape.poly_variant_constructor) ->
         match pv_constr_args with
         | [] -> Left pv_constr_name
         | _ :: _ -> Right (pv_constr_name, pv_constr_args))
@@ -892,10 +887,9 @@ let create_tuple_die ~reference ~parent_proto_die ~name ~fields =
   wrap_die_under_a_pointer ~proto_die:structure_type ~reference
     ~parent_proto_die
 
-let unboxed_base_type_to_simd_vec_split
-    (x : Type_shape.Type_shape.Predef.unboxed) =
+let unboxed_base_type_to_simd_vec_split (x : Shape.Predef.unboxed) =
   match x with
-  | Type_shape.Type_shape.Predef.Unboxed_simd s -> Some s
+  | Shape.Predef.Unboxed_simd s -> Some s
   | Unboxed_float | Unboxed_float32 | Unboxed_nativeint | Unboxed_int64
   | Unboxed_int32 ->
     None
@@ -906,8 +900,7 @@ type vec_split_properties =
     size : int
   }
 
-let vec_split_to_properties
-    (vec_split : Type_shape.Type_shape.Predef.simd_vec_split) =
+let vec_split_to_properties (vec_split : Shape.Predef.simd_vec_split) =
   match vec_split with
   | Int8x16 -> { encoding = Encoding_attribute.signed; count = 16; size = 1 }
   | Int16x8 -> { encoding = Encoding_attribute.signed; count = 8; size = 2 }
@@ -929,7 +922,7 @@ let vec_split_to_properties
   | Float64x8 -> { encoding = Encoding_attribute.float; count = 8; size = 8 }
 
 let create_simd_vec_split_base_layout_die ~reference ~parent_proto_die ~name
-    ~(split : Type_shape.Type_shape.Predef.simd_vec_split option) =
+    ~(split : Shape.Predef.simd_vec_split option) =
   let maybe_name = List.map DAH.create_name (Option.to_list name) in
   match split with
   | None ->
@@ -1002,11 +995,11 @@ let create_base_layout_type ?(simd_vec_split = None) ~reference
 
 module Shape_with_layout = struct
   include Identifiable.Make (struct
-    type nonrec t = Layout.t Type_shape.Type_shape.ts
+    type nonrec t = Layout.t Shape.ts
 
     let compare = Stdlib.compare
 
-    let print = Type_shape.Type_shape.print
+    let print = Shape.print_type_shape
 
     let hash = Hashtbl.hash
 
@@ -1020,7 +1013,7 @@ module Cache = Shape_with_layout.Tbl
 
 let cache = Cache.create 16
 
-let rec type_shape_to_dwarf_die (type_shape : Layout.t Type_shape.Type_shape.ts)
+let rec type_shape_to_dwarf_die (type_shape : Layout.t Shape.ts)
     ~parent_proto_die ~fallback_value_die =
   match Cache.find_opt cache type_shape with
   | Some reference -> reference
@@ -1034,7 +1027,7 @@ let rec type_shape_to_dwarf_die (type_shape : Layout.t Type_shape.Type_shape.ts)
     let type_name = Type_shape.type_name type_shape in
     let layout_name =
       Format.asprintf "%a" Jkind_types.Sort.Const.format
-        (Type_shape.Type_shape.shape_layout type_shape)
+        (Shape.shape_layout type_shape)
     in
     let name = type_name ^ " @ " ^ layout_name in
     (match type_shape with
@@ -1082,12 +1075,11 @@ and type_shape_to_dwarf_die_tuple ~name ~reference ~parent_proto_die
   create_tuple_die ~reference ~parent_proto_die ~name ~fields
 
 and type_shape_to_dwarf_die_predef ~name ~reference ~parent_proto_die
-    ~fallback_value_die (predef : Type_shape.Type_shape.Predef.t) args =
+    ~fallback_value_die (predef : Shape.Predef.t) args =
   match predef, args with
   | Array, [element_type_shape] ->
     let element_type_shape =
-      Type_shape.Type_shape.shape_with_layout ~layout:(Base Value)
-        element_type_shape
+      Shape.shape_with_layout ~layout:(Base Value) element_type_shape
     in
     (* CR sspies: Check whether the elements of an array are always values and,
        if not, where that information is maintained. *)
@@ -1102,7 +1094,7 @@ and type_shape_to_dwarf_die_predef ~name ~reference ~parent_proto_die
        simply yielding the [fallback_value_die], but that seems strange. *)
   | Char, _ -> create_char_die ~reference ~parent_proto_die ~name
   | Unboxed b, _ ->
-    let type_layout = Type_shape.Type_shape.Predef.unboxed_type_to_layout b in
+    let type_layout = Shape.Predef.unboxed_type_to_layout b in
     create_base_layout_type
       ~simd_vec_split:(unboxed_base_type_to_simd_vec_split b)
       ~reference type_layout ~name ~parent_proto_die ~fallback_value_die
@@ -1140,17 +1132,14 @@ and type_shape_to_dwarf_die_type_constructor ~reference ~name ~parent_proto_die
     create_base_layout_type ~reference type_layout ~name ~parent_proto_die
       ~fallback_value_die
   | Some type_decl_shape -> (
-    let type_decl_shape =
-      Type_shape.Type_decl_shape.replace_tvar type_decl_shape shapes
-    in
+    let type_decl_shape = Shape.replace_tvar type_decl_shape shapes in
     match type_decl_shape.definition with
     | Tds_other ->
       create_base_layout_type ~reference type_layout ~name ~parent_proto_die
         ~fallback_value_die
     | Tds_alias alias_shape ->
       let alias_shape =
-        Type_shape.Type_shape.shape_with_layout ~layout:(Base type_layout)
-          alias_shape
+        Shape.shape_with_layout ~layout:(Base type_layout) alias_shape
       in
       let alias_die =
         type_shape_to_dwarf_die alias_shape ~parent_proto_die
@@ -1162,8 +1151,7 @@ and type_shape_to_dwarf_die_type_constructor ~reference ~name ~parent_proto_die
         List.map
           (fun (name, type_shape, type_layout) ->
             let type_shape' =
-              Type_shape.Type_shape.shape_with_layout ~layout:type_layout
-                type_shape
+              Shape.shape_with_layout ~layout:type_layout type_shape
             in
             ( name,
               Arch.size_addr,
@@ -1180,9 +1168,7 @@ and type_shape_to_dwarf_die_type_constructor ~reference ~name ~parent_proto_die
     | Tds_record
         { fields = [(field_name, sh, Base base_layout)]; kind = Record_unboxed }
       ->
-      let field_shape =
-        Type_shape.Type_shape.shape_with_layout ~layout:(Base base_layout) sh
-      in
+      let field_shape = Shape.shape_with_layout ~layout:(Base base_layout) sh in
       let field_die =
         type_shape_to_dwarf_die ~parent_proto_die ~fallback_value_die
           field_shape
@@ -1203,8 +1189,7 @@ and type_shape_to_dwarf_die_type_constructor ~reference ~name ~parent_proto_die
         List.map
           (fun (name, type_shape, base_layout) ->
             let type_shape' =
-              Type_shape.Type_shape.shape_with_layout ~layout:(Base base_layout)
-                type_shape
+              Shape.shape_with_layout ~layout:(Base base_layout) type_shape
             in
             match name with
             | Some name ->
@@ -1225,15 +1210,14 @@ and type_shape_to_dwarf_die_type_constructor ~reference ~name ~parent_proto_die
         (* we flatten the fields of the constructors first *)
         let complex_constructors =
           List.map
-            (fun { Type_shape.Type_decl_shape.name; kind; args } ->
+            (fun { Shape.name; kind; args } ->
               ( name,
                 match kind with
                 | Constructor_mixed mixed_block_shapes ->
                   flatten_fields_in_mixed_record ~mixed_block_shapes
                     (List.map
-                       (fun { Type_shape.Type_decl_shape.field_name = name;
-                              field_value = sh, ly
-                            } -> name, sh, ly)
+                       (fun { Shape.field_name = name; field_value = sh, ly } ->
+                         name, sh, ly)
                        args) ))
             complex_constructors
         in
@@ -1244,8 +1228,7 @@ and type_shape_to_dwarf_die_type_constructor ~reference ~name ~parent_proto_die
                 List.map
                   (fun (field_name, sh, ly) ->
                     let sh =
-                      Type_shape.Type_shape.shape_with_layout
-                        ~layout:(Layout.Base ly) sh
+                      Shape.shape_with_layout ~layout:(Layout.Base ly) sh
                     in
                     ( field_name,
                       type_shape_to_dwarf_die ~parent_proto_die
@@ -1258,9 +1241,7 @@ and type_shape_to_dwarf_die_type_constructor ~reference ~name ~parent_proto_die
           ~simple_constructors ~complex_constructors)
     | Tds_variant_unboxed
         { name = constr_name; arg_name; arg_shape; arg_layout } ->
-      let arg_shape =
-        Type_shape.Type_shape.shape_with_layout ~layout:arg_layout arg_shape
-      in
+      let arg_shape = Shape.shape_with_layout ~layout:arg_layout arg_shape in
       let arg_die =
         type_shape_to_dwarf_die ~parent_proto_die ~fallback_value_die arg_shape
       in
@@ -1276,7 +1257,7 @@ and type_shape_to_dwarf_die_arrow ~reference ~name ~parent_proto_die
 and type_shape_to_dwarf_die_poly_variant ~reference ~parent_proto_die
     ~fallback_value_die ~name ~constructors =
   let constructors_with_references =
-    Type_shape.Type_shape.poly_variant_constructors_map
+    Shape.poly_variant_constructors_map
       (type_shape_to_dwarf_die ~parent_proto_die ~fallback_value_die)
       constructors
   in
@@ -1294,7 +1275,7 @@ let rec flatten_to_base_sorts (sort : Layout.t) : base_layout list =
    type variables). In these cases, we produce the corresponding number of
    entries of the form [`Unknown base_layout] for the fields. Otherwise, when
    the type is known, we produce [`Known type_shape] for the fields. *)
-let rec flatten_shape (type_shape : Layout.t Type_shape.Type_shape.ts) =
+let rec flatten_shape (type_shape : Layout.t Shape.ts) =
   let unknown_base_layouts layout =
     let base_sorts = flatten_to_base_sorts layout in
     List.map (fun base_sort -> `Unknown base_sort) base_sorts
@@ -1316,16 +1297,12 @@ let rec flatten_shape (type_shape : Layout.t Type_shape.Type_shape.ts) =
     | None -> unknown_base_layouts layout
     | Some { definition = Tds_other; _ } -> unknown_base_layouts layout
     | Some type_decl_shape -> (
-      let type_decl_shape =
-        Type_shape.Type_decl_shape.replace_tvar type_decl_shape shapes
-      in
+      let type_decl_shape = Shape.replace_tvar type_decl_shape shapes in
       match type_decl_shape.definition with
       | Tds_other ->
         unknown_base_layouts layout (* Cannot break up unknown type. *)
       | Tds_alias alias_shape ->
-        let alias_shape =
-          Type_shape.Type_shape.shape_with_layout ~layout alias_shape
-        in
+        let alias_shape = Shape.shape_with_layout ~layout alias_shape in
         flatten_shape alias_shape
         (* At first glance, this recursion could potentially diverge, for direct
            cycles between type aliases and the defintion of the type. However,
@@ -1342,8 +1319,7 @@ let rec flatten_shape (type_shape : Layout.t Type_shape.Type_shape.ts) =
       | Tds_record { fields = [(_, sh, ly)]; kind = Record_unboxed }
         when Layout.equal ly layout -> (
         match layout with
-        | Product _ ->
-          flatten_shape (Type_shape.Type_shape.shape_with_layout ~layout sh)
+        | Product _ -> flatten_shape (Shape.shape_with_layout ~layout sh)
         (* for unboxed products of the form [{ field: ty } [@@unboxed]] where
            [ty] is of product sort, we simply look through the unboxed product.
            Otherwise, we will create an additional DWARF entry for it. *)
@@ -1362,8 +1338,7 @@ let rec flatten_shape (type_shape : Layout.t Type_shape.Type_shape.ts) =
           ->
           let shapes =
             List.map
-              (fun (_, sh, ly) ->
-                Type_shape.Type_shape.shape_with_layout ~layout:ly sh)
+              (fun (_, sh, ly) -> Shape.shape_with_layout ~layout:ly sh)
               fields
           in
           List.concat_map flatten_shape shapes
@@ -1404,9 +1379,7 @@ let variable_to_die state (var_uid : Uid.t) ~parent_proto_die =
      we should simply not emit any DWARF information for this variable
      instead. *)
   | Some { type_shape; type_layout } -> (
-    let type_shape =
-      Type_shape.Type_shape.shape_with_layout ~layout:type_layout type_shape
-    in
+    let type_shape = Shape.shape_with_layout ~layout:type_layout type_shape in
     let type_shape =
       match unboxed_projection with
       | None -> `Known type_shape
