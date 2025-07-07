@@ -9,12 +9,14 @@ type base_layout = Jkind_types.Sort.base
 
 module Type_shape : sig
   val of_type_expr :
-    Types.type_expr -> (Path.t -> Uid.t option) -> Shape.without_layout Shape.ts
+    Types.type_expr ->
+    (Path.t -> Shape.t option) ->
+    Shape.without_layout Shape.ts
 end
 
 module Type_decl_shape : sig
   val of_type_declaration :
-    Path.t -> Types.type_declaration -> (Path.t -> Uid.t option) -> Shape.tds
+    Types.type_declaration -> (Path.t -> Shape.t option) -> Shape.tds
 end
 
 type shape_with_layout =
@@ -33,14 +35,14 @@ val all_type_shapes : shape_with_layout Uid.Tbl.t
 
 (* Passing [Path.t -> Uid.t] instead of [Env.t] to avoid a dependency cycle. *)
 val add_to_type_decls :
-  Path.t -> Types.type_declaration -> (Path.t -> Uid.t option) -> unit
+  Types.type_declaration -> (Path.t -> Shape.t option) -> unit
 
 val add_to_type_shapes :
   Uid.t ->
   Types.type_expr ->
   Jkind_types.Sort.Const.t ->
   name:string ->
-  (Path.t -> Uid.t option) ->
+  (Path.t -> Shape.t option) ->
   unit
 
 val find_in_type_decls : Uid.t -> Shape.tds option
