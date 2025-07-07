@@ -498,6 +498,7 @@ and desc =
   | Struct of t Item.Map.t
   | Alias of t
   | Leaf
+  | Type of without_layout ts
   | Type_decl of tds
   | Proj of t * Item.t
   | Comp_unit of string
@@ -506,11 +507,12 @@ and desc =
 and without_layout = Layout_to_be_determined
 
 and 'a ts =
-  | Ts_constr of (t * 'a) * without_layout ts list
+  | Ts_shape of (t * 'a)
+    (** This case is used for type constructors, type variables, and more. *)
   | Ts_tuple of 'a ts list
   | Ts_unboxed_tuple of 'a ts list
-  | Ts_var of string option * 'a
-  | Ts_predef of Predef.t * without_layout ts list
+  | Ts_predef of Predef.t
+    (** Arguments are handled via the [Ts_shape] case. *)
   | Ts_arrow of without_layout ts * without_layout ts
   | Ts_variant of 'a ts poly_variant_constructors
   | Ts_other of 'a
@@ -523,7 +525,7 @@ and 'a poly_variant_constructor =
   }
 
 
-and tds_desc =
+and tds =
   | Tds_variant of
       { simple_constructors : string list;
         complex_constructors :
@@ -574,11 +576,6 @@ and constructor_representation =
 
 and mixed_product_shape = base_layout array
 
-and tds =
-  {
-    definition : tds_desc;
-    type_params : without_layout ts list
-  }
 
 let rec equal_desc d1 d2 =
   if d1 == d2 then true else
@@ -594,22 +591,24 @@ let rec equal_desc d1 d2 =
     else equal v1 v2
   | Leaf, Leaf -> true
   | Type_decl tds1, Type_decl tds2 -> equal_tds tds1 tds2
+  | Type t1, Type t2 -> equal_ts equal_without_layout t1 t2
   | Struct t1, Struct t2 ->
     Item.Map.equal equal t1 t2
   | Proj (t1, i1), Proj (t2, i2) ->
     if Item.compare i1 i2 <> 0 then false
     else equal t1 t2
   | Comp_unit c1, Comp_unit c2 -> String.equal c1 c2
-  | Var _, (Abs _ | App _ | Struct _ | Leaf  | Type_decl _ | Proj _ | Comp_unit _ | Alias _ | Error _)
-  | Abs _, (Var _ | App _ | Struct _ | Leaf  | Type_decl _ | Proj _ | Comp_unit _ | Alias _ | Error _)
-  | App _, (Var _ | Abs _ | Struct _ | Leaf  | Type_decl _ | Proj _ | Comp_unit _ | Alias _ | Error _)
-  | Struct _, (Var _ | Abs _ | App _ | Leaf  | Type_decl _ | Proj _ | Comp_unit _ | Alias _ | Error _)
-  | Leaf, (Var _ | Abs _ | App _ | Struct _ | Proj _ | Type_decl _ | Comp_unit _ | Alias _ | Error _)
-  | Type_decl _, (Var _ | Abs _ | App _ | Struct _ | Leaf  | Proj _ | Comp_unit _ | Alias _ | Error _)
-  | Proj _, (Var _ | Abs _ | App _ | Struct _ | Leaf  | Type_decl _ | Comp_unit _ | Alias _ | Error _)
-  | Comp_unit _, (Var _ | Abs _ | App _ | Struct _ | Leaf  | Type_decl _ | Proj _ | Alias _ | Error _)
-  | Alias _, (Var _ | Abs _ | App _ | Struct _ | Leaf  | Type_decl _ | Proj _ | Comp_unit _ | Error _)
-  | Error _, (Var _ | Abs _ | App _ | Struct _ | Leaf  | Type_decl _ | Proj _ | Comp_unit _ | Alias _)
+  | Var _, (Abs _ | App _ | Struct _ | Leaf  | Type_decl _ | Type _ | Proj _ | Comp_unit _ | Alias _ | Error _)
+  | Abs _, (Var _ | App _ | Struct _ | Leaf  | Type_decl _ | Type _ | Proj _ | Comp_unit _ | Alias _ | Error _)
+  | App _, (Var _ | Abs _ | Struct _ | Leaf  | Type_decl _ | Type _ | Proj _ | Comp_unit _ | Alias _ | Error _)
+  | Struct _, (Var _ | Abs _ | App _ | Leaf  | Type_decl _ | Type _ | Proj _ | Comp_unit _ | Alias _ | Error _)
+  | Leaf, (Var _ | Abs _ | App _ | Struct _ | Proj _ | Type_decl _ | Type _ | Comp_unit _ | Alias _ | Error _)
+  | Type_decl _, (Var _ | Abs _ | App _ | Struct _ | Leaf | Type _ | Proj _ | Comp_unit _ | Alias _ | Error _)
+  | Type _, (Var _ | Abs _ | App _ | Struct _ | Leaf  | Type_decl _ | Proj _ | Comp_unit _ | Alias _ | Error _)
+  | Proj _, (Var _ | Abs _ | App _ | Struct _ | Leaf  | Type_decl _ | Type _ | Comp_unit _ | Alias _ | Error _)
+  | Comp_unit _, (Var _ | Abs _ | App _ | Struct _ | Leaf  | Type_decl _ | Type _ | Proj _ | Alias _ | Error _)
+  | Alias _, (Var _ | Abs _ | App _ | Struct _ | Leaf  | Type_decl _ | Type _ | Proj _ | Comp_unit _ | Error _)
+  | Error _, (Var _ | Abs _ | App _ | Struct _ | Leaf  | Type_decl _ | Type _ | Proj _ | Comp_unit _ | Alias _)
     -> false
 
 and equal t1 t2 =
@@ -618,11 +617,7 @@ and equal t1 t2 =
   else if not (Option.equal Uid.equal t1.uid t2.uid) then false
   else equal_desc t1.desc t2.desc
 
-and equal_tds t1 t2 =
-  equal_tds_desc t1.definition t2.definition &&
-  List.equal (equal_ts equal_without_layout) t1.type_params t2.type_params
-
-and equal_tds_desc d1 d2 =
+and equal_tds d1 d2 =
   if d1 == d2 then true else
   match d1, d2 with
   | Tds_alias t1, Tds_alias t2 -> equal_ts equal_without_layout t1 t2
@@ -727,50 +722,42 @@ and equal_ts :
   'a. ('a -> 'a -> bool) -> 'a ts -> 'a ts -> bool =
   fun eq t1 t2 ->
   match t1, t2 with
-  | Ts_constr ((sh1, ly1), ts1), Ts_constr ((sh2, ly2), ts2) ->
+  | Ts_shape (sh1, ly1), Ts_shape (sh2, ly2) ->
     equal sh1 sh2 &&
-    eq ly1 ly2 &&
-    List.equal (equal_ts equal_without_layout) ts1 ts2
+    eq ly1 ly2
   | Ts_tuple ts1, Ts_tuple ts2 ->
     List.equal (equal_ts eq) ts1 ts2
   | Ts_unboxed_tuple ts1, Ts_unboxed_tuple ts2 ->
     List.equal (equal_ts eq) ts1 ts2
-  | Ts_var (name1, ly1), Ts_var (name2, ly2) ->
-    Option.equal String.equal name1 name2 &&
-    eq ly1 ly2
-  | Ts_predef (predef1, shapes1), Ts_predef (predef2, shapes2) ->
-    Predef.equal predef1 predef2 &&
-    List.equal (equal_ts equal_without_layout) shapes1 shapes2
+  | Ts_predef (predef1), Ts_predef (predef2) ->
+    Predef.equal predef1 predef2
   | Ts_arrow (arg1, ret1), Ts_arrow (arg2, ret2) ->
     equal_ts equal_without_layout arg1 arg2 &&
     equal_ts equal_without_layout ret1 ret2
   | Ts_variant (cstrs1), Ts_variant (cstrs2) ->
     List.equal (equal_poly_variant_constructor eq) cstrs1 cstrs2
   | Ts_other ly1, Ts_other ly2 -> eq ly1 ly2
-  | Ts_constr _,
+  | Ts_shape _,
       (Ts_other _ | Ts_predef _ | Ts_arrow _ | Ts_variant _ | Ts_tuple _
-       | Ts_unboxed_tuple _ | Ts_var _)
+       | Ts_unboxed_tuple _ )
   | Ts_other _,
-      (Ts_constr _ | Ts_predef _ | Ts_arrow _ | Ts_variant _ | Ts_tuple _
-       | Ts_unboxed_tuple _ | Ts_var _)
+      (Ts_shape _ | Ts_predef _ | Ts_arrow _ | Ts_variant _ | Ts_tuple _
+       | Ts_unboxed_tuple _ )
   | Ts_predef _ ,
-      (Ts_constr _ | Ts_other _ | Ts_arrow _ | Ts_variant _ | Ts_tuple _
-       | Ts_unboxed_tuple _ | Ts_var _)
+      (Ts_shape _ | Ts_other _ | Ts_arrow _ | Ts_variant _ | Ts_tuple _
+       | Ts_unboxed_tuple _ )
   | Ts_arrow _ ,
-      (Ts_constr _ | Ts_predef _ | Ts_other _ | Ts_variant _ | Ts_tuple _
-       | Ts_unboxed_tuple _ | Ts_var _)
+      (Ts_shape _ | Ts_predef _ | Ts_other _ | Ts_variant _ | Ts_tuple _
+       | Ts_unboxed_tuple _ )
   | Ts_variant _ ,
-      (Ts_constr _ | Ts_predef _ | Ts_arrow _ | Ts_other _  | Ts_tuple _
-       | Ts_unboxed_tuple _ | Ts_var _)
+      (Ts_shape _ | Ts_predef _ | Ts_arrow _ | Ts_other _  | Ts_tuple _
+       | Ts_unboxed_tuple _ )
   | Ts_tuple _ ,
-      (Ts_constr _ | Ts_predef _ | Ts_arrow _ | Ts_variant _ | Ts_other _
-       | Ts_unboxed_tuple _ | Ts_var _)
+      (Ts_shape _ | Ts_predef _ | Ts_arrow _ | Ts_variant _ | Ts_other _
+       | Ts_unboxed_tuple _ )
   | Ts_unboxed_tuple _ ,
-      (Ts_constr _ | Ts_predef _ | Ts_arrow _ | Ts_variant _ | Ts_other _
-       | Ts_tuple _ | Ts_var _)
-  | Ts_var _ ,
-      (Ts_constr _ | Ts_predef _ | Ts_arrow _ | Ts_variant _ | Ts_other _
-       | Ts_tuple _ | Ts_unboxed_tuple _)
+      (Ts_shape _ | Ts_predef _ | Ts_arrow _ | Ts_variant _ | Ts_other _
+       | Ts_tuple _ )
     -> false
 
 
@@ -800,10 +787,14 @@ let rec print fmt t =
         Format.fprintf fmt "Abs@[%a@,(@[%a,@ @[%a@]@])@]"
           print_uid_opt uid pp_idents (id :: other_idents) aux body
     | App (t1, t2) ->
-        Format.fprintf fmt "@[%a(@,%a)%a@]" aux t1 aux t2
+        Format.fprintf fmt "@[App (%a(@,%a))(%a)@]" aux t1 aux t2
           print_uid_opt uid
     | Leaf ->
         Format.fprintf fmt "<%a>" (Format.pp_print_option Uid.print) uid
+    | Type ts ->
+      Format.fprintf fmt "%a%@{%a}"
+        print_type_shape ts
+        (Format.pp_print_option Uid.print) uid
     | Type_decl decl ->
       Format.fprintf fmt "<%a> = %a"
         (Format.pp_print_option Uid.print) uid
@@ -846,19 +837,10 @@ let rec print fmt t =
 (* printing type shapes *)
 and print_type_shape : type a. Format.formatter -> a ts -> unit =
   fun ppf -> function
-  | Ts_predef (predef, shapes) ->
-    Format.fprintf ppf "Ts_predef %s (%a)" (Predef.to_string predef)
-      (Format.pp_print_list
-          ~pp_sep:(fun ppf () -> Format.pp_print_string ppf ", ")
-          print_type_shape)
-      shapes
-  | Ts_constr ((shape, _), shapes) ->
-    Format.fprintf ppf "Ts_constr shape=%a (%a)"
-    print shape
-      (Format.pp_print_list
-        ~pp_sep:(fun ppf () -> Format.pp_print_string ppf ", ")
-        print_type_shape)
-      shapes
+  | Ts_predef (predef) ->
+    Format.fprintf ppf "Ts_predef %s" (Predef.to_string predef)
+  | Ts_shape (shape, _) ->
+    Format.fprintf ppf "Ts_shape (%a)" print shape
   | Ts_tuple shapes ->
     Format.fprintf ppf "Ts_tuple (%a)"
       (Format.pp_print_list
@@ -871,10 +853,6 @@ and print_type_shape : type a. Format.formatter -> a ts -> unit =
           ~pp_sep:(fun ppf () -> Format.pp_print_string ppf ", ")
           print_type_shape)
       shapes
-  | Ts_var (name, _) ->
-    Format.fprintf ppf "Ts_var (%a)"
-      (fun ppf opt -> Format.pp_print_option Format.pp_print_string ppf opt)
-      name
   | Ts_arrow (arg, ret) ->
     Format.fprintf ppf "Ts_arrow (%a, %a)" print_type_shape arg print_type_shape ret
   | Ts_variant fields ->
@@ -923,7 +901,7 @@ and print_record_type = function
   | Record_unboxed -> " [@@unboxed]"
   | Record_unboxed_product -> "_unboxed_product"
 
-and print_tds_desc ppf = function
+and print_type_decl_shape ppf = function
   | Tds_variant { simple_constructors; complex_constructors } ->
     Format.fprintf ppf
       "Tds_variant simple_constructors=%a complex_constructors=%a"
@@ -947,9 +925,6 @@ and print_tds_desc ppf = function
     Format.fprintf ppf "Tds_alias %a" print_type_shape type_shape
   | Tds_other -> Format.fprintf ppf "Tds_other"
 
-and print_type_decl_shape ppf t =
-  print_tds_desc ppf t.definition
-
 let rec strip_head_aliases = function
   | { desc = Alias t; _ } -> strip_head_aliases t
   | t -> t
@@ -963,6 +938,8 @@ let hash_app = 6
 let hash_comp_unit = 7
 let hash_alias = 8
 let hash_error = 9
+let hash_type_ = 10
+let hash_type_decl = 11
 
 let fresh_var ?(name="shape-var") uid =
   let var = Ident.create_local name in
@@ -1004,8 +981,11 @@ let leaf uid = leaf' (Some uid)
 let type_decl uid name =
   { uid;
     desc = Type_decl name;
-    hash = Hashtbl.hash (hash_alias, uid, name);
+    hash = Hashtbl.hash (hash_type_decl, uid, name);
     approximated = false }
+
+let type_ ?uid ts =
+  { uid; desc = Type ts; hash = Hashtbl.hash (hash_type_, uid, ts); approximated = false }
 
 let approx t = { t with approximated = true}
 
@@ -1097,11 +1077,10 @@ let poly_variant_constructors_map f pvs =
 
 let rec shape_layout (sh : Layout.t ts) =
   match sh with
-  | Ts_constr ((_, ly), _) -> ly
+  | Ts_shape (_, ly) -> ly
   | Ts_tuple _ -> Layout.Base Value
   | Ts_unboxed_tuple shapes -> Layout.Product (List.map shape_layout shapes)
-  | Ts_var (_, ly) -> ly
-  | Ts_predef (predef, _) -> Predef.predef_to_layout predef
+  | Ts_predef predef -> Predef.predef_to_layout predef
   | Ts_arrow _ -> Layout.Base Value
   | Ts_variant _ -> Layout.Base Value
   | Ts_other ly -> ly
@@ -1121,8 +1100,8 @@ let complex_constructors_map f = List.map (complex_constructor_map f)
 let rec shape_with_layout ~(layout : Layout.t) (sh : without_layout ts) :
     Layout.t ts =
   match sh, layout with
-  | Ts_constr ((sh, Layout_to_be_determined), shapes), _ ->
-    Ts_constr ((sh, layout), shapes)
+  | Ts_shape (sh, Layout_to_be_determined), _ ->
+    Ts_shape (sh, layout)
   | Ts_tuple shapes, Base Value ->
     let layouted_shapes =
       List.map (shape_with_layout ~layout:(Layout.Base Value)) shapes
@@ -1154,14 +1133,13 @@ let rec shape_with_layout ~(layout : Layout.t) (sh : without_layout ts) :
     Misc.fatal_errorf
       "unboxed tuple must have unboxed product layout, but has layout %a"
       Layout.format layout
-  | Ts_var (name, Layout_to_be_determined), _ -> Ts_var (name, layout)
   | Ts_arrow (arg, ret), Base Value -> Ts_arrow (arg, ret)
   | Ts_arrow _, _ ->
     Misc.fatal_errorf "function type shape must have layout value"
-  | Ts_predef (predef, shapes), _
+  | Ts_predef predef, _
     when Layout.equal (Predef.predef_to_layout predef) layout ->
-    Ts_predef (predef, shapes)
-  | Ts_predef (predef, _), _ ->
+    Ts_predef predef
+  | Ts_predef predef, _ ->
     Misc.fatal_errorf
       "predef has layout %a, but is expected to have layout %a" Layout.format
       (Predef.predef_to_layout predef)
@@ -1176,78 +1154,6 @@ let rec shape_with_layout ~(layout : Layout.t) (sh : without_layout ts) :
   | Ts_variant _, _ ->
     Misc.fatal_errorf "polymorphic variant must have layout value"
   | Ts_other Layout_to_be_determined, _ -> Ts_other layout
-
-(* CR sspies: This is a hacky "solution" to do type variable substitution in
-    type expression shapes. In subsequent PRs, this code should be changed to
-    use the shape mechanism instead. *)
-let rec replace_tvar_type_shape t ~(pairs : (without_layout ts * without_layout ts) list) =
-  match
-    List.filter_map
-      (fun (from, to_) -> if t = from then Some to_ else None)
-      pairs
-  with
-  | new_type :: _ -> new_type
-  | [] -> (
-    match t with
-    | Ts_constr (uid, shape_list) ->
-      Ts_constr (uid, List.map (replace_tvar_type_shape ~pairs) shape_list)
-    | Ts_tuple shape_list ->
-      Ts_tuple (List.map (replace_tvar_type_shape ~pairs) shape_list)
-    | Ts_unboxed_tuple shape_list ->
-      Ts_unboxed_tuple (List.map (replace_tvar_type_shape ~pairs) shape_list)
-    | Ts_var (name, ly) -> Ts_var (name, ly)
-    | Ts_predef (predef, shape_list) -> Ts_predef (predef, shape_list)
-    | Ts_arrow (arg, ret) ->
-      Ts_arrow (replace_tvar_type_shape ~pairs arg, replace_tvar_type_shape ~pairs ret)
-    | Ts_variant fields ->
-      let fields =
-        poly_variant_constructors_map (replace_tvar_type_shape ~pairs) fields
-      in
-      Ts_variant fields
-    | Ts_other ly -> Ts_other ly)
-
-(* CR sspies: This is a hacky "solution" to do type variable substitution in
-    type declaration shapes. In subsequent PRs, this code should be changed to
-    use the shape mechanism instead. *)
-let replace_tvar (t : tds)
-    (shapes : without_layout ts list) =
-  match List.length t.type_params == List.length shapes with
-  | true ->
-    let subst = List.combine t.type_params shapes in
-    let replace_tvar (sh, ly) = replace_tvar_type_shape ~pairs:subst sh, ly in
-    let ret =
-      { type_params = [];
-        definition =
-          (match t.definition with
-          | Tds_variant { simple_constructors; complex_constructors } ->
-            Tds_variant
-              { simple_constructors;
-                complex_constructors =
-                  complex_constructors_map replace_tvar complex_constructors
-              }
-          | Tds_variant_unboxed { name; arg_name; arg_shape; arg_layout } ->
-            Tds_variant_unboxed
-              { name;
-                arg_name;
-                arg_shape = replace_tvar_type_shape ~pairs:subst arg_shape;
-                arg_layout
-              }
-          | Tds_record { fields; kind } ->
-            Tds_record
-              { fields =
-                  List.map
-                    (fun (name, sh, ly) ->
-                      name, replace_tvar_type_shape ~pairs:subst sh, ly)
-                    fields;
-                kind
-              }
-          | Tds_alias type_shape ->
-            Tds_alias (replace_tvar_type_shape ~pairs:subst type_shape)
-          | Tds_other -> Tds_other)
-      }
-    in
-    ret
-  | false -> { type_params = []; definition = Tds_other }
 
 
 

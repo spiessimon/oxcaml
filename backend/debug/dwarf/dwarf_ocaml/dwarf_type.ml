@@ -1155,7 +1155,7 @@ let rec type_shape_to_dwarf_die ?type_name (type_shape : Layout.t Shape.ts)
        for recursive occurrences, which use a leaf rather than a declaration.
        These will only be used if the recursive occurrences (after substitution)
        are applied to the same type arguments. *)
-    (match type_shape with
+    (*= (match type_shape with
     | Ts_constr (({ uid = Some uid; desc = Type_decl _; _ }, layout), args) ->
       let rec_occurrence = Shape.Ts_constr ((Shape.leaf uid, layout), args) in
       Cache.add cache
@@ -1164,7 +1164,8 @@ let rec type_shape_to_dwarf_die ?type_name (type_shape : Layout.t Shape.ts)
       Cache.add cache { type_shape = rec_occurrence; type_name } reference
       (* For recursive occurrences, it is fine if they either do or do not carry
          the same name, so we add the same entry potentially twice. *)
-    | _ -> ());
+    | _ -> ()); *)
+    (* CR sspies: Fix the case where a recursive occurrence is not inserted. *)
     let layout_name =
       Format.asprintf "%a" Jkind_types.Sort.Const.format
         (Shape.shape_layout type_shape)
@@ -1173,7 +1174,7 @@ let rec type_shape_to_dwarf_die ?type_name (type_shape : Layout.t Shape.ts)
       Option.map (fun type_name -> type_name ^ " @ " ^ layout_name) type_name
     in
     (match type_shape with
-    | Ts_other type_layout | Ts_var (_, type_layout) -> (
+    | Ts_other type_layout -> (
       match type_layout with
       | Base b ->
         create_base_layout_type ~reference b ?name ~parent_proto_die
@@ -1187,10 +1188,12 @@ let rec type_shape_to_dwarf_die ?type_name (type_shape : Layout.t Shape.ts)
     | Ts_tuple fields ->
       type_shape_to_dwarf_die_tuple ~reference ~parent_proto_die
         ~fallback_value_die ?name fields
-    | Ts_predef (predef, args) ->
-      type_shape_to_dwarf_die_predef ~reference ?name ~parent_proto_die
-        ~fallback_value_die predef args
-    | Ts_constr ((shape, type_layout), shapes) -> (
+    | Ts_predef predef ->
+      Misc.fatal_errorf "unimplemented predef"
+      (*= type_shape_to_dwarf_die_predef ~reference ?name ~parent_proto_die
+        ~fallback_value_die predef args *)
+    | Ts_shape (shape, type_layout) -> Misc.fatal_error "unimplemented"
+    (*= | Ts_constr ((shape, type_layout), shapes) -> (
       match type_layout with
       | Base b ->
         type_shape_to_dwarf_die_type_constructor ~reference ?name
@@ -1198,7 +1201,7 @@ let rec type_shape_to_dwarf_die ?type_name (type_shape : Layout.t Shape.ts)
       | Product _ ->
         Misc.fatal_errorf
           "only base layouts supported, but found product layout %s" layout_name
-      )
+      ) *)
     | Ts_variant fields ->
       type_shape_to_dwarf_die_poly_variant ~reference ?name ~parent_proto_die
         ~fallback_value_die ~constructors:fields ()
@@ -1267,6 +1270,7 @@ and type_shape_to_dwarf_die_type_constructor ~reference ?name ~parent_proto_die
   let decl =
     match shape.desc with
     | Shape.Type_decl tds -> `Declaration tds
+    | Shape.Type _ -> Misc.fatal_error "unimplemented"
     | Shape.Leaf | Shape.Var _ | Shape.Abs _ | Shape.App _ | Shape.Struct _
     | Shape.Alias _ | Shape.Proj _ | Shape.Comp_unit _ | Shape.Error _ ->
       `Missing
@@ -1281,7 +1285,7 @@ and type_shape_to_dwarf_die_type_constructor ~reference ?name ~parent_proto_die
     create_base_layout_type ~reference type_layout ?name ~parent_proto_die
       ~fallback_value_die ()
   | `Declaration type_decl_shape -> (
-    match type_decl_shape.definition with
+    match type_decl_shape with
     | Tds_other ->
       create_base_layout_type ~reference type_layout ?name ~parent_proto_die
         ~fallback_value_die ()
@@ -1410,13 +1414,11 @@ let rec flatten_to_base_sorts (sort : Jkind_types.Sort.Const.t) :
    entries of the form [`Unknown base_layout] for the fields. Otherwise, when
    the type is known, we produce [`Known type_shape] for the fields. *)
 let rec flatten_type_shape (type_shape : Jkind_types.Sort.Const.t Shape.ts) =
-  let unknown_base_layouts layout =
+  let _unknown_base_layouts layout =
     let base_sorts = flatten_to_base_sorts layout in
     List.map (fun base_sort -> `Unknown base_sort) base_sorts
   in
   match type_shape with
-  | Ts_var (_, Base _) -> [`Known type_shape]
-  | Ts_var (_, (Product _ as type_layout)) -> unknown_base_layouts type_layout
   | Ts_tuple _ ->
     [`Known type_shape] (* tuples are only a single base layout wide *)
   | Ts_unboxed_tuple shapes -> List.concat_map flatten_type_shape shapes
@@ -1426,7 +1428,8 @@ let rec flatten_type_shape (type_shape : Jkind_types.Sort.Const.t Shape.ts) =
   | Ts_other layout ->
     let base_layouts = flatten_to_base_sorts layout in
     List.map (fun layout -> `Unknown layout) base_layouts
-  | Ts_constr ((shape, layout), shapes) -> (
+  | Ts_shape (shape, layout) -> Misc.fatal_error "unimplemented"
+(*= (
     let decl =
       match shape.desc with
       | Shape.Type_decl tds -> Some tds
@@ -1495,7 +1498,7 @@ let rec flatten_type_shape (type_shape : Jkind_types.Sort.Const.t Shape.ts) =
         then [`Known type_shape]
         else
           Misc.fatal_error
-            "unboxed variant must have same layout as its contents"))
+            "unboxed variant must have same layout as its contents")) *)
 
 module With_cms_reduce = Shape_reduce.Make (struct
   let fuel = 10
@@ -1521,11 +1524,10 @@ module With_cms_reduce = Shape_reduce.Make (struct
 
   let type_shape_compression = true
 
-  let lookup_shape_for_uid uid =
-    Option.map (Shape.type_decl (Some uid)) (Type_shape.find_in_type_decls uid)
+  let lookup_shape_for_uid uid = Type_shape.find_in_type_decls uid
 end)
 
-let debug_print_reduction_before_and_after = false
+let debug_print_reduction_before_and_after = true
 
 let variable_to_die state (var_uid : Uid.t) ~parent_proto_die =
   let fallback_value_die =

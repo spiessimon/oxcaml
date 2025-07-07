@@ -66,6 +66,7 @@ end) = struct
     | NProj of nf * Item.t
     | NLeaf
     | NType_decl of delayed_nf_tds
+    | NType of delayed_nf_ts
     | NComp_unit of string
     | NError of string
 
@@ -90,6 +91,8 @@ end) = struct
   and delayed_nf = Thunk of local_env * t
 
   and delayed_nf_tds = Thunk_tds of local_env * tds
+
+  and delayed_nf_ts = Thunk_ts of local_env * without_layout ts
 
   and local_env =
     { env: delayed_nf option Ident.Map.t;
@@ -117,6 +120,12 @@ end) = struct
       if Shape.equal_tds t1 t2 then equal_local_env l1 l2
       else false
 
+  and equal_delayed_nf_ts t1 t2 =
+    match t1, t2 with
+    | Thunk_ts (l1, t1), Thunk_ts (l2, t2) ->
+      if Shape.equal_ts Shape.equal_without_layout t1 t2 then equal_local_env l1 l2
+      else false
+
   and equal_nf_desc d1 d2 =
     match d1, d2 with
     | NVar v1, NVar v2 -> Ident.equal v1 v2
@@ -130,6 +139,7 @@ end) = struct
       else false
     | NLeaf, NLeaf -> true
     | NType_decl tds1, NType_decl tds2 -> equal_delayed_nf_tds tds1 tds2
+    | NType t1, NType t2 -> equal_delayed_nf_ts t1 t2
     | NStruct t1, NStruct t2 ->
       Item.Map.equal equal_delayed_nf t1 t2
     | NProj (t1, i1), NProj (t2, i2) ->
@@ -138,16 +148,17 @@ end) = struct
     | NComp_unit c1, NComp_unit c2 -> String.equal c1 c2
     | NAlias a1, NAlias a2 -> equal_delayed_nf a1 a2
     | NError e1, NError e2 -> String.equal e1 e2
-    | NVar _, (NLeaf | NApp _ | NAbs _ | NStruct _ | NProj _ | NComp_unit _ | NAlias _ | NError _ | NType_decl _)
-    | NLeaf, (NVar _ | NApp _ | NAbs _ | NStruct _ | NProj _ | NComp_unit _ | NAlias _ | NError _ | NType_decl _)
-    | NApp _, (NVar _ | NLeaf | NAbs _ | NStruct _ | NProj _ | NComp_unit _ | NAlias _ | NError _ | NType_decl _)
-    | NAbs _, (NVar _ | NLeaf | NApp _ | NStruct _ | NProj _ | NComp_unit _ | NAlias _ | NError _ | NType_decl _)
-    | NStruct _, (NVar _ | NLeaf | NApp _ | NAbs _ | NProj _ | NComp_unit _ | NAlias _ | NError _ | NType_decl _)
-    | NProj _, (NVar _ | NLeaf | NApp _ | NAbs _ | NStruct _ | NComp_unit _ | NAlias _ | NError _ | NType_decl _)
-    | NComp_unit _, (NVar _ | NLeaf | NApp _ | NAbs _ | NStruct _ | NProj _ | NAlias _ | NError _ | NType_decl _)
-    | NAlias _, (NVar _ | NLeaf | NApp _ | NAbs _ | NStruct _ | NProj _ | NComp_unit _ | NError _ | NType_decl _)
-    | NError _, (NVar _ | NLeaf | NApp _ | NAbs _ | NStruct _ | NProj _ | NComp_unit _ | NAlias _ | NType_decl _)
-    | NType_decl _, (NVar _ | NLeaf | NApp _ | NAbs _ | NStruct _ | NProj _ | NComp_unit _ | NAlias _ | NError _)
+    | NVar _, (NLeaf | NApp _ | NAbs _ | NStruct _ | NProj _ | NComp_unit _ | NAlias _ | NError _ | NType_decl _| NType _)
+    | NLeaf, (NVar _ | NApp _ | NAbs _ | NStruct _ | NProj _ | NComp_unit _ | NAlias _ | NError _ | NType_decl _| NType _)
+    | NApp _, (NVar _ | NLeaf | NAbs _ | NStruct _ | NProj _ | NComp_unit _ | NAlias _ | NError _ | NType_decl _| NType _)
+    | NAbs _, (NVar _ | NLeaf | NApp _ | NStruct _ | NProj _ | NComp_unit _ | NAlias _ | NError _ | NType_decl _| NType _)
+    | NStruct _, (NVar _ | NLeaf | NApp _ | NAbs _ | NProj _ | NComp_unit _ | NAlias _ | NError _ | NType_decl _| NType _)
+    | NProj _, (NVar _ | NLeaf | NApp _ | NAbs _ | NStruct _ | NComp_unit _ | NAlias _ | NError _ | NType_decl _| NType _)
+    | NComp_unit _, (NVar _ | NLeaf | NApp _ | NAbs _ | NStruct _ | NProj _ | NAlias _ | NError _ | NType_decl _| NType _)
+    | NAlias _, (NVar _ | NLeaf | NApp _ | NAbs _ | NStruct _ | NProj _ | NComp_unit _ | NError _ | NType_decl _| NType _)
+    | NError _, (NVar _ | NLeaf | NApp _ | NAbs _ | NStruct _ | NProj _ | NComp_unit _ | NAlias _ | NType_decl _| NType _)
+    | NType_decl _, (NVar _ | NLeaf | NApp _ | NAbs _ | NStruct _ | NProj _ | NComp_unit _ | NAlias _ | NError _ | NType _)
+    | NType _, (NVar _ | NLeaf | NApp _ | NAbs _ | NStruct _ | NProj _ | NComp_unit _ | NAlias _ | NError _ | NType_decl _)
     -> false
 
   and equal_nf t1 t2 =
@@ -257,6 +268,7 @@ end) = struct
     let reduce env t = reduce_ env t in
     let delay_reduce env t = Thunk (env.local_env, t) in
     let delay_reduce_tds env tds = Thunk_tds (env.local_env, tds) in
+    let delay_reduce_ts env ts = Thunk_ts (env.local_env, ts) in
     let return desc = { uid = t.uid; desc; approximated = t.approximated } in
     let rec force_aliases nf = match nf.desc with
       | NAlias delayed_nf ->
@@ -351,6 +363,8 @@ end) = struct
         in
         { desc = (NType_decl (delay_reduce_tds env tds));
           uid; approximated = t.approximated }
+      | Type ts ->
+          return (NType (delay_reduce_ts env ts))
       | Struct m ->
           let mnf = Item.Map.map (delay_reduce env) m in
           return (NStruct mnf)
@@ -392,16 +406,23 @@ end) = struct
     | NError t -> error ?uid t
     | NType_decl tds ->
       type_decl uid (read_back_tds env tds)
+    | NType ts ->
+      type_ ?uid (read_back_ts env ts)
 
   and read_back_tds env (tds: delayed_nf_tds) : tds =
     let Thunk_tds (l, tds) = tds in
     let env = { env with local_env = l } in
     force_reduce_tds env tds
 
+  and read_back_ts env (ts: delayed_nf_ts) : without_layout ts =
+    let Thunk_ts (l, ts) = ts in
+    let env = { env with local_env = l } in
+    force_reduce_ts env ts
+
   (* CR sspies: We currently do not match the delayed reduction strategy for
      type declarations that is used for the other parts, and instead
      aggressively reduce the occurrences of shapes in type declarations. *)
-  and force_reduce_tds env ({definition; type_params}: tds) =
+  and force_reduce_tds env (definition: tds) =
     let def = match definition with
     | Tds_other -> Tds_other
     | Tds_alias sh ->
@@ -424,18 +445,15 @@ end) = struct
                                           name, force_reduce_ts env sh, ly)
                                 fields
                  ; kind }
-    in
-    (* CR sspies: Does it even make sense to reduce in the type params? *)
-    { definition = def; type_params = List.map (force_reduce_ts env) type_params }
+    in def
 
   and force_reduce_ts env (ts: 'a ts) =
     match ts with
-    | Ts_constr ((sh, ly), args) ->
-      Ts_constr ((read_back env (reduce__ env sh), ly), args)
+    | Ts_shape (sh, ly) ->
+      Ts_shape (read_back env (reduce__ env sh), ly)
     | Ts_tuple ts -> Ts_tuple (List.map (force_reduce_ts env) ts)
     | Ts_unboxed_tuple ts -> Ts_unboxed_tuple (List.map (force_reduce_ts env) ts)
-    | Ts_var (name, ly) -> Ts_var (name, ly)
-    | Ts_predef (predef, ts) -> Ts_predef (predef, List.map (force_reduce_ts env) ts)
+    | Ts_predef predef -> Ts_predef predef
     | Ts_arrow (arg, ret) -> Ts_arrow (force_reduce_ts env arg, force_reduce_ts env ret)
     | Ts_variant (fields) ->
       let fields = Shape.poly_variant_constructors_map (force_reduce_ts env) fields in
@@ -452,6 +470,7 @@ let rec used_uids_shape (sh : Shape.t) =
     | None -> Shape.Uid.Set.empty
     | Some uid -> Shape.Uid.Set.singleton uid)
   | Type_decl tds -> used_uids_tds tds
+  | Type ts -> used_uids_ts ts
   | Abs (_, e) -> used_uids_shape e
   | App (f, s) -> Shape.Uid.Set.union (used_uids_shape f) (used_uids_shape s)
   | Struct items ->
@@ -463,7 +482,7 @@ let rec used_uids_shape (sh : Shape.t) =
   | Error _ -> Shape.Uid.Set.empty
 
 and used_uids_tds (tds : Shape.tds) =
-  match tds.definition with
+  match tds with
   | Tds_other -> Shape.Uid.Set.empty
   | Tds_alias sh -> used_uids_ts sh
   | Tds_record { fields; _ } ->
@@ -489,11 +508,9 @@ and used_uids_ts (ts : 'a Shape.ts) =
       Shape.Uid.Set.empty tss
   in
   match ts with
-  | Ts_constr ((sh, _), args) ->
-    Shape.Uid.Set.union (used_uids_shape sh) (used_uids_type_shapes args)
+  | Ts_shape ((sh, _)) -> (used_uids_shape sh)
   | Ts_tuple ts -> used_uids_type_shapes ts
   | Ts_unboxed_tuple ts -> used_uids_type_shapes ts
-  | Ts_var _ -> Shape.Uid.Set.empty
   | Ts_predef _ -> Shape.Uid.Set.empty
   | Ts_arrow (arg, ret) -> used_uids_type_shapes [arg; ret]
   | Ts_variant fields ->
@@ -518,18 +535,21 @@ let rec compress_shape (used_uids : Shape.Uid.Set.t) (sh : Shape.t) =
       ->
       sh
     | Alias sh -> compress_shape used_uids sh
-    | Type_decl { definition = Tds_alias (Ts_constr ((inner_sh, _), [])); _ }
+    | Type_decl (Tds_alias (Ts_shape (inner_sh, _)))
       when not (uid_used sh.uid) ->
       compress_shape used_uids inner_sh
     | Type_decl tds ->
       let uid = if uid_used sh.uid then sh.uid else None in
       Shape.type_decl uid (compress_tds used_uids tds)
+    | Type ts ->
+      let uid = if uid_used sh.uid then sh.uid else None in
+      Shape.type_ ?uid (compress_ts used_uids ts)
   in
   compressed
 
 and compress_tds (used_uids : Shape.Uid.Set.t) (tds : Shape.tds) =
   let desc =
-    match tds.definition with
+    match tds with
     | Tds_other -> Shape.Tds_other
     | Tds_alias sh -> Shape.Tds_alias (compress_ts used_uids sh)
     | Tds_record { fields; kind } ->
@@ -557,19 +577,17 @@ and compress_tds (used_uids : Shape.Uid.Set.t) (tds : Shape.tds) =
           arg_layout
         }
   in
-  let params = List.map (fun sh -> compress_ts used_uids sh) tds.type_params in
-  { Shape.definition = desc; type_params = params }
+  desc
 
 and compress_ts (used_uids : Shape.Uid.Set.t) (ts : 'a Shape.ts) =
   let compress_ts_list tss =
     List.map (fun ts -> compress_ts used_uids ts) tss
   in
   match ts with
-  | Ts_constr ((sh, ly), args) ->
-    Shape.Ts_constr ((compress_shape used_uids sh, ly), compress_ts_list args)
+  | Ts_shape (sh, ly) ->
+    Shape.Ts_shape (compress_shape used_uids sh, ly)
   | Ts_tuple ts -> Shape.Ts_tuple (compress_ts_list ts)
   | Ts_unboxed_tuple ts -> Shape.Ts_unboxed_tuple (compress_ts_list ts)
-  | Ts_var _ -> ts
   | Ts_predef _ -> ts
   | Ts_arrow (arg, ret) ->
     Shape.Ts_arrow (compress_ts used_uids arg, compress_ts used_uids ret)
@@ -612,13 +630,13 @@ and compress_ts (used_uids : Shape.Uid.Set.t) (ts : 'a Shape.ts) =
     match reduce global_env (Shape.type_decl None tds) with
     | { desc = Shape.Type_decl tds; _ } -> tds
     | { desc = Shape.Leaf; _ } as s ->
-      { definition = Tds_alias (Ts_constr ((s, Layout_to_be_determined), [])); type_params = [] }
+      (Tds_alias (Ts_shape ((s, Layout_to_be_determined))))
     | s -> Misc.fatal_errorf "Should reduce to type declaration, but found %a."
             Shape.print s
 
   let reduce_ts global_env ts =
-    let tds = reduce_tds global_env { definition = Tds_alias ts; type_params = [] }
-    in Ts_constr ((Shape.type_decl None tds, Layout_to_be_determined), [])
+    let shape = reduce global_env (Shape.type_ ts)
+    in Ts_shape (shape, Layout_to_be_determined)
 
 
   let rec is_stuck_on_comp_unit (nf : nf) =
@@ -633,6 +651,7 @@ and compress_ts (used_uids : Shape.Uid.Set.t) (ts : 'a Shape.ts) =
     | NError _ -> false
     | NLeaf -> false
     | NType_decl _ -> false
+    | NType _ -> false
 
   let rec reduce_aliases_for_uid env (nf : nf) =
     match nf with

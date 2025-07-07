@@ -2962,7 +2962,7 @@ let transl_type_decl env rec_flag sdecl_list =
     let shape_tds = Type_shape.Type_decl_shape.of_type_declaration decl shape_of_path in
     Uid.Tbl.add Type_shape.all_type_decls uid shape_tds;
     Env.add_type_decl_shape uid shape_tds;
-    Shape.type_decl (Some uid) shape_tds
+    shape_tds
   ) decls
   in
   (* Compute the final environment with variance and immediacy *)

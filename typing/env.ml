@@ -1624,9 +1624,9 @@ let has_probe name = String.Set.mem name !probes
 
 (* CR sspies: Should these become part of the environment instead of being
    global state?*)
-let type_decl_shapes : Shape.tds Shape.Uid.Tbl.t = Shape.Uid.Tbl.create 16
+let type_decl_shapes : Shape.t Shape.Uid.Tbl.t = Shape.Uid.Tbl.create 16
 let reset_type_decl_shapes () = Shape.Uid.Tbl.clear type_decl_shapes
-let add_type_decl_shape (uid: Shape.Uid.t) (decl : Shape.tds) =
+let add_type_decl_shape (uid: Shape.Uid.t) (decl : Shape.t) =
   Shape.Uid.Tbl.add type_decl_shapes uid decl
 let get_type_decl_shapes () = type_decl_shapes
 
