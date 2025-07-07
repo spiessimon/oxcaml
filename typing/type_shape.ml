@@ -21,7 +21,7 @@ module Type_shape = struct
     then Ts_other Layout_to_be_determined
     else
       match
-        List.find_opt (fun (p, _) -> Types.get_id p = Types.get_id expr) subst
+        List.find_opt (fun (p, _) -> Types.get_id p == Types.get_id expr) subst
       with
       (* CR sspies: Physical equality is also how printing in [printtyp.ml] works. It
          seems to be the way to substitute type parameters (after type inference has
