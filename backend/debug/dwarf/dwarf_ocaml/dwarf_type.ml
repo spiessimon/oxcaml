@@ -1139,7 +1139,7 @@ module Cache = Shape_with_layout.Tbl
 let cache = Cache.create 16
 
 let rec type_shape_to_dwarf_die ?type_name (type_shape : Layout.t Shape.ts)
-    ~parent_proto_die ~fallback_value_die =
+    ~parent_proto_die ~fallback_value_die ~rec_env =
   match
     Cache.find_opt cache ({ type_shape; type_name } : Shape_with_layout.t)
   with
@@ -1187,14 +1187,14 @@ let rec type_shape_to_dwarf_die ?type_name (type_shape : Layout.t Shape.ts)
       Misc.fatal_errorf "unboxed tuples cannot have base layout %s" layout_name
     | Ts_tuple fields ->
       type_shape_to_dwarf_die_tuple ~reference ~parent_proto_die
-        ~fallback_value_die ?name fields
+        ~fallback_value_die ?name ~rec_env fields
     | Ts_predef (predef, args) ->
       let refs =
         List.map
           (fun s ->
             let reference = Proto_die.create_reference () in
             type_shape_to_dwarf_die_shape ~reference ~parent_proto_die
-              ~fallback_value_die s Layout.value;
+              ~fallback_value_die s Layout.value ~rec_env;
             reference)
           (* CR sspies: Value layout here is wrong. The predef type should
              determine which layouts the arguments. *)
@@ -1204,20 +1204,20 @@ let rec type_shape_to_dwarf_die ?type_name (type_shape : Layout.t Shape.ts)
         ~fallback_value_die predef refs
     | Ts_shape (shape, type_layout) ->
       type_shape_to_dwarf_die_shape ~reference ?name ~parent_proto_die shape
-        ~fallback_value_die type_layout
+        ~fallback_value_die type_layout ~rec_env
     | Ts_variant fields ->
       type_shape_to_dwarf_die_poly_variant ~reference ?name ~parent_proto_die
-        ~fallback_value_die ~constructors:fields ()
+        ~fallback_value_die ~constructors:fields ~rec_env ()
     | Ts_arrow (arg, ret) ->
       type_shape_to_dwarf_die_arrow ~reference ?name ~parent_proto_die
         ~fallback_value_die arg ret);
     reference
 
 and type_shape_to_dwarf_die_tuple ?name ~reference ~parent_proto_die
-    ~fallback_value_die fields =
+    ~fallback_value_die ~rec_env fields =
   let fields =
     List.map
-      (type_shape_to_dwarf_die ~parent_proto_die ~fallback_value_die)
+      (type_shape_to_dwarf_die ~parent_proto_die ~fallback_value_die ~rec_env)
       fields
   in
   create_tuple_die ~reference ~parent_proto_die ?name fields
@@ -1260,15 +1260,14 @@ and type_shape_to_dwarf_die_predef ?name ~reference ~parent_proto_die
       ~fallback_value_die ()
 
 and type_shape_to_dwarf_die_shape ~reference ?name ~parent_proto_die
-    ~fallback_value_die (type_shape : Shape.t) type_layout =
+    ~fallback_value_die (type_shape : Shape.t) type_layout ~rec_env =
   let result =
     match type_shape.desc with
     | Shape.Type_decl tds -> `Declaration tds
     | Shape.Type ts -> `Type ts
-    | Shape.Rec_var _ ->
-      `Missing (* CR sspies: Fix this by carrying around an environment. *)
+    | Shape.Rec_var i -> `Reference (rec_env i)
     | Shape.Leaf -> `Missing
-    | Shape.Mu sh -> `Shape sh
+    | Shape.Mu sh -> `RecursiveBinder sh
     | Shape.Var _ | Shape.Abs _ | Shape.App _ | Shape.Struct _ | Shape.Alias _
     | Shape.Proj _ | Shape.Comp_unit _ | Shape.Error _ ->
       `Illformed
@@ -1278,14 +1277,16 @@ and type_shape_to_dwarf_die_shape ~reference ?name ~parent_proto_die
     match type_layout with
     | Layout.Base b ->
       type_shape_to_dwarf_die_type_declaration ~reference ?name
-        ~parent_proto_die ~fallback_value_die tds b
+        ~parent_proto_die ~fallback_value_die tds b rec_env
     | Layout.Product _ -> Misc.fatal_error "product layout not supported")
   | `Type ts ->
     let layouted_type = Shape.shape_with_layout ~layout:type_layout ts in
     let reference' =
       type_shape_to_dwarf_die ~parent_proto_die ~fallback_value_die
-        layouted_type
+        layouted_type ~rec_env
     in
+    create_typedef_die ~reference ~parent_proto_die ?name reference'
+  | `Reference reference' ->
     create_typedef_die ~reference ~parent_proto_die ?name reference'
   | `Missing -> (
     match type_layout with
@@ -1294,12 +1295,13 @@ and type_shape_to_dwarf_die_shape ~reference ?name ~parent_proto_die
         ~fallback_value_die ()
     | Layout.Product _ -> Misc.fatal_error "product layout not supported")
   | `Illformed -> Misc.fatal_error "illformed type shape encountered"
-  | `Shape sh ->
+  | `RecursiveBinder sh ->
     type_shape_to_dwarf_die_shape ~reference ?name ~parent_proto_die
-      ~fallback_value_die sh type_layout
+      ~fallback_value_die sh type_layout ~rec_env:(fun i ->
+        if i = 0 then reference else rec_env (i - 1))
 
 and type_shape_to_dwarf_die_type_declaration ~reference ?name ~parent_proto_die
-    ~fallback_value_die type_decl_shape type_layout =
+    ~fallback_value_die type_decl_shape type_layout rec_env =
   let open Shape in
   match type_decl_shape with
   | Tds_other ->
@@ -1311,6 +1313,7 @@ and type_shape_to_dwarf_die_type_declaration ~reference ?name ~parent_proto_die
     in
     let alias_die =
       type_shape_to_dwarf_die alias_shape ~parent_proto_die ~fallback_value_die
+        ~rec_env
     in
     create_typedef_die ~reference ~parent_proto_die ?name alias_die
   | Tds_record { fields; kind = Record_boxed | Record_floats } ->
@@ -1324,7 +1327,7 @@ and type_shape_to_dwarf_die_type_declaration ~reference ?name ~parent_proto_die
             Arch.size_addr,
             (* field size for values *)
             type_shape_to_dwarf_die ~parent_proto_die ~fallback_value_die
-              type_shape' ))
+              type_shape' ~rec_env ))
         fields
     in
     create_record_die ~reference ~parent_proto_die ?name fields
@@ -1338,6 +1341,7 @@ and type_shape_to_dwarf_die_type_declaration ~reference ?name ~parent_proto_die
     let field_shape = Shape.shape_with_layout ~layout:(Base base_layout) sh in
     let field_die =
       type_shape_to_dwarf_die ~parent_proto_die ~fallback_value_die field_shape
+        ~rec_env
     in
     let field_size = base_layout_to_byte_size base_layout in
     create_unboxed_record_die ~reference ~parent_proto_die ?name ~field_name
@@ -1360,7 +1364,7 @@ and type_shape_to_dwarf_die_type_declaration ~reference ?name ~parent_proto_die
             ( name,
               base_layout_to_byte_size_in_mixed_block base_layout,
               type_shape_to_dwarf_die ~parent_proto_die ~fallback_value_die
-                type_shape' )
+                type_shape' ~rec_env )
           | Product _ ->
             Misc.fatal_error "mixed products must contain base layouts")
         fields
@@ -1381,7 +1385,8 @@ and type_shape_to_dwarf_die_type_declaration ~reference ?name ~parent_proto_die
             match layout with
             | Jkind_types.Sort.Const.Base ly ->
               let sh = Shape.shape_with_layout ~layout sh in
-              ( type_shape_to_dwarf_die ~parent_proto_die ~fallback_value_die sh,
+              ( type_shape_to_dwarf_die ~parent_proto_die ~fallback_value_die sh
+                  ~rec_env,
                 ly )
             | Jkind_types.Sort.Const.Product _ ->
               Misc.fatal_error
@@ -1395,6 +1400,7 @@ and type_shape_to_dwarf_die_type_declaration ~reference ?name ~parent_proto_die
     let arg_shape = Shape.shape_with_layout ~layout:arg_layout arg_shape in
     let arg_die =
       type_shape_to_dwarf_die ~parent_proto_die ~fallback_value_die arg_shape
+        ~rec_env
     in
     create_unboxed_variant_die ~reference ~parent_proto_die ?name ~constr_name
       ~arg_name ~arg_layout arg_die
@@ -1405,10 +1411,10 @@ and type_shape_to_dwarf_die_arrow ~reference ?name ~parent_proto_die
   create_typedef_die ~reference ~parent_proto_die ?name fallback_value_die
 
 and type_shape_to_dwarf_die_poly_variant ~reference ~parent_proto_die
-    ~fallback_value_die ?name ~constructors () =
+    ~fallback_value_die ?name ~constructors ~rec_env () =
   let constructors_with_references =
     Shape.poly_variant_constructors_map
-      (type_shape_to_dwarf_die ~parent_proto_die ~fallback_value_die)
+      (type_shape_to_dwarf_die ~parent_proto_die ~fallback_value_die ~rec_env)
       constructors
   in
   create_type_shape_to_dwarf_die_poly_variant ~reference ~parent_proto_die ?name
@@ -1619,7 +1625,7 @@ let variable_to_die state (var_uid : Uid.t) ~parent_proto_die =
     | `Known type_shape ->
       let reference =
         type_shape_to_dwarf_die ~type_name type_shape ~parent_proto_die
-          ~fallback_value_die
+          ~fallback_value_die ~rec_env:(fun _ -> raise Not_found)
       in
       if debug_emit_dwarf_dies
       then (
