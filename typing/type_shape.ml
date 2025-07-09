@@ -3,6 +3,21 @@ module Layout = Jkind_types.Sort.Const
 
 type base_layout = Jkind_types.Sort.base
 
+type path_lookup = Path.t -> args:Shape.t list -> Shape.t option
+
+let extended_env f path ~args =
+  let open Shape in
+  match Shape.Predef.of_string (Path.name path) with
+  | Some predef ->
+    let predef_shape = Ts_predef predef in
+    Some (Shape.app_list (Shape.smart_type_ predef_shape) args)
+  | None -> f path ~args
+
+let smart_type_shape (sh : Shape.t) =
+  match sh.desc with
+  | Shape.Type ts -> ts
+  | _ -> Shape.Ts_shape (sh, Shape.Layout_to_be_determined)
+
 module Type_shape = struct
   (* Similarly to [value_kind], we track a set of visited types to avoid cycles
      in the lookup and we, additionally, carry a maximal depth for the recursion.
@@ -11,7 +26,7 @@ module Type_shape = struct
      Also consider reverting to the original value kind depth limit (although 2
      seems low). *)
   let rec of_type_expr_go ~visited ~depth (expr : Types.type_expr)
-      (subst : (Types.type_expr * Ident.t) list) shape_of_path :
+      (subst : (Types.type_expr * Shape.t) list) shape_of_path :
       Shape.without_layout Shape.ts =
     let open Shape in
     let[@inline] cannot_proceed () =
@@ -26,10 +41,7 @@ module Type_shape = struct
       (* CR sspies: Physical equality is also how printing in [printtyp.ml] works. It
          seems to be the way to substitute type parameters (after type inference has
          already made them more precise). *)
-      | Some (_, id) ->
-        Ts_shape
-          ( Shape.var Shape.Uid.internal_not_actually_unique id,
-            Layout_to_be_determined )
+      | Some (_, s) -> smart_type_shape s
       | None -> (
         let visited = Numbers.Int.Set.add (Types.get_id expr) visited in
         let depth = depth + 1 in
@@ -40,38 +52,14 @@ module Type_shape = struct
               of_type_expr_go ~depth ~visited expr subst shape_of_path)
             exprs
         in
-        let app_expr_list ~(args : Types.type_expr list) (sh : Shape.t) :
-            Shape.t =
-          match args with
-          | [] -> sh
-          | _ :: _ ->
-            let inner_shape =
-              List.fold_left
-                (fun acc expr ->
-                  Shape.app acc
-                    ~arg:
-                      (Shape.type_
-                         (of_type_expr_go ~depth ~visited expr subst
-                            shape_of_path)))
-                sh args
-            in
-            inner_shape
-          (* CR sspies: Double check whether this should be fold_left or fold_right. *)
-        in
         match desc with
-        | Tconstr (path, constrs, _abbrev_memo) -> (
-          match Predef.of_string (Path.name path) with
-          | Some predef ->
-            let predef_shape = Ts_predef predef in
-            Ts_shape
-              ( app_expr_list (Shape.type_ predef_shape) ~args:constrs,
-                Layout_to_be_determined )
-          | None -> (
-            match shape_of_path path with
-            | Some shape ->
-              Ts_shape
-                (app_expr_list shape ~args:constrs, Layout_to_be_determined)
-            | None -> Ts_other Layout_to_be_determined))
+        | Tconstr (path, constrs, _) ->
+          let args =
+            List.map (fun ts -> Shape.smart_type_ ts) (map_expr_list constrs)
+          in
+          let shape = shape_of_path path ~args in
+          let shape = Option.map smart_type_shape shape in
+          Option.value shape ~default:(Ts_other Layout_to_be_determined)
         | Ttuple exprs -> Ts_tuple (map_expr_list (List.map snd exprs))
         | Tvar _ -> Ts_other Layout_to_be_determined
         | Tpoly (type_expr, _type_vars) ->
@@ -118,12 +106,12 @@ module Type_shape = struct
 
   let of_type_expr (expr : Types.type_expr) shape_of_path =
     of_type_expr_go ~visited:Numbers.Int.Set.empty ~depth:(-1) expr []
-      shape_of_path
+      (extended_env shape_of_path)
 
   let of_type_expr_with_type_subst (expr : Types.type_expr) shape_of_path subst
       =
     of_type_expr_go ~visited:Numbers.Int.Set.empty ~depth:(-1) expr subst
-      shape_of_path
+      (extended_env shape_of_path)
 end
 
 module Type_decl_shape = struct
@@ -226,20 +214,13 @@ module Type_decl_shape = struct
 
   let type_var_count = ref 0
 
-  let of_type_declaration (type_declaration : Types.type_declaration)
+  let of_type_declaration_go (rec_uid : Uid.t)
+      (type_declaration : Types.type_declaration) type_param_shapes
       shape_of_path =
     let module Types_predef = Predef in
     let open Shape in
     let type_params = type_declaration.type_params in
-    let type_param_idents =
-      List.map
-        (fun _ ->
-          let name = Format.asprintf "a/%d" !type_var_count in
-          type_var_count := !type_var_count + 1;
-          Ident.create_local name)
-        type_params
-    in
-    let type_subst = List.combine type_params type_param_idents in
+    let type_subst = List.combine type_params type_param_shapes in
     (* Duplicates are fine, the constraint system makes sure they are instantiated
        with the same type expression. *)
     let definition =
@@ -333,13 +314,78 @@ module Type_decl_shape = struct
           record_of_labels ~shape_of_path ~type_subst Record_unboxed_product
             lbl_list)
     in
-    let closed_definition =
-      List.fold_left
-        (fun acc (_, id) -> Shape.abs id acc)
-        (Shape.type_decl None definition)
-        type_subst
+    Shape.mu None rec_uid (Shape.type_decl None definition)
+
+  let update_shape_of_path shape_of_path id id_args sh path ~args =
+    match path with
+    | Path.Pident id'
+      when Ident.equal id id' && List.equal Shape.equal id_args args ->
+      Some sh
+    | Path.Pident id' when Ident.equal id id' ->
+      Misc.fatal_errorf "different args, original %a new %a"
+        (Format.pp_print_list Shape.print)
+        id_args
+        (Format.pp_print_list Shape.print)
+        args
+    | _ -> shape_of_path path ~args
+
+  let rec shape_of_path_with_declarations decl_lookup_map shape_of_path path
+      ~args =
+    match shape_of_path path ~args with
+    | Some s -> Some s
+    | None -> (
+      match path with
+      | Path.Pident id -> (
+        match Ident.Map.find_opt id decl_lookup_map with
+        | Some decl ->
+          let rec_uid = Uid.mk ~current_unit:None in
+          (* uid to use for recursive occurrences for this id
+             and these arguments *)
+          let shape_of_path =
+            shape_of_path_with_declarations decl_lookup_map
+              (update_shape_of_path shape_of_path id args (Shape.leaf rec_uid))
+          in
+          Some (of_type_declaration_go rec_uid decl args shape_of_path)
+        | None -> None)
+      | _ -> None)
+
+  let of_type_declaration_with_variables (id : Ident.t)
+      (type_declaration : Types.type_declaration) shape_of_path =
+    Format.eprintf "shape_of_path_with_declarations %a@." Ident.print id;
+    let type_param_idents =
+      List.map
+        (fun _ ->
+          let name = Format.asprintf "a/%d" !type_var_count in
+          type_var_count := !type_var_count + 1;
+          Ident.create_local name)
+        type_declaration.type_params
     in
-    closed_definition
+    let type_param_shapes =
+      List.map (fun id -> Shape.var' None id) type_param_idents
+    in
+    match shape_of_path (Path.Pident id) ~args:type_param_shapes with
+    (* This works, because we add the declarations to the environment below *)
+    | None -> assert false
+    | Some definition -> Shape.abs_list definition type_param_idents
+
+  let of_type_declarations
+      (type_declarations : (Ident.t * Types.type_declaration) list)
+      shape_of_path =
+    let decl_lookup_map = Ident.Map.of_list type_declarations in
+    (* We unbind all declarations, to avoid accidental recursive cycles. *)
+    let shape_of_path path ~args =
+      match path with
+      | Path.Pident id when Ident.Map.mem id decl_lookup_map -> None
+      | _ -> shape_of_path path ~args
+    in
+    let shape_of_path = extended_env shape_of_path in
+    let shape_of_path =
+      shape_of_path_with_declarations decl_lookup_map shape_of_path
+    in
+    List.map
+      (fun (id, decl) ->
+        of_type_declaration_with_variables id decl shape_of_path)
+      type_declarations
 end
 
 type type_shape_with_name =
@@ -352,11 +398,14 @@ let (all_type_decls : Shape.t Uid.Tbl.t) = Uid.Tbl.create 16
 
 let (all_type_shapes : type_shape_with_name Uid.Tbl.t) = Uid.Tbl.create 16
 
-let add_to_type_decls (type_decl : Types.type_declaration) shape_of_path =
-  let type_decl_shape =
-    Type_decl_shape.of_type_declaration type_decl shape_of_path
+let add_to_type_decls (decls : (Ident.t * Types.type_declaration) list)
+    shape_of_path =
+  let type_decl_shapes =
+    Type_decl_shape.of_type_declarations decls shape_of_path
   in
-  Uid.Tbl.add all_type_decls type_decl.type_uid type_decl_shape
+  List.iter
+    (fun ((_, decl), sh) -> Uid.Tbl.add all_type_decls decl.Types.type_uid sh)
+    (List.combine decls type_decl_shapes)
 
 let add_to_type_shapes var_uid type_expr type_layout ~name shape_of_path =
   let type_shape = Type_shape.of_type_expr type_expr shape_of_path in

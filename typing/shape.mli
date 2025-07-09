@@ -205,6 +205,8 @@ and desc =
   | Proj of t * Item.t
   | Comp_unit of string
   | Error of string
+  | Mu of Uid.t * t
+    (** Carries the recursive occurrence and the body *)
 
 (* Type shapes are abstract representations of type expressions. We define
   them with a placeholder 'a for the layout inside. This allows one to
@@ -317,6 +319,7 @@ val for_unnamed_functor_param : var
 val fresh_var : ?name:string -> Uid.t -> var * t
 
 val var : Uid.t -> Ident.t -> t
+val var': Uid.t option -> Ident.t -> t
 val abs : ?uid:Uid.t -> var -> t -> t
 val app : ?uid:Uid.t -> t -> arg:t -> t
 val str : ?uid:Uid.t -> t Item.Map.t -> t
@@ -327,10 +330,19 @@ val leaf : Uid.t -> t
 val leaf' : Uid.t option -> t
 val type_decl : Uid.t option -> tds -> t
 val type_ : ?uid:Uid.t -> without_layout ts -> t
+val smart_type_ : without_layout ts -> t
+  (** Smart constructor that will avoid redundant applications of [Ts_shape] *)
+
+(* recursive binder, recursive occurrences should be leaves with the same uid *)
+val mu : Uid.t option -> Uid.t -> t -> t
+
 val no_fuel_left : ?uid:Uid.t -> t -> t
 val comp_unit : ?uid:Uid.t -> string -> t
 
 val set_approximated : approximated:bool -> t -> t
+
+val app_list : t -> t list -> t
+val abs_list : t -> Ident.t list -> t
 
 val decompose_abs : t -> (var * t) option
 

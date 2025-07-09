@@ -2931,40 +2931,16 @@ let transl_type_decl env rec_flag sdecl_list =
   (* Check re-exportation, updating [type_jkind] from the manifest *)
   let decls = List.map2 (check_abbrev new_env) sdecl_list decls in
   (* Save the declarations in [Type_shape] for debug info. *)
-  let decl_lookup_map = Ident.Map.of_list decls in
-  let shape_of_path path =
-    (* We first search in the current environment for the path, containing the
-       shapes of earlier declarations. If it does not contain the path, we can
-       still construct a shape for the path. This shape potentially references
-       other declarations in [decls], so we provide an additional lookup
-       function for the current list of declarations. If the declaration is not
-       there either, we simply use the leaf case without a UID. *)
-    match Env.shape_of_path_opt ~namespace:Type env path with
-    | None ->
-      (try
-        path |>
-        Shape.of_path ~namespace:Type
-          ~find_shape:(fun (kind: Shape.Sig_component_kind.t) id ->
-            match kind with
-            | Type ->
-              let decl = Ident.Map.find_opt id decl_lookup_map in
-              Option.map (fun decl -> decl.type_uid) decl |> Shape.leaf'
-            | _ -> raise Not_found
-          ) |> Option.some
-      with Not_found -> None)
-    | Some { uid = Some uid; desc = Shape.Type_decl _; _ } ->
-      (* We truncate known declarations to leafs to reduce shape sizes. *)
-      Some (Shape.leaf uid)
-    | (Some _) as s -> s
+  let shape_of_path path ~args =
+    Option.map (fun sh -> Shape.app_list sh args)
+      (Env.shape_of_path_opt ~namespace:Type env path)
   in
-  let shapes = List.map (fun (_id, decl) ->
+  let shapes = Type_shape.Type_decl_shape.of_type_declarations decls shape_of_path in
+  List.iter (fun (sh, (_, decl)) ->
     let uid = decl.type_uid in
-    let shape_tds = Type_shape.Type_decl_shape.of_type_declaration decl shape_of_path in
-    Uid.Tbl.add Type_shape.all_type_decls uid shape_tds;
-    Env.add_type_decl_shape uid shape_tds;
-    shape_tds
-  ) decls
-  in
+    Uid.Tbl.add Type_shape.all_type_decls uid sh;
+    Env.add_type_decl_shape uid sh;
+  ) (List.combine shapes decls);
   (* Compute the final environment with variance and immediacy *)
   let final_env = add_types_to_env decls ~shapes env in
   (* Keep original declaration *)

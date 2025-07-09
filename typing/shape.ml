@@ -503,6 +503,7 @@ and desc =
   | Proj of t * Item.t
   | Comp_unit of string
   | Error of string
+  | Mu of Uid.t * t
 
 and without_layout = Layout_to_be_determined
 
@@ -592,23 +593,26 @@ let rec equal_desc d1 d2 =
   | Leaf, Leaf -> true
   | Type_decl tds1, Type_decl tds2 -> equal_tds tds1 tds2
   | Type t1, Type t2 -> equal_ts equal_without_layout t1 t2
+  | Mu (x1, t1_body), Mu (x2, t2_body) ->
+    Uid.equal x1 x2 && equal t1_body t2_body
   | Struct t1, Struct t2 ->
     Item.Map.equal equal t1 t2
   | Proj (t1, i1), Proj (t2, i2) ->
     if Item.compare i1 i2 <> 0 then false
     else equal t1 t2
   | Comp_unit c1, Comp_unit c2 -> String.equal c1 c2
-  | Var _, (Abs _ | App _ | Struct _ | Leaf  | Type_decl _ | Type _ | Proj _ | Comp_unit _ | Alias _ | Error _)
-  | Abs _, (Var _ | App _ | Struct _ | Leaf  | Type_decl _ | Type _ | Proj _ | Comp_unit _ | Alias _ | Error _)
-  | App _, (Var _ | Abs _ | Struct _ | Leaf  | Type_decl _ | Type _ | Proj _ | Comp_unit _ | Alias _ | Error _)
-  | Struct _, (Var _ | Abs _ | App _ | Leaf  | Type_decl _ | Type _ | Proj _ | Comp_unit _ | Alias _ | Error _)
-  | Leaf, (Var _ | Abs _ | App _ | Struct _ | Proj _ | Type_decl _ | Type _ | Comp_unit _ | Alias _ | Error _)
-  | Type_decl _, (Var _ | Abs _ | App _ | Struct _ | Leaf | Type _ | Proj _ | Comp_unit _ | Alias _ | Error _)
-  | Type _, (Var _ | Abs _ | App _ | Struct _ | Leaf  | Type_decl _ | Proj _ | Comp_unit _ | Alias _ | Error _)
-  | Proj _, (Var _ | Abs _ | App _ | Struct _ | Leaf  | Type_decl _ | Type _ | Comp_unit _ | Alias _ | Error _)
-  | Comp_unit _, (Var _ | Abs _ | App _ | Struct _ | Leaf  | Type_decl _ | Type _ | Proj _ | Alias _ | Error _)
-  | Alias _, (Var _ | Abs _ | App _ | Struct _ | Leaf  | Type_decl _ | Type _ | Proj _ | Comp_unit _ | Error _)
-  | Error _, (Var _ | Abs _ | App _ | Struct _ | Leaf  | Type_decl _ | Type _ | Proj _ | Comp_unit _ | Alias _)
+  | Var _, (Abs _ | App _ | Struct _ | Leaf  | Type_decl _ | Type _ | Mu _ | Proj _ | Comp_unit _ | Alias _ | Error _)
+  | Abs _, (Var _ | App _ | Struct _ | Leaf  | Type_decl _ | Type _ | Mu _ | Proj _ | Comp_unit _ | Alias _ | Error _)
+  | App _, (Var _ | Abs _ | Struct _ | Leaf  | Type_decl _ | Type _ | Mu _ | Proj _ | Comp_unit _ | Alias _ | Error _)
+  | Struct _, (Var _ | Abs _ | App _ | Leaf  | Type_decl _ | Type _ | Mu _ | Proj _ | Comp_unit _ | Alias _ | Error _)
+  | Leaf, (Var _ | Abs _ | App _ | Struct _ | Proj _ | Type_decl _ | Type _ | Mu _ | Comp_unit _ | Alias _ | Error _)
+  | Type_decl _, (Var _ | Abs _ | App _ | Struct _ | Leaf | Type _ | Mu _ | Proj _ | Comp_unit _ | Alias _ | Error _)
+  | Type _, (Var _ | Abs _ | App _ | Struct _ | Leaf  | Type_decl _| Mu _ | Proj _ | Comp_unit _ | Alias _ | Error _)
+  | Mu _, (Var _ | Abs _ | App _ | Struct _ | Leaf  | Type_decl _ | Type _ | Proj _ | Comp_unit _ | Alias _ | Error _)
+  | Proj _, (Var _ | Abs _ | App _ | Struct _ | Leaf  | Type_decl _ | Type _ | Mu _ | Comp_unit _ | Alias _ | Error _)
+  | Comp_unit _, (Var _ | Abs _ | App _ | Struct _ | Leaf  | Type_decl _ | Type _ | Mu _ | Proj _ | Alias _ | Error _)
+  | Alias _, (Var _ | Abs _ | App _ | Struct _ | Leaf  | Type_decl _ | Type _ | Mu _ | Proj _ | Comp_unit _ | Error _)
+  | Error _, (Var _ | Abs _ | App _ | Struct _ | Leaf  | Type_decl _ | Type _ | Mu _ | Proj _ | Comp_unit _ | Alias _)
     -> false
 
 and equal t1 t2 =
@@ -787,18 +791,22 @@ let rec print fmt t =
         Format.fprintf fmt "Abs@[%a@,(@[%a,@ @[%a@]@])@]"
           print_uid_opt uid pp_idents (id :: other_idents) aux body
     | App (t1, t2) ->
-        Format.fprintf fmt "@[App (%a(@,%a))(%a)@]" aux t1 aux t2
+        Format.fprintf fmt "@[%a(@,%a) %a@]" aux t1 aux t2
           print_uid_opt uid
     | Leaf ->
         Format.fprintf fmt "<%a>" (Format.pp_print_option Uid.print) uid
     | Type ts ->
-      Format.fprintf fmt "%a%@{%a}"
+      Format.fprintf fmt "%a%a"
+        print_uid_opt uid
         print_type_shape ts
-        (Format.pp_print_option Uid.print) uid
     | Type_decl decl ->
-      Format.fprintf fmt "<%a> = %a"
-        (Format.pp_print_option Uid.print) uid
+      Format.fprintf fmt "%a%a"
+        print_uid_opt uid
         print_type_decl_shape decl
+    | Mu (x, t_body) ->
+      Format.fprintf fmt "Rec <%a> := %a"
+        Uid.print x
+        print t_body
     | Proj (t, item) ->
         begin match uid with
         | None ->
@@ -940,6 +948,7 @@ let hash_alias = 8
 let hash_error = 9
 let hash_type_ = 10
 let hash_type_decl = 11
+let hash_mu = 12
 
 let fresh_var ?(name="shape-var") uid =
   let var = Ident.create_local name in
@@ -951,6 +960,12 @@ let for_unnamed_functor_param = Ident.create_local "()"
 
 let var uid id =
   { uid = Some uid; desc = Var id;
+    hash = Hashtbl.hash (hash_var, Some uid, id);
+    approximated = false }
+
+(* variable without uid *)
+let var' uid id =
+  { uid; desc = Var id;
     hash = Hashtbl.hash (hash_var, uid, id);
     approximated = false }
 
@@ -983,10 +998,6 @@ let type_decl uid name =
     desc = Type_decl name;
     hash = Hashtbl.hash (hash_type_decl, uid, name);
     approximated = false }
-
-let type_ ?uid ts =
-  { uid; desc = Type ts; hash = Hashtbl.hash (hash_type_, uid, ts); approximated = false }
-
 let approx t = { t with approximated = true}
 
 let set_approximated ~approximated t = { t with approximated}
@@ -1012,6 +1023,27 @@ let app ?uid f ~arg =
 let comp_unit ?uid s =
       { uid; desc = Comp_unit s; hash = Hashtbl.hash (hash_comp_unit, uid, s);
         approximated = false }
+
+let type_ ?uid ts =
+  { uid; desc = Type ts; hash = Hashtbl.hash (hash_type_, uid, ts); approximated = false }
+
+let smart_type_ ts =
+  match ts with
+  | Ts_shape (t, _) -> t
+  | _ -> type_ ts
+
+let mu uid x t_body =
+  { uid; desc = Mu (x, t_body); hash = Hashtbl.hash (hash_mu, uid, x, t_body.hash);
+    approximated = false }
+
+
+let app_list (base_shape : t) (args : t list) : t =
+  List.fold_left (fun shape arg -> app shape ~arg) base_shape args
+  (* CR sspies: Double check whether this should be fold_left or fold_right. *)
+
+let abs_list (base_shape : t) (binders : Ident.t list) : t =
+  List.fold_right (fun shape id -> abs shape id) binders base_shape
+
 
 let no_fuel_left ?uid s = { s with uid }
 

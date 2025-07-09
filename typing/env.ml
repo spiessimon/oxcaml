@@ -2959,10 +2959,12 @@ let initial =
                       empty
   in
   (* We record the type declarations for the type shapes. *)
-  Ident.Tbl.iter (fun _ decl ->
-    Type_shape.add_to_type_decls
-      decl
-      (shape_of_path_opt ~namespace:Type initial_env);
+  let shape_of_path path ~args =
+    Option.map (fun sh -> Shape.app_list sh args)
+      (shape_of_path_opt ~namespace:Type initial_env path)
+  in
+  Ident.Tbl.iter (fun id decl ->
+    Type_shape.add_to_type_decls [id, decl] shape_of_path
   ) added_types;
   initial_env
 

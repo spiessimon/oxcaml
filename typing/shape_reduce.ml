@@ -69,6 +69,7 @@ end) = struct
     | NType of delayed_nf_ts
     | NComp_unit of string
     | NError of string
+    | NMu of Uid.t * delayed_nf
 
   (* A type of normal forms for strong call-by-need evaluation.
      The normal form of an abstraction
@@ -96,7 +97,7 @@ end) = struct
 
   and local_env =
     { env: delayed_nf option Ident.Map.t;
-      uid_renaming : Shape.Uid.t Shape.Uid.Map.t }
+      uid_renaming : Shape.Uid.Set.t }
   (* When reducing in the body of an abstraction [Abs(x, body)], we
      bind [x] to [None] in the environment. [Some v] is used for
      actual substitutions, for example in [App(Abs(x, body), t)], when
@@ -106,7 +107,7 @@ end) = struct
 
   let rec equal_local_env t1 t2 =
     Ident.Map.equal (Option.equal equal_delayed_nf) t1.env t2.env &&
-    Shape.Uid.Map.equal (Shape.Uid.equal) t1.uid_renaming t2.uid_renaming
+    Shape.Uid.Set.equal t1.uid_renaming t2.uid_renaming
 
   and equal_delayed_nf t1 t2 =
     match t1, t2 with
@@ -140,6 +141,8 @@ end) = struct
     | NLeaf, NLeaf -> true
     | NType_decl tds1, NType_decl tds2 -> equal_delayed_nf_tds tds1 tds2
     | NType t1, NType t2 -> equal_delayed_nf_ts t1 t2
+    | NMu (v1, nf1), NMu (v2, nf2) ->
+      Shape.Uid.equal v1 v2 && equal_delayed_nf nf1 nf2
     | NStruct t1, NStruct t2 ->
       Item.Map.equal equal_delayed_nf t1 t2
     | NProj (t1, i1), NProj (t2, i2) ->
@@ -148,17 +151,18 @@ end) = struct
     | NComp_unit c1, NComp_unit c2 -> String.equal c1 c2
     | NAlias a1, NAlias a2 -> equal_delayed_nf a1 a2
     | NError e1, NError e2 -> String.equal e1 e2
-    | NVar _, (NLeaf | NApp _ | NAbs _ | NStruct _ | NProj _ | NComp_unit _ | NAlias _ | NError _ | NType_decl _| NType _)
-    | NLeaf, (NVar _ | NApp _ | NAbs _ | NStruct _ | NProj _ | NComp_unit _ | NAlias _ | NError _ | NType_decl _| NType _)
-    | NApp _, (NVar _ | NLeaf | NAbs _ | NStruct _ | NProj _ | NComp_unit _ | NAlias _ | NError _ | NType_decl _| NType _)
-    | NAbs _, (NVar _ | NLeaf | NApp _ | NStruct _ | NProj _ | NComp_unit _ | NAlias _ | NError _ | NType_decl _| NType _)
-    | NStruct _, (NVar _ | NLeaf | NApp _ | NAbs _ | NProj _ | NComp_unit _ | NAlias _ | NError _ | NType_decl _| NType _)
-    | NProj _, (NVar _ | NLeaf | NApp _ | NAbs _ | NStruct _ | NComp_unit _ | NAlias _ | NError _ | NType_decl _| NType _)
-    | NComp_unit _, (NVar _ | NLeaf | NApp _ | NAbs _ | NStruct _ | NProj _ | NAlias _ | NError _ | NType_decl _| NType _)
-    | NAlias _, (NVar _ | NLeaf | NApp _ | NAbs _ | NStruct _ | NProj _ | NComp_unit _ | NError _ | NType_decl _| NType _)
-    | NError _, (NVar _ | NLeaf | NApp _ | NAbs _ | NStruct _ | NProj _ | NComp_unit _ | NAlias _ | NType_decl _| NType _)
-    | NType_decl _, (NVar _ | NLeaf | NApp _ | NAbs _ | NStruct _ | NProj _ | NComp_unit _ | NAlias _ | NError _ | NType _)
-    | NType _, (NVar _ | NLeaf | NApp _ | NAbs _ | NStruct _ | NProj _ | NComp_unit _ | NAlias _ | NError _ | NType_decl _)
+    | NVar _, (NLeaf | NApp _ | NAbs _ | NStruct _ | NProj _ | NComp_unit _ | NAlias _ | NError _ | NType_decl _| NType _| NMu _)
+    | NLeaf, (NVar _ | NApp _ | NAbs _ | NStruct _ | NProj _ | NComp_unit _ | NAlias _ | NError _ | NType_decl _| NType _| NMu _)
+    | NApp _, (NVar _ | NLeaf | NAbs _ | NStruct _ | NProj _ | NComp_unit _ | NAlias _ | NError _ | NType_decl _| NType _| NMu _)
+    | NAbs _, (NVar _ | NLeaf | NApp _ | NStruct _ | NProj _ | NComp_unit _ | NAlias _ | NError _ | NType_decl _| NType _| NMu _)
+    | NStruct _, (NVar _ | NLeaf | NApp _ | NAbs _ | NProj _ | NComp_unit _ | NAlias _ | NError _ | NType_decl _| NType _| NMu _)
+    | NProj _, (NVar _ | NLeaf | NApp _ | NAbs _ | NStruct _ | NComp_unit _ | NAlias _ | NError _ | NType_decl _| NType _| NMu _)
+    | NComp_unit _, (NVar _ | NLeaf | NApp _ | NAbs _ | NStruct _ | NProj _ | NAlias _ | NError _ | NType_decl _| NType _| NMu _)
+    | NAlias _, (NVar _ | NLeaf | NApp _ | NAbs _ | NStruct _ | NProj _ | NComp_unit _ | NError _ | NType_decl _| NType _| NMu _)
+    | NError _, (NVar _ | NLeaf | NApp _ | NAbs _ | NStruct _ | NProj _ | NComp_unit _ | NAlias _ | NType_decl _| NType _| NMu _)
+    | NType_decl _, (NVar _ | NLeaf | NApp _ | NAbs _ | NStruct _ | NProj _ | NComp_unit _ | NAlias _ | NError _ | NType _ | NMu _)
+    | NType _, (NVar _ | NLeaf | NApp _ | NAbs _ | NStruct _ | NProj _ | NComp_unit _ | NAlias _ | NError _ | NType_decl _ | NMu _)
+    | NMu _, (NVar _ | NLeaf | NApp _ | NAbs _ | NStruct _ | NProj _ | NComp_unit _ | NAlias _ | NError _ | NType_decl _ | NType _)
     -> false
 
   and equal_nf t1 t2 =
@@ -212,11 +216,6 @@ end) = struct
       { env = Ident.Map.add var shape env.local_env.env;
         uid_renaming = env.local_env.uid_renaming} }
 
-  let bind_new_uid env uid new_uid =
-    let local_env = { env.local_env with
-      uid_renaming = Shape.Uid.Map.add uid new_uid env.local_env.uid_renaming }
-    in
-    { env with local_env }
 
   let rec reduce_ env t =
     let local_env = env.local_env in
@@ -346,23 +345,12 @@ end) = struct
         (match t.uid  with
         | None -> return NLeaf
         | Some uid ->
-          match Shape.Uid.Map.find_opt uid env.local_env.uid_renaming with
-          | Some new_uid ->
-            { uid = Some new_uid; desc = NLeaf; approximated = t.approximated }
-          | None ->
-            match Params.lookup_shape_for_uid uid with
-            | Some sh -> reduce__ env sh
-            | None -> return NLeaf)
+        (match Params.lookup_shape_for_uid uid with
+        | Some sh -> reduce__ env sh
+        | None -> return NLeaf))
       | Type_decl tds ->
-        let env, uid = match t.uid with
-        | None -> env, None
-        | Some uid ->
-            (* CR sspies: Consider the case of internal uids. *)
-            let new_uid = Shape.Uid.mk ~current_unit:None in
-            bind_new_uid env uid new_uid, Some new_uid
-        in
-        { desc = (NType_decl (delay_reduce_tds env tds));
-          uid; approximated = t.approximated }
+          return (NType_decl (delay_reduce_tds env tds))
+      | Mu (x, t_body) -> return (NMu (x, delay_reduce env t_body))
       | Type ts ->
           return (NType (delay_reduce_ts env ts))
       | Struct m ->
@@ -386,7 +374,7 @@ end) = struct
     let read_back_force dnf = read_back (force env dnf) in
     match desc with
     | NVar v ->
-      var (Option.get uid) v
+      var' uid v
     | NApp (nft, nfu) ->
         let f = read_back nft in
         let arg = read_back nfu in
@@ -408,6 +396,8 @@ end) = struct
       type_decl uid (read_back_tds env tds)
     | NType ts ->
       type_ ?uid (read_back_ts env ts)
+    | NMu (x, t_body) ->
+      mu uid x (read_back_force t_body)
 
   and read_back_tds env (tds: delayed_nf_tds) : tds =
     let Thunk_tds (l, tds) = tds in
@@ -465,11 +455,12 @@ let rec used_uids_shape (sh : Shape.t) =
   | Comp_unit _ -> Shape.Uid.Set.empty
   | Var _ -> Shape.Uid.Set.empty
   | Leaf -> (
-    (* After reduction, the only possible occurrences of uids are the leafs. *)
+    (* After reduction, the only possible occurrences of uids are the leaves. *)
     match sh.uid with
     | None -> Shape.Uid.Set.empty
     | Some uid -> Shape.Uid.Set.singleton uid)
   | Type_decl tds -> used_uids_tds tds
+  | Mu (_, sh) -> used_uids_shape sh
   | Type ts -> used_uids_ts ts
   | Abs (_, e) -> used_uids_shape e
   | App (f, s) -> Shape.Uid.Set.union (used_uids_shape f) (used_uids_shape s)
@@ -524,26 +515,36 @@ and used_uids_ts (ts : 'a Shape.ts) =
     [Shape.type_def (Tds_alias (Ts_constr (...)))]
   if the UID of the shape is not later used as part of a recursive definition.
 *)
+
+let uid_used used_uids = function
+  | None -> false
+  | Some uid -> Shape.Uid.Set.mem uid used_uids
+
 let rec compress_shape (used_uids : Shape.Uid.Set.t) (sh : Shape.t) =
-  let uid_used = function
-    | None -> false
-    | Some uid -> Shape.Uid.Set.mem uid used_uids
-  in
   let compressed =
     match[@warning "-4"] sh.desc with
-    | Comp_unit _ | Var _ | Proj _ | Leaf | Abs _ | App _ | Struct _ | Error _
+    | Comp_unit _ | Var _ | Proj _ | Leaf | Abs _ | Struct _ | Error _
       ->
       sh
+    | App (sh1, sh2) ->
+      Shape.app (compress_shape used_uids sh1) ~arg:(compress_shape used_uids sh2)
     | Alias sh -> compress_shape used_uids sh
     | Type_decl (Tds_alias (Ts_shape (inner_sh, _)))
-      when not (uid_used sh.uid) ->
+      when not (uid_used used_uids sh.uid) ->
+      compress_shape used_uids inner_sh
+    | Type (Ts_shape (inner_sh, _)) when not (uid_used used_uids sh.uid) ->
       compress_shape used_uids inner_sh
     | Type_decl tds ->
-      let uid = if uid_used sh.uid then sh.uid else None in
+      let uid = if uid_used used_uids sh.uid then sh.uid else None in
       Shape.type_decl uid (compress_tds used_uids tds)
     | Type ts ->
-      let uid = if uid_used sh.uid then sh.uid else None in
+      let uid = if uid_used used_uids sh.uid then sh.uid else None in
       Shape.type_ ?uid (compress_ts used_uids ts)
+    (* | Mu t when not (uid_used used_uids sh.uid) ->
+      (compress_shape used_uids t) *)
+    | Mu (t_rec, t_body) ->
+      Shape.mu sh.uid t_rec (compress_shape used_uids t_body)
+      (* CR sspies: Reconsider this. *)
   in
   compressed
 
@@ -584,6 +585,10 @@ and compress_ts (used_uids : Shape.Uid.Set.t) (ts : 'a Shape.ts) =
     List.map (fun ts -> compress_ts used_uids ts) tss
   in
   match ts with
+  | Ts_shape ({ desc = Type ts; uid ;_ }, _) when not (uid_used used_uids uid) ->
+    compress_ts used_uids ts
+  (* CR sspies: This works, but it is not particularly pretty. Is there a more
+     principaled approach that avoids the roundtrips. *)
   | Ts_shape (sh, ly) ->
     Shape.Ts_shape (compress_shape used_uids sh, ly)
   | Ts_tuple ts -> Shape.Ts_tuple (compress_ts_list ts)
@@ -606,7 +611,7 @@ and compress_ts (used_uids : Shape.Uid.Set.t) (ts : 'a Shape.ts) =
   let reduce global_env t =
     let fuel = ref Params.fuel in
     let local_env = { env = Ident.Map.empty;
-                      uid_renaming = Shape.Uid.Map.empty }
+                      uid_renaming = Shape.Uid.Set.empty }
     in
     let maybe_compress_shape sh =
       if Params.type_shape_compression
@@ -652,6 +657,7 @@ and compress_ts (used_uids : Shape.Uid.Set.t) (ts : 'a Shape.ts) =
     | NLeaf -> false
     | NType_decl _ -> false
     | NType _ -> false
+    | NMu _ -> false
 
   let rec reduce_aliases_for_uid env (nf : nf) =
     match nf with
@@ -671,7 +677,7 @@ and compress_ts (used_uids : Shape.Uid.Set.t) (ts : 'a Shape.ts) =
   let reduce_for_uid global_env t =
     let fuel = ref Params.fuel in
     let local_env = { env = Ident.Map.empty;
-                      uid_renaming = Shape.Uid.Map.empty }
+                      uid_renaming = Shape.Uid.Set.empty }
     in
     let env = {
       fuel;
