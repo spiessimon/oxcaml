@@ -214,7 +214,7 @@ module Type_decl_shape = struct
 
   let type_var_count = ref 0
 
-  let of_type_declaration_go (rec_uid : Uid.t)
+  let of_type_declaration_go (maybe_mu : Shape.t -> Shape.t)
       (type_declaration : Types.type_declaration) type_param_shapes
       shape_of_path =
     let module Types_predef = Predef in
@@ -314,20 +314,7 @@ module Type_decl_shape = struct
           record_of_labels ~shape_of_path ~type_subst Record_unboxed_product
             lbl_list)
     in
-    Shape.mu None rec_uid (Shape.type_decl None definition)
-
-  let update_shape_of_path shape_of_path id id_args sh path ~args =
-    match path with
-    | Path.Pident id'
-      when Ident.equal id id' && List.equal Shape.equal id_args args ->
-      Some sh
-    | Path.Pident id' when Ident.equal id id' ->
-      Misc.fatal_errorf "different args, original %a new %a"
-        (Format.pp_print_list Shape.print)
-        id_args
-        (Format.pp_print_list Shape.print)
-        args
-    | _ -> shape_of_path path ~args
+    maybe_mu (Shape.type_decl None definition)
 
   let rec shape_of_path_with_declarations decl_lookup_map shape_of_path path
       ~args =
@@ -339,13 +326,32 @@ module Type_decl_shape = struct
         match Ident.Map.find_opt id decl_lookup_map with
         | Some decl ->
           let rec_uid = Uid.mk ~current_unit:None in
-          (* uid to use for recursive occurrences for this id
-             and these arguments *)
+          let rec_uid_used = ref false in
+          (* We perform a small optimization, where the mu binder is only
+             added when the variable is actually used recursively. *)
+          let rec_uid_mu sh =
+            if !rec_uid_used then Shape.mu None rec_uid sh else sh
+          in
+          let guarded_shape_of_path path ~args:inner_args =
+            match path with
+            | Path.Pident id'
+              when Ident.equal id id' && List.equal Shape.equal args inner_args
+              ->
+              rec_uid_used := true;
+              Some (Shape.leaf rec_uid)
+            | Path.Pident id' when Ident.equal id id' ->
+              Misc.fatal_errorf "different args, original %a new %a"
+                (Format.pp_print_list Shape.print)
+                args
+                (Format.pp_print_list Shape.print)
+                inner_args
+            | _ -> shape_of_path path ~args
+          in
           let shape_of_path =
             shape_of_path_with_declarations decl_lookup_map
-              (update_shape_of_path shape_of_path id args (Shape.leaf rec_uid))
+              guarded_shape_of_path
           in
-          Some (of_type_declaration_go rec_uid decl args shape_of_path)
+          Some (of_type_declaration_go rec_uid_mu decl args shape_of_path)
         | None -> None)
       | _ -> None)
 
