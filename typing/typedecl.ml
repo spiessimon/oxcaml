@@ -2934,6 +2934,8 @@ let transl_type_decl env rec_flag sdecl_list =
   let shape_of_path path ~args =
     Option.map (fun sh -> Shape.app_list sh args)
       (Env.shape_of_path_opt ~namespace:Type env path)
+    (* CR sspies: Consider truncating external declarations behind their UID
+       to avoid redundancy. *)
   in
   let shapes = Type_shape.Type_decl_shape.of_type_declarations decls shape_of_path in
   List.iter (fun (sh, (_, decl)) ->

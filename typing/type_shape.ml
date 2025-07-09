@@ -514,7 +514,11 @@ module Type_decl_shape = struct
     match shape_of_path (Path.Pident id) ~args:type_param_shapes with
     (* This works, because we add the declarations to the environment below *)
     | None -> assert false
-    | Some definition -> Shape.abs_list definition type_param_idents
+    | Some definition ->
+      let sh = Shape.abs_list definition type_param_idents in
+      Shape.set_uid_if_none sh type_declaration.type_uid
+  (* We add the UID to the declaration shape to ensure that
+     variable shapes can stay small. *)
 
   let of_type_declarations
       (type_declarations : (Ident.t * Types.type_declaration) list)

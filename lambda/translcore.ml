@@ -1599,7 +1599,12 @@ and transl_tupled_function
   | _ -> None
 
 and wrap_path_opt f path ~args =
-  Option.map (fun sh -> Shape.app_list sh args) (f path)
+  Option.map (fun (sh: Shape.t) ->
+    let sh = match sh.uid with
+    | None -> sh
+    | Some uid -> Shape.leaf uid
+    in
+    Shape.app_list sh args) (f path)
 
 and add_type_shape ~env uid type_expr sort =
   Type_shape.add_to_type_shapes uid type_expr sort
