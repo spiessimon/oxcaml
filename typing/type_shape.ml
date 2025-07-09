@@ -18,6 +18,86 @@ let smart_type_shape (sh : Shape.t) =
   | Shape.Type ts -> ts
   | _ -> Shape.Ts_shape (sh, Shape.Layout_to_be_determined)
 
+let rec shape_subst_uid_with_rec_var uid rv outer =
+  let open Shape in
+  match outer.desc with
+  | Leaf when Option.equal Uid.equal outer.uid (Some uid) ->
+    Shape.rec_var ~uid rv
+  | Leaf | Error _ | Rec_var _ | Comp_unit _ | Var _ -> outer (* base cases *)
+  | Alias sh ->
+    Shape.alias ?uid:outer.uid (shape_subst_uid_with_rec_var uid rv sh)
+  | Type ts ->
+    Shape.type_ ?uid:outer.uid (type_shape_subst_uid_with_rec_var uid rv ts)
+  | Type_decl tds ->
+    Shape.type_decl outer.uid
+      (type_declaration_shape_subst_uid_with_rec_var uid rv tds)
+  | App (sh, arg) ->
+    Shape.app ?uid:outer.uid
+      (shape_subst_uid_with_rec_var uid rv sh)
+      ~arg:(shape_subst_uid_with_rec_var uid rv arg)
+  | Proj (sh, item) ->
+    Shape.proj ?uid:outer.uid (shape_subst_uid_with_rec_var uid rv sh) item
+  | Struct map ->
+    Shape.str ?uid:outer.uid
+      (Item.Map.map (shape_subst_uid_with_rec_var uid rv) map)
+  | Abs (var, sh) ->
+    Shape.abs ?uid:outer.uid var (shape_subst_uid_with_rec_var uid rv sh)
+  | Mu sh ->
+    Shape.mu ?uid:outer.uid (shape_subst_uid_with_rec_var uid (rv + 1) sh)
+
+and type_shape_subst_uid_with_rec_var uid rv ts =
+  let open Shape in
+  match ts with
+  | Ts_shape (sh, _) ->
+    Ts_shape (shape_subst_uid_with_rec_var uid rv sh, Layout_to_be_determined)
+  | Ts_tuple shapes ->
+    Ts_tuple (List.map (type_shape_subst_uid_with_rec_var uid rv) shapes)
+  | Ts_unboxed_tuple shapes ->
+    Ts_unboxed_tuple
+      (List.map (type_shape_subst_uid_with_rec_var uid rv) shapes)
+  | Ts_predef predef -> Ts_predef predef
+  | Ts_arrow (arg, ret) ->
+    Ts_arrow
+      ( type_shape_subst_uid_with_rec_var uid rv arg,
+        type_shape_subst_uid_with_rec_var uid rv ret )
+  | Ts_variant fields ->
+    Ts_variant
+      (poly_variant_constructors_map
+         (type_shape_subst_uid_with_rec_var uid rv)
+         fields)
+  | Ts_other layout -> Ts_other layout
+
+and type_declaration_shape_subst_uid_with_rec_var uid rv tds =
+  let open Shape in
+  match tds with
+  | Tds_alias sh -> Tds_alias (type_shape_subst_uid_with_rec_var uid rv sh)
+  | Tds_record { fields; kind } ->
+    Tds_record
+      { fields =
+          List.map
+            (fun (name, sh, layout) ->
+              name, type_shape_subst_uid_with_rec_var uid rv sh, layout)
+            fields;
+        kind
+      }
+  | Tds_variant { simple_constructors; complex_constructors } ->
+    Tds_variant
+      { simple_constructors;
+        complex_constructors =
+          Shape.complex_constructors_map
+            (fun (sh, layout) ->
+              type_shape_subst_uid_with_rec_var uid rv sh, layout)
+            complex_constructors
+      }
+  | Tds_variant_unboxed { name; arg_name; arg_shape; arg_layout; _ } ->
+    Tds_variant_unboxed
+      { name;
+        arg_name;
+        arg_shape = type_shape_subst_uid_with_rec_var uid rv arg_shape;
+        arg_layout
+      }
+  | Tds_other -> Tds_other
+
 module Dynamic_binder : sig
   type dynamic_binder
 
@@ -44,14 +124,18 @@ end = struct
     Shape.leaf db.uid
 
   let bind_dynamic_binder db sh =
-    if not db.used then sh else Shape.mu None db.uid sh
+    if not db.used
+    then sh
+    else
+      let sh = shape_subst_uid_with_rec_var db.uid 0 sh in
+      Shape.mu ~uid:db.uid sh
 
   let bind_dynamic_binder_type_shape db ts =
     if not db.used
     then ts
     else
-      Shape.Ts_shape
-        (Shape.mu None db.uid (Shape.type_ ts), Shape.Layout_to_be_determined)
+      let sh = shape_subst_uid_with_rec_var db.uid 0 (Shape.type_ ts) in
+      Shape.Ts_shape (Shape.mu ~uid:db.uid sh, Shape.Layout_to_be_determined)
 end
 
 module Type_shape = struct

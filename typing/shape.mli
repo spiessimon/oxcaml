@@ -205,8 +205,8 @@ and desc =
   | Proj of t * Item.t
   | Comp_unit of string
   | Error of string
-  | Mu of Uid.t * t
-    (** Carries the recursive occurrence and the body *)
+  | Mu of t
+  | Rec_var of int
 
 (* Type shapes are abstract representations of type expressions. We define
   them with a placeholder 'a for the layout inside. This allows one to
@@ -334,7 +334,8 @@ val smart_type_ : without_layout ts -> t
   (** Smart constructor that will avoid redundant applications of [Ts_shape] *)
 
 (* recursive binder, recursive occurrences should be leaves with the same uid *)
-val mu : Uid.t option -> Uid.t -> t -> t
+val mu : ?uid:Uid.t -> t -> t
+val rec_var : ?uid:Uid.t -> int -> t
 
 val no_fuel_left : ?uid:Uid.t -> t -> t
 val comp_unit : ?uid:Uid.t -> string -> t

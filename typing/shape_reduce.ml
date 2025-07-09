@@ -53,6 +53,8 @@ module Make(Params : sig
   val type_shape_compression : bool
   val lookup_shape_for_uid : Uid.t -> t option
 end) = struct
+  let _ = Params.type_shape_compression
+
   (* We implement a strong call-by-need reduction, following an
      evaluator from Nathanaelle Courant. *)
 
@@ -69,7 +71,8 @@ end) = struct
     | NType of delayed_nf_ts
     | NComp_unit of string
     | NError of string
-    | NMu of Uid.t * delayed_nf
+    | NMu of delayed_nf
+    | NRec_var of int
 
   (* A type of normal forms for strong call-by-need evaluation.
      The normal form of an abstraction
@@ -141,8 +144,8 @@ end) = struct
     | NLeaf, NLeaf -> true
     | NType_decl tds1, NType_decl tds2 -> equal_delayed_nf_tds tds1 tds2
     | NType t1, NType t2 -> equal_delayed_nf_ts t1 t2
-    | NMu (v1, nf1), NMu (v2, nf2) ->
-      Shape.Uid.equal v1 v2 && equal_delayed_nf nf1 nf2
+    | NMu (nf1), NMu (nf2) -> equal_delayed_nf nf1 nf2
+    | NRec_var i1, NRec_var i2 -> Int.equal i1 i2
     | NStruct t1, NStruct t2 ->
       Item.Map.equal equal_delayed_nf t1 t2
     | NProj (t1, i1), NProj (t2, i2) ->
@@ -151,18 +154,19 @@ end) = struct
     | NComp_unit c1, NComp_unit c2 -> String.equal c1 c2
     | NAlias a1, NAlias a2 -> equal_delayed_nf a1 a2
     | NError e1, NError e2 -> String.equal e1 e2
-    | NVar _, (NLeaf | NApp _ | NAbs _ | NStruct _ | NProj _ | NComp_unit _ | NAlias _ | NError _ | NType_decl _| NType _| NMu _)
-    | NLeaf, (NVar _ | NApp _ | NAbs _ | NStruct _ | NProj _ | NComp_unit _ | NAlias _ | NError _ | NType_decl _| NType _| NMu _)
-    | NApp _, (NVar _ | NLeaf | NAbs _ | NStruct _ | NProj _ | NComp_unit _ | NAlias _ | NError _ | NType_decl _| NType _| NMu _)
-    | NAbs _, (NVar _ | NLeaf | NApp _ | NStruct _ | NProj _ | NComp_unit _ | NAlias _ | NError _ | NType_decl _| NType _| NMu _)
-    | NStruct _, (NVar _ | NLeaf | NApp _ | NAbs _ | NProj _ | NComp_unit _ | NAlias _ | NError _ | NType_decl _| NType _| NMu _)
-    | NProj _, (NVar _ | NLeaf | NApp _ | NAbs _ | NStruct _ | NComp_unit _ | NAlias _ | NError _ | NType_decl _| NType _| NMu _)
-    | NComp_unit _, (NVar _ | NLeaf | NApp _ | NAbs _ | NStruct _ | NProj _ | NAlias _ | NError _ | NType_decl _| NType _| NMu _)
-    | NAlias _, (NVar _ | NLeaf | NApp _ | NAbs _ | NStruct _ | NProj _ | NComp_unit _ | NError _ | NType_decl _| NType _| NMu _)
-    | NError _, (NVar _ | NLeaf | NApp _ | NAbs _ | NStruct _ | NProj _ | NComp_unit _ | NAlias _ | NType_decl _| NType _| NMu _)
-    | NType_decl _, (NVar _ | NLeaf | NApp _ | NAbs _ | NStruct _ | NProj _ | NComp_unit _ | NAlias _ | NError _ | NType _ | NMu _)
-    | NType _, (NVar _ | NLeaf | NApp _ | NAbs _ | NStruct _ | NProj _ | NComp_unit _ | NAlias _ | NError _ | NType_decl _ | NMu _)
-    | NMu _, (NVar _ | NLeaf | NApp _ | NAbs _ | NStruct _ | NProj _ | NComp_unit _ | NAlias _ | NError _ | NType_decl _ | NType _)
+    | NVar _, (NLeaf | NApp _ | NAbs _ | NStruct _ | NProj _ | NComp_unit _ | NAlias _ | NError _ | NType_decl _| NType _| NMu _| NRec_var _)
+    | NLeaf, (NVar _ | NApp _ | NAbs _ | NStruct _ | NProj _ | NComp_unit _ | NAlias _ | NError _ | NType_decl _| NType _| NMu _| NRec_var _)
+    | NApp _, (NVar _ | NLeaf | NAbs _ | NStruct _ | NProj _ | NComp_unit _ | NAlias _ | NError _ | NType_decl _| NType _| NMu _| NRec_var _)
+    | NAbs _, (NVar _ | NLeaf | NApp _ | NStruct _ | NProj _ | NComp_unit _ | NAlias _ | NError _ | NType_decl _| NType _| NMu _| NRec_var _)
+    | NStruct _, (NVar _ | NLeaf | NApp _ | NAbs _ | NProj _ | NComp_unit _ | NAlias _ | NError _ | NType_decl _| NType _| NMu _| NRec_var _)
+    | NProj _, (NVar _ | NLeaf | NApp _ | NAbs _ | NStruct _ | NComp_unit _ | NAlias _ | NError _ | NType_decl _| NType _| NMu _| NRec_var _)
+    | NComp_unit _, (NVar _ | NLeaf | NApp _ | NAbs _ | NStruct _ | NProj _ | NAlias _ | NError _ | NType_decl _| NType _| NMu _| NRec_var _)
+    | NAlias _, (NVar _ | NLeaf | NApp _ | NAbs _ | NStruct _ | NProj _ | NComp_unit _ | NError _ | NType_decl _| NType _| NMu _| NRec_var _)
+    | NError _, (NVar _ | NLeaf | NApp _ | NAbs _ | NStruct _ | NProj _ | NComp_unit _ | NAlias _ | NType_decl _| NType _| NMu _| NRec_var _)
+    | NType_decl _, (NVar _ | NLeaf | NApp _ | NAbs _ | NStruct _ | NProj _ | NComp_unit _ | NAlias _ | NError _ | NType _ | NMu _| NRec_var _)
+    | NType _, (NVar _ | NLeaf | NApp _ | NAbs _ | NStruct _ | NProj _ | NComp_unit _ | NAlias _ | NError _ | NType_decl _ | NMu _| NRec_var _)
+    | NMu _, (NVar _ | NLeaf | NApp _ | NAbs _ | NStruct _ | NProj _ | NComp_unit _ | NAlias _ | NError _ | NType_decl _ | NType _| NRec_var _ )
+    | NRec_var _, (NVar _ | NLeaf | NApp _ | NAbs _ | NStruct _ | NProj _ | NComp_unit _ | NAlias _ | NError _ | NType_decl _ | NType _ | NMu _)
     -> false
 
   and equal_nf t1 t2 =
@@ -350,7 +354,8 @@ end) = struct
         | None -> return NLeaf))
       | Type_decl tds ->
           return (NType_decl (delay_reduce_tds env tds))
-      | Mu (x, t_body) -> return (NMu (x, delay_reduce env t_body))
+      | Mu t_body -> return (NMu (delay_reduce env t_body))
+      | Rec_var n -> return (NRec_var n)
       | Type ts ->
           return (NType (delay_reduce_ts env ts))
       | Struct m ->
@@ -396,8 +401,10 @@ end) = struct
       type_decl uid (read_back_tds env tds)
     | NType ts ->
       type_ ?uid (read_back_ts env ts)
-    | NMu (x, t_body) ->
-      mu uid x (read_back_force t_body)
+    | NMu (t_body) ->
+      mu ?uid (read_back_force t_body)
+    | NRec_var n ->
+      rec_var ?uid n
 
   and read_back_tds env (tds: delayed_nf_tds) : tds =
     let Thunk_tds (l, tds) = tds in
@@ -449,7 +456,7 @@ end) = struct
       let fields = Shape.poly_variant_constructors_map (force_reduce_ts env) fields in
       Ts_variant fields
     | Ts_other ly -> Ts_other ly
-
+(*
 let rec used_uids_shape (sh : Shape.t) =
   match sh.desc with
   | Comp_unit _ -> Shape.Uid.Set.empty
@@ -509,13 +516,13 @@ and used_uids_ts (ts : 'a Shape.ts) =
       (fun acc { Shape.pv_constr_args; _ } ->
         Shape.Uid.Set.union (used_uids_type_shapes pv_constr_args) acc)
       Shape.Uid.Set.empty fields
-  | Ts_other _ -> Shape.Uid.Set.empty
+  | Ts_other _ -> Shape.Uid.Set.empty *)
 
 (* We compress the cases where of the form
     [Shape.type_def (Tds_alias (Ts_constr (...)))]
   if the UID of the shape is not later used as part of a recursive definition.
 *)
-
+(*
 let uid_used used_uids = function
   | None -> false
   | Some uid -> Shape.Uid.Set.mem uid used_uids
@@ -601,7 +608,7 @@ and compress_ts (used_uids : Shape.Uid.Set.t) (ts : 'a Shape.ts) =
       Shape.poly_variant_constructors_map (compress_ts used_uids) fields
     in
     Shape.Ts_variant fields
-  | Ts_other _ -> ts
+  | Ts_other _ -> ts *)
 
   (* Sharing the memo tables is safe at the level of a compilation unit since
     idents should be unique *)
@@ -613,12 +620,12 @@ and compress_ts (used_uids : Shape.Uid.Set.t) (ts : 'a Shape.ts) =
     let local_env = { env = Ident.Map.empty;
                       uid_renaming = Shape.Uid.Set.empty }
     in
-    let maybe_compress_shape sh =
-      if Params.type_shape_compression
+    let maybe_compress_shape sh = sh
+      (* if Params.type_shape_compression
       then
         let used_uids = used_uids_shape sh in
         compress_shape used_uids sh
-      else sh
+      else sh *)
     in
     let env = {
       fuel;
@@ -658,7 +665,7 @@ and compress_ts (used_uids : Shape.Uid.Set.t) (ts : 'a Shape.ts) =
     | NType_decl _ -> false
     | NType _ -> false
     | NMu _ -> false
-
+    | NRec_var _ -> false
   let rec reduce_aliases_for_uid env (nf : nf) =
     match nf with
     | { uid = Some uid; desc = NAlias dnf; approximated = false; _ } ->

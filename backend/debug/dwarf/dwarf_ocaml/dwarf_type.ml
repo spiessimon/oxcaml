@@ -1271,6 +1271,7 @@ and type_shape_to_dwarf_die_type_constructor ~reference ?name ~parent_proto_die
     match shape.desc with
     | Shape.Type_decl tds -> `Declaration tds
     | Shape.Type _ -> Misc.fatal_error "unimplemented"
+    | Shape.Rec_var _ -> Misc.fatal_error "unimplemented"
     | Shape.Leaf | Shape.Var _ | Shape.Abs _ | Shape.App _ | Shape.Struct _
     | Shape.Alias _ | Shape.Proj _ | Shape.Comp_unit _ | Shape.Error _
     | Shape.Mu _ ->

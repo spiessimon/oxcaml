@@ -503,7 +503,10 @@ and desc =
   | Proj of t * Item.t
   | Comp_unit of string
   | Error of string
-  | Mu of Uid.t * t
+  | Mu of t
+  | Rec_var of int
+  (** Recursive variable in DeBruijn representation. *)
+
 
 and without_layout = Layout_to_be_determined
 
@@ -593,26 +596,28 @@ let rec equal_desc d1 d2 =
   | Leaf, Leaf -> true
   | Type_decl tds1, Type_decl tds2 -> equal_tds tds1 tds2
   | Type t1, Type t2 -> equal_ts equal_without_layout t1 t2
-  | Mu (x1, t1_body), Mu (x2, t2_body) ->
-    Uid.equal x1 x2 && equal t1_body t2_body
+  | Mu (t1_body), Mu (t2_body) ->
+    equal t1_body t2_body
+  | Rec_var i1, Rec_var i2 -> Int.equal i1 i2
   | Struct t1, Struct t2 ->
     Item.Map.equal equal t1 t2
   | Proj (t1, i1), Proj (t2, i2) ->
     if Item.compare i1 i2 <> 0 then false
     else equal t1 t2
   | Comp_unit c1, Comp_unit c2 -> String.equal c1 c2
-  | Var _, (Abs _ | App _ | Struct _ | Leaf  | Type_decl _ | Type _ | Mu _ | Proj _ | Comp_unit _ | Alias _ | Error _)
-  | Abs _, (Var _ | App _ | Struct _ | Leaf  | Type_decl _ | Type _ | Mu _ | Proj _ | Comp_unit _ | Alias _ | Error _)
-  | App _, (Var _ | Abs _ | Struct _ | Leaf  | Type_decl _ | Type _ | Mu _ | Proj _ | Comp_unit _ | Alias _ | Error _)
-  | Struct _, (Var _ | Abs _ | App _ | Leaf  | Type_decl _ | Type _ | Mu _ | Proj _ | Comp_unit _ | Alias _ | Error _)
-  | Leaf, (Var _ | Abs _ | App _ | Struct _ | Proj _ | Type_decl _ | Type _ | Mu _ | Comp_unit _ | Alias _ | Error _)
-  | Type_decl _, (Var _ | Abs _ | App _ | Struct _ | Leaf | Type _ | Mu _ | Proj _ | Comp_unit _ | Alias _ | Error _)
-  | Type _, (Var _ | Abs _ | App _ | Struct _ | Leaf  | Type_decl _| Mu _ | Proj _ | Comp_unit _ | Alias _ | Error _)
-  | Mu _, (Var _ | Abs _ | App _ | Struct _ | Leaf  | Type_decl _ | Type _ | Proj _ | Comp_unit _ | Alias _ | Error _)
-  | Proj _, (Var _ | Abs _ | App _ | Struct _ | Leaf  | Type_decl _ | Type _ | Mu _ | Comp_unit _ | Alias _ | Error _)
-  | Comp_unit _, (Var _ | Abs _ | App _ | Struct _ | Leaf  | Type_decl _ | Type _ | Mu _ | Proj _ | Alias _ | Error _)
-  | Alias _, (Var _ | Abs _ | App _ | Struct _ | Leaf  | Type_decl _ | Type _ | Mu _ | Proj _ | Comp_unit _ | Error _)
-  | Error _, (Var _ | Abs _ | App _ | Struct _ | Leaf  | Type_decl _ | Type _ | Mu _ | Proj _ | Comp_unit _ | Alias _)
+  | Var _, (Abs _ | App _ | Struct _ | Leaf  | Type_decl _ | Type _ | Mu _ | Rec_var _ | Proj _ | Comp_unit _ | Alias _ | Error _)
+  | Abs _, (Var _ | App _ | Struct _ | Leaf  | Type_decl _ | Type _ | Mu _ | Rec_var _ | Proj _ | Comp_unit _ | Alias _ | Error _)
+  | App _, (Var _ | Abs _ | Struct _ | Leaf  | Type_decl _ | Type _ | Mu _ | Rec_var _ | Proj _ | Comp_unit _ | Alias _ | Error _)
+  | Struct _, (Var _ | Abs _ | App _ | Leaf  | Type_decl _ | Type _ | Mu _ | Rec_var _ | Proj _ | Comp_unit _ | Alias _ | Error _)
+  | Leaf, (Var _ | Abs _ | App _ | Struct _ | Proj _ | Type_decl _ | Type _ | Mu _ | Rec_var _ | Comp_unit _ | Alias _ | Error _)
+  | Type_decl _, (Var _ | Abs _ | App _ | Struct _ | Leaf | Type _ | Mu _ | Rec_var _ | Proj _ | Comp_unit _ | Alias _ | Error _)
+  | Type _, (Var _ | Abs _ | App _ | Struct _ | Leaf  | Type_decl _| Mu _ | Rec_var _ | Proj _ | Comp_unit _ | Alias _ | Error _)
+  | Mu _, (Var _ | Abs _ | App _ | Struct _ | Leaf  | Type_decl _ | Type _ | Rec_var _ | Proj _ | Comp_unit _ | Alias _ | Error _)
+  | Rec_var _, (Var _ | Abs _ | App _ | Struct _ | Leaf  | Type_decl _ | Type _ | Mu _ | Proj _ | Comp_unit _ | Alias _ | Error _)
+  | Proj _, (Var _ | Abs _ | App _ | Struct _ | Leaf  | Type_decl _ | Type _ | Mu _ | Rec_var _ | Comp_unit _ | Alias _ | Error _)
+  | Comp_unit _, (Var _ | Abs _ | App _ | Struct _ | Leaf  | Type_decl _ | Type _ | Mu _ | Rec_var _ | Proj _ | Alias _ | Error _)
+  | Alias _, (Var _ | Abs _ | App _ | Struct _ | Leaf  | Type_decl _ | Type _ | Mu _ | Rec_var _ | Proj _ | Comp_unit _ | Error _)
+  | Error _, (Var _ | Abs _ | App _ | Struct _ | Leaf  | Type_decl _ | Type _ | Mu _ | Rec_var _ | Proj _ | Comp_unit _ | Alias _)
     -> false
 
 and equal t1 t2 =
@@ -803,10 +808,14 @@ let rec print fmt t =
       Format.fprintf fmt "%a%a"
         print_uid_opt uid
         print_type_decl_shape decl
-    | Mu (x, t_body) ->
-      Format.fprintf fmt "Rec <%a> := %a"
-        Uid.print x
+    | Mu (t_body) ->
+      Format.fprintf fmt "Rec%a %a"
+        print_uid_opt uid
         print t_body
+    | Rec_var id ->
+      Format.fprintf fmt "Rec_var %d%a"
+      id
+      print_uid_opt uid
     | Proj (t, item) ->
         begin match uid with
         | None ->
@@ -1032,10 +1041,13 @@ let smart_type_ ts =
   | Ts_shape (t, _) -> t
   | _ -> type_ ts
 
-let mu uid x t_body =
-  { uid; desc = Mu (x, t_body); hash = Hashtbl.hash (hash_mu, uid, x, t_body.hash);
+let mu ?uid t_body =
+  { uid; desc = Mu (t_body); hash = Hashtbl.hash (hash_mu, uid, t_body.hash);
     approximated = false }
 
+let rec_var ?uid n =
+  { uid; desc = Rec_var n; hash = Hashtbl.hash (hash_var, uid, n);
+    approximated = false }
 
 let app_list (base_shape : t) (args : t list) : t =
   List.fold_left (fun shape arg -> app shape ~arg) base_shape args
