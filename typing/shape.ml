@@ -515,7 +515,7 @@ and 'a ts =
     (** This case is used for type constructors, type variables, and more. *)
   | Ts_tuple of 'a ts list
   | Ts_unboxed_tuple of 'a ts list
-  | Ts_predef of Predef.t
+  | Ts_predef of Predef.t * t list
     (** Arguments are handled via the [Ts_shape] case. *)
   | Ts_arrow of without_layout ts * without_layout ts
   | Ts_variant of 'a ts poly_variant_constructors
@@ -738,8 +738,9 @@ and equal_ts :
     List.equal (equal_ts eq) ts1 ts2
   | Ts_unboxed_tuple ts1, Ts_unboxed_tuple ts2 ->
     List.equal (equal_ts eq) ts1 ts2
-  | Ts_predef (predef1), Ts_predef (predef2) ->
-    Predef.equal predef1 predef2
+  | Ts_predef (predef1, args1), Ts_predef (predef2, args2) ->
+    Predef.equal predef1 predef2 &&
+    List.equal (equal) args1 args2
   | Ts_arrow (arg1, ret1), Ts_arrow (arg2, ret2) ->
     equal_ts equal_without_layout arg1 arg2 &&
     equal_ts equal_without_layout ret1 ret2
@@ -854,8 +855,10 @@ let rec print fmt t =
 (* printing type shapes *)
 and print_type_shape : type a. Format.formatter -> a ts -> unit =
   fun ppf -> function
-  | Ts_predef (predef) ->
-    Format.fprintf ppf "Ts_predef %s" (Predef.to_string predef)
+  | Ts_predef (predef, args) ->
+    Format.fprintf ppf "Ts_predef %s (%a)"
+      (Predef.to_string predef)
+      (Format.pp_print_list print) args
   | Ts_shape (shape, _) ->
     Format.fprintf ppf "Ts_shape (%a)" print shape
   | Ts_tuple shapes ->
@@ -1124,7 +1127,7 @@ let rec shape_layout (sh : Layout.t ts) =
   | Ts_shape (_, ly) -> ly
   | Ts_tuple _ -> Layout.Base Value
   | Ts_unboxed_tuple shapes -> Layout.Product (List.map shape_layout shapes)
-  | Ts_predef predef -> Predef.predef_to_layout predef
+  | Ts_predef (predef, _) -> Predef.predef_to_layout predef
   | Ts_arrow _ -> Layout.Base Value
   | Ts_variant _ -> Layout.Base Value
   | Ts_other ly -> ly
@@ -1180,10 +1183,11 @@ let rec shape_with_layout ~(layout : Layout.t) (sh : without_layout ts) :
   | Ts_arrow (arg, ret), Base Value -> Ts_arrow (arg, ret)
   | Ts_arrow _, _ ->
     Misc.fatal_errorf "function type shape must have layout value"
-  | Ts_predef predef, _
+  | Ts_predef (predef, args), _
     when Layout.equal (Predef.predef_to_layout predef) layout ->
-    Ts_predef predef
-  | Ts_predef predef, _ ->
+    Ts_predef (predef, args)
+    (* CR sspies: We could check the arguments here as well. *)
+  | Ts_predef (predef, _), _ ->
     Misc.fatal_errorf
       "predef has layout %a, but is expected to have layout %a" Layout.format
       (Predef.predef_to_layout predef)

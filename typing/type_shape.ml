@@ -9,8 +9,8 @@ let extended_env f path ~args =
   let open Shape in
   match Shape.Predef.of_string (Path.name path) with
   | Some predef ->
-    let predef_shape = Ts_predef predef in
-    Some (Shape.app_list (Shape.smart_type_ predef_shape) args)
+    let predef_shape = Ts_predef (predef, args) in
+    Some (Shape.smart_type_ predef_shape)
   | None -> f path ~args
 
 let smart_type_shape (sh : Shape.t) =
@@ -55,7 +55,9 @@ and type_shape_subst_uid_with_rec_var uid rv ts =
   | Ts_unboxed_tuple shapes ->
     Ts_unboxed_tuple
       (List.map (type_shape_subst_uid_with_rec_var uid rv) shapes)
-  | Ts_predef predef -> Ts_predef predef
+  | Ts_predef (predef, args) ->
+    Ts_predef
+      (predef, List.map (fun sh -> shape_subst_uid_with_rec_var uid rv sh) args)
   | Ts_arrow (arg, ret) ->
     Ts_arrow
       ( type_shape_subst_uid_with_rec_var uid rv arg,
@@ -450,8 +452,8 @@ module Type_decl_shape = struct
       (Shape.type_decl None definition)
 
   let rec shape_of_path_with_declarations decl_lookup_map shape_of_path path
-      ~args =
-    match shape_of_path path ~args with
+      ~args:outer_args =
+    match shape_of_path path ~args:outer_args with
     | Some s -> Some s
     | None -> (
       match path with
@@ -462,8 +464,8 @@ module Type_decl_shape = struct
           let guarded_shape_of_path path ~args:inner_args =
             match path with
             | Path.Pident id'
-              when Ident.equal id id' && List.equal Shape.equal args inner_args
-              ->
+              when Ident.equal id id'
+                   && List.equal Shape.equal outer_args inner_args ->
               Some (Dynamic_binder.use_dynamic_binder rec_binder)
             | Path.Pident id' when Ident.equal id id' ->
               (* We found the same path, but with different arguments;
@@ -473,11 +475,11 @@ module Type_decl_shape = struct
                 List.map
                   (fun _ ->
                     Shape.type_ (Shape.Ts_other Shape.Layout_to_be_determined))
-                  args
+                  outer_args
               in
               let decl =
                 of_type_declaration_go rec_value_only_binder decl value_args
-                  (fun path ~args ->
+                  (fun path ~args:value_inner_args ->
                     match path with
                     | Path.Pident id'' when Ident.equal id id'' ->
                       (* Regardless of arguments, we insert the value version now *)
@@ -485,16 +487,16 @@ module Type_decl_shape = struct
                         (Dynamic_binder.use_dynamic_binder rec_value_only_binder)
                     | _ ->
                       shape_of_path_with_declarations decl_lookup_map
-                        shape_of_path path ~args)
+                        shape_of_path path ~args:value_inner_args)
               in
               Some decl
-            | _ -> shape_of_path path ~args
+            | _ -> shape_of_path path ~args:inner_args
           in
           let shape_of_path =
             shape_of_path_with_declarations decl_lookup_map
               guarded_shape_of_path
           in
-          Some (of_type_declaration_go rec_binder decl args shape_of_path)
+          Some (of_type_declaration_go rec_binder decl outer_args shape_of_path)
         | None -> None)
       | _ -> None)
 

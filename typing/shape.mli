@@ -219,7 +219,7 @@ and 'a ts =
     (** This case is used for type constructors, type variables, and more. *)
   | Ts_tuple of 'a ts list
   | Ts_unboxed_tuple of 'a ts list
-  | Ts_predef of Predef.t
+  | Ts_predef of Predef.t * t list
     (** Arguments are handled via the [Ts_shape] case. *)
   | Ts_arrow of without_layout ts * without_layout ts
   | Ts_variant of 'a ts poly_variant_constructors

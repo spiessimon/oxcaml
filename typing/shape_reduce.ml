@@ -450,7 +450,7 @@ end) = struct
       Ts_shape (read_back env (reduce__ env sh), ly)
     | Ts_tuple ts -> Ts_tuple (List.map (force_reduce_ts env) ts)
     | Ts_unboxed_tuple ts -> Ts_unboxed_tuple (List.map (force_reduce_ts env) ts)
-    | Ts_predef predef -> Ts_predef predef
+    | Ts_predef (predef, args) -> Ts_predef (predef, List.map (fun sh -> read_back env (reduce__ env sh)) args)
     | Ts_arrow (arg, ret) -> Ts_arrow (force_reduce_ts env arg, force_reduce_ts env ret)
     | Ts_variant (fields) ->
       let fields = Shape.poly_variant_constructors_map (force_reduce_ts env) fields in
