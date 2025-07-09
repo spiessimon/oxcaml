@@ -382,11 +382,28 @@ module Type_decl_shape = struct
               ->
               Some (Dynamic_binder.use_dynamic_binder rec_binder)
             | Path.Pident id' when Ident.equal id id' ->
-              Misc.fatal_errorf "different args, original %a new %a"
-                (Format.pp_print_list Shape.print)
-                args
-                (Format.pp_print_list Shape.print)
-                inner_args
+              (* We found the same path, but with different arguments;
+                 we inline the declaration again, but generically for arbitrary values *)
+              let rec_value_only_binder = Dynamic_binder.mk_dynamic_binder () in
+              let value_args =
+                List.map
+                  (fun _ ->
+                    Shape.type_ (Shape.Ts_other Shape.Layout_to_be_determined))
+                  args
+              in
+              let decl =
+                of_type_declaration_go rec_value_only_binder decl value_args
+                  (fun path ~args ->
+                    match path with
+                    | Path.Pident id'' when Ident.equal id id'' ->
+                      (* Regardless of arguments, we insert the value version now *)
+                      Some
+                        (Dynamic_binder.use_dynamic_binder rec_value_only_binder)
+                    | _ ->
+                      shape_of_path_with_declarations decl_lookup_map
+                        shape_of_path path ~args)
+              in
+              Some decl
             | _ -> shape_of_path path ~args
           in
           let shape_of_path =
