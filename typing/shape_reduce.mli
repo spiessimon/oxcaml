@@ -53,7 +53,7 @@ module Make(_ : sig
 
     val read_unit_shape : unit_name:string -> Shape.t option
 
-    val type_shape_compression : bool
+    val remove_uids : bool
 
     val lookup_shape_for_uid : Shape.Uid.t -> Shape.t option
     (* CR sspies: In practice, this function depends on global state that is

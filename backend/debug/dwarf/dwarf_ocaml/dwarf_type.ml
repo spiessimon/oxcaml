@@ -1524,7 +1524,7 @@ module With_cms_reduce = Shape_reduce.Make (struct
            here. *)
         cms_infos.cms_impl_shape)
 
-  let type_shape_compression = true
+  let remove_uids = true
 
   let lookup_shape_for_uid uid = Type_shape.find_in_type_decls uid
 end)
