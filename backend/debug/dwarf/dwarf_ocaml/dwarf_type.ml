@@ -1266,10 +1266,10 @@ and type_shape_to_dwarf_die_shape ~reference ?name ~parent_proto_die
     | Shape.Type_decl tds -> `Declaration tds
     | Shape.Type ts -> `Type ts
     | Shape.Rec_var i -> `Reference (rec_env i)
-    | Shape.Leaf -> `Missing
+    | Shape.Leaf | Shape.App _ | Shape.Proj _ -> `Missing
     | Shape.Mu sh -> `RecursiveBinder sh
-    | Shape.Var _ | Shape.Abs _ | Shape.App _ | Shape.Struct _ | Shape.Alias _
-    | Shape.Proj _ | Shape.Comp_unit _ | Shape.Error _ ->
+    | Shape.Var _ | Shape.Abs _ | Shape.Struct _ | Shape.Alias _
+    | Shape.Comp_unit _ | Shape.Error _ ->
       `Illformed
   in
   match result with
