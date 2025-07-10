@@ -1457,89 +1457,82 @@ and flatten_shape (shape : Shape.t) layout :
   in
   match shape.desc with
   | Shape.Type ts -> flatten_type_shape (Shape.shape_with_layout ~layout ts)
-  | Shape.Type_decl _ -> unknown_base_layouts layout
-  | Shape.Leaf -> unknown_base_layouts layout
-  | Shape.Var _ -> unknown_base_layouts layout
-  | Shape.Abs _ -> unknown_base_layouts layout
-  | Shape.App _ -> unknown_base_layouts layout
-  | Shape.Rec_var _ -> unknown_base_layouts layout
-  | Shape.Struct _ -> unknown_base_layouts layout
-  | Shape.Alias _ -> unknown_base_layouts layout
-  | Shape.Proj _ -> unknown_base_layouts layout
-  | Shape.Comp_unit _ -> unknown_base_layouts layout
-  | Shape.Error _ -> unknown_base_layouts layout
-  | Shape.Mu _ -> unknown_base_layouts layout
+  | Shape.Type_decl tds -> flatten_type_decl_shape tds layout
+  | Shape.Rec_var _ ->
+    unknown_base_layouts layout
+    (* A projection should not reach the point of a local variable. *)
+  | Shape.Leaf | Shape.App _ | Shape.Proj _ -> unknown_base_layouts layout
+  (* Applications, projections, and leafs indicate that something could not be
+     reduced, because a lookup failed . *)
+  | Shape.Mu shape -> flatten_shape shape layout
+  | Shape.Alias shape -> flatten_shape shape layout
+  | Shape.Var _ | Shape.Abs _ | Shape.Struct _ | Shape.Comp_unit _
+  | Shape.Error _ ->
+    Misc.fatal_error "This shape should not occur here."
+(* CR sspies: This case should not happen. Consider weakening this error in the
+   future, but for now failing loudly is a good idea. *)
 
-(*= (
-    let decl =
-      match shape.desc with
-      | Shape.Type_decl tds -> Some tds
-      | Shape.Var _ | Shape.Abs _ | Shape.App _ | Shape.Leaf | Shape.Struct _
-      | Shape.Alias _ | Shape.Proj _ | Shape.Comp_unit _ | Shape.Error _ ->
-        None
-    in
-    match[@warning "-4"] decl with
-    | None -> unknown_base_layouts layout
-    | Some { definition = Tds_other; _ } -> unknown_base_layouts layout
-    | Some type_decl_shape -> (
-      let type_decl_shape = Shape.replace_tvar type_decl_shape shapes in
-      match type_decl_shape.definition with
-      | Tds_other ->
-        unknown_base_layouts layout (* Cannot break up unknown type. *)
-      | Tds_alias alias_shape ->
-        let alias_shape = Shape.shape_with_layout ~layout alias_shape in
-        flatten_type_shape alias_shape
-        (* At first glance, this recursion could potentially diverge, for direct
-           cycles between type aliases and the defintion of the type. However,
-           it seems the compiler disallows direct cycles such as [type t = t]
-           and the like. If this ever causes trouble or the behvior of the
-           compiler changes with respect to recursive types, we can add a bound
-           on the maximal recursion depth. *)
-      | Tds_record
-          { fields = _; kind = Record_boxed | Record_mixed _ | Record_floats }
-        -> (
-        match layout with
-        | Base Value -> [`Known type_shape]
-        | _ -> Misc.fatal_error "record must have value layout")
-      | Tds_record { fields = [(_, sh, ly)]; kind = Record_unboxed }
-        when Layout.equal ly layout -> (
-        match layout with
-        | Product _ -> flatten_type_shape (Shape.shape_with_layout ~layout sh)
-        (* for unboxed products of the form [{ field: ty } [@@unboxed]] where
-           [ty] is of product sort, we simply look through the unboxed product.
-           Otherwise, we will create an additional DWARF entry for it. *)
-        | Base _ -> [`Known type_shape])
-      | Tds_record { fields = [_]; kind = Record_unboxed } ->
-        Misc.fatal_error "unboxed record at different layout than its field"
-      | Tds_record
-          { fields = ([] | _ :: _ :: _) as fields; kind = Record_unboxed } ->
-        Misc.fatal_errorf "unboxed record must have exactly one field, found %a"
-          (Format.pp_print_list ~pp_sep:Format.pp_print_space
-             Format.pp_print_string)
-          (List.map (fun (name, _, _) -> name) fields)
-      | Tds_record { fields; kind = Record_unboxed_product } -> (
-        match layout with
-        | Product prod_shapes when List.length prod_shapes = List.length fields
-          ->
-          let shapes =
-            List.map
-              (fun (_, sh, ly) -> Shape.shape_with_layout ~layout:ly sh)
-              fields
-          in
-          List.concat_map flatten_type_shape shapes
-        | Product _ -> Misc.fatal_error "unboxed record field mismatch"
-        | Base _ -> Misc.fatal_error "unboxed record must have product layout")
-      | Tds_variant _ -> (
-        match layout with
-        | Base Value -> [`Known type_shape]
-        | _ -> Misc.fatal_error "variant must have value layout")
-      | Tds_variant_unboxed
-          { name = _; arg_name = _; arg_layout; arg_shape = _ } ->
-        if Layout.equal arg_layout layout
-        then [`Known type_shape]
-        else
-          Misc.fatal_error
-            "unboxed variant must have same layout as its contents")) *)
+and flatten_type_decl_shape (type_decl_shape : Shape.tds) layout :
+    [`Known of _ Shape.ts | `Unknown of base_layout] list =
+  let open Layout in
+  let unknown_base_layouts layout =
+    let base_sorts = flatten_to_base_sorts layout in
+    List.map (fun base_sort -> `Unknown base_sort) base_sorts
+  in
+  let known () =
+    [`Known (Shape.Ts_shape (Shape.type_decl None type_decl_shape, layout))]
+  in
+  match type_decl_shape with
+  | Tds_other -> unknown_base_layouts layout (* Cannot break up unknown type. *)
+  | Tds_alias alias_shape ->
+    let alias_shape = Shape.shape_with_layout ~layout alias_shape in
+    flatten_type_shape alias_shape
+    (* At first glance, this recursion could potentially diverge, for direct
+       cycles between type aliases and the defintion of the type. However, it
+       seems the compiler disallows direct cycles such as [type t = t] and the
+       like. If this ever causes trouble or the behvior of the compiler changes
+       with respect to recursive types, we can add a bound on the maximal
+       recursion depth. *)
+  | Tds_record
+      { fields = _; kind = Record_boxed | Record_mixed _ | Record_floats } -> (
+    match layout with
+    | Base Value -> known ()
+    | _ -> Misc.fatal_error "record must have value layout")
+  | Tds_record { fields = [(_, sh, ly)]; kind = Record_unboxed }
+    when Layout.equal ly layout -> (
+    match layout with
+    | Product _ -> flatten_type_shape (Shape.shape_with_layout ~layout sh)
+    (* for unboxed products of the form [{ field: ty } [@@unboxed]] where [ty]
+       is of product sort, we simply look through the unboxed product.
+       Otherwise, we will create an additional DWARF entry for it. *)
+    | Base _ -> known ())
+  | Tds_record { fields = [_]; kind = Record_unboxed } ->
+    Misc.fatal_error "unboxed record at different layout than its field"
+  | Tds_record { fields = ([] | _ :: _ :: _) as fields; kind = Record_unboxed }
+    ->
+    Misc.fatal_errorf "unboxed record must have exactly one field, found %a"
+      (Format.pp_print_list ~pp_sep:Format.pp_print_space Format.pp_print_string)
+      (List.map (fun (name, _, _) -> name) fields)
+  | Tds_record { fields; kind = Record_unboxed_product } -> (
+    match layout with
+    | Product prod_shapes when List.length prod_shapes = List.length fields ->
+      let shapes =
+        List.map
+          (fun (_, sh, ly) -> Shape.shape_with_layout ~layout:ly sh)
+          fields
+      in
+      List.concat_map flatten_type_shape shapes
+    | Product _ -> Misc.fatal_error "unboxed record field mismatch"
+    | Base _ -> Misc.fatal_error "unboxed record must have product layout")
+  | Tds_variant _ -> (
+    match layout with
+    | Base Value -> known ()
+    | _ -> Misc.fatal_error "variant must have value layout")
+  | Tds_variant_unboxed { name = _; arg_name = _; arg_layout; arg_shape = _ } ->
+    if Layout.equal arg_layout layout
+    then known ()
+    else
+      Misc.fatal_error "unboxed variant must have same layout as its contents"
 
 module With_cms_reduce = Shape_reduce.Make (struct
   let fuel = 10
