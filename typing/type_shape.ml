@@ -5,7 +5,7 @@ type base_layout = Jkind_types.Sort.base
 
 type path_lookup = Path.t -> args:Shape.t list -> Shape.t option
 
-let extended_env f path ~args =
+let add_predefs_to_lookup f path ~args =
   let open Shape in
   match Shape.Predef.of_string (Path.name path) with
   | Some predef ->
@@ -18,121 +18,122 @@ let smart_type_shape (sh : Shape.t) =
   | Shape.Type ts -> ts
   | _ -> Shape.Ts_shape (sh, Shape.Layout_to_be_determined)
 
-let rec shape_subst_uid_with_rec_var uid rv outer =
-  let open Shape in
-  match outer.desc with
-  | Leaf when Option.equal Uid.equal outer.uid (Some uid) ->
-    Shape.rec_var ~uid rv
-  | Leaf | Error _ | Rec_var _ | Comp_unit _ | Var _ -> outer (* base cases *)
-  | Alias sh ->
-    Shape.alias ?uid:outer.uid (shape_subst_uid_with_rec_var uid rv sh)
-  | Type ts ->
-    Shape.type_ ?uid:outer.uid (type_shape_subst_uid_with_rec_var uid rv ts)
-  | Type_decl tds ->
-    Shape.type_decl outer.uid
-      (type_declaration_shape_subst_uid_with_rec_var uid rv tds)
-  | App (sh, arg) ->
-    Shape.app ?uid:outer.uid
-      (shape_subst_uid_with_rec_var uid rv sh)
-      ~arg:(shape_subst_uid_with_rec_var uid rv arg)
-  | Proj (sh, item) ->
-    Shape.proj ?uid:outer.uid (shape_subst_uid_with_rec_var uid rv sh) item
-  | Struct map ->
-    Shape.str ?uid:outer.uid
-      (Item.Map.map (shape_subst_uid_with_rec_var uid rv) map)
-  | Abs (var, sh) ->
-    Shape.abs ?uid:outer.uid var (shape_subst_uid_with_rec_var uid rv sh)
-  | Mu sh ->
-    Shape.mu ?uid:outer.uid (shape_subst_uid_with_rec_var uid (rv + 1) sh)
+module Recursive_binder : sig
+  type recursive_binder
 
-and type_shape_subst_uid_with_rec_var uid rv ts =
-  let open Shape in
-  match ts with
-  | Ts_shape (sh, _) ->
-    Ts_shape (shape_subst_uid_with_rec_var uid rv sh, Layout_to_be_determined)
-  | Ts_tuple shapes ->
-    Ts_tuple (List.map (type_shape_subst_uid_with_rec_var uid rv) shapes)
-  | Ts_unboxed_tuple shapes ->
-    Ts_unboxed_tuple
-      (List.map (type_shape_subst_uid_with_rec_var uid rv) shapes)
-  | Ts_predef (predef, args) ->
-    Ts_predef
-      (predef, List.map (fun sh -> shape_subst_uid_with_rec_var uid rv sh) args)
-  | Ts_arrow (arg, ret) ->
-    Ts_arrow
-      ( type_shape_subst_uid_with_rec_var uid rv arg,
-        type_shape_subst_uid_with_rec_var uid rv ret )
-  | Ts_variant fields ->
-    Ts_variant
-      (poly_variant_constructors_map
-         (type_shape_subst_uid_with_rec_var uid rv)
-         fields)
-  | Ts_other layout -> Ts_other layout
+  val mk_recursive_binder : unit -> recursive_binder
 
-and type_declaration_shape_subst_uid_with_rec_var uid rv tds =
-  let open Shape in
-  match tds with
-  | Tds_alias sh -> Tds_alias (type_shape_subst_uid_with_rec_var uid rv sh)
-  | Tds_record { fields; kind } ->
-    Tds_record
-      { fields =
-          List.map
-            (fun (name, sh, layout) ->
-              name, type_shape_subst_uid_with_rec_var uid rv sh, layout)
-            fields;
-        kind
-      }
-  | Tds_variant { simple_constructors; complex_constructors } ->
-    Tds_variant
-      { simple_constructors;
-        complex_constructors =
-          Shape.complex_constructors_map
-            (fun (sh, layout) ->
-              type_shape_subst_uid_with_rec_var uid rv sh, layout)
-            complex_constructors
-      }
-  | Tds_variant_unboxed { name; arg_name; arg_shape; arg_layout; _ } ->
-    Tds_variant_unboxed
-      { name;
-        arg_name;
-        arg_shape = type_shape_subst_uid_with_rec_var uid rv arg_shape;
-        arg_layout
-      }
-  | Tds_other -> Tds_other
+  val use_recursive_binder : recursive_binder -> Shape.t
 
-module Dynamic_binder : sig
-  type dynamic_binder
+  val bind_recursive_binder : recursive_binder -> Shape.t -> Shape.t
 
-  val mk_dynamic_binder : unit -> dynamic_binder
-
-  val use_dynamic_binder : dynamic_binder -> Shape.t
-
-  val bind_dynamic_binder : dynamic_binder -> Shape.t -> Shape.t
-
-  val bind_dynamic_binder_type_shape :
-    dynamic_binder ->
+  val bind_recursive_binder_type_shape :
+    recursive_binder ->
     Shape.without_layout Shape.ts ->
     Shape.without_layout Shape.ts
 end = struct
-  type dynamic_binder =
+  let rec shape_subst_uid_with_rec_var uid rv outer =
+    let open Shape in
+    match outer.desc with
+    | Leaf when Option.equal Uid.equal outer.uid (Some uid) ->
+      Shape.rec_var ~uid rv
+    | Leaf | Error _ | Rec_var _ | Comp_unit _ | Var _ -> outer (* base cases *)
+    | Alias sh ->
+      Shape.alias ?uid:outer.uid (shape_subst_uid_with_rec_var uid rv sh)
+    | Type ts ->
+      Shape.type_ ?uid:outer.uid (type_shape_subst_uid_with_rec_var uid rv ts)
+    | Type_decl tds ->
+      Shape.type_decl outer.uid
+        (type_declaration_shape_subst_uid_with_rec_var uid rv tds)
+    | App (sh, arg) ->
+      Shape.app ?uid:outer.uid
+        (shape_subst_uid_with_rec_var uid rv sh)
+        ~arg:(shape_subst_uid_with_rec_var uid rv arg)
+    | Proj (sh, item) ->
+      Shape.proj ?uid:outer.uid (shape_subst_uid_with_rec_var uid rv sh) item
+    | Struct map ->
+      Shape.str ?uid:outer.uid
+        (Item.Map.map (shape_subst_uid_with_rec_var uid rv) map)
+    | Abs (var, sh) ->
+      Shape.abs ?uid:outer.uid var (shape_subst_uid_with_rec_var uid rv sh)
+    | Mu sh ->
+      Shape.mu ?uid:outer.uid (shape_subst_uid_with_rec_var uid (rv + 1) sh)
+
+  and type_shape_subst_uid_with_rec_var uid rv ts =
+    let open Shape in
+    match ts with
+    | Ts_shape (sh, _) ->
+      Ts_shape (shape_subst_uid_with_rec_var uid rv sh, Layout_to_be_determined)
+    | Ts_tuple shapes ->
+      Ts_tuple (List.map (type_shape_subst_uid_with_rec_var uid rv) shapes)
+    | Ts_unboxed_tuple shapes ->
+      Ts_unboxed_tuple
+        (List.map (type_shape_subst_uid_with_rec_var uid rv) shapes)
+    | Ts_predef (predef, args) ->
+      Ts_predef
+        ( predef,
+          List.map (fun sh -> shape_subst_uid_with_rec_var uid rv sh) args )
+    | Ts_arrow (arg, ret) ->
+      Ts_arrow
+        ( type_shape_subst_uid_with_rec_var uid rv arg,
+          type_shape_subst_uid_with_rec_var uid rv ret )
+    | Ts_variant fields ->
+      Ts_variant
+        (poly_variant_constructors_map
+           (type_shape_subst_uid_with_rec_var uid rv)
+           fields)
+    | Ts_other layout -> Ts_other layout
+
+  and type_declaration_shape_subst_uid_with_rec_var uid rv tds =
+    let open Shape in
+    match tds with
+    | Tds_alias sh -> Tds_alias (type_shape_subst_uid_with_rec_var uid rv sh)
+    | Tds_record { fields; kind } ->
+      Tds_record
+        { fields =
+            List.map
+              (fun (name, sh, layout) ->
+                name, type_shape_subst_uid_with_rec_var uid rv sh, layout)
+              fields;
+          kind
+        }
+    | Tds_variant { simple_constructors; complex_constructors } ->
+      Tds_variant
+        { simple_constructors;
+          complex_constructors =
+            Shape.complex_constructors_map
+              (fun (sh, layout) ->
+                type_shape_subst_uid_with_rec_var uid rv sh, layout)
+              complex_constructors
+        }
+    | Tds_variant_unboxed { name; arg_name; arg_shape; arg_layout; _ } ->
+      Tds_variant_unboxed
+        { name;
+          arg_name;
+          arg_shape = type_shape_subst_uid_with_rec_var uid rv arg_shape;
+          arg_layout
+        }
+    | Tds_other -> Tds_other
+
+  type recursive_binder =
     { uid : Uid.t;
       mutable used : bool
     }
 
-  let mk_dynamic_binder () = { uid = Uid.mk ~current_unit:None; used = false }
+  let mk_recursive_binder () = { uid = Uid.mk ~current_unit:None; used = false }
 
-  let use_dynamic_binder db =
+  let use_recursive_binder db =
     db.used <- true;
     Shape.leaf db.uid
 
-  let bind_dynamic_binder db sh =
+  let bind_recursive_binder db sh =
     if not db.used
     then sh
     else
       let sh = shape_subst_uid_with_rec_var db.uid 0 sh in
       Shape.mu ~uid:db.uid sh
 
-  let bind_dynamic_binder_type_shape db ts =
+  let bind_recursive_binder_type_shape db ts =
     if not db.used
     then ts
     else
@@ -158,7 +159,7 @@ module Type_shape = struct
     then
       match Numbers.Int.Map.find_opt (Types.get_id expr) visited with
       | Some db ->
-        let sh = Dynamic_binder.use_dynamic_binder db in
+        let sh = Recursive_binder.use_recursive_binder db in
         Ts_shape (sh, Layout_to_be_determined)
       | None -> Ts_other Layout_to_be_determined
     else
@@ -170,7 +171,7 @@ module Type_shape = struct
          already made them more precise). *)
       | Some (_, s) -> smart_type_shape s
       | None ->
-        let rec_binder = Dynamic_binder.mk_dynamic_binder () in
+        let rec_binder = Recursive_binder.mk_recursive_binder () in
         let visited =
           Numbers.Int.Map.add (Types.get_id expr) rec_binder visited
         in
@@ -236,16 +237,16 @@ module Type_shape = struct
           | Tpackage _ -> Ts_other Layout_to_be_determined
           (* CR sspies: Support first-class modules. *)
         in
-        Dynamic_binder.bind_dynamic_binder_type_shape rec_binder type_shape
+        Recursive_binder.bind_recursive_binder_type_shape rec_binder type_shape
 
   let of_type_expr (expr : Types.type_expr) shape_of_path =
     of_type_expr_go ~visited:Numbers.Int.Map.empty ~depth:(-1) expr []
-      (extended_env shape_of_path)
+      (add_predefs_to_lookup shape_of_path)
 
   let of_type_expr_with_type_subst (expr : Types.type_expr) shape_of_path subst
       =
     of_type_expr_go ~visited:Numbers.Int.Map.empty ~depth:(-1) expr subst
-      (extended_env shape_of_path)
+      (add_predefs_to_lookup shape_of_path)
 end
 
 module Type_decl_shape = struct
@@ -348,7 +349,7 @@ module Type_decl_shape = struct
 
   let type_var_count = ref 0
 
-  let of_type_declaration_go (rec_binder : Dynamic_binder.dynamic_binder)
+  let of_type_declaration_go (rec_binder : Recursive_binder.recursive_binder)
       (type_declaration : Types.type_declaration) type_param_shapes
       shape_of_path =
     let module Types_predef = Predef in
@@ -448,7 +449,7 @@ module Type_decl_shape = struct
           record_of_labels ~shape_of_path ~type_subst Record_unboxed_product
             lbl_list)
     in
-    Dynamic_binder.bind_dynamic_binder rec_binder
+    Recursive_binder.bind_recursive_binder rec_binder
       (Shape.type_decl None definition)
 
   let rec shape_of_path_with_declarations decl_lookup_map shape_of_path path
@@ -460,17 +461,19 @@ module Type_decl_shape = struct
       | Path.Pident id -> (
         match Ident.Map.find_opt id decl_lookup_map with
         | Some decl ->
-          let rec_binder = Dynamic_binder.mk_dynamic_binder () in
+          let rec_binder = Recursive_binder.mk_recursive_binder () in
           let guarded_shape_of_path path ~args:inner_args =
             match path with
             | Path.Pident id'
               when Ident.equal id id'
                    && List.equal Shape.equal outer_args inner_args ->
-              Some (Dynamic_binder.use_dynamic_binder rec_binder)
+              Some (Recursive_binder.use_recursive_binder rec_binder)
             | Path.Pident id' when Ident.equal id id' ->
               (* We found the same path, but with different arguments;
                  we inline the declaration again, but generically for arbitrary values *)
-              let rec_value_only_binder = Dynamic_binder.mk_dynamic_binder () in
+              let rec_value_only_binder =
+                Recursive_binder.mk_recursive_binder ()
+              in
               let value_args =
                 List.map
                   (fun _ ->
@@ -484,7 +487,8 @@ module Type_decl_shape = struct
                     | Path.Pident id'' when Ident.equal id id'' ->
                       (* Regardless of arguments, we insert the value version now *)
                       Some
-                        (Dynamic_binder.use_dynamic_binder rec_value_only_binder)
+                        (Recursive_binder.use_recursive_binder
+                           rec_value_only_binder)
                     | _ ->
                       shape_of_path_with_declarations decl_lookup_map
                         shape_of_path path ~args:value_inner_args)
@@ -532,7 +536,7 @@ module Type_decl_shape = struct
       | Path.Pident id when Ident.Map.mem id decl_lookup_map -> None
       | _ -> shape_of_path path ~args
     in
-    let shape_of_path = extended_env shape_of_path in
+    let shape_of_path = add_predefs_to_lookup shape_of_path in
     let shape_of_path =
       shape_of_path_with_declarations decl_lookup_map shape_of_path
     in
