@@ -2962,13 +2962,11 @@ let transl_type_decl env rec_flag sdecl_list =
   (* Check re-exportation, updating [type_jkind] from the manifest *)
   let decls = List.map2 (check_abbrev new_env) sdecl_list decls in
   (* Save the declarations in [Type_shape] for debug info. *)
-  let shape_of_path path ~args =
-    Option.map (fun sh -> Shape.app_list sh args)
-      (Env.shape_of_path_opt ~namespace:Type env path)
-    (* CR sspies: Consider truncating external declarations behind their UID
-       to avoid redundancy. *)
+  let env_shape_of_path env path ~args =
+    let decl = try Some (Env.find_type path env) with Not_found -> None in
+    Option.map (fun decl -> Shape.constr decl.type_uid args) decl
   in
-  let shapes = Type_shape.Type_decl_shape.of_type_declarations decls shape_of_path in
+  let shapes = Type_shape.Type_decl_shape.of_type_declarations decls (env_shape_of_path env) in
   List.iter (fun (sh, (_, decl)) ->
     let uid = decl.type_uid in
     Uid.Tbl.add Type_shape.all_type_decls uid sh;
