@@ -198,10 +198,13 @@ and desc =
   | Struct of t Item.Map.t
   | Alias of t
   | Leaf
+  | Type of without_layout ts
   | Type_decl of tds
   | Proj of t * Item.t
   | Comp_unit of string
   | Error of string
+  | Mu of t
+  | Rec_var of int
 
 (* Type shapes are abstract representations of type expressions. We define
   them with a placeholder 'a for the layout inside. This allows one to
@@ -210,11 +213,12 @@ and desc =
 and without_layout = Layout_to_be_determined
 
 and 'a ts =
-  | Ts_constr of (t * 'a) * without_layout ts list
+  | Ts_shape of (t * 'a)
+    (** This case is used for type constructors, type variables, and more. *)
   | Ts_tuple of 'a ts list
   | Ts_unboxed_tuple of 'a ts list
-  | Ts_var of string option * 'a
-  | Ts_predef of Predef.t * without_layout ts list
+  | Ts_predef of Predef.t * t list
+    (** Arguments are handled via the [Ts_shape] case. *)
   | Ts_arrow of without_layout ts * without_layout ts
   | Ts_variant of 'a ts poly_variant_constructors
   | Ts_other of 'a
@@ -230,7 +234,7 @@ and 'a poly_variant_constructor =
 (** For type substitution to work as expected, we store the layouts in the
     declaration alongside the shapes instead of directly going for the
     substituted version. *)
-and tds_desc =
+and tds =
   | Tds_variant of
       { simple_constructors : string list;
             (** The string is the name of the constructor. The runtime
@@ -295,11 +299,6 @@ and constructor_representation = Constructor_mixed of mixed_product_shape
 
 and mixed_product_shape = Layout.t array
 
-and tds =
-  {
-    definition : tds_desc;
-    type_params : without_layout ts list
-  }
 
 
 val print : Format.formatter -> t -> unit
@@ -309,7 +308,7 @@ val strip_head_aliases : t -> t
 val equal : t -> t -> bool
 val equal_tds : tds -> tds -> bool
 val equal_ts : ('a -> 'a -> bool) -> 'a ts -> 'a ts -> bool
-
+val equal_without_layout : without_layout -> without_layout -> bool
 
 (* Smart constructors *)
 
@@ -317,6 +316,7 @@ val for_unnamed_functor_param : var
 val fresh_var : ?name:string -> Uid.t -> var * t
 
 val var : Uid.t -> Ident.t -> t
+val var': Uid.t option -> Ident.t -> t
 val abs : ?uid:Uid.t -> var -> t -> t
 val app : ?uid:Uid.t -> t -> arg:t -> t
 val str : ?uid:Uid.t -> t Item.Map.t -> t
@@ -326,10 +326,21 @@ val proj : ?uid:Uid.t -> t -> Item.t -> t
 val leaf : Uid.t -> t
 val leaf' : Uid.t option -> t
 val type_decl : Uid.t option -> tds -> t
+val type_ : ?uid:Uid.t -> without_layout ts -> t
+val smart_type_ : without_layout ts -> t
+  (** Smart constructor that will avoid redundant applications of [Ts_shape] *)
+
+(* recursive binder, recursive occurrences should be leaves with the same uid *)
+val mu : ?uid:Uid.t -> t -> t
+val rec_var : ?uid:Uid.t -> int -> t
+
 val no_fuel_left : ?uid:Uid.t -> t -> t
 val comp_unit : ?uid:Uid.t -> string -> t
 
 val set_approximated : approximated:bool -> t -> t
+
+val app_list : t -> t list -> t
+val abs_list : t -> Ident.t list -> t
 
 val decompose_abs : t -> (var * t) option
 
@@ -349,8 +360,6 @@ val poly_variant_constructors_map :
 
 (* Type declaration shapes *)
 val print_type_decl_shape : Format.formatter -> tds -> unit
-
-val replace_tvar : tds -> without_layout ts list -> tds
 
 val complex_constructor_map :
   ('a -> 'b) -> 'a complex_constructor -> 'b complex_constructor

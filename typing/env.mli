@@ -159,8 +159,8 @@ val add_probe: string -> unit
 val has_probe: string -> bool
 
 val reset_type_decl_shapes: unit -> unit
-val add_type_decl_shape: Shape.Uid.t -> Shape.tds -> unit
-val get_type_decl_shapes: unit -> Shape.tds Shape.Uid.Tbl.t
+val add_type_decl_shape: Shape.Uid.t -> Shape.t -> unit
+val get_type_decl_shapes: unit -> Shape.t Shape.Uid.Tbl.t
 
 val has_local_constraints: t -> bool
 

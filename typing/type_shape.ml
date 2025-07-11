@@ -1,7 +1,143 @@
+(* CR sspies: Rename this file into [shapeify.ml], since it is no longer purely
+   about type shapes. *)
+
 module Uid = Shape.Uid
 module Layout = Jkind_types.Sort.Const
 
 type base_layout = Jkind_types.Sort.base
+
+type path_lookup = Path.t -> args:Shape.t list -> Shape.t option
+
+let smart_type_shape (sh : Shape.t) =
+  match sh.desc with
+  | Shape.Type ts -> ts
+  | _ -> Shape.Ts_shape (sh, Shape.Layout_to_be_determined)
+
+module Recursive_binder : sig
+  type recursive_binder
+
+  val mk_recursive_binder : unit -> recursive_binder
+
+  val use_recursive_binder : recursive_binder -> Shape.t
+
+  val bind_recursive_binder : recursive_binder -> Shape.t -> Shape.t
+
+  val bind_recursive_binder_type_shape :
+    recursive_binder ->
+    Shape.without_layout Shape.ts ->
+    Shape.without_layout Shape.ts
+end = struct
+  (* CR sspies: To improve performance, consider replacing this pass with
+     a single pass over the resulting definition that simultaneously turns
+     all binders into DeBruijn indices. *)
+  let rec shape_subst_uid_with_rec_var uid rv outer =
+    let open Shape in
+    match outer.desc with
+    | Leaf when Option.equal Uid.equal outer.uid (Some uid) ->
+      Shape.rec_var ~uid rv
+    | Leaf | Error _ | Rec_var _ | Comp_unit _ | Var _ -> outer (* base cases *)
+    | Alias sh ->
+      Shape.alias ?uid:outer.uid (shape_subst_uid_with_rec_var uid rv sh)
+    | Type ts ->
+      Shape.type_ ?uid:outer.uid (type_shape_subst_uid_with_rec_var uid rv ts)
+    | Type_decl tds ->
+      Shape.type_decl outer.uid
+        (type_declaration_shape_subst_uid_with_rec_var uid rv tds)
+    | App (sh, arg) ->
+      Shape.app ?uid:outer.uid
+        (shape_subst_uid_with_rec_var uid rv sh)
+        ~arg:(shape_subst_uid_with_rec_var uid rv arg)
+    | Proj (sh, item) ->
+      Shape.proj ?uid:outer.uid (shape_subst_uid_with_rec_var uid rv sh) item
+    | Struct map ->
+      Shape.str ?uid:outer.uid
+        (Item.Map.map (shape_subst_uid_with_rec_var uid rv) map)
+    | Abs (var, sh) ->
+      Shape.abs ?uid:outer.uid var (shape_subst_uid_with_rec_var uid rv sh)
+    | Mu sh ->
+      Shape.mu ?uid:outer.uid (shape_subst_uid_with_rec_var uid (rv + 1) sh)
+
+  and type_shape_subst_uid_with_rec_var uid rv ts =
+    let open Shape in
+    match ts with
+    | Ts_shape (sh, _) ->
+      Ts_shape (shape_subst_uid_with_rec_var uid rv sh, Layout_to_be_determined)
+    | Ts_tuple shapes ->
+      Ts_tuple (List.map (type_shape_subst_uid_with_rec_var uid rv) shapes)
+    | Ts_unboxed_tuple shapes ->
+      Ts_unboxed_tuple
+        (List.map (type_shape_subst_uid_with_rec_var uid rv) shapes)
+    | Ts_predef (predef, args) ->
+      Ts_predef
+        ( predef,
+          List.map (fun sh -> shape_subst_uid_with_rec_var uid rv sh) args )
+    | Ts_arrow (arg, ret) ->
+      Ts_arrow
+        ( type_shape_subst_uid_with_rec_var uid rv arg,
+          type_shape_subst_uid_with_rec_var uid rv ret )
+    | Ts_variant fields ->
+      Ts_variant
+        (poly_variant_constructors_map
+           (type_shape_subst_uid_with_rec_var uid rv)
+           fields)
+    | Ts_other layout -> Ts_other layout
+
+  and type_declaration_shape_subst_uid_with_rec_var uid rv tds =
+    let open Shape in
+    match tds with
+    | Tds_alias sh -> Tds_alias (type_shape_subst_uid_with_rec_var uid rv sh)
+    | Tds_record { fields; kind } ->
+      Tds_record
+        { fields =
+            List.map
+              (fun (name, sh, layout) ->
+                name, type_shape_subst_uid_with_rec_var uid rv sh, layout)
+              fields;
+          kind
+        }
+    | Tds_variant { simple_constructors; complex_constructors } ->
+      Tds_variant
+        { simple_constructors;
+          complex_constructors =
+            Shape.complex_constructors_map
+              (fun (sh, layout) ->
+                type_shape_subst_uid_with_rec_var uid rv sh, layout)
+              complex_constructors
+        }
+    | Tds_variant_unboxed { name; arg_name; arg_shape; arg_layout; _ } ->
+      Tds_variant_unboxed
+        { name;
+          arg_name;
+          arg_shape = type_shape_subst_uid_with_rec_var uid rv arg_shape;
+          arg_layout
+        }
+    | Tds_other -> Tds_other
+
+  type recursive_binder =
+    { uid : Uid.t;
+      mutable used : bool
+    }
+
+  let mk_recursive_binder () = { uid = Uid.mk ~current_unit:None; used = false }
+
+  let use_recursive_binder db =
+    db.used <- true;
+    Shape.leaf db.uid
+
+  let bind_recursive_binder db sh =
+    if not db.used
+    then sh
+    else
+      let sh = shape_subst_uid_with_rec_var db.uid 0 sh in
+      Shape.mu ~uid:db.uid sh
+
+  let bind_recursive_binder_type_shape db ts =
+    if not db.used
+    then ts
+    else
+      let sh = shape_subst_uid_with_rec_var db.uid 0 (Shape.type_ ts) in
+      Shape.Ts_shape (Shape.mu ~uid:db.uid sh, Shape.Layout_to_be_determined)
+end
 
 module Type_shape = struct
   module Predef = struct
@@ -81,6 +217,13 @@ module Type_shape = struct
           match unboxed_of_path p with
           | Some u -> Some (Unboxed u)
           | None -> None))
+
+    let add_predefs_to_lookup f path ~args =
+      match of_path path with
+      | Some predef ->
+        let predef_shape = Shape.Ts_predef (predef, args) in
+        Some (Shape.smart_type_ predef_shape)
+      | None -> f path ~args
   end
 
   (* Similarly to [value_kind], we track a set of visited types to avoid cycles
@@ -89,78 +232,105 @@ module Type_shape = struct
   (* CR sspies: Consider additionally adding a max size for the set of visited types.
      Also consider reverting to the original value kind depth limit (although 2
      seems low). *)
-  let rec of_type_expr_go ~visited ~depth (expr : Types.type_expr) shape_of_path
-      =
-    let predef_of_path = Predef.of_path in
+  let rec of_type_expr_go ~visited ~depth (expr : Types.type_expr)
+      (subst : (Types.type_expr * Shape.t) list) shape_of_path :
+      Shape.without_layout Shape.ts =
     let open Shape in
     let[@inline] cannot_proceed () =
-      Numbers.Int.Set.mem (Types.get_id expr) visited || depth >= 10
+      Numbers.Int.Map.mem (Types.get_id expr) visited || depth >= 10
     in
     if cannot_proceed ()
-    then Ts_other Layout_to_be_determined
+    then
+      match Numbers.Int.Map.find_opt (Types.get_id expr) visited with
+      | Some db ->
+        let sh = Recursive_binder.use_recursive_binder db in
+        Ts_shape (sh, Layout_to_be_determined)
+      | None -> Ts_other Layout_to_be_determined
     else
-      let visited = Numbers.Int.Set.add (Types.get_id expr) visited in
-      let depth = depth + 1 in
-      let desc = Types.get_desc expr in
-      let map_expr_list (exprs : Types.type_expr list) =
-        List.map
-          (fun expr -> of_type_expr_go ~depth ~visited expr shape_of_path)
-          exprs
-      in
-      match desc with
-      | Tconstr (path, constrs, _abbrev_memo) -> (
-        match predef_of_path path with
-        | Some predef -> Ts_predef (predef, map_expr_list constrs)
-        | None -> (
-          match shape_of_path path with
-          | Some shape ->
-            Ts_constr ((shape, Layout_to_be_determined), map_expr_list constrs)
-          | None -> Ts_other Layout_to_be_determined))
-      | Ttuple exprs -> Ts_tuple (map_expr_list (List.map snd exprs))
-      | Tvar { name; _ } -> Ts_var (name, Layout_to_be_determined)
-      | Tpoly (type_expr, _type_vars) ->
-        (* CR sspies: At the moment, we simply ignore the polymorphic variables.
-           This code used to only work for [_type_vars = []]. *)
-        of_type_expr_go ~depth ~visited type_expr shape_of_path
-      | Tunboxed_tuple exprs ->
-        Ts_unboxed_tuple (map_expr_list (List.map snd exprs))
-      | Tobject _ | Tnil | Tfield _ ->
-        Ts_other Layout_to_be_determined
-        (* Objects are currently not supported in the debugger. *)
-      | Tlink _ | Tsubst _ ->
-        Misc.fatal_error "linking and substitution should not reach this stage."
-      | Tvariant rd ->
-        let row_fields = Types.row_fields rd in
-        let row_fields =
-          List.concat_map
-            (fun (name, desc) ->
-              match Types.row_field_repr desc with
-              | Types.Rpresent (Some ty) ->
-                [ { pv_constr_name = name;
-                    pv_constr_args =
-                      [of_type_expr_go ~depth ~visited ty shape_of_path]
-                  } ]
-              | Types.Rpresent None ->
-                [{ pv_constr_name = name; pv_constr_args = [] }]
-              | Types.Rabsent -> [] (* we filter out absent constructors *)
-              | Types.Reither (_, args, _) ->
-                [{ pv_constr_name = name; pv_constr_args = map_expr_list args }])
-            row_fields
+      match
+        List.find_opt (fun (p, _) -> Types.get_id p == Types.get_id expr) subst
+      with
+      (* CR sspies: Physical equality is also how printing in [printtyp.ml] works. It
+         seems to be the way to substitute type parameters (after type inference has
+         already made them more precise). *)
+      | Some (_, s) -> smart_type_shape s
+      | None ->
+        let rec_binder = Recursive_binder.mk_recursive_binder () in
+        let visited =
+          Numbers.Int.Map.add (Types.get_id expr) rec_binder visited
         in
-        Ts_variant row_fields
-      | Tarrow (_, arg, ret, _) ->
-        Ts_arrow
-          ( of_type_expr_go ~depth ~visited arg shape_of_path,
-            of_type_expr_go ~depth ~visited ret shape_of_path )
-      | Tunivar { name; _ } -> Ts_var (name, Layout_to_be_determined)
-      | Tof_kind _ -> Ts_other Layout_to_be_determined
-      | Tpackage _ ->
-        Ts_other
-          Layout_to_be_determined (* CR sspies: Support first-class modules. *)
+        let depth = depth + 1 in
+        let desc = Types.get_desc expr in
+        let map_expr_list (exprs : Types.type_expr list) =
+          List.map
+            (fun expr ->
+              of_type_expr_go ~depth ~visited expr subst shape_of_path)
+            exprs
+        in
+        let type_shape =
+          match desc with
+          | Tconstr (path, constrs, _) ->
+            let args =
+              List.map (fun ts -> Shape.smart_type_ ts) (map_expr_list constrs)
+            in
+            let shape = shape_of_path path ~args in
+            let shape = Option.map smart_type_shape shape in
+            Option.value shape ~default:(Ts_other Layout_to_be_determined)
+          | Ttuple exprs -> Ts_tuple (map_expr_list (List.map snd exprs))
+          | Tvar _ -> Ts_other Layout_to_be_determined
+          | Tpoly (type_expr, _type_vars) ->
+            (* CR sspies: At the moment, we simply ignore the polymorphic variables.
+               This code used to only work for [_type_vars = []]. *)
+            of_type_expr_go ~depth ~visited type_expr subst shape_of_path
+          | Tunboxed_tuple exprs ->
+            Ts_unboxed_tuple (map_expr_list (List.map snd exprs))
+          | Tobject _ | Tnil | Tfield _ ->
+            Ts_other Layout_to_be_determined
+            (* Objects are currently not supported in the debugger. *)
+          | Tlink _ | Tsubst _ ->
+            Misc.fatal_error
+              "linking and substitution should not reach this stage."
+          | Tvariant rd ->
+            let row_fields = Types.row_fields rd in
+            let row_fields =
+              List.concat_map
+                (fun (name, desc) ->
+                  match Types.row_field_repr desc with
+                  | Types.Rpresent (Some ty) ->
+                    [ { pv_constr_name = name;
+                        pv_constr_args =
+                          [ of_type_expr_go ~depth ~visited ty subst
+                              shape_of_path ]
+                      } ]
+                  | Types.Rpresent None ->
+                    [{ pv_constr_name = name; pv_constr_args = [] }]
+                  | Types.Rabsent -> [] (* we filter out absent constructors *)
+                  | Types.Reither (_, args, _) ->
+                    [ { pv_constr_name = name;
+                        pv_constr_args = map_expr_list args
+                      } ])
+                row_fields
+            in
+            Ts_variant row_fields
+          | Tarrow (_, arg, ret, _) ->
+            Ts_arrow
+              ( of_type_expr_go ~depth ~visited arg subst shape_of_path,
+                of_type_expr_go ~depth ~visited ret subst shape_of_path )
+          | Tunivar _ -> Ts_other Layout_to_be_determined
+          | Tof_kind _ -> Ts_other Layout_to_be_determined
+          | Tpackage _ -> Ts_other Layout_to_be_determined
+          (* CR sspies: Support first-class modules. *)
+        in
+        Recursive_binder.bind_recursive_binder_type_shape rec_binder type_shape
 
   let of_type_expr (expr : Types.type_expr) shape_of_path =
-    of_type_expr_go ~visited:Numbers.Int.Set.empty ~depth:(-1) expr
-      shape_of_path
+    of_type_expr_go ~visited:Numbers.Int.Map.empty ~depth:(-1) expr []
+      (Predef.add_predefs_to_lookup shape_of_path)
+
+  let of_type_expr_with_type_subst (expr : Types.type_expr) shape_of_path subst
+      =
+    of_type_expr_go ~visited:Numbers.Int.Map.empty ~depth:(-1) expr subst
+      (Predef.add_predefs_to_lookup shape_of_path)
 end
 
 module Type_decl_shape = struct
@@ -181,7 +351,7 @@ module Type_decl_shape = struct
       Layout.Product
         (Array.to_list (Array.map mixed_block_shape_to_layout args))
 
-  let of_variant_constructor_with_args name
+  let of_variant_constructor_with_args type_subst name
       (cstr_args : Types.constructor_declaration)
       ((constructor_repr, _) : Types.constructor_representation * _)
       shape_of_path =
@@ -194,7 +364,9 @@ module Type_decl_shape = struct
                  Types.constructor_argument) ->
             { Shape.field_name = None;
               field_value =
-                Type_shape.of_type_expr type_expr shape_of_path, type_layout
+                ( Type_shape.of_type_expr_with_type_subst type_expr
+                    shape_of_path type_subst,
+                  type_layout )
             })
           list
       | Cstr_record list ->
@@ -202,7 +374,9 @@ module Type_decl_shape = struct
           (fun (lbl : Types.label_declaration) ->
             { Shape.field_name = Some (Ident.name lbl.ld_id);
               field_value =
-                Type_shape.of_type_expr lbl.ld_type shape_of_path, lbl.ld_sort
+                ( Type_shape.of_type_expr_with_type_subst lbl.ld_type
+                    shape_of_path type_subst,
+                  lbl.ld_sort )
             })
           list
     in
@@ -248,26 +422,36 @@ module Type_decl_shape = struct
     in
     length = 0
 
-  let record_of_labels ~shape_of_path kind labels =
+  let record_of_labels ~shape_of_path ~type_subst kind labels =
     Shape.Tds_record
       { fields =
           List.map
             (fun (lbl : Types.label_declaration) ->
               ( Ident.name lbl.ld_id,
-                Type_shape.of_type_expr lbl.ld_type shape_of_path,
+                Type_shape.of_type_expr_with_type_subst lbl.ld_type
+                  shape_of_path type_subst,
                 lbl.ld_sort ))
             labels;
         kind
       }
 
-  let of_type_declaration (type_declaration : Types.type_declaration)
+  let type_var_count = ref 0
+
+  let of_type_declaration_go (rec_binder : Recursive_binder.recursive_binder)
+      (type_declaration : Types.type_declaration) type_param_shapes
       shape_of_path =
     let module Types_predef = Predef in
     let open Shape in
+    let type_params = type_declaration.type_params in
+    let type_subst = List.combine type_params type_param_shapes in
+    (* Duplicates are fine, the constraint system makes sure they are instantiated
+       with the same type expression. *)
     let definition =
       match type_declaration.type_manifest with
       | Some type_expr ->
-        Tds_alias (Type_shape.of_type_expr type_expr shape_of_path)
+        Tds_alias
+          (Type_shape.of_type_expr_with_type_subst type_expr shape_of_path
+             type_subst)
       | None -> (
         match type_declaration.type_kind with
         | Type_variant (cstr_list, Variant_boxed layouts, _unsafe_mode_crossing)
@@ -283,8 +467,8 @@ module Type_decl_shape = struct
                 | true -> Left name
                 | false ->
                   Right
-                    (of_variant_constructor_with_args name cstr arg_layouts
-                       shape_of_path))
+                    (of_variant_constructor_with_args type_subst name cstr
+                       arg_layouts shape_of_path))
               cstrs_with_layouts
           in
           Tds_variant { simple_constructors; complex_constructors }
@@ -303,7 +487,9 @@ module Type_decl_shape = struct
             { name;
               arg_name = field_name;
               arg_layout = layout;
-              arg_shape = Type_shape.of_type_expr type_expr shape_of_path
+              arg_shape =
+                Type_shape.of_type_expr_with_type_subst type_expr shape_of_path
+                  type_subst
             }
         | Type_variant ([_], Variant_unboxed, _unsafe_mode_crossing) ->
           Misc.fatal_error "Unboxed variant must have constructor arguments."
@@ -318,13 +504,13 @@ module Type_decl_shape = struct
           (* CR sspies: Why is there another copy of the layouts of the fields
              here? Which one should we use? Shouldn't they both be just values? *)
           | Record_boxed _ ->
-            record_of_labels ~shape_of_path Record_boxed lbl_list
+            record_of_labels ~shape_of_path ~type_subst Record_boxed lbl_list
           | Record_mixed fields ->
-            record_of_labels ~shape_of_path
+            record_of_labels ~shape_of_path ~type_subst
               (Record_mixed (Array.map mixed_block_shape_to_layout fields))
               lbl_list
           | Record_unboxed ->
-            record_of_labels ~shape_of_path Record_unboxed lbl_list
+            record_of_labels ~shape_of_path ~type_subst Record_unboxed lbl_list
           | Record_float | Record_ufloat ->
             let lbl_list =
               List.map
@@ -338,7 +524,7 @@ module Type_decl_shape = struct
                      it with [float#]. *)
                 lbl_list
             in
-            record_of_labels ~shape_of_path Record_floats lbl_list
+            record_of_labels ~shape_of_path ~type_subst Record_floats lbl_list
           | Record_inlined _ ->
             Misc.fatal_error "inlined records not allowed here"
             (* Inline records of this form should not occur as part of type delcarations.
@@ -348,14 +534,109 @@ module Type_decl_shape = struct
         | Type_abstract _ -> Tds_other
         | Type_open -> Tds_other
         | Type_record_unboxed_product (lbl_list, _, _) ->
-          record_of_labels ~shape_of_path Record_unboxed_product lbl_list)
+          record_of_labels ~shape_of_path ~type_subst Record_unboxed_product
+            lbl_list)
     in
-    let type_params =
+    Recursive_binder.bind_recursive_binder rec_binder
+      (Shape.type_decl None definition)
+
+  let rec shape_of_path_with_declarations ~depth
+      (decl_lookup_map : Types.type_declaration Ident.Map.t) shape_of_path path
+      ~args:outer_args =
+    match shape_of_path path ~args:outer_args with
+    | Some s -> Some s
+    | None -> (
+      match path with
+      | Path.Pident id -> (
+        match Ident.Map.find_opt id decl_lookup_map with
+        | Some _ when depth > 2 -> Some (Shape.leaf' None)
+        (* For performance reasons, we cut off the inlining of declarations
+           if we go beyond declaration depth 2. *)
+        | Some decl ->
+          let rec_binder = Recursive_binder.mk_recursive_binder () in
+          let guarded_shape_of_path path ~args:inner_args =
+            match path with
+            | Path.Pident id'
+              when Ident.equal id id'
+                   && List.equal Shape.equal outer_args inner_args ->
+              Some (Recursive_binder.use_recursive_binder rec_binder)
+            | Path.Pident id' when Ident.equal id id' ->
+              (* We found the same path, but with different arguments;
+                 we inline the declaration again, but generically for arbitrary values *)
+              let rec_value_only_binder =
+                Recursive_binder.mk_recursive_binder ()
+              in
+              let value_args =
+                List.map
+                  (fun _ ->
+                    Shape.type_ (Shape.Ts_other Shape.Layout_to_be_determined))
+                  outer_args
+              in
+              let decl =
+                of_type_declaration_go rec_value_only_binder decl value_args
+                  (fun path ~args:value_inner_args ->
+                    match path with
+                    | Path.Pident id'' when Ident.equal id id'' ->
+                      (* Regardless of arguments, we insert the value version now *)
+                      Some
+                        (Recursive_binder.use_recursive_binder
+                           rec_value_only_binder)
+                    | _ ->
+                      shape_of_path_with_declarations ~depth:(depth + 1)
+                        decl_lookup_map shape_of_path path
+                        ~args:value_inner_args)
+              in
+              Some decl
+            | _ -> shape_of_path path ~args:inner_args
+          in
+          let shape_of_path =
+            shape_of_path_with_declarations ~depth:(depth + 1) decl_lookup_map
+              guarded_shape_of_path
+          in
+          Some (of_type_declaration_go rec_binder decl outer_args shape_of_path)
+        | None -> None)
+      | _ -> None)
+
+  let of_type_declaration_with_variables (id : Ident.t)
+      (type_declaration : Types.type_declaration) shape_of_path =
+    let type_param_idents =
       List.map
-        (fun type_expr -> Type_shape.of_type_expr type_expr shape_of_path)
+        (fun _ ->
+          let name = Format.asprintf "a/%d" !type_var_count in
+          type_var_count := !type_var_count + 1;
+          Ident.create_local name)
         type_declaration.type_params
     in
-    { definition; type_params }
+    let type_param_shapes =
+      List.map (fun id -> Shape.var' None id) type_param_idents
+    in
+    match shape_of_path (Path.Pident id) ~args:type_param_shapes with
+    (* This works, because we add the declarations to the environment below *)
+    | None -> assert false
+    | Some definition ->
+      let sh = Shape.abs_list definition type_param_idents in
+      Shape.set_uid_if_none sh type_declaration.type_uid
+  (* We add the UID to the declaration shape to ensure that
+     variable shapes can stay small. *)
+
+  let of_type_declarations
+      (type_declarations : (Ident.t * Types.type_declaration) list)
+      shape_of_path =
+    let decl_lookup_map = Ident.Map.of_list type_declarations in
+    (* We unbind all declarations, to avoid accidental recursive cycles. *)
+    let shape_of_path path ~args =
+      match path with
+      | Path.Pident id when Ident.Map.mem id decl_lookup_map -> None
+      | _ -> shape_of_path path ~args
+    in
+    let shape_of_path = Type_shape.Predef.add_predefs_to_lookup shape_of_path in
+    let shape_of_path =
+      shape_of_path_with_declarations ~depth:0 decl_lookup_map shape_of_path
+    in
+    List.map
+      (fun (id, decl) ->
+        of_type_declaration_with_variables id decl shape_of_path)
+      type_declarations
 end
 
 type shape_with_layout =
@@ -364,15 +645,18 @@ type shape_with_layout =
     type_name : string
   }
 
-let (all_type_decls : Shape.tds Uid.Tbl.t) = Uid.Tbl.create 16
+let (all_type_decls : Shape.t Uid.Tbl.t) = Uid.Tbl.create 16
 
 let (all_type_shapes : shape_with_layout Uid.Tbl.t) = Uid.Tbl.create 16
 
-let add_to_type_decls (type_decl : Types.type_declaration) shape_of_path =
-  let type_decl_shape =
-    Type_decl_shape.of_type_declaration type_decl shape_of_path
+let add_to_type_decls (decls : (Ident.t * Types.type_declaration) list)
+    shape_of_path =
+  let type_decl_shapes =
+    Type_decl_shape.of_type_declarations decls shape_of_path
   in
-  Uid.Tbl.add all_type_decls type_decl.type_uid type_decl_shape
+  List.iter
+    (fun ((_, decl), sh) -> Uid.Tbl.add all_type_decls decl.Types.type_uid sh)
+    (List.combine decls type_decl_shapes)
 
 let add_to_type_shapes var_uid type_expr type_layout ~name:type_name
     shape_of_path =
@@ -432,8 +716,7 @@ let print_table_all_type_decls ppf =
   let entries =
     List.map
       (fun (k, v) ->
-        ( Format.asprintf "%a" Uid.print k,
-          Format.asprintf "%a" Shape.print_type_decl_shape v ))
+        Format.asprintf "%a" Uid.print k, Format.asprintf "%a" Shape.print v)
       entries
   in
   let uids, decls = List.split entries in
