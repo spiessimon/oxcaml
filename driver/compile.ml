@@ -53,6 +53,11 @@ let raw_lambda_to_bytecode i raw_lambda ~as_arg_for =
        |> print_if i.ppf_dump Clflags.dump_blambda Printblambda.blambda
        |> Bytegen.compile_implementation i.module_name
        |> print_if i.ppf_dump Clflags.dump_instr Printinstr.instrlist
+       |> print_if i.ppf_dump Clflags.dump_debug_uids (fun fmt _ ->
+        Format.fprintf fmt "\n\n\n";
+        Type_shape.print_table_all_type_decls fmt;
+        Format.fprintf fmt "\n";
+        Type_shape.print_table_all_type_shapes fmt)
        |> fun bytecode ->
           let arg_descr = make_arg_descr ~param:as_arg_for ~arg_block_idx in
           bytecode, required_globals, main_module_block_format, arg_descr

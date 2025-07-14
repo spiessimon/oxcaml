@@ -70,6 +70,12 @@ let load_lambda ppf lam =
   if !Clflags.dump_rawlambda then fprintf ppf "%a@." Printlambda.lambda lam;
   let slam = Simplif.simplify_lambda lam in
   if !Clflags.dump_lambda then fprintf ppf "%a@." Printlambda.lambda slam;
+  if !Clflags.dump_debug_uids then (
+    fprintf ppf "\n";
+    Type_shape.print_table_all_type_decls ppf;
+    fprintf ppf "\n";
+    Type_shape.print_table_all_type_shapes ppf
+  ); (* CR sspies: This will be printed for every declaration. Find an alternative. *)
   let blam = Blambda_of_lambda.blambda_of_lambda slam in
   if !Clflags.dump_blambda then fprintf ppf "%a@." Printblambda.blambda blam;
   let instrs, can_free = Bytegen.compile_phrase blam in
