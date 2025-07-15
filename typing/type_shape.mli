@@ -19,7 +19,8 @@ end
 
 type shape_with_layout =
   { type_shape : Shape.without_layout Shape.ts;
-    type_layout : Layout.t
+    type_layout : Layout.t;
+    type_name : string
   }
 (* CR sspies: There are two options here: We can fold the layout into the shape,
     or we can keep it on the outside. Currently, we keep it on the outside to
@@ -38,12 +39,11 @@ val add_to_type_shapes :
   Uid.t ->
   Types.type_expr ->
   Jkind_types.Sort.Const.t ->
+  name:string ->
   (Path.t -> Uid.t option) ->
   unit
 
 val find_in_type_decls : Uid.t -> Shape.tds option
-
-val type_name : 'a. 'a Shape.ts -> string
 
 val print_table_all_type_decls : Format.formatter -> unit
 
