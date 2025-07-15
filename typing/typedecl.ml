@@ -766,11 +766,39 @@ let verify_unboxed_attr unboxed_attr sdecl =
 *)
 
 
-let shape_map_labels =
+let merlin_shape_map_labels =
   List.fold_left (fun map { Types.ld_id; ld_uid; _} ->
     Shape.Map.add_label map ld_id ld_uid)
     Shape.Map.empty
 
+let merlin_shape_map_unboxed_labels =
+  List.fold_left (fun map { Types.ld_id; ld_uid; _} ->
+    Shape.Map.add_unboxed_label map ld_id ld_uid)
+    Shape.Map.empty
+
+let merlin_shape_map_cstrs =
+  List.fold_left (fun map { Types.cd_id; cd_uid; cd_args; _ } ->
+    let cstr_shape_map =
+      let label_decls =
+        match cd_args with
+        | Cstr_tuple _ -> []
+        | Cstr_record ldecls -> ldecls
+      in
+      merlin_shape_map_labels label_decls
+    in
+    Shape.Map.add_constr map cd_id
+      @@ Shape.str ~uid:cd_uid cstr_shape_map)
+    (Shape.Map.empty)
+
+let merlin_shape_declaration decl =
+  let uid = decl.type_uid in
+  match decl.type_kind with
+  | Type_variant (cstrs, _, _) -> Shape.str ~uid (merlin_shape_map_cstrs cstrs)
+  | Type_record (labels, _, _) ->
+    Shape.str ~uid (merlin_shape_map_labels labels)
+  | Type_record_unboxed_product (labels, _, _) ->
+    Shape.str ~uid (merlin_shape_map_unboxed_labels labels)
+  | Type_abstract _ | Type_open -> Shape.leaf uid
 
 let transl_declaration env sdecl (id, uid) =
   (* Bind type parameters *)
@@ -2954,9 +2982,11 @@ let transl_type_decl env rec_flag sdecl_list =
                       (Pident id) decl uid_of_path in
     Uid.Tbl.add Type_shape.all_type_decls uid shape_tds;
     Env.add_type_decl_shape uid shape_tds;
-    Shape.leaf' (Some uid)
+    merlin_shape_declaration decl
     (* CR sspies: In subsequent PRs, we can use this as a hook to create a shape
-       that contains the type declaration at this point. *)
+       that contains the type declaration at this point. It would be great if
+       we could teach Merlin to just use that one, instead of building separate
+       shapes here. *)
   ) decls
   in
   (* Compute the final environment with variance and immediacy *)
@@ -3111,7 +3141,7 @@ let transl_extension_constructor ~scope env type_path type_params
   in
   let shape =
     let map = match args with
-    | Cstr_record lbls -> shape_map_labels lbls
+    | Cstr_record lbls -> merlin_shape_map_labels lbls
     | _ -> Shape.Map.empty
     in
     Shape.str ~uid:ext_cstrs.ext_type.ext_uid map
