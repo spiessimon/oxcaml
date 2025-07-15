@@ -20,17 +20,17 @@ end
 [%%expect{|
 {
  "M"[module] ->
-   {<.39>
+   {<.49>
     "Exn"[extension constructor] -> {<.1>
                                      "lbl_exn"[label] -> <.0>;
                                      };
-    "Ext"[extension constructor] -> {<.7>
-                                     "lbl_ext"[label] -> <.6>;
+    "Ext"[extension constructor] -> {<.10>
+                                     "lbl_ext"[label] -> <.9>;
                                      };
-    "ext"[type] -> <.46> = Tds_other;
-    "l"[type] -> <.47> = Tds_record_boxed { lbl: Ts_predef int () };
+    "ext"[type] -> <.7>Tds_other;
+    "l"[type] -> <.3>Tds_record_boxed { lbl: Ts_predef int () };
     "t"[type] ->
-      <.48> = Tds_variant simple_constructors= complex_constructors=(C of lbl_cstr=Ts_predef int ());
+      <.12>Tds_variant simple_constructors= complex_constructors=(C of lbl_cstr=Ts_predef int ());
     };
  }
 module M :

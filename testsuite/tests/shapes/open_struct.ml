@@ -18,7 +18,7 @@ module M : sig type t = A end
 include M
 [%%expect{|
 {
- "t"[type] -> <.3> = Tds_variant simple_constructors=A complex_constructors=;
+ "t"[type] -> <.0>Tds_variant simple_constructors=A complex_constructors=;
  }
 type t = M.t = A
 |}]
@@ -28,9 +28,9 @@ module N = M
 {
  "N"[module] ->
    Alias(<.4>
-         {<.2>
+         {<.3>
           "t"[type] ->
-            <.3> = Tds_variant simple_constructors=A complex_constructors=;
+            <.0>Tds_variant simple_constructors=A complex_constructors=;
           });
  }
 module N = M
@@ -48,9 +48,8 @@ end
 [%%expect{|
 {
  "M'"[module] ->
-   {<.7>
-    "t"[type] ->
-      <.8> = Tds_variant simple_constructors=A complex_constructors=;
+   {<.8>
+    "t"[type] -> <.5>Tds_variant simple_constructors=A complex_constructors=;
     };
  }
 module M' : sig type t = A end
@@ -61,9 +60,9 @@ module N' = M'
 {
  "N'"[module] ->
    Alias(<.9>
-         {<.7>
+         {<.8>
           "t"[type] ->
-            <.8> = Tds_variant simple_constructors=A complex_constructors=;
+            <.5>Tds_variant simple_constructors=A complex_constructors=;
           });
  }
 module N' = M'
@@ -77,11 +76,11 @@ end
 [%%expect{|
 {
  "Test"[module] ->
-   {<.13>
+   {<.14>
     "M"[module] ->
-      {<.12>
+      {<.13>
        "t"[type] ->
-         <.14> = Tds_variant simple_constructors=A complex_constructors=;
+         <.10>Tds_variant simple_constructors=A complex_constructors=;
        };
     };
  }
@@ -92,9 +91,9 @@ include Test
 [%%expect{|
 {
  "M"[module] ->
-   {<.12>
+   {<.13>
     "t"[type] ->
-      <.14> = Tds_variant simple_constructors=A complex_constructors=;
+      <.10>Tds_variant simple_constructors=A complex_constructors=;
     };
  }
 module M = Test.M
@@ -105,9 +104,9 @@ module N = M
 {
  "N"[module] ->
    Alias(<.15>
-         {<.12>
+         {<.13>
           "t"[type] ->
-            <.14> = Tds_variant simple_constructors=A complex_constructors=;
+            <.10>Tds_variant simple_constructors=A complex_constructors=;
           });
  }
 module N = M

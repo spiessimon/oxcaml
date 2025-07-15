@@ -14,7 +14,7 @@ val x : unit = ()
 external y : int -> int = "%identity"
 [%%expect{|
 {
- "y"[value] -> <.1>;
+ "y"[value] -> <.2>;
  }
 external y : int -> int = "%identity"
 |}]
@@ -24,11 +24,11 @@ and foo = Bar
 [%%expect{|
 {
  "foo"[type] ->
-   <.6> = Tds_variant simple_constructors=Bar complex_constructors=;
+   <.4>Tds_variant simple_constructors=Bar complex_constructors=;
  "t"[type] ->
-   <.7> = Tds_variant simple_constructors= complex_constructors=(A of Ts_constr shape=
-   <.3>
-    ());
+   <.3>Tds_variant simple_constructors= complex_constructors=(A of Ts_shape (
+   Tds_variant simple_constructors=Bar complex_constructors=
+   ));
  }
 type t = A of foo
 and foo = Bar
@@ -39,7 +39,7 @@ module type S = sig
 end
 [%%expect{|
 {
- "S"[module type] -> <.9>;
+ "S"[module type] -> <.13>;
  }
 module type S = sig type t end
 |}]
@@ -47,7 +47,7 @@ module type S = sig type t end
 exception E
 [%%expect{|
 {
- "E"[extension constructor] -> {<.10>};
+ "E"[extension constructor] -> {<.14>};
  }
 exception E
 |}]
@@ -55,7 +55,7 @@ exception E
 type ext = ..
 [%%expect{|
 {
- "ext"[type] -> <.12> = Tds_other;
+ "ext"[type] -> <.15>Tds_other;
  }
 type ext = ..
 |}]
@@ -63,8 +63,8 @@ type ext = ..
 type ext += A | B
 [%%expect{|
 {
- "A"[extension constructor] -> {<.13>};
- "B"[extension constructor] -> {<.14>};
+ "A"[extension constructor] -> {<.17>};
+ "B"[extension constructor] -> {<.18>};
  }
 type ext += A | B
 |}]
@@ -74,8 +74,8 @@ module M = struct
 end
 [%%expect{|
 {
- "M"[module] -> {<.16>
-                 "C"[extension constructor] -> {<.15>};
+ "M"[module] -> {<.20>
+                 "C"[extension constructor] -> {<.19>};
                  };
  }
 module M : sig type ext += C end
@@ -106,15 +106,15 @@ end
  "M1"[module] ->
    {
     "t"[type] ->
-      <.35> = Tds_variant simple_constructors= complex_constructors=(C of Ts_constr shape=
-      M2<.21> . "t"[type]
-       ());
+      <.41>Tds_variant simple_constructors= complex_constructors=(C of Ts_shape (
+      M2<.26> . "t"[type]
+      ));
     };
  "M2"[module] ->
    {
     "t"[type] ->
-      <.36> = Tds_variant simple_constructors=T complex_constructors=;
-    "x"[value] -> <.34>;
+      <.45>Tds_variant simple_constructors=T complex_constructors=;
+    "x"[value] -> <.48>;
     };
  }
 module rec M1 : sig type t = C of M2.t end
@@ -124,9 +124,9 @@ and M2 : sig type t val x : t end
 class c = object end
 [%%expect{|
 {
- "c"[type] -> <.37>;
- "c"[class] -> <.37>;
- "c"[class type] -> <.37>;
+ "c"[type] -> <.50>;
+ "c"[class] -> <.50>;
+ "c"[class type] -> <.50>;
  }
 class c : object  end
 |}]
@@ -134,8 +134,8 @@ class c : object  end
 class type c = object end
 [%%expect{|
 {
- "c"[type] -> <.40>;
- "c"[class type] -> <.40>;
+ "c"[type] -> <.53>;
+ "c"[class type] -> <.53>;
  }
 class type c = object  end
 |}]
@@ -143,7 +143,11 @@ class type c = object  end
 type u = t
 [%%expect{|
 {
- "u"[type] -> <.42> = Tds_alias Ts_constr shape=<.2>  ();
+ "u"[type] ->
+   <.54>Tds_alias Ts_shape (<.3>Tds_variant simple_constructors= complex_constructors=(A of Ts_shape (
+                            Tds_variant simple_constructors=Bar complex_constructors=
+                            ))
+   );
  }
 type u = t
 |}]

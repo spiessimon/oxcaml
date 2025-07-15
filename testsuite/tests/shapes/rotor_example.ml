@@ -12,7 +12,7 @@ module type Stringable = sig
 end
 [%%expect{|
 {
- "Stringable"[module type] -> <.2>;
+ "Stringable"[module type] -> <.3>;
  }
 module type Stringable = sig type t val to_string : t -> string end
 |}]
@@ -25,14 +25,14 @@ end
 [%%expect{|
 {
  "Pair"[module] ->
-   Abs<.9>
+   Abs<.14>
       (X, Y,
        {
         "t"[type] ->
-          <.10> = Tds_alias Ts_tuple (Ts_constr shape=X<.3> . "t"[type]
-           (), Ts_constr shape=Y<.4> . "t"[type]
-           ());
-        "to_string"[value] -> <.6>;
+          <.6>Tds_alias Ts_tuple (Ts_shape (X<.4> . "t"[type]
+          ), Ts_shape (Y<.5> . "t"[type]
+          ));
+        "to_string"[value] -> <.11>;
         });
  }
 module Pair :
@@ -47,9 +47,9 @@ end
 [%%expect{|
 {
  "Int"[module] ->
-   {<.14>
-    "t"[type] -> <.15> = Tds_alias Ts_predef int ();
-    "to_string"[value] -> <.12>;
+   {<.28>
+    "t"[type] -> <.23>Tds_alias Ts_predef int ();
+    "to_string"[value] -> <.26>;
     };
  }
 module Int : sig type t = int val to_string : int -> string end
@@ -62,9 +62,9 @@ end
 [%%expect{|
 {
  "String"[module] ->
-   {<.19>
-    "t"[type] -> <.20> = Tds_alias Ts_predef string ();
-    "to_string"[value] -> <.17>;
+   {<.39>
+    "t"[type] -> <.34>Tds_alias Ts_predef string ();
+    "to_string"[value] -> <.37>;
     };
  }
 module String : sig type t = string val to_string : 'a -> 'a end
@@ -74,15 +74,13 @@ module P = Pair(Int)(Pair(String)(Int))
 [%%expect{|
 {
  "P"[module] ->
-   {<.21>
+   {<.45>
     "t"[type] ->
-      <.22> = Tds_alias Ts_tuple (Ts_constr shape=<.15> = Tds_alias Ts_predef int ()
-       (), Ts_constr shape=<.23> = Tds_alias Ts_tuple (Ts_constr shape=
-                           <.20> = Tds_alias Ts_predef string ()
-                            (), Ts_constr shape=<.15> = Tds_alias Ts_predef int ()
-                            ())
-       ());
-    "to_string"[value] -> <.6>;
+      <.6>Tds_alias Ts_tuple (Ts_shape (<.23>Tds_alias Ts_predef int ()
+      ), Ts_shape (<.6>Tds_alias Ts_tuple (Ts_shape (<.34>Tds_alias Ts_predef string ()
+                   ), Ts_shape (<.23>Tds_alias Ts_predef int () ))
+      ));
+    "to_string"[value] -> <.11>;
     };
  }
 module P :
