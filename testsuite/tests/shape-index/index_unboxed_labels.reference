@@ -1,17 +1,17 @@
 Indexed shapes:
 Missing uid : b (File "index_unboxed_labels.ml", line 41, characters 7-8)
-Resolved: Index_unboxed_labels.21 :
+Resolved: Index_unboxed_labels.18 :
   x (File "index_unboxed_labels.ml", line 38, characters 9-10)
 Missing uid : b (File "index_unboxed_labels.ml", line 38, characters 12-13)
 Missing uid : b (File "index_unboxed_labels.ml", line 37, characters 11-12)
 Missing uid : a (File "index_unboxed_labels.ml", line 32, characters 7-8)
-Resolved: Index_unboxed_labels.14 :
+Resolved: Index_unboxed_labels.12 :
   x (File "index_unboxed_labels.ml", line 29, characters 9-10)
 Missing uid : a (File "index_unboxed_labels.ml", line 29, characters 12-13)
 Missing uid : a (File "index_unboxed_labels.ml", line 28, characters 11-12)
 Missing uid : b (File "index_unboxed_labels.ml", line 25, characters 14-15)
 Missing uid : a (File "index_unboxed_labels.ml", line 25, characters 6-7)
-Resolved: Index_unboxed_labels.10 :
+Resolved: Index_unboxed_labels.8 :
   x (File "index_unboxed_labels.ml", line 22, characters 9-10)
 Missing uid : a (File "index_unboxed_labels.ml", line 22, characters 11-12)
 Missing uid : b (File "index_unboxed_labels.ml", line 21, characters 18-19)
@@ -24,29 +24,29 @@ Index_unboxed_labels.1:
   a (File "index_unboxed_labels.ml", line 18, characters 11-12)
 Index_unboxed_labels.2:
   b (File "index_unboxed_labels.ml", line 18, characters 19-20)
-Index_unboxed_labels.6:
+Index_unboxed_labels.5:
   tu (File "index_unboxed_labels.ml", line 19, characters 5-7)
-Index_unboxed_labels.7:
+Index_unboxed_labels.6:
   a (File "index_unboxed_labels.ml", line 19, characters 13-14)
-Index_unboxed_labels.10:
+Index_unboxed_labels.8:
   x (File "index_unboxed_labels.ml", line 21, characters 4-5)
-Index_unboxed_labels.11:
+Index_unboxed_labels.9:
   _y (File "index_unboxed_labels.ml", line 22, characters 4-6)
-Index_unboxed_labels.12:
+Index_unboxed_labels.10:
   f (File "index_unboxed_labels.ml", line 24, characters 4-5)
-Index_unboxed_labels.14:
+Index_unboxed_labels.12:
   x (File "index_unboxed_labels.ml", line 28, characters 4-5)
-Index_unboxed_labels.15:
+Index_unboxed_labels.13:
   _y (File "index_unboxed_labels.ml", line 29, characters 4-6)
-Index_unboxed_labels.16:
+Index_unboxed_labels.14:
   f (File "index_unboxed_labels.ml", line 31, characters 4-5)
-Index_unboxed_labels.17:
+Index_unboxed_labels.15:
   tb (File "index_unboxed_labels.ml", line 35, characters 5-7)
-Index_unboxed_labels.18:
+Index_unboxed_labels.16:
   b (File "index_unboxed_labels.ml", line 35, characters 12-13)
-Index_unboxed_labels.21:
+Index_unboxed_labels.18:
   x (File "index_unboxed_labels.ml", line 37, characters 4-5)
-Index_unboxed_labels.22:
+Index_unboxed_labels.19:
   _y (File "index_unboxed_labels.ml", line 38, characters 4-6)
-Index_unboxed_labels.23:
+Index_unboxed_labels.20:
   f (File "index_unboxed_labels.ml", line 40, characters 4-5)

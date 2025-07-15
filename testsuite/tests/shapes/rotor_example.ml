@@ -12,7 +12,7 @@ module type Stringable = sig
 end
 [%%expect{|
 {
- "Stringable"[module type] -> <.3>;
+ "Stringable"[module type] -> <.2>;
  }
 module type Stringable = sig type t val to_string : t -> string end
 |}]
@@ -25,15 +25,10 @@ end
 [%%expect{|
 {
  "Pair"[module] ->
-   Abs<.14>
-      (X, Y,
-       {
-        "t"[type] ->
-          <.6>Tds_alias Ts_tuple (Ts_shape (X<.4> . "t"[type]
-          ), Ts_shape (Y<.5> . "t"[type]
-          ));
-        "to_string"[value] -> <.11>;
-        });
+   Abs<.12>(X, Y, {
+                   "t"[type] -> <>  * <> ;
+                   "to_string"[value] -> <.9>;
+                   });
  }
 module Pair :
   functor (X : Stringable) (Y : Stringable) ->
@@ -47,9 +42,9 @@ end
 [%%expect{|
 {
  "Int"[module] ->
-   {<.28>
-    "t"[type] -> <.23>Tds_alias Ts_predef int ();
-    "to_string"[value] -> <.26>;
+   {<.25>
+    "t"[type] -> Predef int ();
+    "to_string"[value] -> <.23>;
     };
  }
 module Int : sig type t = int val to_string : int -> string end
@@ -62,9 +57,9 @@ end
 [%%expect{|
 {
  "String"[module] ->
-   {<.39>
-    "t"[type] -> <.34>Tds_alias Ts_predef string ();
-    "to_string"[value] -> <.37>;
+   {<.35>
+    "t"[type] -> Predef string ();
+    "to_string"[value] -> <.33>;
     };
  }
 module String : sig type t = string val to_string : 'a -> 'a end
@@ -73,15 +68,10 @@ module String : sig type t = string val to_string : 'a -> 'a end
 module P = Pair(Int)(Pair(String)(Int))
 [%%expect{|
 {
- "P"[module] ->
-   {<.45>
-    "t"[type] ->
-      <.6>Tds_alias Ts_tuple (Ts_shape (<.23>Tds_alias Ts_predef int ()
-      ), Ts_shape (<.6>Tds_alias Ts_tuple (Ts_shape (<.34>Tds_alias Ts_predef string ()
-                   ), Ts_shape (<.23>Tds_alias Ts_predef int () ))
-      ));
-    "to_string"[value] -> <.11>;
-    };
+ "P"[module] -> {<.41>
+                 "t"[type] -> <>  * <> ;
+                 "to_string"[value] -> <.9>;
+                 };
  }
 module P :
   sig
