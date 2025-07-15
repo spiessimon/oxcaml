@@ -43,10 +43,13 @@ module Fredef (X : S) = struct
 end
 [%%expect{|
 {
- "Fredef"[module] -> Abs<.10>(X, {
-                                  "t"[type] -> <.8>;
-                                  "x"[value] -> <.9>;
-                                  });
+ "Fredef"[module] ->
+   Abs<.10>
+      (X,
+       {
+        "t"[type] -> <.11> = Tds_alias Ts_constr shape=X<.7> . "t"[type]  ();
+        "x"[value] -> <.9>;
+        });
  }
 module Fredef : functor (X : S) -> sig type t = X.t val x : X.t end
 |}]
@@ -58,13 +61,12 @@ end
 [%%expect{|
 {
  "Fignore"[module] ->
-   Abs<.14>
+   Abs<.15>
       ((),
        {
-        "t"[type] -> {<.11>
-                      "Fresh"[constructor] -> {<.12>};
-                      };
-        "x"[value] -> <.13>;
+        "t"[type] ->
+          <.16> = Tds_variant simple_constructors=Fresh complex_constructors=;
+        "x"[value] -> <.14>;
         });
  }
 module Fignore : S -> sig type t = Fresh val x : t end
@@ -77,11 +79,10 @@ end
 [%%expect{|
 {
  "Arg"[module] ->
-   {<.18>
-    "t"[type] -> {<.15>
-                  "T"[constructor] -> {<.16>};
-                  };
-    "x"[value] -> <.17>;
+   {<.20>
+    "t"[type] ->
+      <.21> = Tds_variant simple_constructors=T complex_constructors=;
+    "x"[value] -> <.19>;
     };
  }
 module Arg : S
@@ -90,10 +91,9 @@ module Arg : S
 include Falias(Arg)
 [%%expect{|
 {
- "t"[type] -> {<.15>
-               "T"[constructor] -> {<.16>};
-               };
- "x"[value] -> <.17>;
+ "t"[type] ->
+   <.21> = Tds_variant simple_constructors=T complex_constructors=;
+ "x"[value] -> <.19>;
  }
 type t = Arg.t
 val x : t = <abstr>
@@ -102,10 +102,9 @@ val x : t = <abstr>
 include Finclude(Arg)
 [%%expect{|
 {
- "t"[type] -> {<.15>
-               "T"[constructor] -> {<.16>};
-               };
- "x"[value] -> <.17>;
+ "t"[type] ->
+   <.21> = Tds_variant simple_constructors=T complex_constructors=;
+ "x"[value] -> <.19>;
  }
 type t = Arg.t
 val x : t = <abstr>
@@ -114,7 +113,9 @@ val x : t = <abstr>
 include Fredef(Arg)
 [%%expect{|
 {
- "t"[type] -> <.8>;
+ "t"[type] ->
+   <.22> = Tds_alias Ts_constr shape=<.21> = Tds_variant simple_constructors=T complex_constructors=
+    ();
  "x"[value] -> <.9>;
  }
 type t = Arg.t
@@ -124,10 +125,9 @@ val x : Arg.t = <abstr>
 include Fignore(Arg)
 [%%expect{|
 {
- "t"[type] -> {<.11>
-               "Fresh"[constructor] -> {<.12>};
-               };
- "x"[value] -> <.13>;
+ "t"[type] ->
+   <.23> = Tds_variant simple_constructors=Fresh complex_constructors=;
+ "x"[value] -> <.14>;
  }
 type t = Fignore(Arg).t = Fresh
 val x : t = Fresh
@@ -136,8 +136,8 @@ val x : t = Fresh
 include Falias(struct type t = int let x = 0 end)
 [%%expect{|
 {
- "t"[type] -> <.19>;
- "x"[value] -> <.20>;
+ "t"[type] -> <.26> = Tds_alias Ts_predef int ();
+ "x"[value] -> <.25>;
  }
 type t = int
 val x : t = 0
@@ -146,8 +146,8 @@ val x : t = 0
 include Finclude(struct type t = int let x = 0 end)
 [%%expect{|
 {
- "t"[type] -> <.21>;
- "x"[value] -> <.22>;
+ "t"[type] -> <.29> = Tds_alias Ts_predef int ();
+ "x"[value] -> <.28>;
  }
 type t = int
 val x : t = 0
@@ -156,7 +156,9 @@ val x : t = 0
 include Fredef(struct type t = int let x = 0 end)
 [%%expect{|
 {
- "t"[type] -> <.8>;
+ "t"[type] ->
+   <.32> = Tds_alias Ts_constr shape=<.33> = Tds_alias Ts_predef int ()
+    ();
  "x"[value] -> <.9>;
  }
 type t = int
@@ -166,10 +168,9 @@ val x : int = 0
 include Fignore(struct type t = int let x = 0 end)
 [%%expect{|
 {
- "t"[type] -> {<.11>
-               "Fresh"[constructor] -> {<.12>};
-               };
- "x"[value] -> <.13>;
+ "t"[type] ->
+   <.36> = Tds_variant simple_constructors=Fresh complex_constructors=;
+ "x"[value] -> <.14>;
  }
 type t = Fresh
 val x : t = Fresh
@@ -182,13 +183,12 @@ end
 [%%expect{|
 {
  "Fgen"[module] ->
-   Abs<.30>
+   Abs<.40>
       ((),
        {
-        "t"[type] -> {<.27>
-                      "Fresher"[constructor] -> {<.28>};
-                      };
-        "x"[value] -> <.29>;
+        "t"[type] ->
+          <.41> = Tds_variant simple_constructors=Fresher complex_constructors=;
+        "x"[value] -> <.39>;
         });
  }
 module Fgen : functor () -> sig type t = Fresher val x : t end
@@ -197,10 +197,9 @@ module Fgen : functor () -> sig type t = Fresher val x : t end
 include Fgen ()
 [%%expect{|
 {
- "t"[type] -> {<.27>
-               "Fresher"[constructor] -> {<.28>};
-               };
- "x"[value] -> <.29>;
+ "t"[type] ->
+   <.42> = Tds_variant simple_constructors=Fresher complex_constructors=;
+ "x"[value] -> <.39>;
  }
 type t = Fresher
 val x : t = Fresher
@@ -215,7 +214,7 @@ module type Small = sig
 end
 [%%expect{|
 {
- "Small"[module type] -> <.32>;
+ "Small"[module type] -> <.44>;
  }
 module type Small = sig type t end
 |}]
@@ -226,7 +225,7 @@ module type Big = sig
 end
 [%%expect{|
 {
- "Big"[module type] -> <.35>;
+ "Big"[module type] -> <.47>;
  }
 module type Big = sig type t type u end
 |}]
@@ -234,7 +233,7 @@ module type Big = sig type t type u end
 module type B2S = functor (X : Big) -> Small with type t = X.t
 [%%expect{|
 {
- "B2S"[module type] -> <.38>;
+ "B2S"[module type] -> <.50>;
  }
 module type B2S = functor (X : Big) -> sig type t = X.t end
 |}]
@@ -243,8 +242,8 @@ module Big_to_small1 : B2S = functor (X : Big) -> X
 [%%expect{|
 {
  "Big_to_small1"[module] ->
-   Abs<.40>(X, {<.39>
-                "t"[type] -> X<.39> . "t"[type];
+   Abs<.52>(X, {<.51>
+                "t"[type] -> X<.51> . "t"[type];
                 });
  }
 module Big_to_small1 : B2S
@@ -253,8 +252,8 @@ module Big_to_small1 : B2S
 module Big_to_small2 : B2S = functor (X : Big) -> struct include X end
 [%%expect{|
 {
- "Big_to_small2"[module] -> Abs<.42>(X, {
-                                         "t"[type] -> X<.41> . "t"[type];
+ "Big_to_small2"[module] -> Abs<.54>(X, {
+                                         "t"[type] -> X<.53> . "t"[type];
                                          });
  }
 module Big_to_small2 : B2S

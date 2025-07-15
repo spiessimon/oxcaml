@@ -18,9 +18,7 @@ module M : sig type t = A end
 include M
 [%%expect{|
 {
- "t"[type] -> {<.0>
-               "A"[constructor] -> {<.1>};
-               };
+ "t"[type] -> <.3> = Tds_variant simple_constructors=A complex_constructors=;
  }
 type t = M.t = A
 |}]
@@ -29,11 +27,10 @@ module N = M
 [%%expect{|
 {
  "N"[module] ->
-   Alias(<.3>
+   Alias(<.4>
          {<.2>
-          "t"[type] -> {<.0>
-                        "A"[constructor] -> {<.1>};
-                        };
+          "t"[type] ->
+            <.3> = Tds_variant simple_constructors=A complex_constructors=;
           });
  }
 module N = M
@@ -50,11 +47,11 @@ include struct
 end
 [%%expect{|
 {
- "M'"[module] -> {<.6>
-                  "t"[type] -> {<.4>
-                                "A"[constructor] -> {<.5>};
-                                };
-                  };
+ "M'"[module] ->
+   {<.7>
+    "t"[type] ->
+      <.8> = Tds_variant simple_constructors=A complex_constructors=;
+    };
  }
 module M' : sig type t = A end
 |}]
@@ -63,11 +60,10 @@ module N' = M'
 [%%expect{|
 {
  "N'"[module] ->
-   Alias(<.7>
-         {<.6>
-          "t"[type] -> {<.4>
-                        "A"[constructor] -> {<.5>};
-                        };
+   Alias(<.9>
+         {<.7>
+          "t"[type] ->
+            <.8> = Tds_variant simple_constructors=A complex_constructors=;
           });
  }
 module N' = M'
@@ -81,12 +77,12 @@ end
 [%%expect{|
 {
  "Test"[module] ->
-   {<.11>
-    "M"[module] -> {<.10>
-                    "t"[type] -> {<.8>
-                                  "A"[constructor] -> {<.9>};
-                                  };
-                    };
+   {<.13>
+    "M"[module] ->
+      {<.12>
+       "t"[type] ->
+         <.14> = Tds_variant simple_constructors=A complex_constructors=;
+       };
     };
  }
 module Test : sig module M : sig type t = A end end
@@ -95,11 +91,11 @@ module Test : sig module M : sig type t = A end end
 include Test
 [%%expect{|
 {
- "M"[module] -> {<.10>
-                 "t"[type] -> {<.8>
-                               "A"[constructor] -> {<.9>};
-                               };
-                 };
+ "M"[module] ->
+   {<.12>
+    "t"[type] ->
+      <.14> = Tds_variant simple_constructors=A complex_constructors=;
+    };
  }
 module M = Test.M
 |}]
@@ -108,11 +104,10 @@ module N = M
 [%%expect{|
 {
  "N"[module] ->
-   Alias(<.12>
-         {<.10>
-          "t"[type] -> {<.8>
-                        "A"[constructor] -> {<.9>};
-                        };
+   Alias(<.15>
+         {<.12>
+          "t"[type] ->
+            <.14> = Tds_variant simple_constructors=A complex_constructors=;
           });
  }
 module N = M

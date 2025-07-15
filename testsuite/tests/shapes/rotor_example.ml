@@ -25,10 +25,15 @@ end
 [%%expect{|
 {
  "Pair"[module] ->
-   Abs<.9>(X, Y, {
-                  "t"[type] -> <.5>;
-                  "to_string"[value] -> <.6>;
-                  });
+   Abs<.9>
+      (X, Y,
+       {
+        "t"[type] ->
+          <.10> = Tds_alias Ts_tuple (Ts_constr shape=X<.3> . "t"[type]
+           (), Ts_constr shape=Y<.4> . "t"[type]
+           ());
+        "to_string"[value] -> <.6>;
+        });
  }
 module Pair :
   functor (X : Stringable) (Y : Stringable) ->
@@ -41,10 +46,11 @@ module Int = struct
 end
 [%%expect{|
 {
- "Int"[module] -> {<.13>
-                   "t"[type] -> <.10>;
-                   "to_string"[value] -> <.11>;
-                   };
+ "Int"[module] ->
+   {<.14>
+    "t"[type] -> <.15> = Tds_alias Ts_predef int ();
+    "to_string"[value] -> <.12>;
+    };
  }
 module Int : sig type t = int val to_string : int -> string end
 |}]
@@ -55,10 +61,11 @@ module String = struct
 end
 [%%expect{|
 {
- "String"[module] -> {<.17>
-                      "t"[type] -> <.14>;
-                      "to_string"[value] -> <.15>;
-                      };
+ "String"[module] ->
+   {<.19>
+    "t"[type] -> <.20> = Tds_alias Ts_predef string ();
+    "to_string"[value] -> <.17>;
+    };
  }
 module String : sig type t = string val to_string : 'a -> 'a end
 |}]
@@ -66,10 +73,17 @@ module String : sig type t = string val to_string : 'a -> 'a end
 module P = Pair(Int)(Pair(String)(Int))
 [%%expect{|
 {
- "P"[module] -> {<.18>
-                 "t"[type] -> <.5>;
-                 "to_string"[value] -> <.6>;
-                 };
+ "P"[module] ->
+   {<.21>
+    "t"[type] ->
+      <.22> = Tds_alias Ts_tuple (Ts_constr shape=<.15> = Tds_alias Ts_predef int ()
+       (), Ts_constr shape=<.23> = Tds_alias Ts_tuple (Ts_constr shape=
+                           <.20> = Tds_alias Ts_predef string ()
+                            (), Ts_constr shape=<.15> = Tds_alias Ts_predef int ()
+                            ())
+       ());
+    "to_string"[value] -> <.6>;
+    };
  }
 module P :
   sig

@@ -31,13 +31,13 @@ module App = F(List)
 module M : sig end
 {
  "F"[module] -> Abs<.7>(X, {
-                            "t"[type] -> <.6>;
+                            "t"[type] -> <.8> = Tds_other;
                             });
  }
 module F : functor (X : sig end) -> sig type t end
 {
- "App"[module] -> {<.8>
-                   "t"[type] -> <.6>;
+ "App"[module] -> {<.9>
+                   "t"[type] -> <.10> = Tds_other;
                    };
  }
 module App : sig type t = F(List).t end
@@ -48,15 +48,15 @@ module F(X : sig end) = X
 module App = F(M)
 [%%expect{|
 {
- "M"[module] -> {<.9>};
+ "M"[module] -> {<.11>};
  }
 module M : sig end
 {
- "F"[module] -> Abs<.11>(X, X<.10>);
+ "F"[module] -> Abs<.13>(X, X<.12>);
  }
 module F : functor (X : sig end) -> sig end
 {
- "App"[module] -> {<.12>};
+ "App"[module] -> {<.14>};
  }
 module App : sig end
 |}]
@@ -67,13 +67,13 @@ module Struct = struct
 end
 [%%expect{|
 {
- "Id"[module] -> Abs<.14>(X, X<.13>);
+ "Id"[module] -> Abs<.16>(X, X<.15>);
  }
 module Id : functor (X : sig end) -> sig end
 {
  "Struct"[module] ->
-   {<.16>
-    "L"[module] -> Alias(<.15>
+   {<.18>
+    "L"[module] -> Alias(<.17>
                          CU Stdlib . "List"[module]);
     };
  }
@@ -85,12 +85,12 @@ module Proj = Struct.L
   (* this should have the Proj uid and be an alias to Struct.L *)
 [%%expect{|
 {
- "App"[module] -> (CU Stdlib . "List"[module])<.17>;
+ "App"[module] -> (CU Stdlib . "List"[module])<.19>;
  }
 module App : sig end
 {
- "Proj"[module] -> Alias(<.18>
-                         Alias(<.15>
+ "Proj"[module] -> Alias(<.20>
+                         Alias(<.17>
                                CU Stdlib . "List"[module]));
  }
 module Proj = Struct.L
@@ -101,20 +101,20 @@ module N = F(struct end)
 module O = N.M
 [%%expect{|
 {
- "F"[module] -> Abs<.21>(X, {
-                             "M"[module] -> X<.19>;
+ "F"[module] -> Abs<.23>(X, {
+                             "M"[module] -> X<.21>;
                              });
  }
 module F : functor (X : sig end) -> sig module M : sig end end
 {
- "N"[module] -> {<.22>
-                 "M"[module] -> {<.19>};
+ "N"[module] -> {<.24>
+                 "M"[module] -> {<.21>};
                  };
  }
 module N : sig module M : sig end end
 {
- "O"[module] -> Alias(<.23>
-                      {<.19>});
+ "O"[module] -> Alias(<.25>
+                      {<.21>});
  }
 module O = N.M
 |}]

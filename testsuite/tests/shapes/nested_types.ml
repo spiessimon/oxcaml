@@ -27,16 +27,10 @@ end
     "Ext"[extension constructor] -> {<.7>
                                      "lbl_ext"[label] -> <.6>;
                                      };
-    "ext"[type] -> <.5>;
-    "l"[type] -> {<.3>
-                  "lbl"[label] -> <.4>;
-                  };
+    "ext"[type] -> <.46> = Tds_other;
+    "l"[type] -> <.47> = Tds_record_boxed { lbl: Ts_predef int () };
     "t"[type] ->
-      {<.9>
-       "C"[constructor] -> {<.11>
-                            "lbl_cstr"[label] -> <.10>;
-                            };
-       };
+      <.48> = Tds_variant simple_constructors= complex_constructors=(C of lbl_cstr=Ts_predef int ());
     };
  }
 module M :
