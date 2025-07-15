@@ -101,7 +101,7 @@ module Without_constraint = Set.Make(Int)
 [%%expect{|
 {
  "Without_constraint"[module] ->
-   CU Stdlib . "Set"[module] . "Make"[module](CU Stdlib . "Int"[module])<.9>;
+   CU Stdlib . "Set"[module] . "Make"[module](CU Stdlib . "Int"[module]) <.9>;
  }
 module Without_constraint :
   sig
@@ -164,7 +164,7 @@ end
    {<.12>
     "M"[module] ->
       CU Stdlib . "Set"[module] . "Make"[module](
-      CU Stdlib . "Int"[module])<.10>;
+      CU Stdlib . "Int"[module]) <.10>;
     };
  }
 module With_identity_constraint : sig module M : Set.S end
@@ -183,7 +183,7 @@ end
       {<.13>
        "t"[type] ->
          CU Stdlib . "Set"[module] . "Make"[module](
-         CU Stdlib . "Int"[module])<.13> . "t"[type];
+         CU Stdlib . "Int"[module]) <.13> . "t"[type];
        };
     };
  }
