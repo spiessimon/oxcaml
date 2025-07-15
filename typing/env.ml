@@ -1624,9 +1624,9 @@ let has_probe name = String.Set.mem name !probes
 
 (* CR sspies: Should these become part of the environment instead of being
    global state?*)
-let type_decl_shapes : Shape.tds Shape.Uid.Tbl.t = Shape.Uid.Tbl.create 16
+let type_decl_shapes : Shape.t Shape.Uid.Tbl.t = Shape.Uid.Tbl.create 16
 let reset_type_decl_shapes () = Shape.Uid.Tbl.clear type_decl_shapes
-let add_type_decl_shape (uid: Shape.Uid.t) (decl : Shape.tds) =
+let add_type_decl_shape (uid: Shape.Uid.t) (decl : Shape.t) =
   Shape.Uid.Tbl.add type_decl_shapes uid decl
 let get_type_decl_shapes () = type_decl_shapes
 
@@ -2959,10 +2959,12 @@ let initial =
                       empty
   in
   (* We record the type declarations for the type shapes. *)
-  Ident.Tbl.iter (fun _ decl ->
-    Type_shape.add_to_type_decls
-      decl
-      (shape_of_path_opt ~namespace:Type initial_env);
+  let shape_of_path path ~args =
+    Option.map (fun sh -> Shape.app_list sh args)
+      (shape_of_path_opt ~namespace:Type initial_env path)
+  in
+  Ident.Tbl.iter (fun id decl ->
+    Type_shape.add_to_type_decls [id, decl] shape_of_path
   ) added_types;
   initial_env
 

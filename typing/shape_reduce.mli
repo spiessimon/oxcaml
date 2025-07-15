@@ -53,7 +53,7 @@ module Make(_ : sig
 
     val read_unit_shape : unit_name:string -> Shape.t option
 
-    val type_shape_compression : bool
+    val remove_uids : bool
 
     val lookup_shape_for_uid : Shape.Uid.t -> Shape.t option
     (* CR sspies: In practice, this function depends on global state that is
@@ -61,10 +61,6 @@ module Make(_ : sig
        to make this state passing explicit. *)
   end) : sig
   val reduce : Env.t -> Shape.t -> Shape.t
-
-  val reduce_tds : Env.t -> Shape.tds -> Shape.tds
-
-  val reduce_ts : Env.t -> Shape.without_layout Shape.ts -> Shape.without_layout Shape.ts
 
   (** Perform weak reduction and return the head's uid if any. If reduction was
     incomplete the partially reduced shape is returned. *)
@@ -74,10 +70,6 @@ end
 (** [local_reduce] will not reduce shapes that require loading external
   compilation units. *)
 val local_reduce : Env.t -> Shape.t -> Shape.t
-
-val local_reduce_tds : Env.t -> Shape.tds -> Shape.tds
-
-val local_reduce_ts : Env.t -> Shape.without_layout Shape.ts -> Shape.without_layout Shape.ts
 
 (** [local_reduce_for_uid] will not reduce shapes that require loading external
   compilation units. *)

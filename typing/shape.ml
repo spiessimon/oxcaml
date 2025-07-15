@@ -422,22 +422,35 @@ and desc =
   | Struct of t Item.Map.t
   | Alias of t
   | Leaf
-  | Type_decl of tds
   | Proj of t * Item.t
   | Comp_unit of string
   | Error of string
+  | Mu of t
+  | Rec_var of int
+  (** Recursive variable in DeBruijn representation. *)
 
-and without_layout = Layout_to_be_determined
+  | Constr of Uid.t * t list
+  | Tuple of t list
+  | Unboxed_tuple of t list
+  | Predef of Predef.t * t list
+  | Arrow of t * t
+  | Poly_variant of t poly_variant_constructors
 
-and 'a ts =
-  | Ts_constr of (t * 'a) * without_layout ts list
-  | Ts_tuple of 'a ts list
-  | Ts_unboxed_tuple of 'a ts list
-  | Ts_var of string option * 'a
-  | Ts_predef of Predef.t * without_layout ts list
-  | Ts_arrow of without_layout ts * without_layout ts
-  | Ts_variant of 'a ts poly_variant_constructors
-  | Ts_other of 'a
+  (* constructors for type declarations *)
+  | Variant of
+    { simple_constructors : string list;
+      complex_constructors : (t * Layout.t) complex_constructors
+    }
+  | Variant_unboxed of
+    { name : string;
+      arg_name : string option;
+      arg_shape : t;
+      arg_layout : Layout.t
+    }
+  | Record of
+      { fields : (string * t * Layout.t) list;
+        kind : record_kind
+      }
 
 and 'a poly_variant_constructors = 'a poly_variant_constructor list
 
@@ -445,31 +458,6 @@ and 'a poly_variant_constructor =
   { pv_constr_name : string;
     pv_constr_args : 'a list
   }
-
-and tds_desc =
-  | Tds_variant of
-      { simple_constructors : string list;
-        complex_constructors :
-          (without_layout ts * Layout.t)
-          complex_constructors
-      }
-  | Tds_variant_unboxed of
-      { name : string;
-        arg_name : string option;
-            (** if this is [None], we are looking at a singleton tuple;
-            otherwise, it is a singleton record. *)
-        arg_shape : without_layout ts;
-        arg_layout : Layout.t
-      }
-      (** An unboxed variant corresponds to the [@@unboxed] annotation.
-      It must have a single, complex constructor. *)
-  | Tds_record of
-      { fields :
-          (string * without_layout ts * Layout.t) list;
-        kind : record_kind
-      }
-  | Tds_alias of without_layout ts
-  | Tds_other
 
 and record_kind =
   | Record_unboxed
@@ -496,11 +484,23 @@ and constructor_representation = Constructor_mixed of mixed_product_shape
 
 and mixed_product_shape = Layout.t array
 
-and tds =
-  {
-    definition : tds_desc;
-    type_params : without_layout ts list
-  }
+
+let poly_variant_constructors_map f pvs =
+  List.map
+    (fun pv -> { pv with pv_constr_args = List.map f pv.pv_constr_args })
+    pvs
+
+let complex_constructor_map f { name; kind; args } =
+  let args =
+    List.map
+      (fun { field_name; field_value } ->
+        { field_name; field_value = f field_value })
+      args
+  in
+  { name; kind; args }
+
+let complex_constructors_map f = List.map (complex_constructor_map f)
+
 
 let rec equal_desc d1 d2 =
   if d1 == d2 then true else
@@ -515,23 +515,64 @@ let rec equal_desc d1 d2 =
     if not (equal t1 t2) then false
     else equal v1 v2
   | Leaf, Leaf -> true
-  | Type_decl tds1, Type_decl tds2 -> equal_tds tds1 tds2
+  | Mu (t1_body), Mu (t2_body) ->
+    equal t1_body t2_body
+  | Rec_var i1, Rec_var i2 -> Int.equal i1 i2
   | Struct t1, Struct t2 ->
     Item.Map.equal equal t1 t2
   | Proj (t1, i1), Proj (t2, i2) ->
     if Item.compare i1 i2 <> 0 then false
     else equal t1 t2
   | Comp_unit c1, Comp_unit c2 -> String.equal c1 c2
-  | Var _, (Abs _ | App _ | Struct _ | Leaf  | Type_decl _ | Proj _ | Comp_unit _ | Alias _ | Error _)
-  | Abs _, (Var _ | App _ | Struct _ | Leaf  | Type_decl _ | Proj _ | Comp_unit _ | Alias _ | Error _)
-  | App _, (Var _ | Abs _ | Struct _ | Leaf  | Type_decl _ | Proj _ | Comp_unit _ | Alias _ | Error _)
-  | Struct _, (Var _ | Abs _ | App _ | Leaf  | Type_decl _ | Proj _ | Comp_unit _ | Alias _ | Error _)
-  | Leaf, (Var _ | Abs _ | App _ | Struct _ | Proj _ | Type_decl _ | Comp_unit _ | Alias _ | Error _)
-  | Type_decl _, (Var _ | Abs _ | App _ | Struct _ | Leaf  | Proj _ | Comp_unit _ | Alias _ | Error _)
-  | Proj _, (Var _ | Abs _ | App _ | Struct _ | Leaf  | Type_decl _ | Comp_unit _ | Alias _ | Error _)
-  | Comp_unit _, (Var _ | Abs _ | App _ | Struct _ | Leaf  | Type_decl _ | Proj _ | Alias _ | Error _)
-  | Alias _, (Var _ | Abs _ | App _ | Struct _ | Leaf  | Type_decl _ | Proj _ | Comp_unit _ | Error _)
-  | Error _, (Var _ | Abs _ | App _ | Struct _ | Leaf  | Type_decl _ | Proj _ | Comp_unit _ | Alias _)
+
+  | Constr (c1, ts1), Constr (c2, ts2) ->
+    Uid.equal c1 c2
+    && List.equal equal ts1 ts2
+  | Tuple t1, Tuple t2
+  | Unboxed_tuple t1, Unboxed_tuple t2 ->
+    List.equal equal t1 t2
+  | Predef (p1, ts1), Predef (p2, ts2) ->
+    if Predef.equal p1 p2 then
+      List.equal equal ts1 ts2
+    else
+      false
+  | Arrow (t1, t1'), Arrow (t2, t2') ->
+    equal t1 t2 && equal t1' t2'
+  | Poly_variant pvs1, Poly_variant pvs2 ->
+    List.equal equal_poly_variant_constructor pvs1 pvs2
+
+  | Variant c1, Variant c2 ->
+    List.equal equal_simple_constructor c1.simple_constructors c2.simple_constructors
+    && List.equal (equal_complex_constructor (fun (t1, l1) (t2, l2) -> equal t1 t2 && Layout.equal l1 l2)) c1.complex_constructors c2.complex_constructors
+  | Variant_unboxed c1, Variant_unboxed c2 ->
+    String.equal c1.name c2.name
+    && Option.equal String.equal c1.arg_name c2.arg_name
+    && equal c1.arg_shape c2.arg_shape
+    && Layout.equal c1.arg_layout c2.arg_layout
+  | Record r1, Record r2 ->
+    equal_record_kind r1.kind r2.kind
+    && List.equal equal_field r1.fields r2.fields
+
+  | Var _, (Abs _ | App _ | Struct _ | Leaf  | Constr _ | Tuple _ | Unboxed_tuple _ | Predef _ | Arrow _ | Poly_variant _ | Variant _ | Variant_unboxed _ | Record _ | Mu _ | Rec_var _ | Proj _ | Comp_unit _ | Alias _ | Error _)
+  | Abs _, (Var _ | App _ | Struct _ | Leaf  | Constr _ | Tuple _ | Unboxed_tuple _ | Predef _ | Arrow _ | Poly_variant _ | Variant _ | Variant_unboxed _ | Record _ | Mu _ | Rec_var _ | Proj _ | Comp_unit _ | Alias _ | Error _)
+  | App _, (Var _ | Abs _ | Struct _ | Leaf  | Constr _ | Tuple _ | Unboxed_tuple _ | Predef _ | Arrow _ | Poly_variant _ | Variant _ | Variant_unboxed _ | Record _ | Mu _ | Rec_var _ | Proj _ | Comp_unit _ | Alias _ | Error _)
+  | Struct _, (Var _ | Abs _ | App _ | Leaf  | Constr _ | Tuple _ | Unboxed_tuple _ | Predef _ | Arrow _ | Poly_variant _ | Variant _ | Variant_unboxed _ | Record _ | Mu _ | Rec_var _ | Proj _ | Comp_unit _ | Alias _ | Error _)
+  | Leaf, (Var _ | Abs _ | App _ | Struct _ | Proj _ | Constr _ | Tuple _ | Unboxed_tuple _ | Predef _ | Arrow _ | Poly_variant _ | Variant _ | Variant_unboxed _ | Record _ | Mu _ | Rec_var _ | Comp_unit _ | Alias _ | Error _)
+  | Mu _, (Var _ | Abs _ | App _ | Struct _ | Leaf  | Constr _ | Tuple _ | Unboxed_tuple _ | Predef _ | Arrow _ | Poly_variant _ | Variant _ | Variant_unboxed _ | Record _ | Rec_var _ | Proj _ | Comp_unit _ | Alias _ | Error _)
+  | Rec_var _, (Var _ | Abs _ | App _ | Struct _ | Leaf  | Constr _ | Tuple _ | Unboxed_tuple _ | Predef _ | Arrow _ | Poly_variant _ | Variant _ | Variant_unboxed _ | Record _ | Mu _ | Proj _ | Comp_unit _ | Alias _ | Error _)
+  | Proj _, (Var _ | Abs _ | App _ | Struct _ | Leaf  | Constr _ | Tuple _ | Unboxed_tuple _ | Predef _ | Arrow _ | Poly_variant _ | Variant _ | Variant_unboxed _ | Record _ | Mu _ | Rec_var _ | Comp_unit _ | Alias _ | Error _)
+  | Comp_unit _, (Var _ | Abs _ | App _ | Struct _ | Leaf  | Constr _ | Tuple _ | Unboxed_tuple _ | Predef _ | Arrow _ | Poly_variant _ | Variant _ | Variant_unboxed _ | Record _ | Mu _ | Rec_var _ | Proj _ | Alias _ | Error _)
+  | Alias _, (Var _ | Abs _ | App _ | Struct _ | Leaf  | Constr _ | Tuple _ | Unboxed_tuple _ | Predef _ | Arrow _ | Poly_variant _ | Variant _ | Variant_unboxed _ | Record _ | Mu _ | Rec_var _ | Proj _ | Comp_unit _ | Error _)
+  | Error _, (Var _ | Abs _ | App _ | Struct _ | Leaf  | Constr _ | Tuple _ | Unboxed_tuple _ | Predef _ | Arrow _ | Poly_variant _ | Variant _ | Variant_unboxed _ | Record _ | Mu _ | Rec_var _ | Proj _ | Comp_unit _ | Alias _)
+  | Variant _, (Var _ | Abs _ | App _ | Struct _ | Leaf  | Constr _ | Tuple _ | Unboxed_tuple _ | Predef _ | Arrow _ | Poly_variant _ | Variant_unboxed _ | Record _ | Mu _ | Rec_var _ | Proj _ | Comp_unit _ | Alias _ | Error _)
+  | Variant_unboxed _, (Var _ | Abs _ | App _ | Struct _ | Leaf  | Constr _ | Tuple _ | Unboxed_tuple _ | Predef _ | Arrow _ | Variant _ | Poly_variant _ | Record _ | Mu _ | Rec_var _ | Proj _ | Comp_unit _ | Alias _ | Error _)
+  | Record _, (Var _ | Abs _ | App _ | Struct _ | Leaf  | Constr _ | Tuple _ | Unboxed_tuple _ | Predef _ | Arrow _ | Poly_variant _ | Variant _ | Variant_unboxed _ | Mu _ | Rec_var _ | Proj _ | Comp_unit _ | Alias _ | Error _)
+  | Predef _, (Var _ | Abs _ | App _ | Struct _ | Leaf  | Constr _ | Tuple _ | Unboxed_tuple _ | Arrow _ | Poly_variant _ | Variant _ | Variant_unboxed _ | Record _ | Mu _ | Rec_var _ | Proj _ | Comp_unit _ | Alias _ | Error _)
+  | Arrow _, (Var _ | Abs _ | App _ | Struct _ | Leaf  | Constr _ | Tuple _ | Unboxed_tuple _ | Predef _ | Poly_variant _ | Variant _ | Variant_unboxed _ | Record _ | Mu _ | Rec_var _ | Proj _ | Comp_unit _ | Alias _ | Error _)
+  | Poly_variant _, (Var _ | Abs _ | App _ | Struct _ | Leaf  | Constr _ | Tuple _ | Unboxed_tuple _ | Predef _ | Arrow _ | Variant _ | Variant_unboxed _ | Record _ | Mu _ | Rec_var _ | Proj _ | Comp_unit _ | Alias _ | Error _)
+  | Tuple _, (Var _ | Abs _ | App _ | Struct _ | Leaf  | Constr _ | Unboxed_tuple _ | Predef _ | Arrow _ | Poly_variant _ | Variant _ | Variant_unboxed _ | Record _ | Mu _ | Rec_var _ | Proj _ | Comp_unit _ | Alias _ | Error _)
+  | Unboxed_tuple _, (Var _ | Abs _ | App _ | Struct _ | Leaf  | Constr _ | Tuple _ | Predef _ | Arrow _ | Poly_variant _ | Variant _ | Variant_unboxed _ | Record _ | Mu _ | Rec_var _ | Proj _ | Comp_unit _ | Alias _ | Error _)
+  | Constr _, (Var _ | Abs _ | App _ | Struct _ | Leaf  | Tuple _ | Unboxed_tuple _ | Predef _ | Arrow _ | Poly_variant _ | Variant _ | Variant_unboxed _ | Record _ | Mu _ | Rec_var _ | Proj _ | Comp_unit _ | Alias _ | Error _)
     -> false
 
 and equal t1 t2 =
@@ -539,52 +580,6 @@ and equal t1 t2 =
   else if not (Bool.equal t1.approximated t2.approximated) then false
   else if not (Option.equal Uid.equal t1.uid t2.uid) then false
   else equal_desc t1.desc t2.desc
-
-and equal_tds t1 t2 =
-  equal_tds_desc t1.definition t2.definition &&
-  List.equal (equal_ts equal_without_layout) t1.type_params t2.type_params
-
-and equal_tds_desc d1 d2 =
-  if d1 == d2 then true else
-  match d1, d2 with
-  | Tds_alias t1, Tds_alias t2 -> equal_ts equal_without_layout t1 t2
-  | Tds_record {fields = fields1; kind = kind1},
-    Tds_record {fields = fields2; kind = kind2} ->
-    equal_record_kind kind1 kind2 &&
-    List.equal equal_field fields1 fields2
-  | Tds_variant { simple_constructors = simple_constructors1;
-                  complex_constructors = complex_constructors1 },
-    Tds_variant { simple_constructors = simple_constructors2;
-                  complex_constructors = complex_constructors2 } ->
-    List.equal
-      equal_simple_constructor
-      simple_constructors1
-      simple_constructors2
-    && List.equal
-      (equal_complex_constructor (fun (sh1, ly1) (sh2, ly2) ->
-          equal_ts equal_without_layout sh1 sh2 && Layout.equal ly1 ly2))
-      complex_constructors1
-      complex_constructors2
-  | Tds_variant_unboxed { name = name1; arg_name = arg_name1;
-                          arg_shape = arg_shape1; arg_layout = arg_layout1 },
-    Tds_variant_unboxed { name = name2; arg_name = arg_name2;
-                          arg_shape = arg_shape2; arg_layout = arg_layout2 } ->
-    String.equal name1 name2 &&
-    Option.equal String.equal arg_name1 arg_name2 &&
-    equal_ts equal_without_layout arg_shape1 arg_shape2 &&
-    Layout.equal arg_layout1 arg_layout2
-  | Tds_other, Tds_other -> true
-  | Tds_alias _,
-    (Tds_record _ | Tds_variant _ | Tds_variant_unboxed _ | Tds_other)
-  | Tds_record _,
-    (Tds_alias _ | Tds_variant _ | Tds_variant_unboxed _ | Tds_other)
-  | Tds_variant _,
-    (Tds_alias _ | Tds_record _ | Tds_variant_unboxed _ | Tds_other)
-  | Tds_variant_unboxed _,
-    (Tds_alias _ | Tds_record _ | Tds_variant _ | Tds_other)
-  | Tds_other,
-    (Tds_alias _ | Tds_record _ | Tds_variant _ | Tds_variant_unboxed _)
-    -> false
 
 and equal_record_kind k1 k2 =
   match k1, k2 with
@@ -608,7 +603,7 @@ and equal_record_kind k1 k2 =
 
 and equal_field (s1, sh1, ly1) (s2, sh2, ly2) =
   String.equal s1 s2 &&
-  equal_ts equal_without_layout sh1 sh2 &&
+  equal sh1 sh2 &&
   Layout.equal ly1 ly2
 
 and equal_simple_constructor c1 c2 = String.equal c1 c2
@@ -632,71 +627,22 @@ and equal_constructor_representation k1 k2 =
     Misc.Stdlib.Array.equal Layout.equal lys1 lys2
 
 
-and equal_without_layout =
-  function Layout_to_be_determined ->
-  function Layout_to_be_determined -> true
-
-and equal_poly_variant_constructor eq
+and equal_poly_variant_constructor
   { pv_constr_name = name1; pv_constr_args = args1 }
   { pv_constr_name = name2; pv_constr_args = args2 } =
   String.equal name1 name2 &&
-  List.equal (equal_ts eq) args1 args2
-
-and equal_ts :
-  'a. ('a -> 'a -> bool) -> 'a ts -> 'a ts -> bool =
-  fun eq t1 t2 ->
-  match t1, t2 with
-  | Ts_constr ((sh1, ly1), ts1), Ts_constr ((sh2, ly2), ts2) ->
-    equal sh1 sh2 &&
-    eq ly1 ly2 &&
-    List.equal (equal_ts equal_without_layout) ts1 ts2
-  | Ts_tuple ts1, Ts_tuple ts2 ->
-    List.equal (equal_ts eq) ts1 ts2
-  | Ts_unboxed_tuple ts1, Ts_unboxed_tuple ts2 ->
-    List.equal (equal_ts eq) ts1 ts2
-  | Ts_var (name1, ly1), Ts_var (name2, ly2) ->
-    Option.equal String.equal name1 name2 &&
-    eq ly1 ly2
-  | Ts_predef (predef1, shapes1), Ts_predef (predef2, shapes2) ->
-    Predef.equal predef1 predef2 &&
-    List.equal (equal_ts equal_without_layout) shapes1 shapes2
-  | Ts_arrow (arg1, ret1), Ts_arrow (arg2, ret2) ->
-    equal_ts equal_without_layout arg1 arg2 &&
-    equal_ts equal_without_layout ret1 ret2
-  | Ts_variant (cstrs1), Ts_variant (cstrs2) ->
-    List.equal (equal_poly_variant_constructor eq) cstrs1 cstrs2
-  | Ts_other ly1, Ts_other ly2 -> eq ly1 ly2
-  | Ts_constr _,
-      (Ts_other _ | Ts_predef _ | Ts_arrow _ | Ts_variant _ | Ts_tuple _
-       | Ts_unboxed_tuple _ | Ts_var _)
-  | Ts_other _,
-      (Ts_constr _ | Ts_predef _ | Ts_arrow _ | Ts_variant _ | Ts_tuple _
-       | Ts_unboxed_tuple _ | Ts_var _)
-  | Ts_predef _ ,
-      (Ts_constr _ | Ts_other _ | Ts_arrow _ | Ts_variant _ | Ts_tuple _
-       | Ts_unboxed_tuple _ | Ts_var _)
-  | Ts_arrow _ ,
-      (Ts_constr _ | Ts_predef _ | Ts_other _ | Ts_variant _ | Ts_tuple _
-       | Ts_unboxed_tuple _ | Ts_var _)
-  | Ts_variant _ ,
-      (Ts_constr _ | Ts_predef _ | Ts_arrow _ | Ts_other _  | Ts_tuple _
-       | Ts_unboxed_tuple _ | Ts_var _)
-  | Ts_tuple _ ,
-      (Ts_constr _ | Ts_predef _ | Ts_arrow _ | Ts_variant _ | Ts_other _
-       | Ts_unboxed_tuple _ | Ts_var _)
-  | Ts_unboxed_tuple _ ,
-      (Ts_constr _ | Ts_predef _ | Ts_arrow _ | Ts_variant _ | Ts_other _
-       | Ts_tuple _ | Ts_var _)
-  | Ts_var _ ,
-      (Ts_constr _ | Ts_predef _ | Ts_arrow _ | Ts_variant _ | Ts_other _
-       | Ts_tuple _ | Ts_unboxed_tuple _)
-    -> false
+  List.equal equal args1 args2
 
 
 
 let rec print fmt t =
   let print_uid_opt =
     Format.pp_print_option (fun fmt -> Format.fprintf fmt "<%a>" Uid.print)
+  in
+  let print_nested fmt t =
+    match t.desc with
+    | Var _ | Leaf | Rec_var _ | Comp_unit _ | Error _ | Predef (_, []) -> print fmt t
+    | _ -> Format.fprintf fmt "(@[%a@])" print t
   in
   let rec aux fmt { uid; desc; hash = _ } =
     match desc with
@@ -719,14 +665,18 @@ let rec print fmt t =
         Format.fprintf fmt "Abs@[%a@,(@[%a,@ @[%a@]@])@]"
           print_uid_opt uid pp_idents (id :: other_idents) aux body
     | App (t1, t2) ->
-        Format.fprintf fmt "@[%a(@,%a)%a@]" aux t1 aux t2
+        Format.fprintf fmt "@[%a(@,%a) %a@]" aux t1 aux t2
           print_uid_opt uid
     | Leaf ->
         Format.fprintf fmt "<%a>" (Format.pp_print_option Uid.print) uid
-    | Type_decl decl ->
-      Format.fprintf fmt "<%a> = %a"
-        (Format.pp_print_option Uid.print) uid
-        print_type_decl_shape decl
+    | Mu (t_body) ->
+      Format.fprintf fmt "Rec@[%a %a@]"
+        print_uid_opt uid
+        print_nested t_body
+    | Rec_var id ->
+      Format.fprintf fmt "#%d%a"
+      id
+      print_uid_opt uid
     | Proj (t, item) ->
         begin match uid with
         | None ->
@@ -756,83 +706,87 @@ let rec print fmt t =
         Format.fprintf fmt "Alias@[(@[<v>%a@,%a@])@]" print_uid_opt uid aux t
     | Error s ->
         Format.fprintf fmt "Error %s" s
+    | Constr (uid, args) ->
+        Format.fprintf fmt "Constr %a %a"
+          (Uid.print) uid
+          (Format.pp_print_list print) args
+    | Tuple shapes ->
+      Format.fprintf fmt "@[%a@]"
+        (Format.pp_print_list
+            ~pp_sep:(fun fmt () -> Format.pp_print_string fmt " * ")
+            print_nested)
+        shapes
+    | Unboxed_tuple shapes ->
+      Format.fprintf fmt "Unboxed_tuple (%a)"
+        (Format.pp_print_list
+            ~pp_sep:(fun fmt () -> Format.pp_print_string fmt ", ")
+            print)
+        shapes
+    | Predef (predef, args) ->
+      Format.fprintf fmt "Predef %s (%a)"
+        (Predef.to_string predef)
+        (Format.pp_print_list print) args
+    | Arrow (arg, ret) ->
+      Format.fprintf fmt "Arrow (%a, %a)" print arg print ret
+    | Poly_variant fields ->
+      Format.fprintf fmt "Poly_variant (%a)"
+        (Format.pp_print_list
+            ~pp_sep:(fun fmt () -> Format.pp_print_string fmt ", ")
+            (fun fmt { pv_constr_name; pv_constr_args } ->
+              Format.fprintf fmt "%s (%a)" pv_constr_name
+                (Format.pp_print_list
+                  ~pp_sep:(fun fmt () -> Format.pp_print_string fmt ", ")
+                  print)
+                pv_constr_args))
+        fields
+    | Variant { simple_constructors; complex_constructors } ->
+      let constructors = List.map (fun c -> `Simple c) simple_constructors @
+        List.map (fun c -> `Complex c) complex_constructors in
+      let print_constructor fmt = function
+        | `Simple s -> Format.pp_print_string fmt s
+        | `Complex c -> print_complex_constructor (fun fmt (t, _) -> print_nested fmt t) fmt c
+      in
+      Format.fprintf fmt
+        "Variant %a"
+        (Format.pp_print_list ~pp_sep:(fun fmt () -> Format.fprintf fmt "@ | ")
+            print_constructor)
+        constructors
+  | Variant_unboxed { name; arg_name; arg_shape; arg_layout } ->
+    Format.fprintf fmt
+      "Variant_unboxed name=%s arg_name=%s arg_shape=%a arg_layout=%a"
+      name
+      (Option.value ~default:"None" arg_name)
+      print arg_shape Layout.format arg_layout
+  | Record { fields; kind } ->
+    Format.fprintf fmt "Record%s { %a }" (print_record_type kind)
+      (Format.pp_print_list ~pp_sep:(print_sep_string "; ") print_field)
+      fields
   in
   if t.approximated then
     Format.fprintf fmt "@[(approx)@ %a@]@;" aux t
   else
     Format.fprintf fmt "@[%a@]@;" aux t
 
-(* printing type shapes *)
-and print_type_shape : type a. Format.formatter -> a ts -> unit =
-  fun ppf -> function
-  | Ts_predef (predef, shapes) ->
-    Format.fprintf ppf "Ts_predef %s (%a)" (Predef.to_string predef)
-      (Format.pp_print_list
-          ~pp_sep:(fun ppf () -> Format.pp_print_string ppf ", ")
-          print_type_shape)
-      shapes
-  | Ts_constr ((shape, _), shapes) ->
-    Format.fprintf ppf "Ts_constr shape=%a (%a)"
-    print shape
-      (Format.pp_print_list
-        ~pp_sep:(fun ppf () -> Format.pp_print_string ppf ", ")
-        print_type_shape)
-      shapes
-  | Ts_tuple shapes ->
-    Format.fprintf ppf "Ts_tuple (%a)"
-      (Format.pp_print_list
-          ~pp_sep:(fun ppf () -> Format.pp_print_string ppf ", ")
-          print_type_shape)
-      shapes
-  | Ts_unboxed_tuple shapes ->
-    Format.fprintf ppf "Ts_unboxed_tuple (%a)"
-      (Format.pp_print_list
-          ~pp_sep:(fun ppf () -> Format.pp_print_string ppf ", ")
-          print_type_shape)
-      shapes
-  | Ts_var (name, _) ->
-    Format.fprintf ppf "Ts_var (%a)"
-      (fun ppf opt -> Format.pp_print_option Format.pp_print_string ppf opt)
-      name
-  | Ts_arrow (arg, ret) ->
-    Format.fprintf ppf "Ts_arrow (%a, %a)" print_type_shape arg print_type_shape ret
-  | Ts_variant fields ->
-    Format.fprintf ppf "Ts_variant (%a)"
-      (Format.pp_print_list
-          ~pp_sep:(fun ppf () -> Format.pp_print_string ppf ", ")
-          (fun ppf { pv_constr_name; pv_constr_args } ->
-            Format.fprintf ppf "%s (%a)" pv_constr_name
-              (Format.pp_print_list
-                ~pp_sep:(fun ppf () -> Format.pp_print_string ppf ", ")
-                print_type_shape)
-              pv_constr_args))
-      fields
-  | Ts_other _ -> Format.fprintf ppf "Ts_other"
-
-(* printing type declaration shapes *)
 (* We use custom strings as separators instead of pp_print_space, because the
     latter introduces line breaks that can mess up the tables with all shapes.*)
-and print_sep_string str ppf () = Format.pp_print_string ppf str
+and print_sep_string str fmt () = Format.pp_print_string fmt str
 
-and print_one_entry print_value ppf { field_name; field_value } =
+and print_one_entry print_value fmt { field_name; field_value } =
   match field_name with
   | Some name ->
-    Format.fprintf ppf "%a=%a" Format.pp_print_string name print_value
+    Format.fprintf fmt "%a=%a" Format.pp_print_string name print_value
       field_value
-  | None -> Format.fprintf ppf "%a" print_value field_value
+  | None -> Format.fprintf fmt "%a" print_value field_value
 
-and print_complex_constructor print_value ppf { name; kind = _; args } =
-  Format.fprintf ppf "(%a of %a)" Format.pp_print_string name
+and print_complex_constructor print_value fmt { name; kind = _; args } =
+  Format.fprintf fmt "@[%a of @[%a@]@]" Format.pp_print_string name
     (Format.pp_print_list ~pp_sep:(print_sep_string " * ")
         (print_one_entry print_value))
     args
 
-and print_only_shape ppf (shape, _) = print_type_shape ppf shape
-
-and print_field ppf
-    ((name, shape, _) : _ * without_layout ts * _) =
-  Format.fprintf ppf "%a: %a" Format.pp_print_string name print_type_shape
-    shape
+and print_field fmt
+    ((name, shape, _) : _ * t * _) =
+  Format.fprintf fmt "%a: %a" Format.pp_print_string name print shape
 
 and print_record_type = function
   | Record_boxed -> "_boxed"
@@ -840,33 +794,6 @@ and print_record_type = function
   | Record_mixed _ -> "_mixed"
   | Record_unboxed -> " [@@unboxed]"
   | Record_unboxed_product -> "_unboxed_product"
-
-and print_tds_desc ppf = function
-  | Tds_variant { simple_constructors; complex_constructors } ->
-    Format.fprintf ppf
-      "Tds_variant simple_constructors=%a complex_constructors=%a"
-      (Format.pp_print_list ~pp_sep:(print_sep_string " | ")
-          Format.pp_print_string)
-      simple_constructors
-      (Format.pp_print_list ~pp_sep:(print_sep_string " | ")
-          (print_complex_constructor print_only_shape))
-      complex_constructors
-  | Tds_variant_unboxed { name; arg_name; arg_shape; arg_layout } ->
-    Format.fprintf ppf
-      "Tds_variant_unboxed name=%s arg_name=%s arg_shape=%a arg_layout=%a"
-      name
-      (Option.value ~default:"None" arg_name)
-      print_type_shape arg_shape Layout.format arg_layout
-  | Tds_record { fields; kind } ->
-    Format.fprintf ppf "Tds_record%s { %a }" (print_record_type kind)
-      (Format.pp_print_list ~pp_sep:(print_sep_string "; ") print_field)
-      fields
-  | Tds_alias type_shape ->
-    Format.fprintf ppf "Tds_alias %a" print_type_shape type_shape
-  | Tds_other -> Format.fprintf ppf "Tds_other"
-
-and print_type_decl_shape ppf t =
-  print_tds_desc ppf t.definition
 
 let rec strip_head_aliases = function
   | { desc = Alias t; _ } -> strip_head_aliases t
@@ -881,6 +808,19 @@ let hash_app = 6
 let hash_comp_unit = 7
 let hash_alias = 8
 let hash_error = 9
+let hash_mu = 10
+let hash_rec_var = 11
+let hash_tuple = 12
+let hash_unboxed_tuple = 13
+let hash_predef = 14
+let hash_arrow = 15
+let hash_poly_variant = 16
+let hash_variant = 17
+let hash_variant_unboxed = 18
+let hash_record = 19
+
+let hash_constr = 20
+
 
 let fresh_var ?(name="shape-var") uid =
   let var = Ident.create_local name in
@@ -892,6 +832,12 @@ let for_unnamed_functor_param = Ident.create_local "()"
 
 let var uid id =
   { uid = Some uid; desc = Var id;
+    hash = Hashtbl.hash (hash_var, Some uid, id);
+    approximated = false }
+
+(* variable without uid *)
+let var' uid id =
+  { uid; desc = Var id;
     hash = Hashtbl.hash (hash_var, uid, id);
     approximated = false }
 
@@ -919,12 +865,6 @@ let leaf' uid =
 
 let leaf uid = leaf' (Some uid)
 
-let type_decl uid name =
-  { uid;
-    desc = Type_decl name;
-    hash = Hashtbl.hash (hash_alias, uid, name);
-    approximated = false }
-
 let approx t = { t with approximated = true}
 
 let set_approximated ~approximated t = { t with approximated}
@@ -950,6 +890,53 @@ let app ?uid f ~arg =
 let comp_unit ?uid s =
       { uid; desc = Comp_unit s; hash = Hashtbl.hash (hash_comp_unit, uid, s);
         approximated = false }
+
+let mu ?uid t_body =
+  { uid; desc = Mu (t_body); hash = Hashtbl.hash (hash_mu, uid, t_body.hash);
+    approximated = false }
+
+let rec_var ?uid n =
+  { uid; desc = Rec_var n; hash = Hashtbl.hash (hash_rec_var, uid, n);
+    approximated = false }
+
+let app_list (base_shape : t) (args : t list) : t =
+  List.fold_left (fun shape arg -> app shape ~arg) base_shape args
+  (* CR sspies: Double check whether this should be fold_left or fold_right. *)
+
+let abs_list (base_shape : t) (binders : Ident.t list) : t =
+  List.fold_right (fun shape id -> abs shape id) binders base_shape
+
+let tuple ?uid (ts : t list) = { uid; desc = Tuple ts; hash = Hashtbl.hash (hash_tuple, uid, List.map (fun t -> t.hash) ts); approximated = false }
+
+let unboxed_tuple ?uid (ts : t list) = { uid; desc = Unboxed_tuple ts; hash = Hashtbl.hash (hash_unboxed_tuple, uid, List.map (fun t -> t.hash) ts); approximated = false }
+
+let predef ?uid (p : Predef.t) (ts : t list) = { uid; desc = Predef (p, ts); hash = Hashtbl.hash (hash_predef, uid, p, List.map (fun t -> t.hash) ts); approximated = false }
+
+let arrow ?uid t1 t2 = { uid; desc = Arrow (t1, t2); hash = Hashtbl.hash (hash_arrow, uid, t1.hash, t2.hash); approximated = false }
+
+let poly_variant ?uid t = { uid; desc = Poly_variant t; hash = Hashtbl.hash (hash_poly_variant, uid, poly_variant_constructors_map (fun t -> t.hash) t); approximated = false }
+
+let variant ?uid simple_constructors complex_constructors =
+  { uid; desc = Variant { simple_constructors; complex_constructors };
+    hash = Hashtbl.hash (hash_variant, uid, simple_constructors,
+      complex_constructors_map (fun (t, ly) -> (t.hash, ly)) complex_constructors);
+    approximated = false }
+
+let variant_unboxed ?uid name arg_name arg_shape arg_layout =
+  { uid; desc = Variant_unboxed { name; arg_name; arg_shape; arg_layout };
+    hash = Hashtbl.hash (hash_variant_unboxed, uid, name, arg_name, arg_shape.hash, arg_layout);
+    approximated = false }
+
+let record ?uid kind fields =
+  { uid; desc = Record { fields; kind };
+    hash = Hashtbl.hash (hash_record, uid,
+      List.map (fun (i, t, ly) -> (i, t.hash, ly)) fields, kind);
+  approximated = false }
+
+let constr ?uid constr_uid args =
+  { uid; desc = Constr (constr_uid, args);
+    hash = Hashtbl.hash (hash_constr, uid, constr_uid, List.map (fun t -> t.hash) args);
+    approximated = false }
 
 let no_fuel_left ?uid s = { s with uid }
 
@@ -1003,175 +990,28 @@ let for_persistent_unit s =
 let leaf_for_unpack = leaf' None
 
 let set_uid_if_none t uid =
-  match t.uid with
-  | None -> { t with uid = Some uid }
-  | _ -> t
-
-
-let poly_variant_constructors_map f pvs =
-  List.map
-    (fun pv -> { pv with pv_constr_args = List.map f pv.pv_constr_args })
-    pvs
-
-let rec shape_layout (sh : Layout.t ts) =
-  match sh with
-  | Ts_constr ((_, ly), _) -> ly
-  | Ts_tuple _ -> Layout.Base Value
-  | Ts_unboxed_tuple shapes -> Layout.Product (List.map shape_layout shapes)
-  | Ts_var (_, ly) -> ly
-  | Ts_predef (predef, _) -> Predef.predef_to_layout predef
-  | Ts_arrow _ -> Layout.Base Value
-  | Ts_variant _ -> Layout.Base Value
-  | Ts_other ly -> ly
-
-
-let complex_constructor_map f { name; kind; args } =
-  let args =
-    List.map
-      (fun { field_name; field_value } ->
-        { field_name; field_value = f field_value })
-      args
-  in
-  { name; kind; args }
-
-let complex_constructors_map f = List.map (complex_constructor_map f)
-
-
-let rec shape_with_layout ~(layout : Layout.t) (sh : without_layout ts) :
-    Layout.t ts =
-  match sh, layout with
-  | Ts_constr ((sh, Layout_to_be_determined), shapes), _ ->
-    Ts_constr ((sh, layout), shapes)
-  | Ts_tuple shapes, Base Value ->
-    let layouted_shapes =
-      List.map (shape_with_layout ~layout:(Layout.Base Value)) shapes
-    in
-    Ts_tuple layouted_shapes
-  | ( Ts_tuple _,
-      ( Product _
-      | Base
-          ( Void | Bits32 | Bits64 | Float64 | Float32 | Word | Vec128
-          | Vec256 | Vec512 ) ) ) ->
-    Misc.fatal_errorf "tuple shape must have layout value, but has layout %a"
-      Layout.format layout
-  | Ts_unboxed_tuple shapes, Product lys
-    when List.length shapes = List.length lys ->
-    let shapes_and_layouts = List.combine shapes lys in
-    let layouted_shapes =
-      List.map
-        (fun (shape, layout) -> shape_with_layout ~layout shape)
-        shapes_and_layouts
-    in
-    Ts_unboxed_tuple layouted_shapes
-  | Ts_unboxed_tuple shapes, Product lys ->
-    Misc.fatal_errorf "unboxed tuple shape has %d shapes, but %d layouts"
-      (List.length shapes) (List.length lys)
-  | ( Ts_unboxed_tuple _,
-      Base
-        ( Void | Value | Float32 | Float64 | Word | Bits32 | Bits64 | Vec128
-        | Vec256 | Vec512 ) ) ->
-    Misc.fatal_errorf
-      "unboxed tuple must have unboxed product layout, but has layout %a"
-      Layout.format layout
-  | Ts_var (name, Layout_to_be_determined), _ -> Ts_var (name, layout)
-  | Ts_arrow (arg, ret), Base Value -> Ts_arrow (arg, ret)
-  | Ts_arrow _, _ ->
-    Misc.fatal_errorf "function type shape must have layout value"
-  | Ts_predef (predef, shapes), _
-    when Layout.equal (Predef.predef_to_layout predef) layout ->
-    Ts_predef (predef, shapes)
-  | Ts_predef (predef, _), _ ->
-    Misc.fatal_errorf
-      "predef %s has layout %a, but is expected to have layout %a"
-      (Predef.to_string predef) Layout.format
-      (Predef.predef_to_layout predef)
-      Layout.format layout
-  | Ts_variant fields, Base Value ->
-    let fields =
-      poly_variant_constructors_map
-        (shape_with_layout ~layout:(Layout.Base Value))
-        fields
-    in
-    Ts_variant fields
-  | Ts_variant _, _ ->
-    Misc.fatal_errorf "polymorphic variant must have layout value"
-  | Ts_other Layout_to_be_determined, _ -> Ts_other layout
-
-
-
-(* CR sspies: This is a hacky "solution" to do type variable substitution in
-    type expression shapes. In subsequent PRs, this code should be changed to
-    use the shape mechanism instead. *)
-let rec replace_tvar t ~(pairs : (without_layout ts * without_layout ts) list)
-    =
-  match
-    List.filter_map
-      (fun (from, to_) -> if t = from then Some to_ else None)
-      pairs
-  with
-  | new_type :: _ -> new_type
-  | [] -> (
-    match t with
-    | Ts_constr (uid, shape_list) ->
-      Ts_constr (uid, List.map (replace_tvar ~pairs) shape_list)
-    | Ts_tuple shape_list ->
-      Ts_tuple (List.map (replace_tvar ~pairs) shape_list)
-    | Ts_unboxed_tuple shape_list ->
-      Ts_unboxed_tuple (List.map (replace_tvar ~pairs) shape_list)
-    | Ts_var (name, ly) -> Ts_var (name, ly)
-    | Ts_predef (predef, shape_list) -> Ts_predef (predef, shape_list)
-    | Ts_arrow (arg, ret) ->
-      Ts_arrow (replace_tvar ~pairs arg, replace_tvar ~pairs ret)
-    | Ts_variant fields ->
-      let fields =
-        poly_variant_constructors_map (replace_tvar ~pairs) fields
-      in
-      Ts_variant fields
-    | Ts_other ly -> Ts_other ly)
-
-(* CR sspies: This is a hacky "solution" to do type variable substitution in
-    type declaration shapes. In subsequent PRs, this code should be changed to
-    use the shape mechanism instead. *)
-let replace_tvar (t : tds)
-    (shapes : without_layout ts list) =
-  match List.length t.type_params == List.length shapes with
-  | true ->
-    let subst = List.combine t.type_params shapes in
-    let replace_tvar_shape = replace_tvar in
-    let replace_tvar (sh, ly) = replace_tvar ~pairs:subst sh, ly in
-    let ret =
-      { type_params = [];
-        definition =
-          (match t.definition with
-          | Tds_variant { simple_constructors; complex_constructors } ->
-            Tds_variant
-              { simple_constructors;
-                complex_constructors =
-                  complex_constructors_map replace_tvar complex_constructors
-              }
-          | Tds_variant_unboxed { name; arg_name; arg_shape; arg_layout } ->
-            Tds_variant_unboxed
-              { name;
-                arg_name;
-                arg_shape = replace_tvar_shape ~pairs:subst arg_shape;
-                arg_layout
-              }
-          | Tds_record { fields; kind } ->
-            Tds_record
-              { fields =
-                  List.map
-                    (fun (name, sh, ly) ->
-                      name, replace_tvar_shape ~pairs:subst sh, ly)
-                    fields;
-                kind
-              }
-          | Tds_alias type_shape ->
-            Tds_alias (replace_tvar_shape ~pairs:subst type_shape)
-          | Tds_other -> Tds_other)
-      }
-    in
-    ret
-  | false -> { type_params = []; definition = Tds_other }
+  let uid = Option.value ~default:uid t.uid in
+  match t.desc with
+  | Var v -> var uid v
+  | Abs (x, t) -> abs ~uid x t
+  | App (t1, t2) -> app ~uid t1 ~arg:t2
+  | Struct t -> str ~uid t
+  | Alias t -> alias ~uid t
+  | Leaf -> leaf uid
+  | Proj (t, i) -> proj ~uid t i
+  | Comp_unit c -> comp_unit ~uid c
+  | Error s -> error ~uid s
+  | Mu t -> mu ~uid t
+  | Rec_var i -> rec_var ~uid i
+  | Constr (c, ts) -> constr ~uid c ts
+  | Tuple ts -> tuple ~uid ts
+  | Unboxed_tuple ts -> unboxed_tuple ~uid ts
+  | Predef (p, ts) -> predef ~uid p ts
+  | Arrow (t1, t2) -> arrow ~uid t1 t2
+  | Poly_variant t -> poly_variant ~uid t
+  | Variant t -> variant ~uid t.simple_constructors t.complex_constructors
+  | Variant_unboxed t -> variant_unboxed ~uid t.name t.arg_name t.arg_shape t.arg_layout
+  | Record t -> record ~uid t.kind t.fields
 
 
 module Map = struct
