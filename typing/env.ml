@@ -2946,26 +2946,23 @@ let save_signature_with_imports ~alerts sg modname cu cmi imports =
 
 (* Make the initial environment, without language extensions *)
 let initial =
-  (* We collect all the type declarations that are added to the initial
-     environment in a table. *)
-  let added_types = Ident.Tbl.create 16 in
+  let shape_of_path env path ~args =
+    Option.map (fun sh -> Shape.app_list sh args)
+      (shape_of_path_opt ~namespace:Type env path)
+  in
   let add_type_and_remember_decl (type_ident : Ident.t) decl env =
-    Ident.Tbl.add added_types type_ident decl;
-    add_type type_ident decl env ~check:false
+    let shape = Type_shape.Type_decl_shape.of_type_declarations [type_ident, decl] (shape_of_path env) in
+    let shape = match shape with [shape] -> shape | _ -> assert false in
+    Uid.Tbl.add Type_shape.all_type_decls decl.type_uid shape;
+    (* CR sspies: Adding it to [all_type_decls] is not needed at this point. The
+       relevant information now lives in the shapes themselves. *)
+    add_type type_ident ~shape decl env ~check:false
   in
   let initial_env = Predef.build_initial_env
                       add_type_and_remember_decl
                       (add_extension ~check:false ~rebind:false)
                       empty
   in
-  (* We record the type declarations for the type shapes. *)
-  let shape_of_path path ~args =
-    Option.map (fun sh -> Shape.app_list sh args)
-      (shape_of_path_opt ~namespace:Type initial_env path)
-  in
-  Ident.Tbl.iter (fun id decl ->
-    Type_shape.add_to_type_decls [id, decl] shape_of_path
-  ) added_types;
   initial_env
 
 let add_language_extension_types env =

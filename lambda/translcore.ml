@@ -1599,11 +1599,9 @@ and transl_tupled_function
   | _ -> None
 
 and env_shape_of_path env path ~args =
-  let decl = try Some (Env.find_type path env) with Not_found -> None in
-  Option.map (fun decl ->
-    (* We abbreviate shapes by their UIDs in cases, where they have one to
-       reduce the size of shapes for variables. *)
-    Shape.constr decl.type_uid args) decl
+  match Env.shape_of_path_opt ~namespace:Type env path with
+  | None -> None
+  | Some sh -> Some (Shape.app_list sh args)
 
 and add_type_shape ~env uid type_expr sort =
   Type_shape.add_to_type_shapes uid type_expr sort

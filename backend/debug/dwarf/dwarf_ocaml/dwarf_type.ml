@@ -1335,7 +1335,13 @@ let rec type_shape_to_dwarf_die ?type_name (type_shape : Shape.t)
          do not have sufficient information. *)
       create_base_layout_type ~reference type_layout ?name ~parent_proto_die
         ~fallback_value_die ()
-    | Abs _ | Comp_unit _ | Struct _ | Var _ ->
+    | ProjDecl _ ->
+      (* CR sspies: This case should have been ruled out by the recursive
+         unfolding. *)
+      Misc.fatal_error
+        "Projections from mutually recursive definitions should have been \
+         resolved at this point."
+    | Abs _ | Comp_unit _ | Struct _ | Var _ | Mutrec _ ->
       (* CR sspies: In these cases, we have generated an ill-formed term for
          shape reduction, which should result in a louder error. *)
       Misc.fatal_error
@@ -1496,7 +1502,7 @@ let rec flatten_type_shape (type_shape : Shape.t) (type_layout : Layout.t) =
     (* In these cases, something has gone wrong during reduction, because we do
        not have sufficient information. *)
     unknown_base_layouts type_layout
-  | (Abs _ | Comp_unit _ | Struct _ | Var _), _ ->
+  | (Abs _ | Comp_unit _ | Struct _ | Var _ | ProjDecl _ | Mutrec _), _ ->
     (* CR sspies: In these cases, we have generated an ill-formed term for shape
        reduction, which should result in a louder error. *)
     Misc.fatal_error
@@ -1526,10 +1532,10 @@ module With_cms_reduce = Shape_reduce.Make (struct
 
   let remove_uids = true
 
-  let lookup_shape_for_uid uid = Type_shape.find_in_type_decls uid
+  let unfold_recursive_types = true
 end)
 
-let debug_print_reduction_before_and_after = false
+let debug_print_reduction_before_and_after = true
 
 let variable_to_die state (var_uid : Uid.t) ~parent_proto_die =
   let fallback_value_die =
@@ -1558,6 +1564,7 @@ let variable_to_die state (var_uid : Uid.t) ~parent_proto_die =
     if debug_print_reduction_before_and_after
     then Format.eprintf "before reduction %a@." Shape.print type_shape;
     let type_shape = shape_reduce type_shape in
+    let type_shape = Type_shape.unfold_and_evaluate type_shape in
     if debug_print_reduction_before_and_after
     then Format.eprintf "after reduction %a@." Shape.print type_shape;
     let type_shape =

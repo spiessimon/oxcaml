@@ -47,8 +47,17 @@ end = struct
     | Mu sh ->
       Shape.mu ?uid:outer.uid
         (shape_subst_uid_with_rec_var ~preserve_uid uid (rv + 1) sh)
-    | Constr (uid, args) ->
-      Shape.constr ?uid:outer.uid uid
+    | Mutrec map ->
+      Shape.mutrec ?uid:outer.uid
+        (Ident.Map.map
+           (fun sh -> shape_subst_uid_with_rec_var ~preserve_uid uid rv sh)
+           map)
+    | ProjDecl (sh, id) ->
+      Shape.proj_decl ?uid:outer.uid
+        (shape_subst_uid_with_rec_var ~preserve_uid uid rv sh)
+        id
+    | Constr (id, args) ->
+      Shape.constr ?uid:outer.uid id
         (List.map (shape_subst_uid_with_rec_var ~preserve_uid uid rv) args)
     | Tuple shapes ->
       Shape.tuple ?uid:outer.uid
@@ -549,8 +558,8 @@ module Type_decl_shape = struct
     | _ -> false
 
   let shape_of_path_with_declarations
-      (decl_lookup_map : Types.type_declaration Ident.Map.t) shape_of_path ~id:_
-      ~decl_args path ~args:inner_args =
+      (decl_lookup_map : Types.type_declaration Ident.Map.t) shape_of_path
+      ~recursive ~id:_ ~decl_args path ~args:inner_args =
     match shape_of_path path ~args:inner_args with
     | Some s -> Some s
     | None -> (
@@ -558,17 +567,20 @@ module Type_decl_shape = struct
       | Path.Pident id' -> (
         match Ident.Map.find_opt id' decl_lookup_map with
         | None -> None
-        | Some decl when List.equal Shape.equal decl_args inner_args ->
-          Some (Shape.constr decl.type_uid inner_args)
-        | Some decl when List.for_all is_closed_type_shape inner_args ->
-          Some (Shape.constr decl.type_uid inner_args)
-        | Some decl ->
+        | Some _ when List.equal Shape.equal decl_args inner_args ->
+          recursive := true;
+          Some (Shape.constr id' inner_args)
+        | Some _ when List.for_all is_closed_type_shape inner_args ->
+          recursive := true;
+          Some (Shape.constr id' inner_args)
+        | Some _ ->
+          recursive := true;
           (* We are applying the declaration to different arguments
              that are not closed. In this case, we create a version of the type
              that can have any OCaml values for its arguments. *)
           Some
-            (Shape.constr decl.type_uid
-               (List.map (fun _ -> Shape.leaf' None) inner_args)))
+            (Shape.constr id' (List.map (fun _ -> Shape.leaf' None) inner_args))
+        )
       | _ -> None)
 
   let of_type_declaration_with_variables (id : Ident.t)
@@ -602,14 +614,185 @@ module Type_decl_shape = struct
       | _ -> shape_of_path path ~args
     in
     let shape_of_path = Type_shape.Predef.add_predefs_to_lookup shape_of_path in
+    let recursive = ref false in
+    (* We add a small optimization: For the block of declarations, we track via
+       this reference whether there are any recursive occurrenes. If not, we do
+       not have to add a mutually recursive binder for the declarations. *)
     let shape_of_path =
-      shape_of_path_with_declarations decl_lookup_map shape_of_path
+      shape_of_path_with_declarations ~recursive decl_lookup_map shape_of_path
     in
-    List.map
-      (fun (id, decl) ->
-        of_type_declaration_with_variables id decl shape_of_path)
-      type_declarations
+    let individual_declarations =
+      Ident.Map.mapi
+        (fun id decl ->
+          of_type_declaration_with_variables id decl shape_of_path)
+        decl_lookup_map
+    in
+    if !recursive
+    then
+      let mutrec = Shape.mutrec individual_declarations in
+      List.map (fun (id, _) -> Shape.proj_decl mutrec id) type_declarations
+    else
+      List.map
+        (fun (id, _) -> Ident.Map.find id individual_declarations)
+        type_declarations
 end
+
+let rec decompose_application (t : Shape.t) =
+  match t.Shape.desc with
+  | Shape.App (f, arg) ->
+    let head, tail = decompose_application f in
+    head, tail @ [arg]
+  | _ -> t, []
+
+let find_constr_id_with_args (subst_constr, _) id args =
+  match Ident.Map.find_opt id subst_constr with
+  | Some t ->
+    List.find_opt (fun (args', _) -> List.equal Shape.equal args args') t
+    |> Option.map snd
+  | None -> None
+
+let find_mut_rec_shape (_, subst_constr_mut) id =
+  Ident.Map.find_opt id subst_constr_mut
+
+let update_subst_with_id_arg_binder (subst_constr, subst_constr_mut) id args
+    rec_binder =
+  let new_list =
+    match Ident.Map.find_opt id subst_constr with
+    | Some t -> (args, rec_binder) :: t
+    | None -> [args, rec_binder]
+  in
+  Ident.Map.add id new_list subst_constr, subst_constr_mut
+
+let update_subst_with_mutrec_decl (subst_constr, subst_constr_mut) t map =
+  ( subst_constr,
+    Ident.Map.fold
+      (fun id _ map -> Ident.Map.add id (Shape.proj_decl t id) map)
+      map subst_constr_mut )
+
+(* To unroll the mutually recursive declarations, we perform a simple call by
+   value evaluation and catch cycles for ident binders. *)
+let rec unfold_and_evaluate subst_type subst_constr (t : Shape.t) =
+  (* we special case the case where the head is a projection, because of
+     recursive unfolding *)
+  let head, args = decompose_application t in
+  let maybe_evaluated_shape =
+    match head.Shape.desc with
+    | ProjDecl (str, i) -> (
+      let args = List.map (unfold_and_evaluate subst_type subst_constr) args in
+      let str = unfold_and_evaluate subst_type subst_constr str in
+      match str.Shape.desc with
+      | Mutrec ts ->
+        let rec_binder = Recursive_binder.mk_recursive_binder () in
+        let subst_constr =
+          update_subst_with_id_arg_binder subst_constr i args rec_binder
+        in
+        let subst_constr = update_subst_with_mutrec_decl subst_constr str ts in
+        let ts = Ident.Map.find i ts in
+        unfold_and_evaluate subst_type subst_constr (Shape.app_list ts args)
+        |> Recursive_binder.bind_recursive_binder ~preserve_uid:false rec_binder
+        |> Option.some
+      | _ -> assert false
+      (* projections are always directly applied to the mutrec *))
+    | _ -> None
+  in
+  match maybe_evaluated_shape with
+  | Some t -> t
+  | None -> (
+    match t.desc with
+    | Var id -> (
+      match Ident.Map.find_opt id subst_type with
+      | Some t -> t
+      | None -> Shape.leaf' None (* free type variable should not happen *))
+    | Constr (id, constr_args) -> (
+      let constr_args =
+        List.map (unfold_and_evaluate subst_type subst_constr) constr_args
+      in
+      match find_constr_id_with_args subst_constr id constr_args with
+      | Some t -> Recursive_binder.use_recursive_binder t
+      | None -> (
+        match find_mut_rec_shape subst_constr id with
+        | Some t ->
+          unfold_and_evaluate subst_type subst_constr
+            (Shape.app_list t constr_args)
+        | None -> Shape.constr id constr_args (* CR sspies: Fix me. *)))
+    | App (f, arg) -> (
+      let f = unfold_and_evaluate subst_type subst_constr f in
+      let arg = unfold_and_evaluate subst_type subst_constr arg in
+      match f.Shape.desc with
+      | Abs (x, s') ->
+        unfold_and_evaluate (Ident.Map.add x arg subst_type) subst_constr s'
+      | _ -> Shape.app f ~arg)
+    | Abs _ -> t
+    | ProjDecl _ -> assert false
+    | Variant { simple_constructors; complex_constructors } ->
+      let complex_constructors =
+        Shape.complex_constructors_map
+          (fun ((sh, ly) : Shape.t * _) ->
+            unfold_and_evaluate subst_type subst_constr sh, ly)
+          complex_constructors
+      in
+      Shape.variant simple_constructors complex_constructors
+    | Record { fields; kind } ->
+      Shape.record kind
+        (List.map
+           (fun ((name, sh, ly) : _ * Shape.t * _) ->
+             name, unfold_and_evaluate subst_type subst_constr sh, ly)
+           fields)
+    | Poly_variant constrs ->
+      Shape.poly_variant
+        (Shape.poly_variant_constructors_map
+           (fun (sh : Shape.t) ->
+             unfold_and_evaluate subst_type subst_constr sh)
+           constrs)
+    | Arrow (arg, ret) ->
+      Shape.arrow
+        (unfold_and_evaluate subst_type subst_constr arg)
+        (unfold_and_evaluate subst_type subst_constr ret)
+    | Variant_unboxed { name; arg_name; arg_shape; arg_layout } ->
+      Shape.variant_unboxed name arg_name
+        (unfold_and_evaluate subst_type subst_constr arg_shape)
+        arg_layout
+    | Leaf -> t
+    | Proj (t, i) ->
+      Shape.proj (unfold_and_evaluate subst_type subst_constr t) i
+    | Tuple args ->
+      Shape.tuple
+        (List.map
+           (fun (sh : Shape.t) ->
+             unfold_and_evaluate subst_type subst_constr sh)
+           args)
+    | Unboxed_tuple args ->
+      Shape.unboxed_tuple
+        (List.map
+           (fun (sh : Shape.t) ->
+             unfold_and_evaluate subst_type subst_constr sh)
+           args)
+    | Rec_var v -> Shape.rec_var v
+    | Predef (p, args) ->
+      Shape.predef p
+        (List.map
+           (fun (sh : Shape.t) ->
+             unfold_and_evaluate subst_type subst_constr sh)
+           args)
+    | Mu body -> Shape.mu (unfold_and_evaluate subst_type subst_constr body)
+    | Comp_unit _ -> t
+    | Error _ -> t
+    | Alias t -> Shape.alias (unfold_and_evaluate subst_type subst_constr t)
+    | Mutrec ts ->
+      Shape.mutrec
+        (Ident.Map.map
+           (fun (sh : Shape.t) ->
+             unfold_and_evaluate subst_type subst_constr sh)
+           ts)
+    | Struct items ->
+      Shape.str
+        (Shape.Item.Map.map
+           (fun (sh : Shape.t) ->
+             unfold_and_evaluate subst_type subst_constr sh)
+           items))
+
+let unfold_and_evaluate t =
+  unfold_and_evaluate Ident.Map.empty (Ident.Map.empty, Ident.Map.empty) t
 
 type shape_with_layout =
   { type_shape : Shape.t;

@@ -55,10 +55,7 @@ module Make(_ : sig
 
     val remove_uids : bool
 
-    val lookup_shape_for_uid : Shape.Uid.t -> Shape.t option
-    (* CR sspies: In practice, this function depends on global state that is
-       augmented whenever we call [read_unit_shape]. An alternative would be
-       to make this state passing explicit. *)
+    val unfold_recursive_types : bool
   end) : sig
   val reduce : Env.t -> Shape.t -> Shape.t
 

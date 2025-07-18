@@ -14,6 +14,13 @@ module Type_decl_shape : sig
     (Ident.t * Types.type_declaration) list -> path_lookup -> Shape.t list
 end
 
+(** When producing a type shape with [of_type_expr], the resulting shape is
+      not in normal form. In particular, it can contain mutually recursive
+      declarations from mutually recursive type declarations. This function
+      should be applied after shape reduction. It unfoldes the mutually
+      recursive types to result in one linearized form. *)
+val unfold_and_evaluate : Shape.t -> Shape.t
+
 type shape_with_layout =
   { type_shape : Shape.t;
     type_layout : Layout.t;

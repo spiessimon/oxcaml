@@ -51,7 +51,6 @@ module Make(Params : sig
   val fuel : int
   val read_unit_shape : unit_name:string -> t option
   val remove_uids : bool
-  val lookup_shape_for_uid : Uid.t -> t option
 end) = struct
   (* We implement a strong call-by-need reduction, following an
      evaluator from Nathanaelle Courant. *)
@@ -93,7 +92,6 @@ end) = struct
 
   and local_env =
     { env: delayed_nf option Ident.Map.t;
-      uids_to_binders: (Shape.t list * Type_shape.Recursive_binder.t) list Shape.Uid.Map.t
     }
   (* When reducing in the body of an abstraction [Abs(x, body)], we
      bind [x] to [None] in the environment. [Some v] is used for
@@ -143,9 +141,9 @@ end) = struct
     | NComp_unit _, (NVar _ | NLeaf | NApp _ | NAbs _ | NStruct _ | NProj _ | NAlias _ | NError _ | NDelayed _ | NMu _| NRec_var _)
     | NAlias _, (NVar _ | NLeaf | NApp _ | NAbs _ | NStruct _ | NProj _ | NComp_unit _ | NError _ | NDelayed _ | NMu _| NRec_var _)
     | NError _, (NVar _ | NLeaf | NApp _ | NAbs _ | NStruct _ | NProj _ | NComp_unit _ | NAlias _ | NDelayed _ | NMu _| NRec_var _)
-    | NMu _, (NVar _ | NLeaf | NApp _ | NAbs _ | NStruct _ | NProj _ | NComp_unit _ | NAlias _ | NError _ | NDelayed _ | NRec_var _ )
-    | NRec_var _, (NVar _ | NLeaf | NApp _ | NAbs _ | NStruct _ | NProj _ | NComp_unit _ | NAlias _ | NError _ | NDelayed _ | NMu _)
-    | NDelayed _, (NVar _ | NLeaf | NApp _ | NAbs _ | NStruct _ | NProj _ | NComp_unit _ | NAlias _ | NError _ | NMu _ | NRec_var _)
+    | NMu _, (NVar _ | NLeaf | NApp _ | NAbs _ | NStruct _ | NProj _ | NComp_unit _ | NAlias _ | NError _ | NDelayed _ | NRec_var _  )
+    | NRec_var _, (NVar _ | NLeaf | NApp _ | NAbs _ | NStruct _ | NProj _ | NComp_unit _ | NAlias _ | NError _ | NDelayed _ | NMu _ )
+    | NDelayed _, (NVar _ | NLeaf | NApp _ | NAbs _ | NStruct _ | NProj _ | NComp_unit _ | NAlias _ | NError _ | NMu _ | NRec_var _ )
     -> false
 
   and equal_nf t1 t2 =
@@ -196,18 +194,7 @@ end) = struct
 
   let bind env var shape =
     { env with local_env =
-      { env.local_env with env = Ident.Map.add var shape env.local_env.env } }
-
-
-  let bind_uid_to_binder env uid args binder =
-    { env with local_env =
-      { env.local_env with
-        uids_to_binders =
-        Shape.Uid.Map.update uid (function
-        | None -> Some [(args, binder)]
-        | Some binders -> Some ((args, binder) :: binders)) env.local_env.uids_to_binders
-      }
-    }
+      { env = Ident.Map.add var shape env.local_env.env } }
 
   let rec reduce_ env t =
     let local_env = env.local_env in
@@ -340,7 +327,7 @@ end) = struct
       | Alias t -> return (NAlias (delay_reduce env t))
       | Error s -> approx_nf (return (NError s))
       | Tuple _ | Unboxed_tuple _ | Predef _ | Arrow _ | Poly_variant _
-      | Variant _ | Variant_unboxed _ | Record _ | Constr _ ->
+      | Variant _ | Variant_unboxed _ | Record _ | Constr _ | Mutrec _ | ProjDecl _ ->
         (return (NDelayed (delay_reduce env t)))
 
   and read_back env (nf : nf) : t =
@@ -428,29 +415,18 @@ end) = struct
         (force_reduce ~uid:ret.uid env ret)
     | Predef (predef, args) ->
       Shape.predef ?uid predef (List.map (fun (sh: t) -> force_reduce ~uid:sh.uid env sh) args)
-    | Constr (constr_uid, args) ->
-        let recursive_binder =
-          (match Shape.Uid.Map.find_opt constr_uid env.local_env.uids_to_binders with
-          | Some binders ->
-            let maybe_binder = List.find_opt (fun (args', _) -> List.equal Shape.equal args args') binders in
-            Option.map snd maybe_binder
-          | None -> None)
-        in
-        (match recursive_binder with
-        | Some binder -> (Type_shape.Recursive_binder.use_recursive_binder binder)
-        | None ->
-          (match Params.lookup_shape_for_uid constr_uid with
-          | Some sh ->
-            let rec_binder = Type_shape.Recursive_binder.mk_recursive_binder () in
-            let env = bind_uid_to_binder env constr_uid args rec_binder in
-            force_reduce ~uid env (Shape.app_list sh args)
-            |> (Type_shape.Recursive_binder.bind_recursive_binder ~preserve_uid:(not Params.remove_uids) rec_binder)
-          | None -> Shape.leaf' uid))
-    | (Abs _ | Comp_unit _ | Struct _ ) -> assert false
-      (* none of these spell out type expressions *)
-    | (Mu _ | Rec_var _ | Alias _ | Error _ | Leaf | App _ | Proj _ | Var _)  ->
+    | Constr (id, args) ->
+        let args = List.map (fun (sh: t) -> force_reduce ~uid:sh.uid env sh) args in
+        constr ?uid id args
+    | Mutrec defs ->
+        let defs = Ident.Map.map (fun (sh: t) -> force_reduce ~uid:sh.uid env sh) defs in
+        mutrec ?uid defs
+    | ProjDecl (t, id) -> proj_decl ?uid (force_reduce ~uid:t.uid env t) id
+    | (Mu _ | Rec_var _ | Alias _ | Error _ | Leaf | App _ | Proj _ | Var _
+       | Abs _ | Comp_unit _ | Struct _ )  ->
       (* all of these are potentially type expressions *)
       reduce t
+
 
   (* Sharing the memo tables is safe at the level of a compilation unit since
     idents should be unique *)
@@ -460,8 +436,7 @@ end) = struct
   let reduce global_env t =
     let fuel = ref Params.fuel in
     let local_env = {
-      env = Ident.Map.empty;
-      uids_to_binders = Shape.Uid.Map.empty
+      env = Ident.Map.empty
   }
     in
     let env = {
@@ -507,7 +482,7 @@ end) = struct
 
   let reduce_for_uid global_env t =
     let fuel = ref Params.fuel in
-    let local_env = { env = Ident.Map.empty; uids_to_binders = Shape.Uid.Map.empty }
+    let local_env = { env = Ident.Map.empty }
     in
     let env = {
       fuel;
@@ -528,7 +503,6 @@ module Local_reduce =
     let fuel = 10
     let read_unit_shape ~unit_name:_ = None
     let remove_uids = false
-    let lookup_shape_for_uid _ = None
   end)
 
 let local_reduce = Local_reduce.reduce

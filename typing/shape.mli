@@ -205,8 +205,11 @@ and desc =
   | Mu of t
   | Rec_var of int
 
+  | Mutrec of t Ident.Map.t
+  | ProjDecl of t * Ident.t
+
   (* constructors for types  *)
-  | Constr of Uid.t * t list
+  | Constr of Ident.t * t list
   | Tuple of t list (* boxed tuple (value layout) *)
   | Unboxed_tuple of t list (* unboxed tuple (product layout) *)
   | Predef of Predef.t * t list (* predef type with arguments *)
@@ -329,7 +332,10 @@ val rec_var : ?uid:Uid.t -> int -> t
 val no_fuel_left : ?uid:Uid.t -> t -> t
 val comp_unit : ?uid:Uid.t -> string -> t
 
-val constr : ?uid:Uid.t -> Uid.t -> t list -> t
+val constr : ?uid:Uid.t -> Ident.t -> t list -> t
+val mutrec : ?uid:Uid.t -> t Ident.Map.t -> t
+val proj_decl : ?uid:Uid.t -> t -> Ident.t -> t
+
 
 val set_approximated : approximated:bool -> t -> t
 

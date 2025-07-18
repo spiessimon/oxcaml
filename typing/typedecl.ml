@@ -2963,8 +2963,9 @@ let transl_type_decl env rec_flag sdecl_list =
   let decls = List.map2 (check_abbrev new_env) sdecl_list decls in
   (* Save the declarations in [Type_shape] for debug info. *)
   let env_shape_of_path env path ~args =
-    let decl = try Some (Env.find_type path env) with Not_found -> None in
-    Option.map (fun decl -> Shape.constr decl.type_uid args) decl
+    match Env.shape_of_path_opt ~namespace:Type env path with
+    | Some sh -> Some (Shape.app_list sh args)
+    | None -> None
   in
   let shapes = Type_shape.Type_decl_shape.of_type_declarations decls (env_shape_of_path env) in
   List.iter (fun (sh, (_, decl)) ->
