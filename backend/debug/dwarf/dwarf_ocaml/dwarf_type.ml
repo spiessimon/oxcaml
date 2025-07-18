@@ -1593,13 +1593,17 @@ let variable_to_die state (var_uid : Uid.t) ~parent_proto_die =
     in
     match type_shape with
     | `Known (type_shape, base_layout) ->
-      let reference =
-        type_shape_to_dwarf_die ~type_name type_shape base_layout
-          ~parent_proto_die ~fallback_value_die ~rec_env:(fun _ -> None)
+      let anonymous_reference =
+        type_shape_to_dwarf_die type_shape base_layout ~parent_proto_die
+          ~fallback_value_die ~rec_env:(fun _ -> None)
         (* CR sspies: The interaction of recursion and caching is broken. It
            does not account for different substitutions for the same DeBruijn
            variable. *)
       in
+      let reference = Proto_die.create_reference () in
+      create_typedef_die ~reference ~parent_proto_die ~name:type_name
+        anonymous_reference;
+      (* CR sspies: Fix naming and reduce the number of references. *)
       if debug_emit_dwarf_dies
       then (
         Format.eprintf "var %a has become %a@." Uid.print var_uid
