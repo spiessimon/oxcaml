@@ -1562,11 +1562,13 @@ let variable_to_die state (var_uid : Uid.t) ~parent_proto_die =
   | Some { type_shape; type_layout; type_name } -> (
     let shape_reduce = With_cms_reduce.reduce Env.empty in
     if debug_print_reduction_before_and_after
-    then Format.eprintf "before reduction %a@." Shape.print type_shape;
+    then
+      Format.eprintf "before reduction %s=%a@." type_name Shape.print type_shape;
     let type_shape = shape_reduce type_shape in
     let type_shape = Type_shape.unfold_and_evaluate type_shape in
     if debug_print_reduction_before_and_after
-    then Format.eprintf "after reduction %a@." Shape.print type_shape;
+    then
+      Format.eprintf "after reduction %s=%a@." type_name Shape.print type_shape;
     let type_shape =
       match unboxed_projection, type_layout with
       | None, Base b -> `Known (type_shape, b)
@@ -1594,6 +1596,9 @@ let variable_to_die state (var_uid : Uid.t) ~parent_proto_die =
       let reference =
         type_shape_to_dwarf_die ~type_name type_shape base_layout
           ~parent_proto_die ~fallback_value_die ~rec_env:(fun _ -> None)
+        (* CR sspies: The interaction of recursion and caching is broken. It
+           does not account for different substitutions for the same DeBruijn
+           variable. *)
       in
       if debug_emit_dwarf_dies
       then (
