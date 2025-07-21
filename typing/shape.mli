@@ -357,6 +357,9 @@ val complex_constructor_map :
 val complex_constructors_map :
   ('a -> 'b) -> 'a complex_constructors -> 'b complex_constructors
 
+val is_mu_closed : t -> bool
+  (** Checks whether the shape is closed with respect to the mu-binders and
+      recursive variables inside of it. *)
 
 module Map : sig
   type shape = t

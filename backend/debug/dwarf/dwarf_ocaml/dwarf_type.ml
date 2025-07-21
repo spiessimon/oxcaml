@@ -1156,6 +1156,11 @@ module Cache = Shape_with_layout.Tbl
 
 let cache = Cache.create 16
 
+let add_to_cache ~name (type_shape : Shape.t) (type_layout : Layout.t) reference
+    =
+  if Shape.is_mu_closed type_shape
+  then Cache.add cache { type_shape; type_name = name; type_layout } reference
+
 let rec type_shape_to_dwarf_die ?type_name (type_shape : Shape.t)
     (type_layout : base_layout) ~parent_proto_die ~fallback_value_die ~rec_env =
   match
@@ -1166,9 +1171,7 @@ let rec type_shape_to_dwarf_die ?type_name (type_shape : Shape.t)
   | Some reference -> reference
   | None ->
     let reference = Proto_die.create_reference () in
-    Cache.add cache
-      { type_shape; type_name; type_layout = Base type_layout }
-      reference;
+    add_to_cache ~name:type_name type_shape (Base type_layout) reference;
     let layout_name =
       Format.asprintf "%a" Layout.format (Layout.Base type_layout)
     in
@@ -1596,9 +1599,6 @@ let variable_to_die state (var_uid : Uid.t) ~parent_proto_die =
       let anonymous_reference =
         type_shape_to_dwarf_die type_shape base_layout ~parent_proto_die
           ~fallback_value_die ~rec_env:(fun _ -> None)
-        (* CR sspies: The interaction of recursion and caching is broken. It
-           does not account for different substitutions for the same DeBruijn
-           variable. *)
       in
       let reference = Proto_die.create_reference () in
       create_typedef_die ~reference ~parent_proto_die ~name:type_name

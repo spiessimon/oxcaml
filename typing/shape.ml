@@ -1047,6 +1047,44 @@ let set_uid_if_none t uid =
   | ProjDecl (t, i) -> proj_decl ~uid t i
 
 
+let is_mu_closed t =
+  let rec debruijn_closed_shape (bound: int) (t: t) =
+    match t.desc with
+    | Var _ -> true
+      (* we only care about DeBruijn indices in recursive variables *)
+    | Abs (_, t) -> debruijn_closed_shape bound t
+    | App (t1, t2) ->
+      debruijn_closed_shape bound t1 && debruijn_closed_shape bound t2
+    | Struct t -> Item.Map.for_all (fun _ -> debruijn_closed_shape bound) t
+    | Alias t -> debruijn_closed_shape bound t
+    | Leaf -> true
+    | Proj (t, _) -> debruijn_closed_shape bound t
+    | Comp_unit _ -> true
+    | Error _ -> true
+    | Mu t -> debruijn_closed_shape (bound + 1) t
+    | Rec_var i -> i <= bound
+    | Constr (_, ts) -> List.for_all (debruijn_closed_shape bound) ts
+    | Tuple ts -> List.for_all (debruijn_closed_shape bound) ts
+    | Unboxed_tuple ts -> List.for_all (debruijn_closed_shape bound) ts
+    | Predef (_, ts) -> List.for_all (debruijn_closed_shape bound) ts
+    | Arrow (t1, t2) ->
+      debruijn_closed_shape bound t1 && debruijn_closed_shape bound t2
+    | Poly_variant t ->
+      List.for_all (fun { pv_constr_name = _; pv_constr_args = c } ->
+        List.for_all (debruijn_closed_shape bound) c) t
+    | Variant t ->
+      List.for_all (fun { kind = _; name = _; args = c } ->
+        List.for_all (fun { field_value = t, _; field_name = _} ->
+          debruijn_closed_shape bound t) c) t.complex_constructors
+    | Variant_unboxed t -> debruijn_closed_shape bound t.arg_shape
+    | Record t -> List.for_all (fun (_, t, _) ->
+      debruijn_closed_shape bound t) t.fields
+    | Mutrec ts -> Ident.Map.for_all (fun _ -> debruijn_closed_shape bound) ts
+    | ProjDecl (t, _) -> debruijn_closed_shape bound t
+  in debruijn_closed_shape (-1) t
+
+
+
 module Map = struct
   type shape = t
   type nonrec t = t Item.Map.t
