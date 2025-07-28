@@ -20,23 +20,16 @@ end
 [%%expect{|
 {
  "M"[module] ->
-   {<.39>
+   {<.43>
     "Exn"[extension constructor] -> {<.1>
                                      "lbl_exn"[label] -> <.0>;
                                      };
-    "Ext"[extension constructor] -> {<.7>
-                                     "lbl_ext"[label] -> <.6>;
+    "Ext"[extension constructor] -> {<.8>
+                                     "lbl_ext"[label] -> <.7>;
                                      };
-    "ext"[type] -> <.5>;
-    "l"[type] -> {<.3>
-                  "lbl"[label] -> <.4>;
-                  };
-    "t"[type] ->
-      {<.9>
-       "C"[constructor] -> {<.11>
-                            "lbl_cstr"[label] -> <.10>;
-                            };
-       };
+    "ext"[type] -> <.6>;
+    "l"[type] -> Record_boxed { lbl: Predef int ()  };
+    "t"[type] -> Variant C of lbl_cstr=Predef int () ;
     };
  }
 module M :

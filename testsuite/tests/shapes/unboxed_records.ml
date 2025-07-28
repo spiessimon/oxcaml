@@ -6,10 +6,10 @@
 type t = #{ a : int; b : string }
 [%%expect{|
 {
- "t"[type] -> {<.0>
-               "a"[unboxed label] -> <.1>;
-               "b"[unboxed label] -> <.2>;
-               };
+ "t"[type] ->
+   Record_unboxed_product { a: Predef int ()
+   ; b: Predef string ()
+    };
  }
 type t = #{ a : int; b : string; }
 |}]
