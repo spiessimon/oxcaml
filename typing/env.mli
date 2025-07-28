@@ -125,10 +125,8 @@ val find_constructor_address: Path.t -> t -> address
 val shape_of_path:
   namespace:Shape.Sig_component_kind.t -> t -> Path.t -> Shape.t
 
-(* CR sspies: The function [find_uid_of_path] is only temporary and will be
-   removed in a subsequent PR that removes the paths from type shapes. For now,
-   it is here to reduce code duplication. *)
-val find_uid_of_path : t -> Path.t -> Uid.t option
+val shape_of_path_opt:
+  namespace:Shape.Sig_component_kind.t -> t -> Path.t -> Shape.t option
 
 val add_functor_arg: Ident.t -> t -> t
 val is_functor_arg: Path.t -> t -> bool
@@ -159,6 +157,10 @@ val add_required_global: Path.t -> t -> unit
 val reset_probes: unit -> unit
 val add_probe: string -> unit
 val has_probe: string -> bool
+
+val reset_type_decl_shapes: unit -> unit
+val add_type_decl_shape: Shape.Uid.t -> Shape.t -> unit
+val get_type_decl_shapes: unit -> Shape.t Shape.Uid.Tbl.t
 
 val has_local_constraints: t -> bool
 

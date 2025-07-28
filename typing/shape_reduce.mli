@@ -15,6 +15,8 @@
 (*                                                                        *)
 (**************************************************************************)
 
+module Layout = Jkind_types.Sort.Const
+
 (** The result of reducing a shape and looking for its uid *)
 type result =
   | Resolved of Shape.Uid.t (** Shape reduction succeeded and a uid was found *)
@@ -35,6 +37,11 @@ val print_result : Format.formatter -> result -> unit
     - some fuel, which is used to bound recursion when dealing with recursive
       shapes introduced by recursive modules. (FTR: merlin currently uses a
       fuel of 10, which seems to be enough for most practical examples)
+    - a shape lookup function, which can be used to provide shapes of type
+      declarations. Always returning [None] in this function is perfectly fine.
+      If shapes are provided for a [Shape.Uid.t], then reduction will insert
+      this declaration during reduction and reduce further inside the
+      declaration.
 
     Usage warning: To ensure good performances, every reduction made with the
     same instance of that functor share the same ident-based memoization tables.
@@ -45,6 +52,10 @@ module Make(_ : sig
     val fuel : int
 
     val read_unit_shape : unit_name:string -> Shape.t option
+
+    val remove_uids : bool
+
+    val unfold_recursive_types : bool
   end) : sig
   val reduce : Env.t -> Shape.t -> Shape.t
 

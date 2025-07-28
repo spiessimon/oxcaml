@@ -1622,6 +1622,16 @@ let reset_probes () = probes := String.Set.empty
 let add_probe name = probes := String.Set.add name !probes
 let has_probe name = String.Set.mem name !probes
 
+(* CR sspies: Should these become part of the environment instead of being
+   global state?*)
+let type_decl_shapes : Shape.t Shape.Uid.Tbl.t = Shape.Uid.Tbl.create 16
+let reset_type_decl_shapes () = Shape.Uid.Tbl.clear type_decl_shapes
+let add_type_decl_shape (uid: Shape.Uid.t) (decl : Shape.t) =
+  Shape.Uid.Tbl.add type_decl_shapes uid decl
+let get_type_decl_shapes () = type_decl_shapes
+
+
+
 let find_shape env (ns : Shape.Sig_component_kind.t) id =
   match ns with
   | Type ->
@@ -1660,16 +1670,15 @@ let find_shape env (ns : Shape.Sig_component_kind.t) id =
   | Class_type ->
       (IdTbl.find_same id env.cltypes).cltda_shape
 
-let find_uid_of_path env path =
-  (* We currently only support lookup up debugging uids in the current
-     environment. Future versions will support looking up declarations in other
-     files via the shape mechanism in [shape.ml]. *)
-  match find_type path env with
-  | exception Not_found -> None
-  | type_ -> let uid = type_.type_uid in Some uid
 
 let shape_of_path ~namespace env =
   Shape.of_path ~namespace ~find_shape:(find_shape env)
+
+let shape_of_path_opt ~namespace env path =
+  try
+    (Some (shape_of_path ~namespace env path))
+  with
+    Not_found -> None
 
 let shape_or_leaf uid = function
   | None -> Shape.leaf uid
@@ -2937,24 +2946,23 @@ let save_signature_with_imports ~alerts sg modname cu cmi imports =
 
 (* Make the initial environment, without language extensions *)
 let initial =
-  (* We collect all the type declarations that are added to the initial
-     environment in a table. *)
-  let added_types = Ident.Tbl.create 16 in
+  let shape_of_path env path ~args =
+    Option.map (fun sh -> Shape.app_list sh args)
+      (shape_of_path_opt ~namespace:Type env path)
+  in
   let add_type_and_remember_decl (type_ident : Ident.t) decl env =
-    Ident.Tbl.add added_types type_ident decl;
-    add_type type_ident decl env ~check:false
+    let shape = Type_shape.Type_decl_shape.of_type_declarations [type_ident, decl] (shape_of_path env) in
+    let shape = match shape with [shape] -> shape | _ -> assert false in
+    Uid.Tbl.add Type_shape.all_type_decls decl.type_uid shape;
+    (* CR sspies: Adding it to [all_type_decls] is not needed at this point. The
+       relevant information now lives in the shapes themselves. *)
+    add_type type_ident ~shape decl env ~check:false
   in
   let initial_env = Predef.build_initial_env
                       add_type_and_remember_decl
                       (add_extension ~check:false ~rebind:false)
                       empty
   in
-  (* We record the type declarations for the type shapes. *)
-  Ident.Tbl.iter (fun type_ident decl ->
-    Type_shape.add_to_type_decls
-      (Pident type_ident) decl
-      (find_uid_of_path initial_env)
-  ) added_types;
   initial_env
 
 let add_language_extension_types env =
