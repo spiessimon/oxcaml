@@ -812,7 +812,7 @@ let rec unfold_and_evaluate ~depth subst_type subst_constr (t : Shape.t) =
         t (* normal form in this CBV evaluation *))
 
 (* CR sspies: The performance of this evaluation is quite poor, requiring us to
-   limit the depth to about 3 at the moment. Improve it using caching to make it
+   limit the depth to about 5 at the moment. Improve it using caching to make it
    possible to have deeper shapes. *)
 let unfold_and_evaluate t =
   unfold_and_evaluate ~depth:0 Ident.Map.empty
