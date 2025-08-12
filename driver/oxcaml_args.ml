@@ -253,6 +253,9 @@ let mk_dranges f =
 let mk_ddebug_invariants f =
   "-ddebug-invariants", Arg.Unit f, " Run invariant checks during generation of debugging information"
 
+let mk_ddwarf_types f =
+  ("-ddwarf-types", Arg.Unit f, " Enable debug output for DWARF type generation")
+
 let mk_internal_assembler f =
   "-internal-assembler", Arg.Unit f, "Write object files directly instead of using the system assembler (x86-64 ELF only)"
 
@@ -770,6 +773,7 @@ module type Oxcaml_options = sig
   val davail : unit -> unit
   val dranges : unit -> unit
   val ddebug_invariants : unit -> unit
+  val ddwarf_types : unit -> unit
   val dcfg : unit -> unit
   val dcfg_invariants : unit -> unit
   val regalloc : string -> unit
@@ -906,182 +910,157 @@ module type Oxcaml_options = sig
   val cached_generic_functions_path : string -> unit
 end
 
-module Make_oxcaml_options (F : Oxcaml_options) =
-struct
-  let list2 = [
-    mk_dump_inlining_paths F.dump_inlining_paths;
-    mk_davail F.davail;
-    mk_dranges F.dranges;
-    mk_ddebug_invariants F.ddebug_invariants;
-    mk_ocamlcfg F.ocamlcfg;
-    mk_no_ocamlcfg F.no_ocamlcfg;
-    mk_dcfg F.dcfg;
-    mk_dcfg_invariants F.dcfg_invariants;
-    mk_regalloc F.regalloc;
-    mk_regalloc_linscan_threshold F.regalloc_linscan_threshold;
-    mk_regalloc_param F.regalloc_param;
-    mk_regalloc_validate F.regalloc_validate;
-    mk_no_regalloc_validate F.no_regalloc_validate;
-
-    mk_vectorize F.vectorize;
-    mk_no_vectorize F.no_vectorize;
-    mk_vectorize_max_block_size F.vectorize_max_block_size;
-    mk_dvectorize F.dvectorize;
-
-    mk_cfg_peephole_optimize F.cfg_peephole_optimize;
-    mk_no_cfg_peephole_optimize F.no_cfg_peephole_optimize;
-
-    mk_cfg_stack_checks F.cfg_stack_checks;
-    mk_no_cfg_stack_checks F.no_cfg_stack_checks;
-    mk_cfg_stack_checks_threshold F.cfg_stack_checks_threshold;
-
-    mk_cfg_eliminate_dead_trap_handlers F.cfg_eliminate_dead_trap_handlers;
-    mk_no_cfg_eliminate_dead_trap_handlers F.no_cfg_eliminate_dead_trap_handlers;
-
-    mk_reorder_blocks_random F.reorder_blocks_random;
-    mk_basic_block_sections F.basic_block_sections;
-    mk_module_entry_functions_section F.module_entry_functions_section;
-
-    mk_dasm_comments F.dasm_comments;
-    mk_dno_asm_comments F.dno_asm_comments;
-
-    mk_heap_reduction_threshold F.heap_reduction_threshold;
-    mk_zero_alloc_check F.zero_alloc_check;
-    mk_zero_alloc_assert F.zero_alloc_assert;
-
-    mk_dzero_alloc F.dzero_alloc;
-    mk_disable_zero_alloc_checker F.disable_zero_alloc_checker;
-    mk_disable_precise_zero_alloc_checker F.disable_precise_zero_alloc_checker;
-    mk_zero_alloc_checker_details_cutoff F.zero_alloc_checker_details_cutoff;
-    mk_zero_alloc_checker_details_extra F.zero_alloc_checker_details_extra;
-    mk_no_zero_alloc_checker_details_extra
-      F.no_zero_alloc_checker_details_extra;
-    mk_zero_alloc_checker_join F.zero_alloc_checker_join;
-
-    mk_function_layout F.function_layout;
-    mk_disable_builtin_check F.disable_builtin_check;
-    mk_disable_poll_insertion F.disable_poll_insertion;
-    mk_enable_poll_insertion F.enable_poll_insertion;
-
-    mk_symbol_visibility_protected F.symbol_visibility_protected;
-    mk_no_symbol_visibility_protected F.symbol_visibility_protected;
-
-    mk_long_frames F.long_frames;
-    mk_no_long_frames F.no_long_frames;
-    mk_debug_long_frames_threshold F.long_frames_threshold;
-
-    mk_caml_apply_inline_fast_path F.caml_apply_inline_fast_path;
-
-    mk_internal_assembler F.internal_assembler;
-
-    mk_gc_timings F.gc_timings;
-
-    mk_no_mach_ir F.no_mach_ir;
-
-    mk_dllvmir F.dllvmir;
-    mk_keep_llvmir F.keep_llvmir;
-    mk_llvm_path F.llvm_path;
-
-    mk_flambda2_debug F.flambda2_debug;
-    mk_no_flambda2_debug F.no_flambda2_debug;
-    mk_flambda2_join_points F.flambda2_join_points;
-    mk_no_flambda2_join_points F.no_flambda2_join_points;
-    mk_flambda2_result_types_functors_only
-      F.flambda2_result_types_functors_only;
-    mk_flambda2_result_types_all_functions
-      F.flambda2_result_types_all_functions;
-    mk_no_flambda2_result_types
-      F.no_flambda2_result_types;
-    mk_flambda2_basic_meet F.flambda2_basic_meet;
-    mk_flambda2_advanced_meet F.flambda2_advanced_meet;
-    mk_flambda2_join_algorithm F.flambda2_join_algorithm;
-    mk_flambda2_unbox_along_intra_function_control_flow
-      F.flambda2_unbox_along_intra_function_control_flow;
-    mk_no_flambda2_unbox_along_intra_function_control_flow
-      F.no_flambda2_unbox_along_intra_function_control_flow;
-    mk_flambda2_backend_cse_at_toplevel F.flambda2_backend_cse_at_toplevel;
-    mk_no_flambda2_backend_cse_at_toplevel
-      F.no_flambda2_backend_cse_at_toplevel;
-    mk_flambda2_cse_depth F.flambda2_cse_depth;
-    mk_flambda2_join_depth F.flambda2_join_depth;
-    mk_flambda2_reaper F.flambda2_reaper;
-    mk_no_flambda2_reaper F.no_flambda2_reaper;
-    mk_flambda2_expert_fallback_inlining_heuristic
-      F.flambda2_expert_fallback_inlining_heuristic;
-    mk_no_flambda2_expert_fallback_inlining_heuristic
-      F.no_flambda2_expert_fallback_inlining_heuristic;
-    mk_flambda2_expert_inline_effects_in_cmm
-      F.flambda2_expert_inline_effects_in_cmm;
-    mk_no_flambda2_expert_inline_effects_in_cmm
-      F.no_flambda2_expert_inline_effects_in_cmm;
-    mk_flambda2_expert_phantom_lets
-      F.flambda2_expert_phantom_lets;
-    mk_no_flambda2_expert_phantom_lets
-      F.no_flambda2_expert_phantom_lets;
-    mk_flambda2_expert_max_block_size_for_projections
-      F.flambda2_expert_max_block_size_for_projections;
-    mk_flambda2_expert_max_unboxing_depth
-      F.flambda2_expert_max_unboxing_depth;
-    mk_flambda2_expert_can_inline_recursive_functions
-      F.flambda2_expert_can_inline_recursive_functions;
-    mk_no_flambda2_expert_can_inline_recursive_functions
-      F.no_flambda2_expert_can_inline_recursive_functions;
-    mk_flambda2_expert_max_function_simplify_run
-      F.flambda2_expert_max_function_simplify_run;
-    mk_flambda2_expert_shorten_symbol_names
-      F.flambda2_expert_shorten_symbol_names;
-    mk_no_flambda2_expert_shorten_symbol_names
-      F.no_flambda2_expert_shorten_symbol_names;
-    mk_flambda2_expert_cont_lifting_budget
-      F.flambda2_expert_cont_lifting_budget;
-    mk_flambda2_expert_cont_spec_budget
-      F.flambda2_expert_cont_spec_budget;
-    mk_flambda2_debug_concrete_types_only_on_canonicals
-      F.flambda2_debug_concrete_types_only_on_canonicals;
-    mk_no_flambda2_debug_concrete_types_only_on_canonicals
-      F.no_flambda2_debug_concrete_types_only_on_canonicals;
-    mk_flambda2_debug_keep_invalid_handlers
-      F.flambda2_debug_keep_invalid_handlers;
-    mk_no_flambda2_debug_keep_invalid_handlers
-      F.no_flambda2_debug_keep_invalid_handlers;
-
-    mk_flambda2_inline_max_depth F.flambda2_inline_max_depth;
-    mk_flambda2_inline_max_rec_depth F.flambda2_inline_max_rec_depth;
-    mk_flambda2_inline_alloc_cost F.flambda2_inline_alloc_cost;
-    mk_flambda2_inline_branch_cost F.flambda2_inline_branch_cost;
-    mk_flambda2_inline_call_cost F.flambda2_inline_call_cost;
-    mk_flambda2_inline_prim_cost F.flambda2_inline_prim_cost;
-    mk_flambda2_inline_indirect_call_cost F.flambda2_inline_indirect_call_cost;
-    mk_flambda2_inline_poly_compare_cost F.flambda2_inline_poly_compare_cost;
-    mk_flambda2_inline_small_function_size
-      F.flambda2_inline_small_function_size;
-    mk_flambda2_inline_large_function_size
-      F.flambda2_inline_large_function_size;
-    mk_flambda2_inline_threshold F.flambda2_inline_threshold;
-    mk_flambda2_speculative_inlining_only_if_arguments_useful
-      F.flambda2_speculative_inlining_only_if_arguments_useful;
-    mk_no_flambda2_speculative_inlining_only_if_arguments_useful
-      F.no_flambda2_speculative_inlining_only_if_arguments_useful;
-
-    mk_flambda2_inlining_report_bin F.flambda2_inlining_report_bin;
-
-    mk_flambda2_unicode F.flambda2_unicode;
-
-    mk_flambda2_kind_checks F.flambda2_kind_checks;
-
-    mk_drawfexpr F.drawfexpr;
-    mk_drawfexpr_to F.drawfexpr_to;
-    mk_dfexpr F.dfexpr;
-    mk_dfexpr_to F.dfexpr_to;
-    mk_dflexpect_to F.dflexpect_to;
-    mk_dslot_offsets F.dslot_offsets;
-    mk_dfreshen F.dfreshen;
-    mk_dflow F.dflow;
-    mk_dsimplify F.dsimplify;
-    mk_dreaper F.dreaper;
-    mk_use_cached_generic_functions F.use_cached_generic_functions;
-    mk_cached_generic_functions_path F.cached_generic_functions_path;
-  ]
+module Make_oxcaml_options (F : Oxcaml_options) = struct
+  let list2 =
+    [
+      mk_dump_inlining_paths F.dump_inlining_paths;
+      mk_davail F.davail;
+      mk_dranges F.dranges;
+      mk_ddebug_invariants F.ddebug_invariants;
+      mk_ddwarf_types F.ddwarf_types;
+      mk_ocamlcfg F.ocamlcfg;
+      mk_no_ocamlcfg F.no_ocamlcfg;
+      mk_dcfg F.dcfg;
+      mk_dcfg_invariants F.dcfg_invariants;
+      mk_regalloc F.regalloc;
+      mk_regalloc_linscan_threshold F.regalloc_linscan_threshold;
+      mk_regalloc_param F.regalloc_param;
+      mk_regalloc_validate F.regalloc_validate;
+      mk_no_regalloc_validate F.no_regalloc_validate;
+      mk_vectorize F.vectorize;
+      mk_no_vectorize F.no_vectorize;
+      mk_vectorize_max_block_size F.vectorize_max_block_size;
+      mk_dvectorize F.dvectorize;
+      mk_cfg_peephole_optimize F.cfg_peephole_optimize;
+      mk_no_cfg_peephole_optimize F.no_cfg_peephole_optimize;
+      mk_cfg_stack_checks F.cfg_stack_checks;
+      mk_no_cfg_stack_checks F.no_cfg_stack_checks;
+      mk_cfg_stack_checks_threshold F.cfg_stack_checks_threshold;
+      mk_cfg_eliminate_dead_trap_handlers F.cfg_eliminate_dead_trap_handlers;
+      mk_no_cfg_eliminate_dead_trap_handlers
+        F.no_cfg_eliminate_dead_trap_handlers;
+      mk_reorder_blocks_random F.reorder_blocks_random;
+      mk_basic_block_sections F.basic_block_sections;
+      mk_module_entry_functions_section F.module_entry_functions_section;
+      mk_dasm_comments F.dasm_comments;
+      mk_dno_asm_comments F.dno_asm_comments;
+      mk_heap_reduction_threshold F.heap_reduction_threshold;
+      mk_zero_alloc_check F.zero_alloc_check;
+      mk_zero_alloc_assert F.zero_alloc_assert;
+      mk_dzero_alloc F.dzero_alloc;
+      mk_disable_zero_alloc_checker F.disable_zero_alloc_checker;
+      mk_disable_precise_zero_alloc_checker F.disable_precise_zero_alloc_checker;
+      mk_zero_alloc_checker_details_cutoff F.zero_alloc_checker_details_cutoff;
+      mk_zero_alloc_checker_details_extra F.zero_alloc_checker_details_extra;
+      mk_no_zero_alloc_checker_details_extra
+        F.no_zero_alloc_checker_details_extra;
+      mk_zero_alloc_checker_join F.zero_alloc_checker_join;
+      mk_function_layout F.function_layout;
+      mk_disable_builtin_check F.disable_builtin_check;
+      mk_disable_poll_insertion F.disable_poll_insertion;
+      mk_enable_poll_insertion F.enable_poll_insertion;
+      mk_symbol_visibility_protected F.symbol_visibility_protected;
+      mk_no_symbol_visibility_protected F.symbol_visibility_protected;
+      mk_long_frames F.long_frames;
+      mk_no_long_frames F.no_long_frames;
+      mk_debug_long_frames_threshold F.long_frames_threshold;
+      mk_caml_apply_inline_fast_path F.caml_apply_inline_fast_path;
+      mk_internal_assembler F.internal_assembler;
+      mk_gc_timings F.gc_timings;
+      mk_no_mach_ir F.no_mach_ir;
+      mk_dllvmir F.dllvmir;
+      mk_keep_llvmir F.keep_llvmir;
+      mk_llvm_path F.llvm_path;
+      mk_flambda2_debug F.flambda2_debug;
+      mk_no_flambda2_debug F.no_flambda2_debug;
+      mk_flambda2_join_points F.flambda2_join_points;
+      mk_no_flambda2_join_points F.no_flambda2_join_points;
+      mk_flambda2_result_types_functors_only
+        F.flambda2_result_types_functors_only;
+      mk_flambda2_result_types_all_functions
+        F.flambda2_result_types_all_functions;
+      mk_no_flambda2_result_types F.no_flambda2_result_types;
+      mk_flambda2_basic_meet F.flambda2_basic_meet;
+      mk_flambda2_advanced_meet F.flambda2_advanced_meet;
+      mk_flambda2_join_algorithm F.flambda2_join_algorithm;
+      mk_flambda2_unbox_along_intra_function_control_flow
+        F.flambda2_unbox_along_intra_function_control_flow;
+      mk_no_flambda2_unbox_along_intra_function_control_flow
+        F.no_flambda2_unbox_along_intra_function_control_flow;
+      mk_flambda2_backend_cse_at_toplevel F.flambda2_backend_cse_at_toplevel;
+      mk_no_flambda2_backend_cse_at_toplevel
+        F.no_flambda2_backend_cse_at_toplevel;
+      mk_flambda2_cse_depth F.flambda2_cse_depth;
+      mk_flambda2_join_depth F.flambda2_join_depth;
+      mk_flambda2_reaper F.flambda2_reaper;
+      mk_no_flambda2_reaper F.no_flambda2_reaper;
+      mk_flambda2_expert_fallback_inlining_heuristic
+        F.flambda2_expert_fallback_inlining_heuristic;
+      mk_no_flambda2_expert_fallback_inlining_heuristic
+        F.no_flambda2_expert_fallback_inlining_heuristic;
+      mk_flambda2_expert_inline_effects_in_cmm
+        F.flambda2_expert_inline_effects_in_cmm;
+      mk_no_flambda2_expert_inline_effects_in_cmm
+        F.no_flambda2_expert_inline_effects_in_cmm;
+      mk_flambda2_expert_phantom_lets F.flambda2_expert_phantom_lets;
+      mk_no_flambda2_expert_phantom_lets F.no_flambda2_expert_phantom_lets;
+      mk_flambda2_expert_max_block_size_for_projections
+        F.flambda2_expert_max_block_size_for_projections;
+      mk_flambda2_expert_max_unboxing_depth F.flambda2_expert_max_unboxing_depth;
+      mk_flambda2_expert_can_inline_recursive_functions
+        F.flambda2_expert_can_inline_recursive_functions;
+      mk_no_flambda2_expert_can_inline_recursive_functions
+        F.no_flambda2_expert_can_inline_recursive_functions;
+      mk_flambda2_expert_max_function_simplify_run
+        F.flambda2_expert_max_function_simplify_run;
+      mk_flambda2_expert_shorten_symbol_names
+        F.flambda2_expert_shorten_symbol_names;
+      mk_no_flambda2_expert_shorten_symbol_names
+        F.no_flambda2_expert_shorten_symbol_names;
+      mk_flambda2_expert_cont_lifting_budget
+        F.flambda2_expert_cont_lifting_budget;
+      mk_flambda2_expert_cont_spec_budget F.flambda2_expert_cont_spec_budget;
+      mk_flambda2_debug_concrete_types_only_on_canonicals
+        F.flambda2_debug_concrete_types_only_on_canonicals;
+      mk_no_flambda2_debug_concrete_types_only_on_canonicals
+        F.no_flambda2_debug_concrete_types_only_on_canonicals;
+      mk_flambda2_debug_keep_invalid_handlers
+        F.flambda2_debug_keep_invalid_handlers;
+      mk_no_flambda2_debug_keep_invalid_handlers
+        F.no_flambda2_debug_keep_invalid_handlers;
+      mk_flambda2_inline_max_depth F.flambda2_inline_max_depth;
+      mk_flambda2_inline_max_rec_depth F.flambda2_inline_max_rec_depth;
+      mk_flambda2_inline_alloc_cost F.flambda2_inline_alloc_cost;
+      mk_flambda2_inline_branch_cost F.flambda2_inline_branch_cost;
+      mk_flambda2_inline_call_cost F.flambda2_inline_call_cost;
+      mk_flambda2_inline_prim_cost F.flambda2_inline_prim_cost;
+      mk_flambda2_inline_indirect_call_cost F.flambda2_inline_indirect_call_cost;
+      mk_flambda2_inline_poly_compare_cost F.flambda2_inline_poly_compare_cost;
+      mk_flambda2_inline_small_function_size
+        F.flambda2_inline_small_function_size;
+      mk_flambda2_inline_large_function_size
+        F.flambda2_inline_large_function_size;
+      mk_flambda2_inline_threshold F.flambda2_inline_threshold;
+      mk_flambda2_speculative_inlining_only_if_arguments_useful
+        F.flambda2_speculative_inlining_only_if_arguments_useful;
+      mk_no_flambda2_speculative_inlining_only_if_arguments_useful
+        F.no_flambda2_speculative_inlining_only_if_arguments_useful;
+      mk_flambda2_inlining_report_bin F.flambda2_inlining_report_bin;
+      mk_flambda2_unicode F.flambda2_unicode;
+      mk_flambda2_kind_checks F.flambda2_kind_checks;
+      mk_drawfexpr F.drawfexpr;
+      mk_drawfexpr_to F.drawfexpr_to;
+      mk_dfexpr F.dfexpr;
+      mk_dfexpr_to F.dfexpr_to;
+      mk_dflexpect_to F.dflexpect_to;
+      mk_dslot_offsets F.dslot_offsets;
+      mk_dfreshen F.dfreshen;
+      mk_dflow F.dflow;
+      mk_dsimplify F.dsimplify;
+      mk_dreaper F.dreaper;
+      mk_use_cached_generic_functions F.use_cached_generic_functions;
+      mk_cached_generic_functions_path F.cached_generic_functions_path;
+    ]
 end
 
 module Oxcaml_options_impl = struct
@@ -1138,9 +1117,8 @@ module Oxcaml_options_impl = struct
   let dranges = set' Oxcaml_flags.dranges
 
   let ddebug_invariants = set' Dwarf_flags.ddebug_invariants
-
-  let heap_reduction_threshold x =
-    Oxcaml_flags.heap_reduction_threshold := x
+  let ddwarf_types = set' Dwarf_flags.ddwarf_types
+  let heap_reduction_threshold x = Oxcaml_flags.heap_reduction_threshold := x
 
   let zero_alloc_check s =
     match Zero_alloc_annotations.Check.of_string s with
@@ -1481,6 +1459,7 @@ module Extra_params = struct
     | "davail" -> set' Oxcaml_flags.davail
     | "dranges" -> set' Oxcaml_flags.dranges
     | "ddebug-invariants" -> set' Dwarf_flags.ddebug_invariants
+    | "ddwarf-types" -> set' Dwarf_flags.ddwarf_types
     | "reorder-blocks-random" ->
        set_int_option' Oxcaml_flags.reorder_blocks_random
     | "basic-block-sections" -> set' Oxcaml_flags.basic_block_sections
