@@ -74,6 +74,10 @@ val debug : bool ref
 val debug_full : bool ref
 val dwarf_c_toolchain_flag : string ref
 val dwarf_fission : dwarf_fission ref
+val gdwarf_precision_shape_reduce_depth : int ref
+val gdwarf_precision_shape_eval_depth : int ref
+val gdwarf_precision_max_cms_files_per_unit : int ref
+val gdwarf_precision_max_cms_files_per_variable : int ref
 val unsafe : bool ref
 val use_linscan : bool ref
 val link_everything : bool ref
