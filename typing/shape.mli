@@ -374,6 +374,8 @@ val is_mu_closed : t -> bool
   (** Checks whether the shape is closed with respect to the mu-binders and
       recursive variables inside of it. *)
 
+val size : t -> int
+
 module Map : sig
   type shape = t
   type nonrec t = t Item.Map.t
