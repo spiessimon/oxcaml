@@ -678,7 +678,7 @@ module Evaluation_diagnostics = struct
 
   let create_diagnostics () = Some { reduction_steps = 0 }
 
-  let count_reduction_step diagnostics =
+  let count_evaluation_step diagnostics =
     match diagnostics with
     | Some d -> d.reduction_steps <- d.reduction_steps + 1
     | None -> ()
@@ -693,7 +693,7 @@ module D = Evaluation_diagnostics
    value evaluation and catch cycles for ident binders. *)
 let rec unfold_and_evaluate ~diagnostics ~depth subst_type subst_constr
     (t : Shape.t) =
-  D.count_reduction_step diagnostics;
+  D.count_evaluation_step diagnostics;
   if depth >= !Clflags.gdwarf_precision_shape_eval_depth
      (* CR sspies: This depth limit can currently produce very large shapes, and
         some additional caching would be appropriate. *)

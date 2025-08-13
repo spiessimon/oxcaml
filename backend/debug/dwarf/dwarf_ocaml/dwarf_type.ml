@@ -1675,8 +1675,6 @@ module Shape_reduction_diagnostics : sig
   val record_after_dwarf_generation : t -> Proto_die.t -> unit
 
   val append_to_dwarf_state : DS.t -> t -> unit
-
-  val record_evaluation_diagnostics : t -> int -> unit
 end = struct
   type d =
     { mutable record_before_reduction_memory : int;
@@ -1685,7 +1683,6 @@ end = struct
       mutable record_before_reduction_size : int;
       mutable record_after_reduction_size : int;
       mutable record_after_evaluation_size : int;
-      mutable record_shape_evaluation_steps : int;
       mutable record_dwarf_die_size_before : int;
       mutable record_dwarf_die_size_after : int;
       record_type_name : string;
@@ -1706,7 +1703,6 @@ end = struct
           record_before_reduction_size = 0;
           record_after_reduction_size = 0;
           record_after_evaluation_size = 0;
-          record_shape_evaluation_steps = 0;
           record_dwarf_die_size_before = 0;
           record_dwarf_die_size_after = 0;
           record_type_name = type_name;
@@ -1731,28 +1727,23 @@ end = struct
   let record_before_reduction d shape =
     match d with
     | None -> ()
-    | Some d -> 
+    | Some d ->
       d.record_before_reduction_memory <- Shape.size_in_memory shape;
       d.record_before_reduction_size <- Shape.size shape
 
   let record_after_reduction d shape =
     match d with
     | None -> ()
-    | Some d -> 
+    | Some d ->
       d.record_after_reduction_memory <- Shape.size_in_memory shape;
       d.record_after_reduction_size <- Shape.size shape
 
   let record_after_evaluation d shape =
     match d with
     | None -> ()
-    | Some d -> 
+    | Some d ->
       d.record_after_evaluation_memory <- Shape.size_in_memory shape;
       d.record_after_evaluation_size <- Shape.size shape
-
-  let record_evaluation_diagnostics d steps =
-    match d with
-    | None -> ()
-    | Some d -> d.record_shape_evaluation_steps <- steps
 
   let compute_die_size die =
     Proto_die.depth_first_fold die ~init:0 ~f:(fun acc d ->
@@ -1784,7 +1775,9 @@ end = struct
             reduction_steps =
               Shape_reduce.Diagnostics.reduction_steps
                 d.record_shape_reduction_diagnostics;
-            evaluation_steps = d.record_shape_evaluation_steps;
+            evaluation_steps =
+              Type_shape.Evaluation_diagnostics.get_reduction_steps
+                d.record_shape_evaluation_diagnostics;
             type_name = d.record_type_name;
             type_layout = d.record_type_layout;
             dwarf_die_size =
