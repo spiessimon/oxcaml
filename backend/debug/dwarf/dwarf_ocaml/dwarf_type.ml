@@ -1612,11 +1612,11 @@ module With_cms_reduce = Shape_reduce.Make (struct
   let fuel () = 10
 
   let fuel_for_compilation_units () =
-    !Clflags.gdwarf_precision_max_cms_files_per_variable
+    !Clflags.gdwarf_config_max_cms_files_per_variable
   (* Every variable gets to look up at most N compilation units. *)
 
   let max_compilation_unit_depth () =
-    !Clflags.gdwarf_precision_shape_reduce_depth
+    !Clflags.gdwarf_config_shape_reduce_depth
   (* CR sspies: Loading compilation units is expensive. We should avoid going
      too deep into the *)
 
@@ -1634,7 +1634,7 @@ module With_cms_reduce = Shape_reduce.Make (struct
       shape
     | None ->
       if !cms_files_read_counter
-         >= !Clflags.gdwarf_precision_max_cms_files_per_unit
+         >= !Clflags.gdwarf_config_max_cms_files_per_unit
       then None
       else (
         incr cms_files_read_counter;

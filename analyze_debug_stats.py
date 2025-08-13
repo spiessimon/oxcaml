@@ -27,7 +27,7 @@ class StatEntry:
 def parse_json_file(file_path):
     """Parse a single JSON file and return (entries, file_metadata) tuple."""
     entries = []
-    file_metadata = {'sourcefile': 'unknown', 'cms_files_loaded': 0, 'cms_files_cached': 0}
+    file_metadata = {'sourcefile': 'unknown', 'cms_files_loaded': 0, 'cms_files_cached': 0, 'compilation_parameters': None}
     try:
         with open(file_path, 'r') as f:
             data = json.load(f)
@@ -36,6 +36,7 @@ def parse_json_file(file_path):
         file_metadata['sourcefile'] = data.get('sourcefile', 'unknown')
         file_metadata['cms_files_loaded'] = data.get('cms_files_loaded', 0)
         file_metadata['cms_files_cached'] = data.get('cms_files_cached', 0)
+        file_metadata['compilation_parameters'] = data.get('compilation_parameters', None)
         
         # Process variables
         for var_data in data.get('variables', []):
@@ -128,42 +129,123 @@ def analyze_stats():
         print("No valid entries found.")
         return
     
+    # Calculate total DWARF DIEs
+    total_dwarf_dies = sum(e.dwarf_die_size for e in all_entries)
+    
+    # CMS file statistics for summary
+    cms_loaded_counts = [metadata['cms_files_loaded'] for _, metadata in all_file_metadata]
+    cms_cached_counts = [metadata['cms_files_cached'] for _, metadata in all_file_metadata]
+    total_cms_loaded = sum(cms_loaded_counts)
+    total_cms_cached = sum(cms_cached_counts)
+    files_with_cms_loaded = sum(1 for count in cms_loaded_counts if count > 0)
+    
     # Print summary header
     print("# DWARF Debug Statistics Analysis")
     print()
-    print("**Files analyzed:** {:,}  ".format(file_count))
-    print("**Total variables:** {:,}  ".format(len(all_entries)))
+    print("**Summary:** {:,} files, {:,} variables, {:,} total DIEs".format(file_count, len(all_entries), total_dwarf_dies))
+    print("**CMS Files:** {:,} loaded across {:,} files, {:,} cache hits".format(total_cms_loaded, files_with_cms_loaded, total_cms_cached))
+    
+    # Print compilation parameters - fail if not consistent
+    compilation_params_sets = set()
+    for _, metadata in all_file_metadata:
+        params = metadata.get('compilation_parameters')
+        if params:
+            # Convert to a frozenset of items for hashability
+            params_tuple = tuple(sorted(params.items()))
+            compilation_params_sets.add(params_tuple)
+    
+    if not compilation_params_sets:
+        print("**Error:** No compilation parameters found in JSON files.")
+        return
+    elif len(compilation_params_sets) > 1:
+        print("**Error:** Files were compiled with different parameters. All files must use the same configuration.")
+        return
+    else:
+        # All files used the same parameters
+        params_dict = dict(list(compilation_params_sets)[0])
+        config_parts = []
+        for key, value in sorted(params_dict.items()):
+            # Shorten parameter names for display
+            short_name = key.replace('gdwarf_config_', '').replace('_', '-')
+            config_parts.append("{}={}".format(short_name, value))
+        print("**Configuration:** {}".format(", ".join(config_parts)))
     print()
     
-    # CMS file statistics
-    cms_loaded_counts = [metadata['cms_files_loaded'] for _, metadata in all_file_metadata]
-    cms_cached_counts = [metadata['cms_files_cached'] for _, metadata in all_file_metadata]
-    if cms_loaded_counts:
-        print("## CMS File Summary")
+    print("## Individual Variable Statistics")
+    print()
+    
+    # Aggregate statistics for individual variables
+    initial_sizes = [e.initial_size for e in all_entries]
+    initial_sizes_memory = [e.initial_size_memory for e in all_entries]
+    reduced_sizes = [e.reduced_size for e in all_entries]
+    reduced_sizes_memory = [e.reduced_size_memory for e in all_entries]
+    evaluated_sizes = [e.evaluated_size for e in all_entries]
+    evaluated_sizes_memory = [e.evaluated_size_memory for e in all_entries]
+    reduction_steps = [e.reduction_steps for e in all_entries]
+    evaluation_steps = [e.evaluation_steps for e in all_entries]
+    dwarf_die_sizes = [e.dwarf_die_size for e in all_entries]
+    
+    types = [e.type_name for e in all_entries]
+    
+    # Top values analysis function
+    def print_top_values(values, labels, title, n=5):
+        """Print top N values with their labels, deduplicated by (value, label) pairs."""
+        if not values:
+            return
+            
+        # Create a set to deduplicate (value, label) pairs
+        unique_pairs = set(zip(values, labels))
+        
+        # Sort by value descending
+        sorted_pairs = sorted(unique_pairs, key=lambda x: x[0], reverse=True)
+        
+        print("#### Top {} {}".format(n, title))
         print()
-        
-        # Loaded statistics
-        total_cms_loaded = sum(cms_loaded_counts)
-        files_with_cms_loaded = sum(1 for count in cms_loaded_counts if count > 0)
-        print("- **Total CMS files loaded:** {:,}".format(total_cms_loaded))
-        print("- **Files that loaded CMS files:** {:,} out of {:,}".format(files_with_cms_loaded, len(cms_loaded_counts)))
-        if files_with_cms_loaded > 0:
-            print("- **Average CMS files loaded per file (when > 0):** {:.1f}".format(total_cms_loaded / files_with_cms_loaded))
-        
-        # Cached statistics  
-        total_cms_cached = sum(cms_cached_counts)
-        files_with_cms_cached = sum(1 for count in cms_cached_counts if count > 0)
-        print("- **Total CMS files cached:** {:,}".format(total_cms_cached))
-        print("- **Files that cached CMS files:** {:,} out of {:,}".format(files_with_cms_cached, len(cms_cached_counts)))
-        if files_with_cms_cached > 0:
-            print("- **Average CMS files cached per file (when > 0):** {:.1f}".format(total_cms_cached / files_with_cms_cached))
-        
+        for i, (value, label) in enumerate(sorted_pairs[:n]):
+            print("{:2d}. **{:,}** - `{}`".format(i+1, value, label))
         print()
-        print("```")
-        print(create_histogram_text(cms_loaded_counts, "CMS Files Loaded per File"), end="")
-        if total_cms_cached > 0:
-            print(create_histogram_text(cms_cached_counts, "CMS Files Cached per File"), end="")
-        print("```")
+    
+    # Initial Sizes section (non-memory first, then memory)
+    print("### Initial Sizes")
+    print(create_histogram_text(initial_sizes, "Initial Sizes"), end="")
+    print_top_values(initial_sizes, types, "Initial Sizes")
+    
+    print("### Initial Sizes (Memory)")
+    print(create_histogram_text(initial_sizes_memory, "Initial Sizes (Memory)"), end="")
+    print_top_values(initial_sizes_memory, types, "Initial Sizes (Memory)")
+    
+    # Reduced Sizes section (non-memory first, then memory)
+    print("### Reduced Sizes")
+    print(create_histogram_text(reduced_sizes, "Reduced Sizes"), end="") 
+    print_top_values(reduced_sizes, types, "Reduced Sizes")
+    
+    print("### Reduced Sizes (Memory)")
+    print(create_histogram_text(reduced_sizes_memory, "Reduced Sizes (Memory)"), end="") 
+    print_top_values(reduced_sizes_memory, types, "Reduced Sizes (Memory)")
+    
+    # Evaluated Sizes section (non-memory first, then memory)
+    print("### Evaluated Sizes")
+    print(create_histogram_text(evaluated_sizes, "Evaluated Sizes"), end="")
+    print_top_values(evaluated_sizes, types, "Evaluated Sizes")
+    
+    print("### Evaluated Sizes (Memory)")
+    print(create_histogram_text(evaluated_sizes_memory, "Evaluated Sizes (Memory)"), end="")
+    print_top_values(evaluated_sizes_memory, types, "Evaluated Sizes (Memory)")
+    
+    # Reduction Steps section
+    print("### Reduction Steps")
+    print(create_histogram_text(reduction_steps, "Reduction Steps"), end="")
+    print_top_values(reduction_steps, types, "Reduction Steps")
+    
+    # Evaluation Steps section
+    print("### Evaluation Steps")
+    print(create_histogram_text(evaluation_steps, "Evaluation Steps"), end="")
+    print_top_values(evaluation_steps, types, "Evaluation Steps")
+    
+    # DWARF DIE Sizes section
+    print("### DWARF DIE Sizes")
+    print(create_histogram_text(dwarf_die_sizes, "DWARF DIE Sizes"), end="")
+    print_top_values(dwarf_die_sizes, types, "DWARF DIE Sizes")
     
     # File-level aggregation and statistics
     file_stats = defaultdict(lambda: {'count': 0, 'total_initial_memory': 0, 'total_reduced_memory': 0, 'total_initial': 0, 'total_reduced': 0, 'total_dwarf_dies': 0, 'cms_files_loaded': 0, 'cms_files_cached': 0})
@@ -187,8 +269,8 @@ def analyze_stats():
     print()
     print("Top 20 files by DWARF DIE size:")
     print()
-    print("| File | Variables | Memory Initial | Memory Reduced | Size Initial | Size Reduced | Total DIEs | CMS Loaded | CMS Cached |")
-    print("|------|-----------|----------------|----------------|--------------|--------------|------------|------------|------------|")
+    print("| File | Variables | Memory Initial | Memory Reduced | Size Initial | Size Reduced | Total DIEs | CMS Loaded |")
+    print("|------|-----------|----------------|----------------|--------------|--------------|------------|------------|")
     
     # Sort by total DIEs descending
     sorted_files = sorted(file_stats.items(), 
@@ -201,69 +283,10 @@ def analyze_stats():
         else:
             source_filename = filename
         
-        print("| {} | {:,} | {:,} | {:,} | {:,} | {:,} | {:,} | {:,} | {:,} |".format(
+        print("| {} | {:,} | {:,} | {:,} | {:,} | {:,} | {:,} | {:,} |".format(
             source_filename, stats['count'], stats['total_initial_memory'], 
             stats['total_reduced_memory'], stats['total_initial'], stats['total_reduced'], 
-            stats['total_dwarf_dies'], stats['cms_files_loaded'], stats['cms_files_cached']))
-    print()
-    
-    print("## Individual Variable Statistics")
-    print()
-    
-    # Aggregate statistics for individual variables
-    initial_sizes_memory = [e.initial_size_memory for e in all_entries]
-    reduced_sizes_memory = [e.reduced_size_memory for e in all_entries]
-    evaluated_sizes_memory = [e.evaluated_size_memory for e in all_entries]
-    initial_sizes = [e.initial_size for e in all_entries]
-    reduced_sizes = [e.reduced_size for e in all_entries]
-    evaluated_sizes = [e.evaluated_size for e in all_entries]
-    reduction_steps = [e.reduction_steps for e in all_entries]
-    evaluation_steps = [e.evaluation_steps for e in all_entries]
-    dwarf_die_sizes = [e.dwarf_die_size for e in all_entries]
-    
-    # Print histograms
-    print("### Distribution Histograms")
-    print()
-    print("```")
-    print(create_histogram_text(initial_sizes_memory, "Initial Sizes (Memory)"), end="")
-    print(create_histogram_text(reduced_sizes_memory, "Reduced Sizes (Memory)"), end="") 
-    print(create_histogram_text(evaluated_sizes_memory, "Evaluated Sizes (Memory)"), end="")
-    print(create_histogram_text(initial_sizes, "Initial Sizes"), end="")
-    print(create_histogram_text(reduced_sizes, "Reduced Sizes"), end="") 
-    print(create_histogram_text(evaluated_sizes, "Evaluated Sizes"), end="")
-    print(create_histogram_text(reduction_steps, "Reduction Steps"), end="")
-    print(create_histogram_text(evaluation_steps, "Evaluation Steps"), end="")
-    print(create_histogram_text(dwarf_die_sizes, "DWARF DIE Sizes"), end="")
-    print("```")
-    
-    # Top values analysis
-    def print_top_values(values, labels, title, n=5):
-        """Print top N values with their labels, deduplicated by (value, label) pairs."""
-        if not values:
-            return
-            
-        # Create a set to deduplicate (value, label) pairs
-        unique_pairs = set(zip(values, labels))
-        
-        # Sort by value descending
-        sorted_pairs = sorted(unique_pairs, key=lambda x: x[0], reverse=True)
-        
-        print("#### Top {} {}".format(n, title))
-        print()
-        for i, (value, label) in enumerate(sorted_pairs[:n]):
-            print("{:2d}. **{:,}** - `{}`".format(i+1, value, label))
-        print()
-    
-    types = [e.type_name for e in all_entries]
-    
-    print_top_values(initial_sizes_memory, types, "Initial Sizes (Memory)")
-    print_top_values(reduced_sizes_memory, types, "Reduced Sizes (Memory)")
-    print_top_values(evaluated_sizes_memory, types, "Evaluated Sizes (Memory)")
-    print_top_values(initial_sizes, types, "Initial Sizes")
-    print_top_values(reduced_sizes, types, "Reduced Sizes")
-    print_top_values(evaluated_sizes, types, "Evaluated Sizes")
-    print_top_values(reduction_steps, types, "Reduction Steps")
-    print_top_values(dwarf_die_sizes, types, "DWARF DIE Sizes")
+            stats['total_dwarf_dies'], stats['cms_files_loaded']))
 
 if __name__ == "__main__":
     analyze_stats()

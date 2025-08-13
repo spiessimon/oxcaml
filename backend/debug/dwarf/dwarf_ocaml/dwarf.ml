@@ -173,6 +173,11 @@ let emit_stats_file t =
         [ Json.field "sourcefile" (Json.string sourcefile);
           Json.field "cms_files_loaded" (Json.int diagnostics.cms_files_loaded);
           Json.field "cms_files_cached" (Json.int diagnostics.cms_files_cached);
+          Json.field "compilation_parameters" (Json.object_
+            [ Json.field "gdwarf_config_shape_reduce_depth" (Json.int !Clflags.gdwarf_config_shape_reduce_depth);
+              Json.field "gdwarf_config_shape_eval_depth" (Json.int !Clflags.gdwarf_config_shape_eval_depth);
+              Json.field "gdwarf_config_max_cms_files_per_unit" (Json.int !Clflags.gdwarf_config_max_cms_files_per_unit);
+              Json.field "gdwarf_config_max_cms_files_per_variable" (Json.int !Clflags.gdwarf_config_max_cms_files_per_variable) ]);
           Json.field "variables" (Json.array variable_jsons) ]
     in
     Printf.fprintf oc "%s\n" main_object;
