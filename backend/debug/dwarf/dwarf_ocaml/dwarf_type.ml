@@ -1679,9 +1679,12 @@ module Shape_reduction_diagnostics : sig
   val record_evaluation_diagnostics : t -> int -> unit
 end = struct
   type d =
-    { mutable record_before_reduction : int;
-      mutable record_after_reduction : int;
-      mutable record_after_evaluation : int;
+    { mutable record_before_reduction_memory : int;
+      mutable record_after_reduction_memory : int;
+      mutable record_after_evaluation_memory : int;
+      mutable record_before_reduction_size : int;
+      mutable record_after_reduction_size : int;
+      mutable record_after_evaluation_size : int;
       mutable record_shape_evaluation_steps : int;
       mutable record_dwarf_die_size_before : int;
       mutable record_dwarf_die_size_after : int;
@@ -1697,9 +1700,12 @@ end = struct
     if !Dwarf_flags.ddwarf_shape_reduction_diags
     then
       Some
-        { record_before_reduction = 0;
-          record_after_reduction = 0;
-          record_after_evaluation = 0;
+        { record_before_reduction_memory = 0;
+          record_after_reduction_memory = 0;
+          record_after_evaluation_memory = 0;
+          record_before_reduction_size = 0;
+          record_after_reduction_size = 0;
+          record_after_evaluation_size = 0;
           record_shape_evaluation_steps = 0;
           record_dwarf_die_size_before = 0;
           record_dwarf_die_size_after = 0;
@@ -1725,17 +1731,23 @@ end = struct
   let record_before_reduction d shape =
     match d with
     | None -> ()
-    | Some d -> d.record_before_reduction <- Shape.size shape
+    | Some d -> 
+      d.record_before_reduction_memory <- Shape.size_in_memory shape;
+      d.record_before_reduction_size <- Shape.size shape
 
   let record_after_reduction d shape =
     match d with
     | None -> ()
-    | Some d -> d.record_after_reduction <- Shape.size shape
+    | Some d -> 
+      d.record_after_reduction_memory <- Shape.size_in_memory shape;
+      d.record_after_reduction_size <- Shape.size shape
 
   let record_after_evaluation d shape =
     match d with
     | None -> ()
-    | Some d -> d.record_after_evaluation <- Shape.size shape
+    | Some d -> 
+      d.record_after_evaluation_memory <- Shape.size_in_memory shape;
+      d.record_after_evaluation_size <- Shape.size shape
 
   let record_evaluation_diagnostics d steps =
     match d with
@@ -1763,12 +1775,15 @@ end = struct
       if !Dwarf_flags.ddwarf_shape_reduction_diags
       then (
         let diagnostic : DS.Diagnostics.variable_reduction =
-          { initial_size = d.record_before_reduction;
-            reduced_size = d.record_after_reduction;
+          { initial_size_memory = d.record_before_reduction_memory;
+            reduced_size_memory = d.record_after_reduction_memory;
+            evaluated_size_memory = d.record_after_evaluation_memory;
+            initial_size = d.record_before_reduction_size;
+            reduced_size = d.record_after_reduction_size;
+            evaluated_size = d.record_after_evaluation_size;
             reduction_steps =
               Shape_reduce.Diagnostics.reduction_steps
                 d.record_shape_reduction_diagnostics;
-            evaluated_size = d.record_after_evaluation;
             evaluation_steps = d.record_shape_evaluation_steps;
             type_name = d.record_type_name;
             type_layout = d.record_type_layout;

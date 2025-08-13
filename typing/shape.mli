@@ -376,6 +376,8 @@ val is_mu_closed : t -> bool
 
 val size : t -> int
 
+val size_in_memory : t -> int
+
 module Map : sig
   type shape = t
   type nonrec t = t Item.Map.t

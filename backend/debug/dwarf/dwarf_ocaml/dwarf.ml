@@ -143,10 +143,13 @@ let format_variable_json (variable : DS.Diagnostics.variable_reduction) =
   let type_with_layout = Printf.sprintf "%s @ %s" variable.type_name layout in
   Json.object_
     [ Json.field "type" (Json.string type_with_layout);
+      Json.field "initial_size_memory" (Json.int variable.initial_size_memory);
+      Json.field "reduced_size_memory" (Json.int variable.reduced_size_memory);
+      Json.field "evaluated_size_memory" (Json.int variable.evaluated_size_memory);
       Json.field "initial_size" (Json.int variable.initial_size);
       Json.field "reduced_size" (Json.int variable.reduced_size);
-      Json.field "reduction_steps" (Json.int variable.reduction_steps);
       Json.field "evaluated_size" (Json.int variable.evaluated_size);
+      Json.field "reduction_steps" (Json.int variable.reduction_steps);
       Json.field "evaluation_steps" (Json.int variable.evaluation_steps);
       Json.field "dwarf_die_size" (Json.int variable.dwarf_die_size) ]
 

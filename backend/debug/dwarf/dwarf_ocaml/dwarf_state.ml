@@ -19,10 +19,13 @@ open Dwarf_high
 
 module Diagnostics = struct
   type variable_reduction =
-    { initial_size : int;
+    { initial_size_memory : int;
+      reduced_size_memory : int;
+      evaluated_size_memory : int;
+      initial_size : int;
       reduced_size : int;
-      reduction_steps : int;
       evaluated_size : int;
+      reduction_steps : int;
       evaluation_steps : int;
       type_name : string;
       type_layout : Jkind_types.Sort.Const.t;

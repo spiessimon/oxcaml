@@ -9,13 +9,17 @@ import os
 from collections import defaultdict
 
 class StatEntry:
-    def __init__(self, type_name, initial_size, reduced_size, reduction_steps, 
-                 evaluated_size, evaluation_steps, dwarf_die_size, file_path):
+    def __init__(self, type_name, initial_size_memory, reduced_size_memory, evaluated_size_memory,
+                 initial_size, reduced_size, evaluated_size, reduction_steps, 
+                 evaluation_steps, dwarf_die_size, file_path):
         self.type_name = type_name
+        self.initial_size_memory = initial_size_memory
+        self.reduced_size_memory = reduced_size_memory
+        self.evaluated_size_memory = evaluated_size_memory
         self.initial_size = initial_size
         self.reduced_size = reduced_size
-        self.reduction_steps = reduction_steps
         self.evaluated_size = evaluated_size
+        self.reduction_steps = reduction_steps
         self.evaluation_steps = evaluation_steps
         self.dwarf_die_size = dwarf_die_size
         self.file_path = file_path
@@ -38,10 +42,13 @@ def parse_json_file(file_path):
             try:
                 entry = StatEntry(
                     type_name=var_data['type'],
+                    initial_size_memory=int(var_data['initial_size_memory']),
+                    reduced_size_memory=int(var_data['reduced_size_memory']),
+                    evaluated_size_memory=int(var_data['evaluated_size_memory']),
                     initial_size=int(var_data['initial_size']),
                     reduced_size=int(var_data['reduced_size']),
-                    reduction_steps=int(var_data['reduction_steps']),
                     evaluated_size=int(var_data['evaluated_size']),
+                    reduction_steps=int(var_data['reduction_steps']),
                     evaluation_steps=int(var_data['evaluation_steps']),
                     dwarf_die_size=int(var_data['dwarf_die_size']),
                     file_path=file_path
@@ -159,11 +166,13 @@ def analyze_stats():
         print("```")
     
     # File-level aggregation and statistics
-    file_stats = defaultdict(lambda: {'count': 0, 'total_initial': 0, 'total_reduced': 0, 'total_dwarf_dies': 0, 'cms_files_loaded': 0, 'cms_files_cached': 0})
+    file_stats = defaultdict(lambda: {'count': 0, 'total_initial_memory': 0, 'total_reduced_memory': 0, 'total_initial': 0, 'total_reduced': 0, 'total_dwarf_dies': 0, 'cms_files_loaded': 0, 'cms_files_cached': 0})
     
     for entry in all_entries:
         basename = os.path.basename(entry.file_path)
         file_stats[basename]['count'] += 1
+        file_stats[basename]['total_initial_memory'] += entry.initial_size_memory
+        file_stats[basename]['total_reduced_memory'] += entry.reduced_size_memory
         file_stats[basename]['total_initial'] += entry.initial_size
         file_stats[basename]['total_reduced'] += entry.reduced_size
         file_stats[basename]['total_dwarf_dies'] += entry.dwarf_die_size
@@ -178,8 +187,8 @@ def analyze_stats():
     print()
     print("Top 20 files by DWARF DIE size:")
     print()
-    print("| File | Variables | Total Initial | Total Reduced | Total DIEs | CMS Loaded | CMS Cached |")
-    print("|------|-----------|---------------|---------------|------------|------------|------------|")
+    print("| File | Variables | Memory Initial | Memory Reduced | Size Initial | Size Reduced | Total DIEs | CMS Loaded | CMS Cached |")
+    print("|------|-----------|----------------|----------------|--------------|--------------|------------|------------|------------|")
     
     # Sort by total DIEs descending
     sorted_files = sorted(file_stats.items(), 
@@ -192,20 +201,23 @@ def analyze_stats():
         else:
             source_filename = filename
         
-        print("| {} | {:,} | {:,} | {:,} | {:,} | {:,} | {:,} |".format(
-            source_filename, stats['count'], stats['total_initial'], 
-            stats['total_reduced'], stats['total_dwarf_dies'], 
-            stats['cms_files_loaded'], stats['cms_files_cached']))
+        print("| {} | {:,} | {:,} | {:,} | {:,} | {:,} | {:,} | {:,} | {:,} |".format(
+            source_filename, stats['count'], stats['total_initial_memory'], 
+            stats['total_reduced_memory'], stats['total_initial'], stats['total_reduced'], 
+            stats['total_dwarf_dies'], stats['cms_files_loaded'], stats['cms_files_cached']))
     print()
     
     print("## Individual Variable Statistics")
     print()
     
     # Aggregate statistics for individual variables
+    initial_sizes_memory = [e.initial_size_memory for e in all_entries]
+    reduced_sizes_memory = [e.reduced_size_memory for e in all_entries]
+    evaluated_sizes_memory = [e.evaluated_size_memory for e in all_entries]
     initial_sizes = [e.initial_size for e in all_entries]
     reduced_sizes = [e.reduced_size for e in all_entries]
-    reduction_steps = [e.reduction_steps for e in all_entries]
     evaluated_sizes = [e.evaluated_size for e in all_entries]
+    reduction_steps = [e.reduction_steps for e in all_entries]
     evaluation_steps = [e.evaluation_steps for e in all_entries]
     dwarf_die_sizes = [e.dwarf_die_size for e in all_entries]
     
@@ -213,16 +225,19 @@ def analyze_stats():
     print("### Distribution Histograms")
     print()
     print("```")
+    print(create_histogram_text(initial_sizes_memory, "Initial Sizes (Memory)"), end="")
+    print(create_histogram_text(reduced_sizes_memory, "Reduced Sizes (Memory)"), end="") 
+    print(create_histogram_text(evaluated_sizes_memory, "Evaluated Sizes (Memory)"), end="")
     print(create_histogram_text(initial_sizes, "Initial Sizes"), end="")
     print(create_histogram_text(reduced_sizes, "Reduced Sizes"), end="") 
-    print(create_histogram_text(reduction_steps, "Reduction Steps"), end="")
     print(create_histogram_text(evaluated_sizes, "Evaluated Sizes"), end="")
+    print(create_histogram_text(reduction_steps, "Reduction Steps"), end="")
     print(create_histogram_text(evaluation_steps, "Evaluation Steps"), end="")
     print(create_histogram_text(dwarf_die_sizes, "DWARF DIE Sizes"), end="")
     print("```")
     
     # Top values analysis
-    def print_top_values(values, labels, title, n=10):
+    def print_top_values(values, labels, title, n=5):
         """Print top N values with their labels, deduplicated by (value, label) pairs."""
         if not values:
             return
@@ -241,8 +256,12 @@ def analyze_stats():
     
     types = [e.type_name for e in all_entries]
     
+    print_top_values(initial_sizes_memory, types, "Initial Sizes (Memory)")
+    print_top_values(reduced_sizes_memory, types, "Reduced Sizes (Memory)")
+    print_top_values(evaluated_sizes_memory, types, "Evaluated Sizes (Memory)")
     print_top_values(initial_sizes, types, "Initial Sizes")
     print_top_values(reduced_sizes, types, "Reduced Sizes")
+    print_top_values(evaluated_sizes, types, "Evaluated Sizes")
     print_top_values(reduction_steps, types, "Reduction Steps")
     print_top_values(dwarf_die_sizes, types, "DWARF DIE Sizes")
 
