@@ -1624,6 +1624,7 @@ module Extra_params = struct
     | "davail" -> set' Oxcaml_flags.davail
     | "dranges" -> set' Oxcaml_flags.dranges
     | "ddebug-invariants" -> set' Dwarf_flags.ddebug_invariants
+    | "ddwarf-shape-reduction-diags" -> set' Dwarf_flags.ddwarf_shape_reduction_diags
     | "reorder-blocks-random" ->
         set_int_option' Oxcaml_flags.reorder_blocks_random
     | "basic-block-sections" -> set' Oxcaml_flags.basic_block_sections
@@ -1695,6 +1696,14 @@ module Extra_params = struct
     | "gstartup" -> set' Debugging.dwarf_for_startup_file
     | "gdwarf-max-function-complexity" ->
         set_int' Debugging.dwarf_max_function_complexity
+    | "gdwarf-fidelity" -> (
+        match Clflags.gdwarf_fidelity_of_string v with
+        | Some fidelity ->
+            Clflags.set_gdwarf_fidelity fidelity;
+            true
+        | None ->
+            Misc.fatal_error ("Invalid gdwarf-fidelity value: " ^ v)
+        )
     | "llvm-path" ->
         Oxcaml_flags.llvm_path := Some v;
         true

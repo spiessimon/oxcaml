@@ -80,6 +80,7 @@ val gdwarf_config_shape_eval_depth : int ref
 val gdwarf_config_max_cms_files_per_unit : int ref
 val gdwarf_config_max_cms_files_per_variable : int ref
 val gdwarf_fidelity : gdwarf_fidelity option ref
+val gdwarf_fidelity_of_string : string -> gdwarf_fidelity option
 val set_gdwarf_fidelity : gdwarf_fidelity -> unit
 val unsafe : bool ref
 val use_linscan : bool ref

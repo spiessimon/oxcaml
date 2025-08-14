@@ -2209,16 +2209,9 @@ module Default = struct
     let _gdwarf_config_max_cms_files_per_variable n = 
       gdwarf_config_max_cms_files_per_variable := n
     let _gdwarf_fidelity s =
-      let fidelity = match s with
-        | "low" -> Clflags.Fidelity_low
-        | "medium" -> Clflags.Fidelity_medium  
-        | "high" -> Clflags.Fidelity_high
-        | "very-high" -> Clflags.Fidelity_very_high
-        | "ultra-high" -> Clflags.Fidelity_ultra_high
-        | _ -> failwith ("Invalid fidelity level: " ^ s)
-      in
-      Clflags.gdwarf_fidelity := Some fidelity;
-      Clflags.set_gdwarf_fidelity fidelity
+      match Clflags.gdwarf_fidelity_of_string s with
+      | Some fidelity -> Clflags.set_gdwarf_fidelity fidelity
+      | None -> Misc.fatal_error ("Invalid fidelity level: " ^ s)
   end
 
   module Odoc_args = struct

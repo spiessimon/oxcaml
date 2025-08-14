@@ -225,7 +225,17 @@ let rounds () =
   | None -> !default_simplify_rounds
   | Some r -> r
 
+let gdwarf_fidelity_of_string s =
+  match String.lowercase_ascii s with
+  | "low" -> Some Fidelity_low
+  | "medium" -> Some Fidelity_medium
+  | "high" -> Some Fidelity_high
+  | "very-high" -> Some Fidelity_very_high
+  | "ultra-high" -> Some Fidelity_ultra_high
+  | _ -> None
+
 let set_gdwarf_fidelity fidelity =
+  gdwarf_fidelity := Some fidelity;
   match fidelity with
   | Fidelity_low ->
       gdwarf_config_shape_eval_depth := 1;
