@@ -1575,8 +1575,16 @@ module Extra_params = struct
     | "gdwarf-may-alter-codegen" -> set' Debugging.gdwarf_may_alter_codegen
     | "gstartup" -> set' Debugging.dwarf_for_startup_file
     | "gdwarf-max-function-complexity" ->
-      set_int' Debugging.dwarf_max_function_complexity
-    | "llvm-path" -> Oxcaml_flags.llvm_path := Some v; true
+        set_int' Debugging.dwarf_max_function_complexity
+    | "gdwarf-fidelity" -> (
+        match Clflags.gdwarf_fidelity_of_string v with
+        | Some fidelity ->
+            Clflags.set_gdwarf_fidelity fidelity;
+            true
+        | None -> Misc.fatal_error ("Invalid gdwarf-fidelity value: " ^ v))
+    | "llvm-path" ->
+        Oxcaml_flags.llvm_path := Some v;
+        true
     | "keep-llvmir" -> set' Oxcaml_flags.keep_llvmir
     | "flambda2-debug" -> set' Oxcaml_flags.Flambda2.debug
     | "flambda2-join-points" -> set Flambda2.join_points
