@@ -86,6 +86,148 @@ module Debug_info = struct
           | End_of_siblings -> indent := !indent - 2)
 end
 
+module Shape_reduction_diagnostics : sig
+  type t
+
+  val create : string -> Layout.t -> t
+
+  val shape_reduce_diagnostics : t -> Shape_reduce.Diagnostics.t
+
+  val shape_evaluation_diagnostics : t -> Type_shape.Evaluation_diagnostics.t
+
+  val record_before_reduction : t -> Shape.t -> unit
+
+  val record_after_reduction : t -> Shape.t -> unit
+
+  val record_after_evaluation : t -> Shape.t -> unit
+
+  val record_before_dwarf_generation : t -> Proto_die.t -> unit
+
+  val record_after_dwarf_generation : t -> Proto_die.t -> unit
+
+  val append_to_dwarf_state : DS.t -> t -> unit
+end = struct
+  type d =
+    { type_name : string;
+      type_layout : Layout.t;
+      mutable shape_size_before_reduction_memory : int;
+      mutable shape_size_after_reduction_memory : int;
+      mutable shape_size_after_evaluation_memory : int;
+      mutable shape_size_before_reduction_tree : int;
+      mutable shape_size_after_reduction_tree : int;
+      mutable shape_size_after_evaluation_tree : int;
+      mutable dwarf_die_size_before : int;
+      mutable dwarf_die_size_after : int;
+      shape_reduction_diagnostics : Shape_reduce.Diagnostics.t;
+      shape_evaluation_diagnostics : Type_shape.Evaluation_diagnostics.t
+    }
+
+  type t = d option
+
+  let create type_name type_layout =
+    if !Dwarf_flags.ddwarf_shape_reduction_diags
+    then
+      Some
+        { type_name = type_name;
+          type_layout = type_layout;
+          shape_size_before_reduction_memory = 0;
+          shape_size_after_reduction_memory = 0;
+          shape_size_after_evaluation_memory = 0;
+          shape_size_before_reduction_tree = 0;
+          shape_size_after_reduction_tree = 0;
+          shape_size_after_evaluation_tree = 0;
+          dwarf_die_size_before = 0;
+          dwarf_die_size_after = 0;
+          shape_reduction_diagnostics =
+            Shape_reduce.Diagnostics.create_diagnostics ();
+          shape_evaluation_diagnostics =
+            Type_shape.Evaluation_diagnostics.create_diagnostics ()
+        }
+    else None
+
+  let shape_reduce_diagnostics d =
+    match d with
+    | None -> Shape_reduce.Diagnostics.no_diagnostics
+    | Some d -> d.shape_reduction_diagnostics
+
+  let shape_evaluation_diagnostics d =
+    match d with
+    | None -> Type_shape.Evaluation_diagnostics.no_diagnostics
+    | Some d -> d.shape_evaluation_diagnostics
+
+  let record_before_reduction d shape =
+    match d with
+    | None -> ()
+    | Some d ->
+      d.shape_size_before_reduction_memory <- Shape.size_in_memory shape;
+      d.shape_size_before_reduction_tree <- Shape.size shape
+
+  let record_after_reduction d shape =
+    match d with
+    | None -> ()
+    | Some d ->
+      d.shape_size_after_reduction_memory <- Shape.size_in_memory shape;
+      d.shape_size_after_reduction_tree <- Shape.size shape
+
+  let record_after_evaluation d shape =
+    match d with
+    | None -> ()
+    | Some d ->
+      d.shape_size_after_evaluation_memory <- Shape.size_in_memory shape;
+      d.shape_size_after_evaluation_tree <- Shape.size shape
+
+  let compute_die_size die =
+    Proto_die.depth_first_fold die ~init:0 ~f:(fun acc d ->
+        match d with DIE _ -> acc + 1 | End_of_siblings -> acc)
+
+  let record_before_dwarf_generation d die =
+    match d with
+    | None -> ()
+    | Some d -> d.dwarf_die_size_before <- compute_die_size die
+
+  let record_after_dwarf_generation d die =
+    match d with
+    | None -> ()
+    | Some d -> d.dwarf_die_size_after <- compute_die_size die
+
+  let append_to_dwarf_state state d =
+    match d with
+    | None -> ()
+    | Some d ->
+      if !Dwarf_flags.ddwarf_shape_reduction_diags
+      then (
+        let diagnostic : DS.Diagnostics.variable_reduction =
+          { initial_size_memory = d.shape_size_before_reduction_memory;
+            reduced_size_memory = d.shape_size_after_reduction_memory;
+            evaluated_size_memory = d.shape_size_after_evaluation_memory;
+            initial_size = d.shape_size_before_reduction_tree;
+            reduced_size = d.shape_size_after_reduction_tree;
+            evaluated_size = d.shape_size_after_evaluation_tree;
+            reduction_steps =
+              Shape_reduce.Diagnostics.reduction_steps
+                d.shape_reduction_diagnostics;
+            evaluation_steps =
+              Type_shape.Evaluation_diagnostics.get_reduction_steps
+                d.shape_evaluation_diagnostics;
+            type_name = d.type_name;
+            type_layout = d.type_layout;
+            dwarf_die_size =
+              d.dwarf_die_size_after - d.dwarf_die_size_before
+          }
+        in
+        DS.add_variable_reduction_diagnostic state diagnostic;
+        let cms_loaded =
+          Shape_reduce.Diagnostics.cms_files_loaded
+            d.shape_reduction_diagnostics
+        in
+        DS.increment_cms_files_loaded state ~by:cms_loaded;
+        let cms_cached =
+          Shape_reduce.Diagnostics.cms_files_cached
+            d.shape_reduction_diagnostics
+        in
+        DS.increment_cms_files_cached state ~by:cms_cached)
+end
+
 let base_layout_to_byte_size (sort : base_layout) =
   match sort with
   | Void -> 0
@@ -1655,151 +1797,9 @@ module With_cms_reduce = Shape_reduce.Make (struct
             shape))
 end)
 
-module Shape_reduction_diagnostics : sig
-  type t
-
-  val create : string -> Layout.t -> t
-
-  val shape_reduce_diagnostics : t -> Shape_reduce.Diagnostics.t
-
-  val shape_evaluation_diagnostics : t -> Type_shape.Evaluation_diagnostics.t
-
-  val record_before_reduction : t -> Shape.t -> unit
-
-  val record_after_reduction : t -> Shape.t -> unit
-
-  val record_after_evaluation : t -> Shape.t -> unit
-
-  val record_before_dwarf_generation : t -> Proto_die.t -> unit
-
-  val record_after_dwarf_generation : t -> Proto_die.t -> unit
-
-  val append_to_dwarf_state : DS.t -> t -> unit
-end = struct
-  type d =
-    { mutable record_before_reduction_memory : int;
-      mutable record_after_reduction_memory : int;
-      mutable record_after_evaluation_memory : int;
-      mutable record_before_reduction_size : int;
-      mutable record_after_reduction_size : int;
-      mutable record_after_evaluation_size : int;
-      mutable record_dwarf_die_size_before : int;
-      mutable record_dwarf_die_size_after : int;
-      record_type_name : string;
-      record_type_layout : Layout.t;
-      record_shape_reduction_diagnostics : Shape_reduce.Diagnostics.t;
-      record_shape_evaluation_diagnostics : Type_shape.Evaluation_diagnostics.t
-    }
-
-  type t = d option
-
-  let create type_name type_layout =
-    if !Dwarf_flags.ddwarf_shape_reduction_diags
-    then
-      Some
-        { record_before_reduction_memory = 0;
-          record_after_reduction_memory = 0;
-          record_after_evaluation_memory = 0;
-          record_before_reduction_size = 0;
-          record_after_reduction_size = 0;
-          record_after_evaluation_size = 0;
-          record_dwarf_die_size_before = 0;
-          record_dwarf_die_size_after = 0;
-          record_type_name = type_name;
-          record_type_layout = type_layout;
-          record_shape_reduction_diagnostics =
-            Shape_reduce.Diagnostics.create_diagnostics ();
-          record_shape_evaluation_diagnostics =
-            Type_shape.Evaluation_diagnostics.create_diagnostics ()
-        }
-    else None
-
-  let shape_reduce_diagnostics d =
-    match d with
-    | None -> Shape_reduce.Diagnostics.no_diagnostics
-    | Some d -> d.record_shape_reduction_diagnostics
-
-  let shape_evaluation_diagnostics d =
-    match d with
-    | None -> Type_shape.Evaluation_diagnostics.no_diagnostics
-    | Some d -> d.record_shape_evaluation_diagnostics
-
-  let record_before_reduction d shape =
-    match d with
-    | None -> ()
-    | Some d ->
-      d.record_before_reduction_memory <- Shape.size_in_memory shape;
-      d.record_before_reduction_size <- Shape.size shape
-
-  let record_after_reduction d shape =
-    match d with
-    | None -> ()
-    | Some d ->
-      d.record_after_reduction_memory <- Shape.size_in_memory shape;
-      d.record_after_reduction_size <- Shape.size shape
-
-  let record_after_evaluation d shape =
-    match d with
-    | None -> ()
-    | Some d ->
-      d.record_after_evaluation_memory <- Shape.size_in_memory shape;
-      d.record_after_evaluation_size <- Shape.size shape
-
-  let compute_die_size die =
-    Proto_die.depth_first_fold die ~init:0 ~f:(fun acc d ->
-        match d with DIE _ -> acc + 1 | End_of_siblings -> acc)
-
-  let record_before_dwarf_generation d die =
-    match d with
-    | None -> ()
-    | Some d -> d.record_dwarf_die_size_before <- compute_die_size die
-
-  let record_after_dwarf_generation d die =
-    match d with
-    | None -> ()
-    | Some d -> d.record_dwarf_die_size_after <- compute_die_size die
-
-  let append_to_dwarf_state state d =
-    match d with
-    | None -> ()
-    | Some d ->
-      if !Dwarf_flags.ddwarf_shape_reduction_diags
-      then (
-        let diagnostic : DS.Diagnostics.variable_reduction =
-          { initial_size_memory = d.record_before_reduction_memory;
-            reduced_size_memory = d.record_after_reduction_memory;
-            evaluated_size_memory = d.record_after_evaluation_memory;
-            initial_size = d.record_before_reduction_size;
-            reduced_size = d.record_after_reduction_size;
-            evaluated_size = d.record_after_evaluation_size;
-            reduction_steps =
-              Shape_reduce.Diagnostics.reduction_steps
-                d.record_shape_reduction_diagnostics;
-            evaluation_steps =
-              Type_shape.Evaluation_diagnostics.get_reduction_steps
-                d.record_shape_evaluation_diagnostics;
-            type_name = d.record_type_name;
-            type_layout = d.record_type_layout;
-            dwarf_die_size =
-              d.record_dwarf_die_size_after - d.record_dwarf_die_size_before
-          }
-        in
-        DS.add_variable_reduction_diagnostic state diagnostic;
-        let cms_loaded =
-          Shape_reduce.Diagnostics.cms_files_loaded
-            d.record_shape_reduction_diagnostics
-        in
-        DS.increment_cms_files_loaded state ~by:cms_loaded;
-        let cms_cached =
-          Shape_reduce.Diagnostics.cms_files_cached
-            d.record_shape_reduction_diagnostics
-        in
-        DS.increment_cms_files_cached state ~by:cms_cached)
-end
 
 module D = Shape_reduction_diagnostics
 
-let debug_print_reduction_before_and_after = false
 
 (* Search for the first unused variant of [name] in the [name_cache] cache. If
    we come along a type of the same name and type shape, then we simply use that
@@ -1873,8 +1873,6 @@ let variable_to_die state (var_uid : Uid.t) ~parent_proto_die =
         Env.empty
     in
     D.record_before_reduction reduction_diagnostics type_shape;
-    if debug_print_reduction_before_and_after
-    then Format.eprintf "before reduction %a@." Shape.print type_shape;
     let type_shape = shape_reduce type_shape in
     D.record_after_reduction reduction_diagnostics type_shape;
     let type_shape =
@@ -1883,8 +1881,6 @@ let variable_to_die state (var_uid : Uid.t) ~parent_proto_die =
         type_shape
     in
     D.record_after_evaluation reduction_diagnostics type_shape;
-    if debug_print_reduction_before_and_after
-    then Format.eprintf "after reduction %a@." Shape.print type_shape;
     let type_shape =
       match unboxed_projection, type_layout with
       | None, Base b -> Known (type_shape, b)
