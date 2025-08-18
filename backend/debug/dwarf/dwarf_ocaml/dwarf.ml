@@ -153,31 +153,29 @@ let emit_stats_file t =
     base ^ ".debug-stats.json"
   in
   let diagnostics = DS.diagnostics t.state in
-  if List.length diagnostics.variables > 0
-  then (
-    let oc = open_out stats_filename in
-    (* Format variables array *)
-    let variable_jsons =
-      List.rev_map format_variable_json diagnostics.variables
-    in
-    (* Create the main JSON object *)
-    let main_object =
-      Json.object_
-        [ Json.field "compilation_parameters"
-            (Json.object_
-               [ Json.field "gdwarf_config_shape_reduce_depth"
-                   (Json.int !Clflags.gdwarf_config_shape_reduce_depth);
-                 Json.field "gdwarf_config_shape_eval_depth"
-                   (Json.int !Clflags.gdwarf_config_shape_eval_depth);
-                 Json.field "gdwarf_config_max_cms_files_per_unit"
-                   (Json.int !Clflags.gdwarf_config_max_cms_files_per_unit);
-                 Json.field "gdwarf_config_max_cms_files_per_variable"
-                   (Json.int !Clflags.gdwarf_config_max_cms_files_per_variable)
-               ]);
-          Json.field "variables" (Json.array variable_jsons) ]
-    in
-    Printf.fprintf oc "%s\n" main_object;
-    close_out oc)
+  let oc = open_out stats_filename in
+  (* Format variables array *)
+  let variable_jsons =
+    List.rev_map format_variable_json diagnostics.variables
+  in
+  (* Create the main JSON object *)
+  let main_object =
+    Json.object_
+      [ Json.field "compilation_parameters"
+          (Json.object_
+              [ Json.field "gdwarf_config_shape_reduce_depth"
+                  (Json.int !Clflags.gdwarf_config_shape_reduce_depth);
+                Json.field "gdwarf_config_shape_eval_depth"
+                  (Json.int !Clflags.gdwarf_config_shape_eval_depth);
+                Json.field "gdwarf_config_max_cms_files_per_unit"
+                  (Json.int !Clflags.gdwarf_config_max_cms_files_per_unit);
+                Json.field "gdwarf_config_max_cms_files_per_variable"
+                  (Json.int !Clflags.gdwarf_config_max_cms_files_per_variable)
+              ]);
+        Json.field "variables" (Json.array variable_jsons) ]
+  in
+  Printf.fprintf oc "%s\n" main_object;
+  close_out oc
 
 let emit t ~basic_block_sections ~binary_backend_available =
   if t.emitted

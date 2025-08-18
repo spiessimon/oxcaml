@@ -1507,7 +1507,8 @@ let rec type_shape_to_dwarf_die (type_shape : Shape.t)
       | None ->
         (* CR sspies: This case should not happen. Consider weaking the error
            and falling back to the default type. *)
-        assert false)
+        create_base_layout_type ~reference type_layout ?name ~parent_proto_die
+        ~fallback_value_die ())
     | Mu sh ->
       let reference' =
         (* CR sspies: We are creating two typedefs for recursive types. One
