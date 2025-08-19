@@ -4,10 +4,9 @@ let _ = f_start ()
 let[@inline never] [@local never] f_unboxed_float (x: float#) = x
 let _ = f_unboxed_float #4.1
 let _ = f_unboxed_float #0.0
-(* CR sspies: floats that end in .0 are printed with just .
-   It would be more uniform to always print the trailing 0. *)
+
 let _ = f_unboxed_float (-#3.14)
-(* CR sspies: debugger shows as #-3.14 rather than -#3.14 *)
+
 let _ = f_unboxed_float #1e10
 
 let[@inline never] [@local never] f_unboxed_float32 (x: float32#) = x
@@ -22,8 +21,7 @@ let _ = f_unboxed_nativeint (-#999n)
 
 let[@inline never] [@local never] f_unboxed_int32 (x: int32#) = x
 let _ = f_unboxed_int32 #0l
-(* CR sspies: unboxed integers are currently not printed correctly
-   (missing the hash and the suffix) *)
+
 let _ = f_unboxed_int32 #0x12345678l
 let _ = f_unboxed_int32 (-#456l)
 

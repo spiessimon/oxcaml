@@ -58,6 +58,11 @@
 (lldb) c
 (lldb) c
 (lldb) c
+(lldb) c
+(lldb) c
+(lldb) c
+(lldb) c
+(lldb) c
 (lldb) b Test_basic_dwarf.f_bytes
 (lldb) c
 (lldb) c
