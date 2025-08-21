@@ -59,8 +59,7 @@ let[@inline never] [@local never] f_int8x16_unboxed (x: int8x16#) = x
 let _ = f_int8x16_unboxed
     (int8x16_of_int64x2_unboxed
        (int64x2_of_int64s #0x0123456789abcdefL #0xfedcba9876543210L))
-(* CR sspies: int8 vector elements display inconsistently as mix of hex
-   escapes and ASCII characters *)
+
 let _ = f_int8x16_unboxed
     (int8x16_of_int64x2_unboxed (int64x2_of_int64s #0L #0L))
 
