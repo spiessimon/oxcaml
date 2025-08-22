@@ -217,6 +217,12 @@ end = struct
                 d.shape_reduction_diagnostics;
             cms_files_cached =
               Shape_reduce.Diagnostics.cms_files_cached
+                d.shape_reduction_diagnostics;
+            cms_files_missing =
+              Shape_reduce.Diagnostics.cms_files_missing
+                d.shape_reduction_diagnostics;
+            cms_files_unreadable =
+              Shape_reduce.Diagnostics.cms_files_unreadable
                 d.shape_reduction_diagnostics
           }
         in
@@ -1798,11 +1804,13 @@ module With_cms_reduce = Shape_reduce.Make (struct
             match Load_path.find_normalized (filename ^ ".cmt") with
             | exception Not_found ->
               (*= Format.eprintf "Warning: Cannot find CMT file %s.cmt\n" filename; *)
+              Shape_reduce.Diagnostics.add_cms_file_missing diagnostics (filename ^ ".cms");
               None
             | cmt_path -> (
               match Cmt_format.read cmt_path with
               | exception Cmt_format.Error _ ->
                 (*= Format.eprintf "Warning: Cannot read CMT file %s.cmt\n" filename; *)
+                Shape_reduce.Diagnostics.add_cms_file_unreadable diagnostics (filename ^ ".cmt");
                 None
               | (_, Some cmt_infos) -> cmt_infos.cmt_impl_shape
               | _ -> None))
@@ -1810,6 +1818,7 @@ module With_cms_reduce = Shape_reduce.Make (struct
             match Cms_format.read cms_path with
             | exception Cms_format.Error _ ->
               (*= Format.eprintf "Warning: Cannot read CMS file %s.cms\n" filename; *)
+              Shape_reduce.Diagnostics.add_cms_file_unreadable diagnostics (filename ^ ".cms");
               None
             | cms_infos -> cms_infos.cms_impl_shape)
         in
