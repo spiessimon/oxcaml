@@ -159,21 +159,24 @@ end = struct
     match d with
     | None -> ()
     | Some d ->
-      d.shape_size_before_reduction_memory <- Obj.reachable_words (Obj.repr shape);
+      d.shape_size_before_reduction_memory
+        <- Obj.reachable_words (Obj.repr shape);
       d.shape_size_before_reduction_tree <- Shape.size shape
 
   let record_after_reduction d shape =
     match d with
     | None -> ()
     | Some d ->
-      d.shape_size_after_reduction_memory <- Obj.reachable_words (Obj.repr shape);
+      d.shape_size_after_reduction_memory
+        <- Obj.reachable_words (Obj.repr shape);
       d.shape_size_after_reduction_tree <- Shape.size shape
 
   let record_after_evaluation d shape =
     match d with
     | None -> ()
     | Some d ->
-      d.shape_size_after_evaluation_memory <- Obj.reachable_words (Obj.repr shape);
+      d.shape_size_after_evaluation_memory
+        <- Obj.reachable_words (Obj.repr shape);
       d.shape_size_after_evaluation_tree <- Shape.size shape
 
   let compute_die_size die =
@@ -1355,9 +1358,8 @@ let add_to_cache (type_shape : Shape.t) (type_layout : Layout.t) reference =
   if Shape.is_mu_closed type_shape
   then Cache.add cache { type_shape; type_layout } reference
 
-(** This second cache is for named type shapes. Every type name should be
-    associated with at most one DWARF die, so this cache maps type names to
-    type shapes and DWARF dies. *)
+(** This second cache is for named type shapes. Every type name should be associated with
+    at most one DWARF die, so this cache maps type names to type shapes and DWARF dies. *)
 let name_cache = String.Tbl.create 16
 
 (* CR sspies: We have to be careful here, because LLDB currently disambiguates
@@ -1514,7 +1516,7 @@ let rec type_shape_to_dwarf_die (type_shape : Shape.t)
         (* CR sspies: This case should not happen. Consider weaking the error
            and falling back to the default type. *)
         create_base_layout_type ~reference type_layout ?name ~parent_proto_die
-        ~fallback_value_die ())
+          ~fallback_value_die ())
     | Mu sh ->
       let reference' =
         (* CR sspies: We are creating two typedefs for recursive types. One
@@ -1771,6 +1773,10 @@ module With_cms_reduce = Shape_reduce.Make (struct
     !Clflags.gdwarf_config_max_cms_files_per_variable
   (* Every variable gets to look up at most N compilation units. *)
 
+  let max_shape_reduce_steps_per_variable () =
+    Misc.Maybe_bounded.of_option
+      !Clflags.gdwarf_config_max_shape_reduce_steps_per_variable
+
   let max_compilation_unit_depth () = !Clflags.gdwarf_config_shape_reduce_depth
   (* CR sspies: Loading compilation units is expensive. We should avoid going
      too deep into the *)
@@ -1783,9 +1789,9 @@ module With_cms_reduce = Shape_reduce.Make (struct
      different variables. *)
 
   let read_unit_shape ~diagnostics ~unit_name =
-    (* CR sspies: We could consider throwing a louder error here, since
-    there must be something like a [.cms] version mismatch here. For
-    now, since it's only debugging information, we fail silently. *)
+    (* CR sspies: We could consider throwing a louder error here, since there
+       must be something like a [.cms] version mismatch here. For now, since
+       it's only debugging information, we fail silently. *)
     match String.Tbl.find_opt cms_file_cache unit_name with
     | Some shape ->
       Shape_reduce.Diagnostics.count_cms_file_cached diagnostics;
@@ -1804,31 +1810,34 @@ module With_cms_reduce = Shape_reduce.Make (struct
             match Load_path.find_normalized (filename ^ ".cmt") with
             | exception Not_found ->
               (*= Format.eprintf "Warning: Cannot find CMT file %s.cmt\n" filename; *)
-              Shape_reduce.Diagnostics.add_cms_file_missing diagnostics (filename ^ ".cms");
+              Shape_reduce.Diagnostics.add_cms_file_missing diagnostics
+                (filename ^ ".cms");
               None
             | cmt_path -> (
               match Cmt_format.read cmt_path with
               | exception Cmt_format.Error _ ->
                 (*= Format.eprintf "Warning: Cannot read CMT file %s.cmt\n" filename; *)
-                Shape_reduce.Diagnostics.add_cms_file_unreadable diagnostics (filename ^ ".cmt");
+                Shape_reduce.Diagnostics.add_cms_file_unreadable diagnostics
+                  (filename ^ ".cmt");
                 None
-              | (_, Some cmt_infos) -> cmt_infos.cmt_impl_shape
+              | _, Some cmt_infos -> cmt_infos.cmt_impl_shape
               | _ -> None))
           | cms_path -> (
             match Cms_format.read cms_path with
             | exception Cms_format.Error _ ->
               (*= Format.eprintf "Warning: Cannot read CMS file %s.cms\n" filename; *)
-              Shape_reduce.Diagnostics.add_cms_file_unreadable diagnostics (filename ^ ".cms");
+              Shape_reduce.Diagnostics.add_cms_file_unreadable diagnostics
+                (filename ^ ".cms");
               None
             | cms_infos -> cms_infos.cms_impl_shape)
         in
         (*= (match Load_path.find_normalized (filename ^ ".cmi") with
         | exception Not_found -> Format.eprintf "Warning: Cannot find CMI file\n"
         | fn -> Format.eprintf "Found CMI file %s\n" fn); *)
-        (String.Tbl.add cms_file_cache unit_name shape;
+        String.Tbl.add cms_file_cache unit_name shape;
         Shape_reduce.Diagnostics.count_cms_file_loaded diagnostics;
-        shape) (* Note: This is an option, and we are also caching the None case. *)
-        )
+        shape
+        (* Note: This is an option, and we are also caching the None case. *))
 end)
 
 module D = Shape_reduction_diagnostics
@@ -1941,26 +1950,26 @@ let variable_to_die state (var_uid : Uid.t) ~parent_proto_die =
     in
     D.record_before_dwarf_generation reduction_diagnostics parent_proto_die;
     let reference =
-    match type_shape with
-    | Known (type_shape, base_layout) ->
-      let reference =
-        type_shape_to_dwarf_die_with_aliased_name type_name type_shape
-          base_layout ~parent_proto_die ~fallback_value_die
-      in
-      if Debugging_the_compiler.enabled ()
-      then (
-        Format.eprintf "%a has become %a@." Uid.print var_uid
-          Asm_targets.Asm_label.print reference;
-        Debugging_the_compiler.print ~die:parent_proto_die);
-      reference
-    | Unknown base_layout ->
-      let reference = Proto_die.create_reference () in
-      create_base_layout_type ~reference ~parent_proto_die
-        ~name:("unknown @ " ^ Sort.to_string_base base_layout)
-        ~fallback_value_die base_layout ();
-      (* CR sspies: We do have the type name available here, so we could be more
-         precise in principle. *)
-      reference
+      match type_shape with
+      | Known (type_shape, base_layout) ->
+        let reference =
+          type_shape_to_dwarf_die_with_aliased_name type_name type_shape
+            base_layout ~parent_proto_die ~fallback_value_die
+        in
+        if Debugging_the_compiler.enabled ()
+        then (
+          Format.eprintf "%a has become %a@." Uid.print var_uid
+            Asm_targets.Asm_label.print reference;
+          Debugging_the_compiler.print ~die:parent_proto_die);
+        reference
+      | Unknown base_layout ->
+        let reference = Proto_die.create_reference () in
+        create_base_layout_type ~reference ~parent_proto_die
+          ~name:("unknown @ " ^ Sort.to_string_base base_layout)
+          ~fallback_value_die base_layout ();
+        (* CR sspies: We do have the type name available here, so we could be
+           more precise in principle. *)
+        reference
     in
     D.record_after_dwarf_generation reduction_diagnostics parent_proto_die;
     D.append_to_dwarf_state state reduction_diagnostics;

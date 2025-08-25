@@ -910,6 +910,14 @@ let mk_gdwarf_config_max_cms_files_per_variable f =
   "-gdwarf-config-max-cms-files-per-variable", Arg.Int f,
   "<n>  Maximum CMS files per variable in DWARF debug info (default: 0)"
 
+let mk_gdwarf_config_max_shape_reduce_steps_per_variable f =
+  "-gdwarf-config-max-shape-reduce-steps-per-variable", Arg.String f,
+  "<n|none>  Maximum shape reduction steps per variable in DWARF debug info (default: 100, use 'none' for unlimited)"
+
+let mk_gdwarf_config_max_evaluation_steps_per_variable f =
+  "-gdwarf-config-max-evaluation-steps-per-variable", Arg.String f,
+  "<n|none>  Maximum evaluation steps per variable in DWARF debug info (default: 1000, use 'none' for unlimited)"
+
 let mk_gdwarf_fidelity f =
   "-gdwarf-fidelity", Arg.String f,
   "<level>  Set DWARF debug info fidelity level (low|medium|high|very-high|ultra-high)"
@@ -1206,6 +1214,8 @@ module type Optcomp_options = sig
   val _gdwarf_config_shape_eval_depth : int -> unit
   val _gdwarf_config_max_cms_files_per_unit : int -> unit
   val _gdwarf_config_max_cms_files_per_variable : int -> unit
+  val _gdwarf_config_max_shape_reduce_steps_per_variable : string -> unit
+  val _gdwarf_config_max_evaluation_steps_per_variable : string -> unit
   val _gdwarf_fidelity : string -> unit
 end;;
 
@@ -1650,6 +1660,8 @@ struct
     mk_gdwarf_config_shape_eval_depth F._gdwarf_config_shape_eval_depth;
     mk_gdwarf_config_max_cms_files_per_unit F._gdwarf_config_max_cms_files_per_unit;
     mk_gdwarf_config_max_cms_files_per_variable F._gdwarf_config_max_cms_files_per_variable;
+    mk_gdwarf_config_max_shape_reduce_steps_per_variable F._gdwarf_config_max_shape_reduce_steps_per_variable;
+    mk_gdwarf_config_max_evaluation_steps_per_variable F._gdwarf_config_max_evaluation_steps_per_variable;
     mk_gdwarf_fidelity F._gdwarf_fidelity;
 
     mk_args F._args;
@@ -2206,6 +2218,16 @@ module Default = struct
       gdwarf_config_max_cms_files_per_unit := n
     let _gdwarf_config_max_cms_files_per_variable n =
       gdwarf_config_max_cms_files_per_variable := n
+    let _gdwarf_config_max_shape_reduce_steps_per_variable s =
+      gdwarf_config_max_shape_reduce_steps_per_variable :=
+        (match s with
+         | "none" -> None
+         | n -> Some (int_of_string n))
+    let _gdwarf_config_max_evaluation_steps_per_variable s =
+      gdwarf_config_max_evaluation_steps_per_variable :=
+        (match s with
+         | "none" -> None
+         | n -> Some (int_of_string n))
     let _gdwarf_fidelity s =
       match Clflags.gdwarf_fidelity_of_string s with
       | Some fidelity -> Clflags.set_gdwarf_fidelity fidelity

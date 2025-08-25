@@ -145,8 +145,10 @@ let format_variable_json (variable : DS.Diagnostics.variable_reduction) =
       Json.field "dwarf_die_size" (Json.int variable.dwarf_die_size);
       Json.field "cms_files_loaded" (Json.int variable.cms_files_loaded);
       Json.field "cms_files_cached" (Json.int variable.cms_files_cached);
-      Json.field "cms_files_missing" (Json.array (List.map Json.string variable.cms_files_missing));
-      Json.field "cms_files_unreadable" (Json.array (List.map Json.string variable.cms_files_unreadable)) ]
+      Json.field "cms_files_missing"
+        (Json.array (List.map Json.string variable.cms_files_missing));
+      Json.field "cms_files_unreadable"
+        (Json.array (List.map Json.string variable.cms_files_unreadable)) ]
 
 let emit_stats_file t =
   let sourcefile = DS.sourcefile t.state in
@@ -165,15 +167,14 @@ let emit_stats_file t =
     Json.object_
       [ Json.field "compilation_parameters"
           (Json.object_
-              [ Json.field "gdwarf_config_shape_reduce_depth"
-                  (Json.int !Clflags.gdwarf_config_shape_reduce_depth);
-                Json.field "gdwarf_config_shape_eval_depth"
-                  (Json.int !Clflags.gdwarf_config_shape_eval_depth);
-                Json.field "gdwarf_config_max_cms_files_per_unit"
-                  (Json.int !Clflags.gdwarf_config_max_cms_files_per_unit);
-                Json.field "gdwarf_config_max_cms_files_per_variable"
-                  (Json.int !Clflags.gdwarf_config_max_cms_files_per_variable)
-              ]);
+             [ Json.field "gdwarf_config_shape_reduce_depth"
+                 (Json.int !Clflags.gdwarf_config_shape_reduce_depth);
+               Json.field "gdwarf_config_shape_eval_depth"
+                 (Json.int !Clflags.gdwarf_config_shape_eval_depth);
+               Json.field "gdwarf_config_max_cms_files_per_unit"
+                 (Json.int !Clflags.gdwarf_config_max_cms_files_per_unit);
+               Json.field "gdwarf_config_max_cms_files_per_variable"
+                 (Json.int !Clflags.gdwarf_config_max_cms_files_per_variable) ]);
         Json.field "variables" (Json.array variable_jsons) ]
   in
   Printf.fprintf oc "%s\n" main_object;
