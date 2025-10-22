@@ -249,16 +249,20 @@ let create_typedef_die ~reference ~parent_proto_die ?name child_die =
       |> attribute_list_with_optional_name name)
     ()
 
-let create_array_die ~reference ~parent_proto_die ~child_die ?name () =
+let create_array_die ~reference ~parent_proto_die ~child_die ~element_stride
+    ?name () =
   let array_die =
     Proto_die.create ~parent:(Some parent_proto_die) ~tag:Dwarf_tag.Array_type
       ~attribute_values:
         [ DAH.create_type_from_reference ~proto_die_reference:child_die;
           (* We can't use DW_AT_byte_size or DW_AT_bit_size since we don't know
              how large the array might be. *)
-          (* DW_AT_byte_stride probably isn't required strictly speaking, but
-             let's add it for the avoidance of doubt. *)
-          DAH.create_byte_stride ~bytes:(Int8.of_int_exn Arch.size_addr) ]
+          (* DW_AT_byte_stride is required for arrays to correctly specify the
+             distance between consecutive elements. For boxed arrays, this is
+             [Arch.size_addr] (pointer size), but for unboxed arrays like
+             [int32# array], this must be the actual size of the unboxed
+             element. *)
+          DAH.create_byte_stride ~bytes:(Int8.of_int_exn element_stride) ]
       ()
   in
   Proto_die.create_ignore ~parent:(Some array_die) ~tag:Dwarf_tag.Subrange_type
@@ -1131,6 +1135,10 @@ let create_runtime_layout_type ?(simd_vec_split = None) ~reference
       ~byte_size ~split:simd_vec_split ()
 
 let create_packed_struct ~parent_proto_die dies_and_layouts =
+  (* For packed structs used as array elements, the struct's byte size must
+     match the array element stride to allow LLDB to read the values. Since the
+     stride includes padding (size_in_memory), we use size_in_memory for both
+     the total struct size and field offsets. *)
   let packed_byte_size =
     List.fold_left
       (fun acc (_, layout) ->
@@ -1430,7 +1438,12 @@ and predef_to_dwarf_die ~reference ?name (t : Dwarf_shape.Runtime_shape.predef)
       runtime_shape_to_dwarf_die ~parent_proto_die ~fallback_value_die ~rec_env
         s
     in
-    create_array_die ~reference ~parent_proto_die ~child_die ?name ()
+    let element_stride =
+      let element_layout = Dwarf_shape.Runtime_shape.to_runtime_layout s in
+      Dwarf_shape.Runtime_layout.size element_layout
+    in
+    create_array_die ~reference ~parent_proto_die ~child_die ~element_stride
+      ?name ()
   | Array_packed fields ->
     let dies =
       List.map
@@ -1442,7 +1455,16 @@ and predef_to_dwarf_die ~reference ?name (t : Dwarf_shape.Runtime_shape.predef)
         fields
     in
     let packed_die = create_packed_struct ~parent_proto_die dies in
-    create_array_die ~reference ~parent_proto_die ~child_die:packed_die ?name ()
+    (* For unboxed product arrays, each field is padded to at least 8 bytes in
+       memory, but can be larger (e.g., SIMD vectors). The stride is the sum of
+       size_in_memory for all fields. *)
+    let element_stride =
+      List.fold_left
+        (fun acc (_, ly) -> acc + Dwarf_shape.Runtime_layout.size_in_memory ly)
+        0 dies
+    in
+    create_array_die ~reference ~parent_proto_die ~child_die:packed_die
+      ~element_stride ?name ()
   | Char -> create_char_die ~reference ~parent_proto_die ?name ()
   | Unboxed b ->
     let type_layout = Dwarf_shape.Runtime_shape.runtime_layout_of_unboxed b in
