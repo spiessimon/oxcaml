@@ -49,10 +49,23 @@ module Diagnostics = struct
       mutable cms_files_loaded : int;
       mutable cms_files_cached : int;
       mutable cms_files_missing : string list;
-      mutable cms_files_unreadable : string list
+      mutable cms_files_unreadable : string list;
+      mutable reduce_memo_table_stats : Hashtbl.statistics option;
+      mutable read_back_memo_table_stats : Hashtbl.statistics option
     }
 
   type t = diagnostics option
+
+  type memo_table_kind =
+    | Reduce
+    | Read_back
+
+  type memo_table_stats =
+    { size : int;
+      bucket_count : int;
+      max_bucket_length : int;
+      avg_bucket_length : float
+    }
 
   let no_diagnostics = None
 
@@ -63,7 +76,9 @@ module Diagnostics = struct
         cms_files_loaded = 0;
         cms_files_cached = 0;
         cms_files_missing = [];
-        cms_files_unreadable = []
+        cms_files_unreadable = [];
+        reduce_memo_table_stats = None;
+        read_back_memo_table_stats = None
       }
 
   let count_reduction_step d =
@@ -112,6 +127,57 @@ module Diagnostics = struct
 
   let cms_files_unreadable d =
     match d with None -> [] | Some d -> List.rev d.cms_files_unreadable
+
+  let update_memo_table_stats d ~kind stats =
+    match d with
+    | None -> ()
+    | Some d ->
+        match kind with
+        | Reduce -> d.reduce_memo_table_stats <- Some stats
+        | Read_back -> d.read_back_memo_table_stats <- Some stats
+
+  let compute_total_bucket_length histogram =
+    let _, total =
+      Array.fold_left (fun (bucket_size, acc) count ->
+        (bucket_size + 1, acc + (bucket_size * count)))
+        (0, 0) histogram
+    in
+    total
+
+  let get_memo_table_stats kind d =
+    match d with
+    | None ->
+      { size = 0;
+        bucket_count = 0;
+        max_bucket_length = 0;
+        avg_bucket_length = 0.0
+      }
+    | Some d ->
+      let stats_opt =
+        match kind with
+        | Reduce -> d.reduce_memo_table_stats
+        | Read_back -> d.read_back_memo_table_stats
+      in
+      match stats_opt with
+      | None ->
+        { size = 0;
+          bucket_count = 0;
+          max_bucket_length = 0;
+          avg_bucket_length = 0.0
+        }
+      | Some stats ->
+        let size = stats.Hashtbl.num_bindings in
+        let bucket_count = stats.Hashtbl.num_buckets in
+        let max_bucket_length = stats.Hashtbl.max_bucket_length in
+        let total_bucket_length =
+          compute_total_bucket_length stats.Hashtbl.bucket_histogram
+        in
+        let avg_bucket_length =
+          if bucket_count = 0
+          then 0.0
+          else float_of_int total_bucket_length /. float_of_int bucket_count
+        in
+        { size; bucket_count; max_bucket_length; avg_bucket_length }
 end
 
 let find_shape env id =
@@ -194,8 +260,6 @@ end) = struct
      bind [x] to [None] in the environment. [Some v] is used for
      actual substitutions, for example in [App(Abs(x, body), t)], when
      [v] is a thunk that will evaluate to the normal form of [t]. *)
-
-  let approx_nf nf = { nf with approximated = true }
 
   let rec equal_local_env t1 t2 =
     t1.depth = t2.depth &&
@@ -285,6 +349,8 @@ end) = struct
   and equal_nf t1 t2 =
     if not (Option.equal Uid.equal t1.uid t2.uid) then false
     else equal_nf_desc t1.desc t2.desc
+
+  let approx_nf nf = { nf with approximated = true }
 
   module ReduceMemoTable = Hashtbl.Make(struct
       type nonrec t = local_env * t
@@ -699,6 +765,13 @@ end) = struct
   let reduce_memo_table = Local_store.s_table ReduceMemoTable.create 42
   let read_back_memo_table = Local_store.s_table ReadBackMemoTable.create 42
 
+  let update_diagnostics_with_memo_stats diagnostics reduce_tbl read_back_tbl =
+    let reduce_stats = ReduceMemoTable.stats reduce_tbl in
+    Diagnostics.update_memo_table_stats diagnostics ~kind:Reduce reduce_stats;
+    let read_back_stats = ReadBackMemoTable.stats read_back_tbl in
+    Diagnostics.update_memo_table_stats diagnostics ~kind:Read_back
+      read_back_stats
+
   let reduce ?(diagnostics = Diagnostics.no_diagnostics) global_env t =
     let fuel = Params.fuel () in
     MB.incr fuel;
@@ -722,7 +795,10 @@ end) = struct
       read_back_memo_table = !read_back_memo_table;
       local_env;
     } in
-    reduce_ env t |> read_back env
+    let result = reduce_ env t |> read_back env in
+    update_diagnostics_with_memo_stats diagnostics
+      env.reduce_memo_table env.read_back_memo_table;
+    result
 
   let rec is_stuck_on_comp_unit (nf : nf) =
     match nf.desc with

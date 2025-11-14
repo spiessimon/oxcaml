@@ -195,6 +195,14 @@ end = struct
     | Some d ->
       if !Dwarf_flags.ddwarf_metrics
       then
+        let reduce_stats =
+          Shape_reduce.Diagnostics.get_memo_table_stats Reduce
+            d.shape_reduction_diagnostics
+        in
+        let read_back_stats =
+          Shape_reduce.Diagnostics.get_memo_table_stats Read_back
+            d.shape_reduction_diagnostics
+        in
         let diagnostic : DS.Diagnostics.variable_reduction =
           { shape_size_before_reduction_in_bytes =
               d.shape_size_before_reduction_in_bytes;
@@ -222,7 +230,17 @@ end = struct
                 d.shape_reduction_diagnostics;
             cms_files_unreadable =
               Shape_reduce.Diagnostics.cms_files_unreadable
-                d.shape_reduction_diagnostics
+                d.shape_reduction_diagnostics;
+            reduce_memo_table_size = reduce_stats.size;
+            reduce_memo_table_bucket_count = reduce_stats.bucket_count;
+            reduce_memo_table_max_bucket_length = reduce_stats.max_bucket_length;
+            reduce_memo_table_avg_bucket_length = reduce_stats.avg_bucket_length;
+            read_back_memo_table_size = read_back_stats.size;
+            read_back_memo_table_bucket_count = read_back_stats.bucket_count;
+            read_back_memo_table_max_bucket_length =
+              read_back_stats.max_bucket_length;
+            read_back_memo_table_avg_bucket_length =
+              read_back_stats.avg_bucket_length
           }
         in
         DS.add_variable_reduction_diagnostic state diagnostic
@@ -1595,12 +1613,19 @@ let variable_to_die state (var_uid : Uid.t) ~parent_proto_die =
         Env.empty
     in
     D.record_before_reduction reduction_diagnostics type_shape;
-    let type_shape = shape_reduce type_shape in
+    let type_shape =
+      Profile.record "shape_reduce"
+        (fun () -> shape_reduce type_shape)
+        ~accumulate:true ()
+    in
     D.record_after_reduction reduction_diagnostics type_shape;
     let type_shape =
-      Type_shape.unfold_and_evaluate
-        ~diagnostics:(D.shape_evaluation_diagnostics reduction_diagnostics)
-        type_shape
+      Profile.record "unfold_and_evaluate"
+        (fun () ->
+          Type_shape.unfold_and_evaluate
+            ~diagnostics:(D.shape_evaluation_diagnostics reduction_diagnostics)
+            type_shape)
+        ~accumulate:true ()
     in
     D.record_after_evaluation reduction_diagnostics type_shape;
     let complex_shape =
@@ -1658,16 +1683,19 @@ let variable_to_die state (var_uid : Uid.t) ~parent_proto_die =
       in
       D.record_before_dwarf_generation reduction_diagnostics parent_proto_die;
       let reference =
-        let reference =
-          runtime_shape_to_dwarf_die_with_aliased_name type_name runtime_shape
-            ~parent_proto_die ~fallback_value_die
-        in
-        if Debugging_the_compiler.enabled ()
-        then (
-          Format.eprintf "%a has become %a@." Uid.print var_uid
-            Asm_targets.Asm_label.print reference;
-          Debugging_the_compiler.print ~die:parent_proto_die);
-        reference
+        Profile.record "dwarf_produce_dies"
+          (fun () ->
+            let reference =
+              runtime_shape_to_dwarf_die_with_aliased_name type_name
+                runtime_shape ~parent_proto_die ~fallback_value_die
+            in
+            if Debugging_the_compiler.enabled ()
+            then (
+              Format.eprintf "%a has become %a@." Uid.print var_uid
+                Asm_targets.Asm_label.print reference;
+              Debugging_the_compiler.print ~die:parent_proto_die);
+            reference)
+          ~accumulate:true ()
       in
       D.record_after_dwarf_generation reduction_diagnostics parent_proto_die;
       D.append_diagnostics_to_dwarf_state state reduction_diagnostics;

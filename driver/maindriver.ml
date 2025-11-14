@@ -135,10 +135,28 @@ let main argv ppf =
   | () ->
     (* Prevents outputting when using make install to dump CSVs for whole compiler.
        Example use case: scripts/profile-compiler-build.sh *)
-    if not !Clflags.dump_into_csv then
-      Compmisc.with_ppf_dump ~stdout:() ~file_prefix:"profile"
+    if not !Clflags.dump_into_csv then begin
+      (* CR-sspies: This duplication should be removed and the function should be
+         moved. *)
+      let get_profile_file_prefix ~expected_suffix ~default_name =
+        match !Clflags.profile_output_name with
+        | None -> default_name
+        | Some filename ->
+          if Filename.check_suffix filename expected_suffix then
+            Filename.chop_suffix filename expected_suffix
+          else
+            Compenv.fatal
+              (Printf.sprintf
+                "Profile output filename must have %s extension, got: %s"
+                expected_suffix filename)
+      in
+      let file_prefix =
+        get_profile_file_prefix ~expected_suffix:".dump" ~default_name:"profile"
+      in
+      Compmisc.with_ppf_dump ~stdout:() ~file_prefix
         (fun ppf -> Profile.print ppf !Clflags.profile_columns
-          ~timings_precision:!Clflags.timings_precision);
+          ~timings_precision:!Clflags.timings_precision)
+    end;
     0
   | exception x ->
     Location.report_exception ppf x;

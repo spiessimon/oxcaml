@@ -126,13 +126,29 @@ let format_variable_json (variable : DS.Diagnostics.variable_reduction) =
       Json.field "cms_files_missing"
         (Json.array (List.map Json.string variable.cms_files_missing));
       Json.field "cms_files_unreadable"
-        (Json.array (List.map Json.string variable.cms_files_unreadable)) ]
+        (Json.array (List.map Json.string variable.cms_files_unreadable));
+      Json.field "reduce_memo_table_size"
+        (Json.int variable.reduce_memo_table_size);
+      Json.field "reduce_memo_table_bucket_count"
+        (Json.int variable.reduce_memo_table_bucket_count);
+      Json.field "reduce_memo_table_max_bucket_length"
+        (Json.int variable.reduce_memo_table_max_bucket_length);
+      Json.field "reduce_memo_table_avg_bucket_length"
+        (Json.float variable.reduce_memo_table_avg_bucket_length);
+      Json.field "read_back_memo_table_size"
+        (Json.int variable.read_back_memo_table_size);
+      Json.field "read_back_memo_table_bucket_count"
+        (Json.int variable.read_back_memo_table_bucket_count);
+      Json.field "read_back_memo_table_max_bucket_length"
+        (Json.int variable.read_back_memo_table_max_bucket_length);
+      Json.field "read_back_memo_table_avg_bucket_length"
+        (Json.float variable.read_back_memo_table_avg_bucket_length) ]
 
 let emit_stats_file t =
-  let sourcefile = DS.sourcefile t.state in
   let stats_filename =
-    let base = Filename.remove_extension sourcefile in
-    base ^ ".debug-stats.json"
+    match !Clflags.debug_stats_output_name with
+    | Some filename -> filename
+    | None -> DS.sourcefile t.state ^ ".debug-stats.json"
   in
   let { DS.Diagnostics.variables } = DS.diagnostics t.state in
   let oc = open_out stats_filename in
