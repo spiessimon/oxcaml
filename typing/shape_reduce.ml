@@ -180,6 +180,57 @@ module Diagnostics = struct
         { size; bucket_count; max_bucket_length; avg_bucket_length }
 end
 
+(* Hash utility functions *)
+let[@inline] hash_mix acc value =
+  let acc = acc lxor value in
+  acc + 0x9e3779b + (acc lsl 6) + (acc lsr 2)
+
+let[@inline] hash_mix2 a b = hash_mix a b
+let[@inline] hash_mix3 a b c = hash_mix (hash_mix2 a b) c
+let[@inline] hash_mix4 a b c d = hash_mix (hash_mix3 a b c) d
+let[@inline] hash_mix5 a b c d e = hash_mix (hash_mix4 a b c d) e
+let[@inline] hash_mix6 a b c d e f = hash_mix (hash_mix5 a b c d e) f
+let[@inline] hash_mix7 a b c d e f g = hash_mix (hash_mix6 a b c d e f) g
+
+let hash_list hash_elem list =
+  List.fold_left (fun acc x -> hash_mix acc (hash_elem x)) 0 list
+
+let hash_option hash_elem = function
+  | None -> 0
+  | Some x -> hash_mix2 0x27d4eb2d (hash_elem x)
+
+(* Hash function for Layout.t *)
+let rec hash_layout (layout : Layout.t) =
+  match layout with
+  | Base b -> hash_mix2 0x1 (Hashtbl.hash b)
+  | Product layouts -> hash_mix2 0x2 (hash_list hash_layout layouts)
+
+let hash_tag_var = 0x101
+let hash_tag_app = 0x102
+let hash_tag_abs = 0x103
+let hash_tag_struct = 0x104
+let hash_tag_alias = 0x105
+let hash_tag_proj = 0x106
+let hash_tag_leaf = 0x107
+let hash_tag_comp_unit = 0x108
+let hash_tag_error = 0x109
+let hash_tag_mu = 0x10a
+let hash_tag_rec_var = 0x10b
+let hash_tag_mutrec = 0x10c
+let hash_tag_proj_decl = 0x10d
+let hash_tag_constr = 0x10e
+let hash_tag_tuple = 0x10f
+let hash_tag_unboxed_tuple = 0x110
+let hash_tag_predef = 0x111
+let hash_tag_arrow = 0x112
+let hash_tag_poly_variant = 0x113
+let hash_tag_variant = 0x114
+let hash_tag_variant_unboxed = 0x115
+let hash_tag_record = 0x116
+
+(* Hash function for Predef.t *)
+let hash_predef (p : Predef.t) = Hashtbl.hash p
+
 let find_shape env id =
   let namespace = Shape.Sig_component_kind.Module in
   Env.shape_of_path ~namespace env (Pident id)
@@ -196,7 +247,7 @@ end) = struct
   (* We implement a strong call-by-need reduction, following an
      evaluator from Nathanaelle Courant. *)
 
-  type nf = { uid: Uid.t option; desc: nf_desc; approximated: bool }
+  type nf = { uid: Uid.t option; desc: nf_desc; approximated: bool; hash: int }
   and nf_desc =
     | NVar of var
     | NApp of nf * nf
@@ -251,11 +302,13 @@ end) = struct
      by calling the normalization function as usual, but duplicate
      computations are precisely avoided by memoization.
    *)
-  and delayed_nf = Thunk of local_env * t
+  and delayed_nf = Thunk of local_env * t * int
 
   and local_env =
     { subst: delayed_nf option Ident.Map.t;
-      depth: int }
+      subst_hash: int;
+      depth: int;
+      hash_value: int }
   (* When reducing in the body of an abstraction [Abs(x, body)], we
      bind [x] to [None] in the environment. [Some v] is used for
      actual substitutions, for example in [App(Abs(x, body), t)], when
@@ -267,7 +320,7 @@ end) = struct
 
   and equal_delayed_nf t1 t2 =
     match t1, t2 with
-    | Thunk (l1, t1), Thunk (l2, t2) ->
+    | Thunk (l1, t1, _), Thunk (l2, t2, _) ->
       if equal t1 t2 then equal_local_env l1 l2
       else false
 
@@ -352,12 +405,136 @@ end) = struct
 
   let approx_nf nf = { nf with approximated = true }
 
+  (* Hash functions matching equality semantics *)
+  let rec hash_delayed_nf (Thunk (_env, _shape, hash)) =
+    hash
+
+  and hash_local_env env =
+    env.hash_value
+
+  and hash_none_binding = 0x9e3779b9
+
+  and hash_binding_value value =
+    match value with
+    | None -> hash_none_binding
+    | Some dnf -> hash_mix2 hash_none_binding (hash_delayed_nf dnf)
+
+  and compute_local_env_hash depth subst_hash =
+    hash_mix2 depth subst_hash
+
+  and hash_nf nf = nf.hash
+
+  and hash_nf_desc = function
+    | NVar v ->
+        hash_mix2 hash_tag_var (Ident.hash v)
+    | NApp (nf1, nf2) ->
+        hash_mix3 hash_tag_app (hash_nf nf1) (hash_nf nf2)
+    | NAbs (env, v, shape, dnf) ->
+        hash_mix5 hash_tag_abs (hash_local_env env) (Ident.hash v)
+          shape.Shape.hash (hash_delayed_nf dnf)
+    | NStruct map ->
+        let map_hash =
+          Item.Map.fold (fun item dnf acc ->
+            let entry =
+              hash_mix2 (Hashtbl.hash item) (hash_delayed_nf dnf)
+            in
+            hash_mix acc entry
+          ) map 0
+        in
+        hash_mix2 hash_tag_struct map_hash
+    | NAlias dnf ->
+        hash_mix2 hash_tag_alias (hash_delayed_nf dnf)
+    | NProj (nf, item) ->
+        hash_mix3 hash_tag_proj (hash_nf nf) (Hashtbl.hash item)
+    | NLeaf -> hash_tag_leaf
+    | NComp_unit s ->
+        hash_mix2 hash_tag_comp_unit (Hashtbl.hash s)
+    | NError s ->
+        hash_mix2 hash_tag_error (Hashtbl.hash s)
+    | NMu nf ->
+        hash_mix2 hash_tag_mu (hash_nf nf)
+    | NRec_var idx ->
+        hash_mix2 hash_tag_rec_var (Hashtbl.hash idx)
+    | NMutrec map ->
+        let defs_hash =
+          Ident.Map.fold (fun id nf acc ->
+            let entry = hash_mix2 (Ident.hash id) (hash_nf nf) in
+            hash_mix acc entry
+          ) map 0
+        in
+        hash_mix2 hash_tag_mutrec defs_hash
+    | NProj_decl (nf, id) ->
+        hash_mix3 hash_tag_proj_decl (hash_nf nf) (Ident.hash id)
+    | NConstr (id, nfs) ->
+        hash_mix3 hash_tag_constr (Ident.hash id) (hash_list hash_nf nfs)
+    | NTuple nfs ->
+        hash_mix2 hash_tag_tuple (hash_list hash_nf nfs)
+    | NUnboxed_tuple nfs ->
+        hash_mix2 hash_tag_unboxed_tuple (hash_list hash_nf nfs)
+    | NPredef (p, nfs) ->
+        hash_mix3 hash_tag_predef (hash_predef p) (hash_list hash_nf nfs)
+    | NArrow -> hash_tag_arrow
+    | NPoly_variant constrs ->
+        hash_mix2 hash_tag_poly_variant (hash_poly_variant constrs)
+    | NVariant constrs ->
+        hash_mix2 hash_tag_variant (hash_complex_constructors constrs)
+    | NVariant_unboxed { name; variant_uid; arg_name; arg_uid;
+                         arg_shape; arg_layout } ->
+        hash_mix7
+          hash_tag_variant_unboxed
+          (Hashtbl.hash name)
+          (hash_option Uid.hash variant_uid)
+          (hash_option (fun x -> Hashtbl.hash x) arg_name)
+          (hash_option Uid.hash arg_uid)
+          (hash_delayed_nf arg_shape)
+          (hash_layout arg_layout)
+    | NRecord { fields; kind } ->
+        hash_mix3 hash_tag_record (hash_record_fields fields) (Hashtbl.hash kind)
+
+  and hash_poly_variant constrs =
+    hash_list (fun { pv_constr_name; pv_constr_args } ->
+      hash_mix3 0x201
+        (Hashtbl.hash pv_constr_name)
+        (hash_list hash_nf pv_constr_args)
+    ) constrs
+
+  and hash_complex_constructors constrs =
+    hash_list (fun { name; constr_uid; kind; args } ->
+      let acc =
+        hash_mix4 0x211
+          (Hashtbl.hash name)
+          (hash_option Uid.hash constr_uid)
+          (Hashtbl.hash kind)
+      in
+      let args_hash =
+        hash_list (fun { field_name; field_uid;
+                         field_value = (dnf, layout) } ->
+          hash_mix5
+            0x221
+            (hash_option (fun x -> Hashtbl.hash x) field_name)
+            (hash_option Uid.hash field_uid)
+            (hash_delayed_nf dnf)
+            (hash_layout layout)
+        ) args
+      in
+      hash_mix2 acc args_hash
+    ) constrs
+
+  and hash_record_fields fields =
+    hash_list (fun (name, uid, dnf, layout) ->
+      hash_mix5
+        0x231
+        (Hashtbl.hash name)
+        (hash_option Uid.hash uid)
+        (hash_delayed_nf dnf)
+        (hash_layout layout)
+    ) fields
+
   module ReduceMemoTable = Hashtbl.Make(struct
       type nonrec t = local_env * t
 
-      let hash t = Hashtbl.hash t
-      (* CR sspies: The implementation of [hash] should change to use the
-      pre-computed hash value of shapes and match the equality function.  *)
+      let hash (env, shape) =
+        hash_mix2 (hash_local_env env) shape.Shape.hash
 
       let equal (env1, t1) (env2, t2) =
         if equal t1 t2 then equal_local_env env1 env2
@@ -367,10 +544,7 @@ end) = struct
   module ReadBackMemoTable = Hashtbl.Make(struct
       type nonrec t = nf
 
-      let hash t = Hashtbl.hash t
-      (* CR sspies: The implementation of [hash] should change to match the
-         equality function. Perhaps it would also make sense to pre-compute the
-         hash values of the normal forms. *)
+      let hash = hash_nf
 
   let equal a b = equal_nf a b
   end)
@@ -402,54 +576,53 @@ end) = struct
     read_back_memo_table: t ReadBackMemoTable.t;
   }
 
+
+  let hash_binding var shape =
+    hash_mix2 (Ident.hash var) (hash_binding_value shape)
+
+  let hash_bind_local_env_subst subst subst_hash var shape =
+    let old_hash =
+      match Ident.Map.find var subst with
+      | exception Not_found -> 0 (* neutral element for xor *)
+      | old_shape_opt -> hash_binding var old_shape_opt
+    in
+    let new_hash = hash_binding var shape in
+    (* [lxor old_hash] below unbinds the old binding *)
+    subst_hash lxor old_hash lxor new_hash
+
+
   let bind env var shape =
+    let subst_hash = hash_bind_local_env_subst env.local_env.subst env.local_env.subst_hash var shape in
     let subst = Ident.Map.add var shape env.local_env.subst in
-    { env with local_env = { env.local_env with subst } }
+    let depth = env.local_env.depth in
+    let hash_value = compute_local_env_hash depth subst_hash in
+    let local_env =
+      { subst; subst_hash; depth; hash_value }
+    in
+    { env with local_env }
 
   let rec reduce_ env t =
     Diagnostics.count_reduction_step env.diagnostics;
     let local_env = env.local_env in
     let memo_key = (local_env, t) in
     in_reduce_memo_table env.reduce_memo_table memo_key (reduce__ env) t
-  (* Memoization is absolutely essential for performance on this
-     problem, because the normal forms we build can in some real-world
-     cases contain an exponential amount of redundancy. Memoization
-     can avoid the repeated evaluation of identical subterms,
-     providing a large speedup, but even more importantly it
-     implicitly shares the memory of the repeated results, providing
-     much smaller normal forms (that blow up again if printed back
-     as trees). A functor-heavy file from Irmin has its shape normal
-     form decrease from 100Mio to 2.5Mio when memoization is enabled.
+    (* Memoization is absolutely essential for performance on this
+       problem, because the normal forms we build can in some real-world
+       cases contain an exponential amount of redundancy. Memoization
+       can avoid the repeated evaluation of identical subterms,
+       providing a large speedup, but even more importantly it
+       implicitly shares the memory of the repeated results, providing
+       much smaller normal forms (that blow up again if printed back
+       as trees). A functor-heavy file from Irmin has its shape normal
+       form decrease from 100Mio to 2.5Mio when memoization is enabled.
 
-     Note: the local environment is part of the memoization key, while
-     it is defined using a type Ident.Map.t of non-canonical balanced
-     trees: two maps could have exactly the same items, but be
-     balanced differently and therefore hash differently, reducing
-     the effectivenss of memoization.
-     This could in theory happen, say, with the two programs
-       (fun x -> fun y -> ...)
-     and
-       (fun y -> fun x -> ...)
-     having "the same" local environments, with additions done in
-     a different order, giving non-structurally-equal trees. Should we
-     define our own hash functions to provide robust hashing on
-     environments?
+       Note: the local environment is part of the memoization key. We
+       maintain a cached hash for it that is updated incrementally by
+       mixing per-binding hashes in a commutative way, so the hash
+       depends only on the contents of the environment, not on the
+       balancing of the underlying map. *)
 
-     We believe that the answer is "no": this problem does not occur
-     in practice. We can assume that identifiers are unique on valid
-     typedtree fragments (identifier "stamps" distinguish
-     binding positions); in particular the two program fragments above
-     in fact bind *distinct* identifiers x (with different stamps) and
-     different identifiers y, so the environments are distinct. If two
-     environments are structurally the same, they must correspond to
-     the evaluation environments of two sub-terms that are under
-     exactly the same scope of binders. So the two environments were
-     obtained by the same term traversal, adding binders in the same
-     order, giving the same balanced trees: the environments have the
-     same hash.
-  *)
-
-  and force env (Thunk (local_env, t)) =
+  and force env (Thunk (local_env, t, _)) =
     reduce_ { env with local_env } t
 
   and reduce__
@@ -457,11 +630,21 @@ end) = struct
       global_env; local_env; _} as env) (t : t) =
     let reduce env t = reduce_ env t in
     let reduce_with_increased_depth env t =
-      let local_env = { env.local_env with depth = env.local_env.depth + 1 } in
+      let depth = env.local_env.depth + 1 in
+      let subst = env.local_env.subst in
+      let subst_hash = env.local_env.subst_hash in
+      let hash_value = compute_local_env_hash depth subst_hash in
+      let local_env = { subst; subst_hash; depth; hash_value } in
       reduce_ { env with local_env } t
     in
-    let delay_reduce env t = Thunk (env.local_env, t) in
-    let return desc = { uid = t.uid; desc; approximated = t.approximated } in
+    let delay_reduce env t =
+      let h = hash_mix2 (hash_local_env env.local_env) t.Shape.hash in
+      Thunk (env.local_env, t, h)
+    in
+    let return desc =
+      let hash = hash_mix2 (hash_option Uid.hash t.uid) (hash_nf_desc desc) in
+      { uid = t.uid; desc; approximated = t.approximated; hash }
+    in
     let rec force_aliases nf = match nf.desc with
       | NAlias delayed_nf ->
           let nf = force env delayed_nf in
@@ -478,10 +661,13 @@ end) = struct
       | None -> { t with uid = uid }
       | Some _ -> t
     in
-    let delayed_nf_set_uid (Thunk (l, t) as dnf) uid =
+    let delayed_nf_set_uid (Thunk (l, t, _) as dnf) uid =
       match uid with
       | None -> dnf
-      | Some uid -> Thunk (l, Shape.set_uid_if_none t uid)
+      | Some uid ->
+          let t' = Shape.set_uid_if_none t uid in
+          let h' = hash_mix2 (hash_local_env l) t'.Shape.hash in
+          Thunk (l, t', h')
     in
     if MB.is_depleted fuel
     then approx_nf (return (NError "NoFuelLeft"))
@@ -548,8 +734,11 @@ end) = struct
                   let sh = delayed_nf_set_uid sh field_uid in
                   force env sh
                 ) args in
-                { desc = NTuple tuple_args; uid = constr_uid;
-                  approximated = false }
+                let desc = NTuple tuple_args in
+                let hash =
+                  hash_mix2 (hash_option Uid.hash constr_uid) (hash_nf_desc desc)
+                in
+                { desc; uid = constr_uid; approximated = false; hash }
               else
                 let fields = List.map (fun { field_name; field_uid;
                                            field_value = sh, layout } ->
@@ -557,8 +746,11 @@ end) = struct
                   let sh = delayed_nf_set_uid sh field_uid in
                   (name, field_uid, sh, layout)
                 ) args in
-                { desc = NRecord { fields; kind = Record_boxed };
-                  uid = constr_uid; approximated = false }
+                let desc = NRecord { fields; kind = Record_boxed } in
+                let hash =
+                  hash_mix2 (hash_option Uid.hash constr_uid) (hash_nf_desc desc)
+                in
+                { desc; uid = constr_uid; approximated = false; hash }
             | None -> nored())
           | NVariant_unboxed { name; variant_uid; arg_name; arg_uid;
                                arg_shape; arg_layout }
@@ -570,13 +762,21 @@ end) = struct
                 | Some arg_name ->
                   let sh = delayed_nf_set_uid arg_shape arg_uid in
                   let fields = [(arg_name, arg_uid, sh, arg_layout)] in
-                  { desc = NRecord { fields; kind = Record_boxed };
-                    uid = variant_uid; approximated = false }
+                  let desc = NRecord { fields; kind = Record_boxed } in
+                  let hash =
+                    hash_mix2
+                      (hash_option Uid.hash variant_uid) (hash_nf_desc desc)
+                  in
+                  { desc; uid = variant_uid; approximated = false; hash }
                 | None ->
                   let sh = delayed_nf_set_uid arg_shape arg_uid in
                   let sh = force env sh in
-                  { desc = NUnboxed_tuple [sh]; uid = variant_uid;
-                    approximated = false }
+                  let desc = NUnboxed_tuple [sh] in
+                  let hash =
+                    hash_mix2
+                      (hash_option Uid.hash variant_uid) (hash_nf_desc desc)
+                  in
+                  { desc; uid = variant_uid; approximated = false; hash }
             else nored()
           | NRecord { fields; kind = _ }
             when Params.projection_rules_for_merlin_enabled &&
@@ -609,7 +809,11 @@ end) = struct
               begin match force env def with
               | { uid = Some _; _  } as nf -> nf
                   (* This var already has a binding uid *)
-              | { uid = None; _ } as nf -> { nf with uid = t.uid }
+              | { uid = None; _ } as nf ->
+                  let hash =
+                    hash_mix2 (hash_option Uid.hash t.uid) (hash_nf_desc nf.desc)
+                  in
+                  { nf with uid = t.uid; hash }
                   (* Set the var's binding uid *)
               end
           | exception Not_found ->
@@ -784,7 +988,13 @@ end) = struct
     let max_steps_per_variable =
       Params.max_shape_reduce_steps_per_variable ()
     in
-    let local_env = { subst = Ident.Map.empty; depth = 0 } in
+    let local_env =
+      let subst = Ident.Map.empty in
+      let subst_hash = 0 in
+      let depth = 0 in
+      let hash_value = compute_local_env_hash depth subst_hash in
+      { subst; subst_hash; depth; hash_value }
+    in
     let env = {
       fuel;
       fuel_for_compilation_units;
@@ -835,7 +1045,13 @@ end) = struct
   let reduce_for_uid global_env t =
     let fuel = Params.fuel () in
     MB.incr fuel; (* See the comment about [fuel] in [reduce]. *)
-    let local_env = { subst = Ident.Map.empty; depth = 0 } in
+    let local_env =
+      let subst = Ident.Map.empty in
+      let subst_hash = 0 in
+      let depth = 0 in
+      let hash_value = compute_local_env_hash depth subst_hash in
+      { subst; subst_hash; depth; hash_value }
+    in
     let env = {
       fuel;
       fuel_for_compilation_units = Params.fuel_for_compilation_units ();
