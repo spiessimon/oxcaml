@@ -477,7 +477,7 @@ let project_field_given_path (fields : Layout.t projected_field array) path :
         (Format.pp_print_list ~pp_sep:Format.pp_print_space pp_projected_field)
         (Array.to_list fields)
       (* field should exist *)
-    else None, Shape.leaf' None, Sort.Value
+    else None, Shape.unknown_type (), Sort.Value
   | [i] -> (
     match Array.get fields i with
     | name, sh, Base ly -> name, sh, ly
@@ -498,7 +498,7 @@ let project_field_given_path (fields : Layout.t projected_field array) path :
     let field_name = Option.value ~default:("." ^ Int.to_string i) field_name in
     let field_name_with_projection = field_name_with_path field_name subpath in
     ( Some field_name_with_projection,
-      Shape.leaf' None,
+      Shape.unknown_type (),
       (* CR sspies: To properly support unboxed records in mixed records, we we
          need to propagate the right shape information here. *)
       project_layout field_layout subpath )
