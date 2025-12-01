@@ -1595,12 +1595,19 @@ let variable_to_die state (var_uid : Uid.t) ~parent_proto_die =
         Env.empty
     in
     D.record_before_reduction reduction_diagnostics type_shape;
-    let type_shape = shape_reduce type_shape in
+    let type_shape =
+      Profile.record "shape_reduce"
+        (fun () -> shape_reduce type_shape)
+        ~accumulate:true ()
+    in
     D.record_after_reduction reduction_diagnostics type_shape;
     let type_shape =
-      Type_shape.unfold_and_evaluate
-        ~diagnostics:(D.shape_evaluation_diagnostics reduction_diagnostics)
-        type_shape
+      Profile.record "unfold_and_evaluate"
+        (fun () ->
+          Type_shape.unfold_and_evaluate
+            ~diagnostics:(D.shape_evaluation_diagnostics reduction_diagnostics)
+            type_shape)
+        ~accumulate:true ()
     in
     D.record_after_evaluation reduction_diagnostics type_shape;
     let complex_shape =
@@ -1659,8 +1666,11 @@ let variable_to_die state (var_uid : Uid.t) ~parent_proto_die =
       D.record_before_dwarf_generation reduction_diagnostics parent_proto_die;
       let reference =
         let reference =
-          runtime_shape_to_dwarf_die_with_aliased_name type_name runtime_shape
-            ~parent_proto_die ~fallback_value_die
+          Profile.record "dwarf_produce_dies"
+            (fun () ->
+              runtime_shape_to_dwarf_die_with_aliased_name type_name
+                runtime_shape ~parent_proto_die ~fallback_value_die)
+            ~accumulate:true ()
         in
         if Debugging_the_compiler.enabled ()
         then (
