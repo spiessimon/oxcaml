@@ -195,6 +195,14 @@ end = struct
     | Some d ->
       if !Dwarf_flags.ddwarf_metrics
       then
+        let reduce_stats =
+          Shape_reduce.Diagnostics.get_memo_table_stats Reduce
+            d.shape_reduction_diagnostics
+        in
+        let read_back_stats =
+          Shape_reduce.Diagnostics.get_memo_table_stats Read_back
+            d.shape_reduction_diagnostics
+        in
         let diagnostic : DS.Diagnostics.variable_reduction =
           { shape_size_before_reduction_in_bytes =
               d.shape_size_before_reduction_in_bytes;
@@ -222,7 +230,17 @@ end = struct
                 d.shape_reduction_diagnostics;
             cms_files_unreadable =
               Shape_reduce.Diagnostics.cms_files_unreadable
-                d.shape_reduction_diagnostics
+                d.shape_reduction_diagnostics;
+            reduce_memo_table_size = reduce_stats.size;
+            reduce_memo_table_bucket_count = reduce_stats.bucket_count;
+            reduce_memo_table_max_bucket_length = reduce_stats.max_bucket_length;
+            reduce_memo_table_avg_bucket_length = reduce_stats.avg_bucket_length;
+            read_back_memo_table_size = read_back_stats.size;
+            read_back_memo_table_bucket_count = read_back_stats.bucket_count;
+            read_back_memo_table_max_bucket_length =
+              read_back_stats.max_bucket_length;
+            read_back_memo_table_avg_bucket_length =
+              read_back_stats.avg_bucket_length
           }
         in
         DS.add_variable_reduction_diagnostic state diagnostic
