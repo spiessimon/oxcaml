@@ -31,6 +31,19 @@ module Diagnostics : sig
 
   type t
 
+  type memo_table_kind =
+    | Reduce
+    | Read_back
+
+  type memo_table_stats =
+    { size : int;
+      bucket_count : int;
+      max_bucket_length : int;
+      avg_bucket_length : float
+    }
+
+  val enabled : t -> bool
+
   val no_diagnostics : t
 
   val create_diagnostics : unit -> t
@@ -54,6 +67,8 @@ module Diagnostics : sig
   val add_cms_file_unreadable : t -> string -> unit
 
   val cms_files_unreadable : t -> string list
+
+  val get_memo_table_stats : memo_table_kind -> t -> memo_table_stats
 
 end
 

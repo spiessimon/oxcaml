@@ -31,7 +31,15 @@ module Diagnostics : sig
       cms_files_loaded : int;
       cms_files_cached : int;
       cms_files_missing : string list;
-      cms_files_unreadable : string list
+      cms_files_unreadable : string list;
+      reduce_memo_table_size : int;
+      reduce_memo_table_bucket_count : int;
+      reduce_memo_table_max_bucket_length : int;
+      reduce_memo_table_avg_bucket_length : float;
+      read_back_memo_table_size : int;
+      read_back_memo_table_bucket_count : int;
+      read_back_memo_table_max_bucket_length : int;
+      read_back_memo_table_avg_bucket_length : float
     }
 
   type t = { mutable variables : variable_reduction list }
