@@ -55,6 +55,9 @@ let[@inline] mix_list hash_elem list =
 let[@inline] mix_array hash_elem arr =
   Array.fold_left (fun acc x -> mix acc (hash_elem x)) 0 arr
 
+let[@inline] mix_map fold hash_key hash_value m =
+  fold (fun k v acc -> mix acc (mix2 (hash_key k) (hash_value v))) m 0
+
 (** [mix_option hash_elem opt] hashes an optional value. Returns [0] for
     [None], which allows treating a map [key -> value] as a function
     [key -> value option] in terms of the hash: an unbound key hashes

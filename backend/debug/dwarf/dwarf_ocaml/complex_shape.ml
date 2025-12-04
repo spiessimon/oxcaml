@@ -61,7 +61,7 @@ let hash_void = 1
 let hash_unboxed_product = 2
 
 let hash_unboxed_product_kind : unboxed_product_kind -> int = function
-  | Unboxed_record names -> Hashtbl.hash (0, List.map Hashtbl.hash names)
+  | Unboxed_record names -> Hashing.mix2 0 (Hashing.mix_list Hashing.mix_string names)
   | Unboxed_tuple -> 1
 
 let hash { hash; _ } = hash
@@ -73,17 +73,15 @@ let runtime t =
   let layout =
     Layout.Base (RS.Runtime_layout.to_base_layout (RS.runtime_layout t))
   in
-  { desc; layout; hash = Hashtbl.hash (hash_runtime, RS.hash t) }
+  { desc; layout; hash = Hashing.mix2 hash_runtime (RS.hash t) }
 
 let rec unboxed_tuple args =
   let desc = Unboxed_product { components = args; kind = Unboxed_tuple } in
   { desc;
     layout = Layout.Product (List.map to_layout args);
     hash =
-      Hashtbl.hash
-        ( hash_unboxed_product,
-          hash_unboxed_product_kind Unboxed_tuple,
-          List.map hash args )
+      Hashing.mix3 hash_unboxed_product (hash_unboxed_product_kind Unboxed_tuple)
+        (Hashing.mix_list hash args)
   }
 
 let record_unboxed args =
@@ -94,15 +92,14 @@ let record_unboxed args =
   { desc;
     layout = Layout.Product (List.map to_layout components);
     hash =
-      Hashtbl.hash
-        ( hash_unboxed_product,
-          hash_unboxed_product_kind (Unboxed_record field_names),
-          List.map hash components )
+      Hashing.mix3 hash_unboxed_product
+        (hash_unboxed_product_kind (Unboxed_record field_names))
+        (Hashing.mix_list hash components)
   }
 
 let void =
   let desc = Void in
-  { desc; layout = Layout.Base Sort.Void; hash = Hashtbl.hash hash_void }
+  { desc; layout = Layout.Base Sort.Void; hash = hash_void }
 
 let rec print fmt { desc } =
   match desc with
@@ -357,7 +354,8 @@ end = struct
     type t = (RS.DeBruijn_index.t * Layout.t option) S.Rec_var_env.t
 
     let hash_value (idx, ly_opt) =
-      Hashtbl.hash (RS.DeBruijn_index.hash idx, ly_opt)
+      Hashing.mix2 (RS.DeBruijn_index.hash idx)
+        (Hashing.mix_option Layout.hash ly_opt)
 
     let equal_value (i1, l1) (i2, l2) =
       RS.DeBruijn_index.equal i1 i2 && Option.equal Layout.equal l1 l2
@@ -410,8 +408,7 @@ end = struct
       Shape.equal x1 x2 && Layout.equal y1 y2 && Rec_env.equal r1 r2
 
     let hash { type_shape; type_layout; rec_env } =
-      Hashtbl.hash (type_shape.hash, type_layout, Rec_env.hash rec_env)
-    (* CR sspies: Add a hash function to Layout.t *)
+      Hashing.mix3 type_shape.hash (Layout.hash type_layout) (Rec_env.hash rec_env)
   end)
 
   let cache = Cache.create 100

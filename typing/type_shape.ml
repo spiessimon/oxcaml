@@ -746,10 +746,7 @@ module Shape_map = struct
   type t = Shape.t Ident.Map.t
 
   let hash m =
-    Ident.Map.fold
-      (fun id shape acc ->
-        Hashing.mix acc (Hashing.mix2 (Ident.hash id) shape.Shape.hash))
-      m 0
+    Hashing.mix_map Ident.Map.fold Ident.hash (fun s -> s.Shape.hash) m
 
   let equal = Ident.Map.equal Shape.equal
 end
@@ -781,12 +778,8 @@ module Rec_constr_env =
                  (Hashing.mix_list (fun s -> s.Shape.hash) args)
                  (Recursive_binder.hash rb)
              in
-             Ident.Map.fold
-               (fun id entries acc ->
-                 Hashing.mix acc
-                   (Hashing.mix2 (Ident.hash id)
-                      (Hashing.mix_list hash_entry entries)))
-               m 0
+             Hashing.mix_map Ident.Map.fold Ident.hash
+               (Hashing.mix_list hash_entry) m
 
            let equal =
              let equal_entry (args1, rb1) (args2, rb2) =

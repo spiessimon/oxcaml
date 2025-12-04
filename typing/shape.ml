@@ -54,7 +54,17 @@ module Uid = struct
 
     let equal x y = compare x y = 0
 
-    let hash (x : t) = Hashtbl.hash x
+    let hash_intf_or_impl = function
+      | Unit_info.Intf -> 0
+      | Unit_info.Impl -> 1
+
+    let rec hash = function
+      | Compilation_unit s -> Hashing.mix2 0x1 (Hashing.mix_string s)
+      | Item { comp_unit; id; from } ->
+        Hashing.mix4 0x2 (Hashing.mix_string comp_unit) id (hash_intf_or_impl from)
+      | Internal -> 0x3
+      | Predef s -> Hashing.mix2 0x4 (Hashing.mix_string s)
+      | Unboxed_version t -> Hashing.mix2 0x5 (hash t)
 
     let pp_intf_or_impl fmt = function
       | Unit_info.Intf -> Format.pp_print_string fmt "[intf]"
@@ -135,9 +145,7 @@ module Rec_var_env = struct
   include Map.Make (Rec_var_ident)
 
   let hash hash_value m =
-    fold
-      (fun k v acc -> Hashtbl.hash (Rec_var_ident.hash k, hash_value v, acc))
-      m 0
+    Hashing.mix_map fold Rec_var_ident.hash hash_value m
 end
 
 module Sig_component_kind = struct
@@ -230,7 +238,8 @@ module Item = struct
         name
         (Sig_component_kind.to_string ns)
 
-    let hash (name, kind) = Hashtbl.hash (name, Sig_component_kind.rank kind)
+    let hash (name, kind) =
+      Hashing.mix2 (Hashing.mix_string name) (Sig_component_kind.rank kind)
   end
 
   include T
@@ -645,6 +654,40 @@ let complex_constructor_map f { name; constr_uid; kind; args } =
 
 let complex_constructors_map f = List.map (complex_constructor_map f)
 
+let hash_mixed_product_shape = Hashing.mix_array Layout.hash
+
+let hash_record_kind = function
+  | Record_unboxed -> 0x1
+  | Record_unboxed_product -> 0x2
+  | Record_boxed -> 0x3
+  | Record_mixed mps -> Hashing.mix2 0x4 (hash_mixed_product_shape mps)
+  | Record_floats -> 0x5
+
+let hash_poly_variant_constructor hash_elem { pv_constr_name; pv_constr_args } =
+  Hashing.mix2
+    (Hashing.mix_string pv_constr_name)
+    (Hashing.mix_list hash_elem pv_constr_args)
+
+let hash_poly_variant_constructors hash_elem =
+  Hashing.mix_list (hash_poly_variant_constructor hash_elem)
+
+let hash_complex_constructor_argument hash_elem
+    { field_name; field_uid; field_value } =
+  Hashing.mix3
+    (Hashing.mix_option Hashing.mix_string field_name)
+    (Hashing.mix_option Uid.hash field_uid)
+    (hash_elem field_value)
+
+let hash_complex_constructor hash_elem { name; constr_uid; kind; args } =
+  Hashing.mix4
+    (Hashing.mix_string name)
+    (Hashing.mix_option Uid.hash constr_uid)
+    (hash_mixed_product_shape kind)
+    (Hashing.mix_list (hash_complex_constructor_argument hash_elem) args)
+
+let hash_complex_constructors hash_elem =
+  Hashing.mix_list (hash_complex_constructor hash_elem)
+
 let equal_complex_constructor_arguments eq
     { field_name = field_name1; field_value = field_value1 }
     { field_name = field_name2; field_value = field_value2 } =
@@ -981,49 +1024,49 @@ let hash_proj_decl = 22
 let hash_unknown_type = 23
 let hash_at_layout = 24
 
+let hash_uid = Hashing.mix_option Uid.hash
+
 let fresh_var ?(name="shape-var") uid =
   let var = Ident.create_local name in
   var, { uid = Some uid; desc = Var var;
-         hash = Hashtbl.hash (hash_var, uid, var);
+         hash = Hashing.mix3 hash_var (Uid.hash uid) (Ident.hash var);
          approximated = false }
 
 let for_unnamed_functor_param = Ident.create_local "()"
 
 let var uid id =
   { uid = Some uid; desc = Var id;
-    hash = Hashtbl.hash (hash_var, Some uid, id);
+    hash = Hashing.mix3 hash_var (Uid.hash uid) (Ident.hash id);
     approximated = false }
 
 (* variable maybe without uid *)
 let var' uid id =
   { uid; desc = Var id;
-    hash = Hashtbl.hash (hash_var, uid, id);
+    hash = Hashing.mix3 hash_var (hash_uid uid) (Ident.hash id);
     approximated = false }
 
 let abs ?uid var body =
   { uid; desc = Abs (var, body);
-    hash = Hashtbl.hash (hash_abs, uid, body.hash);
+    hash = Hashing.mix3 hash_abs (hash_uid uid) body.hash;
     approximated = false }
 
 let str ?uid map =
-  let h = Item.Map.fold (fun key t acc ->
-    Hashtbl.hash (acc, Item.hash key, t.hash)) map 0
-  in
-  { uid; desc = Struct map; hash = Hashtbl.hash (hash_struct, uid, h);
+  let h = Hashing.mix_map Item.Map.fold Item.hash (fun t -> t.hash) map in
+  { uid; desc = Struct map; hash = Hashing.mix3 hash_struct (hash_uid uid) h;
     approximated = false }
 
 let alias ?uid t =
   { uid; desc = Alias t;
-    hash = Hashtbl.hash (hash_alias, uid, t.hash);
+    hash = Hashing.mix3 hash_alias (hash_uid uid) t.hash;
     approximated = false }
 
 let error ?uid s =
   { uid; desc = Error s;
-    hash = Hashtbl.hash (hash_error, uid, s);
+    hash = Hashing.mix3 hash_error (hash_uid uid) (Hashing.mix_string s);
     approximated = false }
 
 let leaf' uid =
-  { uid; desc = Leaf; hash = Hashtbl.hash (hash_leaf, uid);
+  { uid; desc = Leaf; hash = Hashing.mix2 hash_leaf (hash_uid uid);
     approximated = false }
 
 let leaf uid = leaf' (Some uid)
@@ -1044,26 +1087,27 @@ let proj ?uid t item =
       end
   | _ ->
       { uid; desc = Proj (t, item);
-        hash = Hashtbl.hash (hash_proj, t.hash, item); approximated = false }
+        hash = Hashing.mix3 hash_proj t.hash (Item.hash item);
+        approximated = false }
 
 let app ?uid f ~arg =
   { uid; desc = App (f, arg);
-    hash = Hashtbl.hash (hash_app, f.hash, uid, arg.hash);
+    hash = Hashing.mix4 hash_app f.hash (hash_uid uid) arg.hash;
     approximated = false }
 
 let comp_unit ?uid s =
   { uid; desc = Comp_unit s;
-    hash = Hashtbl.hash (hash_comp_unit, uid, s);
+    hash = Hashing.mix3 hash_comp_unit (hash_uid uid) (Hashing.mix_string s);
     approximated = false }
 
 let mu ?uid rv t_body =
   { uid; desc = Mu (rv, t_body);
-    hash = Hashtbl.hash (hash_mu, uid, Rec_var_ident.hash rv, t_body.hash);
+    hash = Hashing.mix4 hash_mu (hash_uid uid) (Rec_var_ident.hash rv) t_body.hash;
     approximated = false }
 
 let rec_var ?uid rv =
   { uid; desc = Rec_var rv;
-    hash = Hashtbl.hash (hash_rec_var, uid, Rec_var_ident.hash rv);
+    hash = Hashing.mix3 hash_rec_var (hash_uid uid) (Rec_var_ident.hash rv);
     approximated = false }
 
 let app_list (base_shape : t) (args : t list) : t =
@@ -1072,39 +1116,40 @@ let app_list (base_shape : t) (args : t list) : t =
 let abs_list (base_shape : t) (binders : Ident.t list) : t =
   List.fold_right (fun shape id -> abs shape id) binders base_shape
 
+let hash_shapes ts = Hashing.mix_list (fun t -> t.hash) ts
+
 let tuple ?uid (ts : t list) =
   { uid; desc = Tuple ts;
-    hash = Hashtbl.hash (hash_tuple, uid, List.map (fun t -> t.hash) ts);
+    hash = Hashing.mix3 hash_tuple (hash_uid uid) (hash_shapes ts);
     approximated = false }
 
 let unboxed_tuple ?uid (ts : t list) =
   { uid; desc = Unboxed_tuple ts;
-    hash = Hashtbl.hash (hash_unboxed_tuple, uid,
-      List.map (fun t -> t.hash) ts);
+    hash = Hashing.mix3 hash_unboxed_tuple (hash_uid uid) (hash_shapes ts);
     approximated = false }
 
 let predef ?uid (p : Predef.t) (ts : t list) =
   { uid; desc = Predef (p, ts);
-    hash = Hashtbl.hash (hash_predef, uid, p,
-      List.map (fun t -> t.hash) ts);
+    hash = Hashing.mix4 hash_predef (hash_uid uid) (Predef.hash p) (hash_shapes ts);
     approximated = false }
 
 let arrow ?uid () =
   { uid; desc = Arrow;
-    hash = Hashtbl.hash (hash_arrow, uid);
+    hash = Hashing.mix2 hash_arrow (hash_uid uid);
     approximated = false }
 
 let poly_variant ?uid t =
   { uid; desc = Poly_variant t;
-    hash = Hashtbl.hash (hash_poly_variant, uid,
-      poly_variant_constructors_map (fun t -> t.hash) t);
+    hash = Hashing.mix3 hash_poly_variant (hash_uid uid)
+             (hash_poly_variant_constructors (fun t -> t.hash) t);
     approximated = false }
+
+let hash_variant_arg (t, ly) = Hashing.mix2 t.hash (Layout.hash ly)
 
 let variant ?uid constructors =
   { uid; desc = Variant constructors;
-    hash = Hashtbl.hash (hash_variant, uid,
-      complex_constructors_map
-        (fun (t, ly) -> (t.hash, ly)) constructors);
+    hash = Hashing.mix3 hash_variant (hash_uid uid)
+             (hash_complex_constructors hash_variant_arg constructors);
     approximated = false }
 
 let variant_unboxed ?uid ~variant_uid ~arg_uid name arg_name arg_shape
@@ -1113,42 +1158,52 @@ let variant_unboxed ?uid ~variant_uid ~arg_uid name arg_name arg_shape
     desc =
       Variant_unboxed
         { name; variant_uid; arg_name; arg_uid; arg_shape; arg_layout };
-    hash = Hashtbl.hash (hash_variant_unboxed, uid, name, variant_uid,
-      arg_name, arg_uid, arg_shape.hash, arg_layout);
+    hash =
+      Hashing.mix
+        (Hashing.mix7 hash_variant_unboxed (hash_uid uid)
+           (Hashing.mix_string name) (hash_uid variant_uid)
+           (Hashing.mix_option Hashing.mix_string arg_name) (hash_uid arg_uid)
+           arg_shape.hash)
+        (Layout.hash arg_layout);
     approximated = false }
+
+let hash_record_field (name, uid_opt, t, ly) =
+  Hashing.mix4
+    (Hashing.mix_string name) (hash_uid uid_opt) t.hash (Layout.hash ly)
 
 let record ?uid kind fields =
   { uid; desc = Record { fields; kind };
-    hash = Hashtbl.hash (hash_record, uid,
-      List.map (fun (i, uid_opt, t, ly) -> (i, uid_opt, t.hash, ly)) fields,
-      kind);
-  approximated = false }
+    hash = Hashing.mix4 hash_record (hash_uid uid)
+             (Hashing.mix_list hash_record_field fields) (hash_record_kind kind);
+    approximated = false }
 
 let constr ?uid constr_uid args =
   { uid; desc = Constr (constr_uid, args);
-    hash = Hashtbl.hash (hash_constr, uid, constr_uid,
-      List.map (fun t -> t.hash) args);
+    hash = Hashing.mix4 hash_constr (hash_uid uid) (Ident.hash constr_uid)
+             (hash_shapes args);
     approximated = false }
+
+let hash_mutrec_map m =
+  Hashing.mix_map Ident.Map.fold Ident.hash (fun t -> t.hash) m
 
 let mutrec ?uid t =
   { uid; desc = Mutrec t;
-    hash = Hashtbl.hash (hash_mutrec, uid,
-      Ident.Map.map (fun t -> t.hash) t);
+    hash = Hashing.mix3 hash_mutrec (hash_uid uid) (hash_mutrec_map t);
     approximated = false }
 
 let proj_decl ?uid t id =
   { uid; desc = Proj_decl (t, id);
-    hash = Hashtbl.hash (hash_proj_decl, uid, t.hash, id);
+    hash = Hashing.mix4 hash_proj_decl (hash_uid uid) t.hash (Ident.hash id);
     approximated = false }
 
 let unknown_type ?uid () =
   { uid; desc = Unknown_type;
-    hash = Hashtbl.hash (hash_unknown_type, uid);
+    hash = Hashing.mix2 hash_unknown_type (hash_uid uid);
     approximated = false }
 
 let at_layout ?uid shape layout =
   { uid; desc = At_layout (shape, layout);
-    hash = Hashtbl.hash (hash_at_layout, uid, shape.hash, layout);
+    hash = Hashing.mix4 hash_at_layout (hash_uid uid) shape.hash (Layout.hash layout);
     approximated = false }
 
 
