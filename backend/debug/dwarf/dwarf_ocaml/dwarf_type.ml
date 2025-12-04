@@ -1243,7 +1243,7 @@ end = struct
       RS.equal s1 s2 && Rec_env.equal r1 r2
 
     let hash { runtime_shape; rec_env } =
-      Hashtbl.hash (RS.hash runtime_shape, Rec_env.hash rec_env)
+      Hashing.mix2 (RS.hash runtime_shape) (Rec_env.hash rec_env)
   end)
 
   let cache = Cache.create 100

@@ -47,6 +47,13 @@ val mix_list : ('a -> int) -> 'a list -> int
 
 val mix_array : ('a -> int) -> 'a array -> int
 
+val mix_map :
+  (('k -> 'v -> int -> int) -> 'm -> int -> int) ->
+  ('k -> int) ->
+  ('v -> int) ->
+  'm ->
+  int
+
 (** [mix_option hash_elem opt] hashes an optional value. Returns [0] for [None],
     which allows treating a (key, value) map as a function [key -> value option]
     in terms of the hash: an unbound key hashes to zero. *)

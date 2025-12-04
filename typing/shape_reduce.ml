@@ -469,11 +469,7 @@ end) = struct
       H.mix5 tag (hash_local_env env) (Ident.hash v) shape.Shape.hash
         (hash_delayed_nf dnf)
     | NStruct map ->
-      let map_hash =
-        Item.Map.fold (fun item dnf acc ->
-          H.mix acc (H.mix2 (Item.hash item) (hash_delayed_nf dnf))) map 0
-      in
-      H.mix2 tag map_hash
+      H.mix2 tag (H.mix_map Item.Map.fold Item.hash hash_delayed_nf map)
     | NAlias dnf -> H.mix2 tag (hash_delayed_nf dnf)
     | NProj (nf, item) -> H.mix3 tag (hash_nf nf) (Item.hash item)
     | NLeaf -> tag
@@ -482,11 +478,7 @@ end) = struct
     | NMu (rv, nf) -> H.mix3 tag (Shape.Rec_var_ident.hash rv) (hash_nf nf)
     | NRec_var rv -> H.mix2 tag (Shape.Rec_var_ident.hash rv)
     | NMutrec map ->
-      let defs_hash =
-        Ident.Map.fold (fun id nf acc ->
-          H.mix acc (H.mix2 (Ident.hash id) (hash_nf nf))) map 0
-      in
-      H.mix2 tag defs_hash
+      H.mix2 tag (H.mix_map Ident.Map.fold Ident.hash hash_nf map)
     | NProj_decl (nf, id) -> H.mix3 tag (hash_nf nf) (Ident.hash id)
     | NConstr (id, nfs) -> H.mix3 tag (Ident.hash id) (H.mix_list hash_nf nfs)
     | NTuple nfs -> H.mix2 tag (H.mix_list hash_nf nfs)
