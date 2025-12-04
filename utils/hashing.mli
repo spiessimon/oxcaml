@@ -28,6 +28,32 @@
 (*                                                                        *)
 (**************************************************************************)
 
+(** [mix h v] combines a hash accumulator [h] with a new value [v]. *)
+val mix : int -> int -> int
+
+val mix2 : int -> int -> int
+
+val mix3 : int -> int -> int -> int
+
+val mix4 : int -> int -> int -> int -> int
+
+val mix5 : int -> int -> int -> int -> int -> int
+
+val mix6 : int -> int -> int -> int -> int -> int -> int
+
+val mix7 : int -> int -> int -> int -> int -> int -> int -> int
+
+val mix_list : ('a -> int) -> 'a list -> int
+
+val mix_array : ('a -> int) -> 'a array -> int
+
+(** [mix_option hash_elem opt] hashes an optional value. Returns [0] for [None],
+    which allows treating a (key, value) map as a function [key -> value option]
+    in terms of the hash: an unbound key hashes to zero. *)
+val mix_option : ('a -> int) -> 'a option -> int
+
+val mix_string : string -> int
+
 (** [Dedup] is a generative functor: each application [(Dedup(H)())] produces
     a module with a fresh, incompatible [t] type. This prevents accidentally
     mixing values from different deduplication domains that happen to share
@@ -59,3 +85,41 @@ val deduplicate :
   initial_size:int ->
   (module Hashtbl.HashedType with type t = 'a) ->
   (module Dedup with type value = 'a)
+
+(** A polymorphic map module that also provides a hash function for keys. *)
+module type Hashable_map = sig
+  type 'a t
+
+  type key
+
+  val empty : 'a t
+
+  val update : key -> ('a option -> 'a option) -> 'a t -> 'a t
+
+  val iter : (key -> 'a -> unit) -> 'a t -> unit
+
+  val find : key -> 'a t -> 'a
+
+  val hash_key : key -> int
+end
+
+(** A functor that wraps a map with an incrementally-computed hash and size.
+    The hash is updated in O(1) time on each [add] operation using XOR, which
+    is commutative and thus independent of insertion order. The value hash
+    function is passed at runtime to [add], allowing the functor to be
+    applied before the value type is defined. *)
+module Incrementally_hashed_map (Arg : Hashable_map) : sig
+  type 'a t
+
+  val empty : 'a t
+
+  val add : ('a -> int) -> Arg.key -> 'a -> 'a t -> 'a t
+
+  val find : Arg.key -> 'a t -> 'a
+
+  val hash : 'a t -> int
+
+  val cardinal : 'a t -> int
+
+  val equal : ('a -> 'a -> bool) -> 'a t -> 'a t -> bool
+end
