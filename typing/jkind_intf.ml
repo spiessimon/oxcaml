@@ -48,6 +48,8 @@ module type Sort = sig
 
     val equal : t -> t -> bool
 
+    val hash : t -> int
+
     val format : Format.formatter -> t -> unit
 
     val all_void : t -> bool

@@ -747,7 +747,8 @@ module Shape_map = struct
 
   let hash m =
     Ident.Map.fold
-      (fun id shape acc -> Hashtbl.hash (Ident.hash id, shape.Shape.hash, acc))
+      (fun id shape acc ->
+        Hashing.mix acc (Hashing.mix2 (Ident.hash id) shape.Shape.hash))
       m 0
 
   let equal = Ident.Map.equal Shape.equal
@@ -776,12 +777,15 @@ module Rec_constr_env =
 
            let hash m =
              let hash_entry (args, rb) =
-               Hashtbl.hash
-                 (List.map (fun s -> s.Shape.hash) args, Recursive_binder.hash rb)
+               Hashing.mix2
+                 (Hashing.mix_list (fun s -> s.Shape.hash) args)
+                 (Recursive_binder.hash rb)
              in
              Ident.Map.fold
                (fun id entries acc ->
-                 Hashtbl.hash (Ident.hash id, List.map hash_entry entries, acc))
+                 Hashing.mix acc
+                   (Hashing.mix2 (Ident.hash id)
+                      (Hashing.mix_list hash_entry entries)))
                m 0
 
            let equal =
@@ -805,10 +809,10 @@ module Eval_env = struct
     && Rec_constr_env.equal t1.rec_constr_env t2.rec_constr_env
 
   let hash { type_var_env; mutrec_env; rec_constr_env } =
-    Hashtbl.hash
-      ( Type_var_env.hash type_var_env,
-        Mutrec_env.hash mutrec_env,
-        Rec_constr_env.hash rec_constr_env )
+    Hashing.mix3
+      (Type_var_env.hash type_var_env)
+      (Mutrec_env.hash mutrec_env)
+      (Rec_constr_env.hash rec_constr_env)
 
   let empty =
     { type_var_env = Type_var_env.create Ident.Map.empty;
@@ -887,7 +891,7 @@ end = struct
     let equal (s1, env1) (s2, env2) =
       Shape.equal s1 s2 && Eval_env.equal env1 env2
 
-    let hash (s, env) = Hashtbl.hash (s.Shape.hash, Eval_env.hash env)
+    let hash (s, env) = Hashing.mix2 s.Shape.hash (Eval_env.hash env)
   end)
 
   let eval_cache = Cache.create 256

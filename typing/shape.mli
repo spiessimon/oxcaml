@@ -162,6 +162,8 @@ module Item : sig
 
   val compare : t -> t -> int
 
+  val hash : t -> int
+
   val is_constructor : t -> bool
   val is_label : t -> bool
   val is_unboxed_label : t -> bool
@@ -233,6 +235,8 @@ module Predef : sig
   val print : Format.formatter -> t -> unit
 
   val equal : t -> t -> bool
+
+  val hash : t -> int
 
   val unboxed_type_to_base_layout : unboxed -> base_layout
 

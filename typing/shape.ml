@@ -230,7 +230,7 @@ module Item = struct
         name
         (Sig_component_kind.to_string ns)
 
-    let hash x = Hashtbl.hash x
+    let hash (name, kind) = Hashtbl.hash (name, Sig_component_kind.rank kind)
   end
 
   include T
@@ -462,6 +462,29 @@ module Predef = struct
         | Float16x32 | Float32x16 | Float64x8), _
         -> false
 
+    let hash_simd_vec_split : simd_vec_split -> int = function
+      | Int8x16 -> 0x01
+      | Int16x8 -> 0x02
+      | Int32x4 -> 0x03
+      | Int64x2 -> 0x04
+      | Float16x8 -> 0x05
+      | Float32x4 -> 0x06
+      | Float64x2 -> 0x07
+      | Int8x32 -> 0x08
+      | Int16x16 -> 0x09
+      | Int32x8 -> 0x0a
+      | Int64x4 -> 0x0b
+      | Float16x16 -> 0x0c
+      | Float32x8 -> 0x0d
+      | Float64x4 -> 0x0e
+      | Int8x64 -> 0x0f
+      | Int16x32 -> 0x10
+      | Int32x16 -> 0x11
+      | Int64x8 -> 0x12
+      | Float16x32 -> 0x13
+      | Float32x16 -> 0x14
+      | Float64x8 -> 0x15
+
     let equal_unboxed u1 u2 =
       match u1, u2 with
       | Unboxed_float, Unboxed_float
@@ -475,6 +498,16 @@ module Predef = struct
       | (Unboxed_float | Unboxed_float32 | Unboxed_nativeint
         | Unboxed_int64 | Unboxed_int32 | Unboxed_int16 | Unboxed_int8
         | Unboxed_simd _), _ -> false
+
+    let hash_unboxed : unboxed -> int = function
+      | Unboxed_float -> 0x20
+      | Unboxed_float32 -> 0x21
+      | Unboxed_nativeint -> 0x22
+      | Unboxed_int64 -> 0x23
+      | Unboxed_int32 -> 0x24
+      | Unboxed_int16 -> 0x25
+      | Unboxed_int8 -> 0x26
+      | Unboxed_simd s -> Hashing.mix2 0x27 (hash_simd_vec_split s)
 
     let equal p1 p2 =
       match p1, p2 with
@@ -499,6 +532,26 @@ module Predef = struct
       | (Array | Bytes | Char | Extension_constructor | Float | Float32
         | Floatarray | Int | Int8 | Int16 | Int32 | Int64 | Lazy_t | Nativeint
         | String | Simd _ | Exception | Unboxed _), _ -> false
+
+    let hash : t -> int = function
+      | Array -> 0x30
+      | Bytes -> 0x31
+      | Char -> 0x32
+      | Extension_constructor -> 0x33
+      | Float -> 0x34
+      | Float32 -> 0x35
+      | Floatarray -> 0x36
+      | Int -> 0x37
+      | Int8 -> 0x38
+      | Int16 -> 0x39
+      | Int32 -> 0x3a
+      | Int64 -> 0x3b
+      | Lazy_t -> 0x3c
+      | Nativeint -> 0x3d
+      | String -> 0x3e
+      | Simd s -> Hashing.mix2 0x3f (hash_simd_vec_split s)
+      | Exception -> 0x40
+      | Unboxed u -> Hashing.mix2 0x41 (hash_unboxed u)
 end
 
 type var = Ident.t

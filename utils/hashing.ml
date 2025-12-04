@@ -28,6 +28,43 @@
 (*                                                                        *)
 (**************************************************************************)
 
+(** [mix h v] combines a hash accumulator [h] with a new value [v].
+    Based on FxHash from the Rust compiler (see
+    https://github.com/rust-lang/rustc-hash). The constant is truncated
+    to 62 bits to fit in OCaml's int type. *)
+let[@inline] mix acc value =
+  let acc = (acc lsl 5) lor (acc lsr 58) in
+  let x = acc lxor value in
+  x * 0x117cc1b727220a95
+
+let[@inline] mix2 a b = mix a b
+
+let[@inline] mix3 a b c = mix (mix2 a b) c
+
+let[@inline] mix4 a b c d = mix (mix3 a b c) d
+
+let[@inline] mix5 a b c d e = mix (mix4 a b c d) e
+
+let[@inline] mix6 a b c d e f = mix (mix5 a b c d e) f
+
+let[@inline] mix7 a b c d e f g = mix (mix6 a b c d e f) g
+
+let[@inline] mix_list hash_elem list =
+  List.fold_left (fun acc x -> mix acc (hash_elem x)) 0 list
+
+let[@inline] mix_array hash_elem arr =
+  Array.fold_left (fun acc x -> mix acc (hash_elem x)) 0 arr
+
+(** [mix_option hash_elem opt] hashes an optional value. Returns [0] for
+    [None], which allows treating a map [key -> value] as a function
+    [key -> value option] in terms of the hash: an unbound key hashes
+    identically to a key bound to [None]. *)
+let[@inline] mix_option hash_elem = function
+  | None -> 0
+  | Some x -> mix2 0x27d4eb2d (hash_elem x)
+
+let mix_string = Hashtbl.hash
+
 module type Dedup = sig
   (** A deduplicated element wrapping a value with its precomputed hash. *)
   type t
@@ -87,3 +124,48 @@ let deduplicate (type a) ~initial_size
     let value e = e.value
   end in
   (module D : Dedup with type value = a)
+
+module type Hashable_map = sig
+  type 'a t
+
+  type key
+
+  val empty : 'a t
+
+  val add : key -> 'a -> 'a t -> 'a t
+
+  val find : key -> 'a t -> 'a
+
+  val equal : ('a -> 'a -> bool) -> 'a t -> 'a t -> bool
+
+  val hash_key : key -> int
+end
+
+module Incrementally_hashed_map (Arg : Hashable_map) = struct
+  type 'a t =
+    { map : 'a Arg.t;
+      hash : int
+    }
+
+  let empty = { map = Arg.empty; hash = 0 }
+
+  let hash_binding hash_value key value =
+    mix2 (Arg.hash_key key) (hash_value value)
+
+  let add hash_value key value t =
+    let old_hash =
+      match Arg.find key t.map with
+      | exception Not_found -> 0
+      | old_value -> hash_binding hash_value key old_value
+    in
+    let new_hash = hash_binding hash_value key value in
+    let hash = t.hash lxor old_hash lxor new_hash in
+    let map = Arg.add key value t.map in
+    { map; hash }
+
+  let find key t = Arg.find key t.map
+
+  let hash t = t.hash
+
+  let equal eq_value t1 t2 = Arg.equal eq_value t1.map t2.map
+end

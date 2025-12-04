@@ -60,6 +60,21 @@ module Sort = struct
         _ ) ->
       false
 
+  let hash_base = function
+    | Void -> 0x01
+    | Value -> 0x02
+    | Untagged_immediate -> 0x03
+    | Float64 -> 0x04
+    | Float32 -> 0x05
+    | Word -> 0x06
+    | Bits8 -> 0x07
+    | Bits16 -> 0x08
+    | Bits32 -> 0x09
+    | Bits64 -> 0x0a
+    | Vec128 -> 0x0b
+    | Vec256 -> 0x0c
+    | Vec512 -> 0x0d
+
   let to_string_base = function
     | Value -> "value"
     | Void -> "void"
@@ -85,6 +100,15 @@ module Sort = struct
       | Base b1, Base b2 -> equal_base b1 b2
       | Product cs1, Product cs2 -> List.equal equal cs1 cs2
       | (Base _ | Product _), _ -> false
+
+    (* CR sspies: Unclear whether we should introduce the dependency on mixing
+       here. An alternative would be just using Hashtbl.hash. It's a bit strange
+       to introduce custom equality functions, but use the polymorphic hashing.
+       This only works, because the custom equality functions are actually the
+       same as the polymorphic one.*)
+    let rec hash = function
+      | Base b -> Hashing.mix2 0x1 (hash_base b)
+      | Product layouts -> Hashing.mix2 0x2 (Hashing.mix_list hash layouts)
 
     let format ppf c =
       let rec pp_element ~nested ppf = function
