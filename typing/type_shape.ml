@@ -748,7 +748,10 @@ module Shape_map = struct
   let hash m =
     Hashing.mix_map Ident.Map.fold Ident.hash (fun s -> s.Shape.hash) m
 
-  let equal = Ident.Map.equal Shape.equal
+  let equal =
+    Misc.map_equal_iter_find
+      ~iter:Ident.Map.iter ~cardinal:Ident.Map.cardinal ~find:Ident.Map.find
+      Shape.equal
 end
 
 (* Maps type variables to their shape substitutions. Used for beta
@@ -786,7 +789,9 @@ module Rec_constr_env =
                List.equal Shape.equal args1 args2
                && Recursive_binder.equal rb1 rb2
              in
-             Ident.Map.equal (List.equal equal_entry)
+             Misc.map_equal_iter_find
+               ~iter:Ident.Map.iter ~cardinal:Ident.Map.cardinal
+               ~find:Ident.Map.find (List.equal equal_entry)
          end))
 
 module Eval_env = struct

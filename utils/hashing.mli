@@ -101,18 +101,18 @@ module type Hashable_map = sig
 
   val empty : 'a t
 
-  val add : key -> 'a -> 'a t -> 'a t
+  val update : key -> ('a option -> 'a option) -> 'a t -> 'a t
+
+  val iter : (key -> 'a -> unit) -> 'a t -> unit
 
   val find : key -> 'a t -> 'a
-
-  val equal : ('a -> 'a -> bool) -> 'a t -> 'a t -> bool
 
   val hash_key : key -> int
 end
 
-(** A functor that wraps a map with an incrementally-computed hash. The hash
-    is updated in O(1) time on each [add] operation using XOR, which is
-    commutative and thus independent of insertion order. The value hash
+(** A functor that wraps a map with an incrementally-computed hash and size.
+    The hash is updated in O(1) time on each [add] operation using XOR, which
+    is commutative and thus independent of insertion order. The value hash
     function is passed at runtime to [add], allowing the functor to be
     applied before the value type is defined. *)
 module Incrementally_hashed_map (Arg : Hashable_map) : sig
@@ -125,6 +125,8 @@ module Incrementally_hashed_map (Arg : Hashable_map) : sig
   val find : Arg.key -> 'a t -> 'a
 
   val hash : 'a t -> int
+
+  val cardinal : 'a t -> int
 
   val equal : ('a -> 'a -> bool) -> 'a t -> 'a t -> bool
 end

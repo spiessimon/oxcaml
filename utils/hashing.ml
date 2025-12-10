@@ -135,11 +135,11 @@ module type Hashable_map = sig
 
   val empty : 'a t
 
-  val add : key -> 'a -> 'a t -> 'a t
+  val update : key -> ('a option -> 'a option) -> 'a t -> 'a t
+
+  val iter : (key -> 'a -> unit) -> 'a t -> unit
 
   val find : key -> 'a t -> 'a
-
-  val equal : ('a -> 'a -> bool) -> 'a t -> 'a t -> bool
 
   val hash_key : key -> int
 end
@@ -147,28 +147,46 @@ end
 module Incrementally_hashed_map (Arg : Hashable_map) = struct
   type 'a t =
     { map : 'a Arg.t;
-      hash : int
+      hash : int;
+      cardinal : int
     }
 
-  let empty = { map = Arg.empty; hash = 0 }
+  let empty = { map = Arg.empty; hash = 0; cardinal = 0 }
 
   let hash_binding hash_value key value =
     mix2 (Arg.hash_key key) (hash_value value)
 
   let add hash_value key value t =
-    let old_hash =
-      match Arg.find key t.map with
-      | exception Not_found -> 0
-      | old_value -> hash_binding hash_value key old_value
-    in
+    let old_hash = ref None in
+    let new_cardinal = ref None in
+    let map = Arg.update key (function
+      | None ->
+          (* Key not present: old binding contributes 0 to the XOR hash
+             (absence is represented as zero in the incremental hash). *)
+          old_hash := Some 0;
+          new_cardinal := Some (t.cardinal + 1);
+          Some value
+      | Some old_value ->
+          (* Key present: XOR out the old binding's hash contribution. *)
+          old_hash := Some (hash_binding hash_value key old_value);
+          new_cardinal := Some t.cardinal;
+          Some value
+    ) t.map in
     let new_hash = hash_binding hash_value key value in
-    let hash = t.hash lxor old_hash lxor new_hash in
-    let map = Arg.add key value t.map in
-    { map; hash }
-
-  let find key t = Arg.find key t.map
+    let hash = t.hash lxor Option.get !old_hash lxor new_hash in
+    let cardinal = Option.get !new_cardinal in
+    { map; hash; cardinal }
 
   let hash t = t.hash
 
-  let equal eq_value t1 t2 = Arg.equal eq_value t1.map t2.map
+  let cardinal t = t.cardinal
+
+  let iter f t = Arg.iter f t.map
+
+  let find k t = Arg.find k t.map
+
+  let equal eq_value t1 t2 =
+    t1 == t2 ||
+    (Int.equal t1.hash t2.hash &&
+     Misc.map_equal_iter_find ~iter ~cardinal ~find eq_value t1 t2)
 end
