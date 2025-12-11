@@ -745,6 +745,8 @@ let rec decompose_application (t : Shape.t) =
 module Shape_map = struct
   type t = Shape.t Ident.Map.t
 
+  let initial_size = 256
+
   let hash m =
     Ident.Map.fold
       (fun id shape acc -> Hashtbl.hash (Ident.hash id, shape.Shape.hash, acc))
@@ -756,41 +758,38 @@ end
 (* Maps type variables to their shape substitutions. Used for beta
    reduction when evaluating type applications (e.g., [App (Abs (x,
    body), arg)] reduces to [body] with [x -> arg] in type_var_env). *)
-module Type_var_env =
-  (val Hashing.deduplicate ~initial_size:256 (module Shape_map))
+module Type_var_env = Hashing.Dedup (Shape_map)
 
 (* Maps constructor IDs to their mutually recursive declaration shapes.
    When encountering a [Constr (id, args)] during evaluation, we look up
    [id] here to find the shape of the type declaration it belongs to. *)
-module Mutrec_env =
-  (val Hashing.deduplicate ~initial_size:256 (module Shape_map))
+module Mutrec_env = Hashing.Dedup (Shape_map)
 
 (* Maps constructor IDs to lists of (args, recursive_binder) pairs. Used
    for cycle detection: when we see the same [Constr (id, args)] again
    during evaluation, we return the associated recursive variable instead
    of unfolding infinitely. *)
-module Rec_constr_env =
-  (val Hashing.deduplicate ~initial_size:256
-         (module struct
-           type t = (Shape.t list * Recursive_binder.t) list Ident.Map.t
+module Rec_constr_env = Hashing.Dedup (struct
+  type t = (Shape.t list * Recursive_binder.t) list Ident.Map.t
 
-           let hash m =
-             let hash_entry (args, rb) =
-               Hashtbl.hash
-                 (List.map (fun s -> s.Shape.hash) args, Recursive_binder.hash rb)
-             in
-             Ident.Map.fold
-               (fun id entries acc ->
-                 Hashtbl.hash (Ident.hash id, List.map hash_entry entries, acc))
-               m 0
+  let initial_size = 256
 
-           let equal =
-             let equal_entry (args1, rb1) (args2, rb2) =
-               List.equal Shape.equal args1 args2
-               && Recursive_binder.equal rb1 rb2
-             in
-             Ident.Map.equal (List.equal equal_entry)
-         end))
+  let hash m =
+    let hash_entry (args, rb) =
+      Hashtbl.hash
+        (List.map (fun s -> s.Shape.hash) args, Recursive_binder.hash rb)
+    in
+    Ident.Map.fold
+      (fun id entries acc ->
+        Hashtbl.hash (Ident.hash id, List.map hash_entry entries, acc))
+      m 0
+
+  let equal =
+    let equal_entry (args1, rb1) (args2, rb2) =
+      List.equal Shape.equal args1 args2 && Recursive_binder.equal rb1 rb2
+    in
+    Ident.Map.equal (List.equal equal_entry)
+end)
 
 module Eval_env = struct
   type t =

@@ -28,7 +28,55 @@
 (*                                                                        *)
 (**************************************************************************)
 
-(** [Dedup] is a generative functor: each application [(Dedup(H)())] produces
+
+module Hash_consed : sig
+  type ('a, 'tbl) t
+
+  val hash : ('a, 'tbl) t -> int
+
+  val equal : ('a, 'tbl) t -> ('a, 'tbl) t -> bool
+
+  val value : ('a, 'tbl) t -> 'a
+
+  module Table (H : sig
+    type t
+
+    val initial_size : int
+
+    val hash : t -> int
+
+    val equal : t -> t -> bool
+  end) : sig
+    type tbl
+
+    val create : H.t -> (H.t, tbl) t
+  end
+end
+
+module Dedup (H : sig
+  type t
+
+  val initial_size : int
+  val hash : t -> int
+  val equal : t -> t -> bool
+end) : sig
+  type t
+
+  val create : H.t -> t
+
+  val hash : t -> int
+
+  val equal : t -> t -> bool
+
+  val value : t -> H.t
+end
+
+
+
+
+
+
+(*_ (** [Dedup] is a generative functor: each application [(Dedup(H)())] produces
     a module with a fresh, incompatible [t] type. This prevents accidentally
     mixing values from different deduplication domains that happen to share
     the same underlying representation. *)
@@ -58,4 +106,4 @@ end
 val deduplicate :
   initial_size:int ->
   (module Hashtbl.HashedType with type t = 'a) ->
-  (module Dedup with type value = 'a)
+  (module Dedup with type value = 'a) *)

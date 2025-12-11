@@ -356,6 +356,8 @@ end = struct
   module Rec_env_basic = struct
     type t = (RS.DeBruijn_index.t * Layout.t option) S.Rec_var_env.t
 
+    let initial_size = 256
+
     let hash_value (idx, ly_opt) =
       Hashtbl.hash (RS.DeBruijn_index.hash idx, ly_opt)
 
@@ -373,7 +375,7 @@ end = struct
      equality checks when used as a key in [Shape_cache]. Without deduplication,
      cache lookups would require O(n) structural comparison of environment
      maps. *)
-  include (val Hashing.deduplicate ~initial_size:256 (module Rec_env_basic))
+  include Hashing.Dedup (Rec_env_basic)
 
   let empty = create S.Rec_var_env.empty
 

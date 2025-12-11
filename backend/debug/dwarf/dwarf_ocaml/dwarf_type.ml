@@ -1186,6 +1186,8 @@ end = struct
   module Rec_env_basic = struct
     type t = Proto_die.reference RS.DeBruijn_env.t
 
+    let initial_size = 256
+
     let hash = RS.DeBruijn_env.hash Asm_targets.Asm_label.hash
 
     let equal = RS.DeBruijn_env.equal Asm_targets.Asm_label.equal
@@ -1197,7 +1199,7 @@ end = struct
      equality checks when used as a key in [Dwarf_die_cache]. Without
      deduplication, cache lookups would require O(n) structural comparison of
      environment lists. *)
-  include (val Hashing.deduplicate ~initial_size:256 (module Rec_env_basic))
+  include Hashing.Dedup (Rec_env_basic)
 
   let empty = create RS.DeBruijn_env.empty
 

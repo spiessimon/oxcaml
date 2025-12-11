@@ -130,42 +130,49 @@ end) = struct
   (* We implement a strong call-by-need reduction, following an
      evaluator from Nathanaelle Courant. *)
 
-  type nf = { uid: Uid.t option; desc: nf_desc; approximated: bool }
-  and nf_desc =
+  type ('s, 'n) nf_data =
+    { uid: Uid.t option;
+      desc: ('s, 'n) nf_desc;
+      approximated: bool }
+
+  and ('s, 'n) nf =
+    (('s, 'n) nf_data, 'n) Hashing.Hash_consed.t
+
+  and ('s, 'n) nf_desc =
     | NVar of var
-    | NApp of nf * nf
-    | NAbs of local_env * var * t * delayed_nf
-    | NStruct of delayed_nf Item.Map.t
-    | NAlias of delayed_nf
-    | NProj of nf * Item.t
+    | NApp of ('s, 'n) nf * ('s, 'n) nf
+    | NAbs of ('s, 'n) local_env * var * t * ('s, 'n) delayed_nf
+    | NStruct of ('s, 'n) delayed_nf Item.Map.t
+    | NAlias of ('s, 'n) delayed_nf
+    | NProj of ('s, 'n) nf * Item.t
     | NLeaf
     | NComp_unit of string
     | NError of string
-    | NMu of Shape.Rec_var_ident.t * nf
+    | NMu of Shape.Rec_var_ident.t * ('s, 'n) nf
     | NRec_var of Shape.Rec_var_ident.t
-    | NMutrec of nf Ident.Map.t
-    | NProj_decl of nf * Ident.t
-    | NConstr of Ident.t * nf list
-    | NTuple of nf list
-    | NUnboxed_tuple of nf list
-    | NPredef of Predef.t * nf list
+    | NMutrec of ('s, 'n) nf Ident.Map.t
+    | NProj_decl of ('s, 'n) nf * Ident.t
+    | NConstr of Ident.t * ('s, 'n) nf list
+    | NTuple of ('s, 'n) nf list
+    | NUnboxed_tuple of ('s, 'n) nf list
+    | NPredef of Predef.t * ('s, 'n) nf list
     | NArrow
-    | NPoly_variant of nf poly_variant_constructors
-    | NVariant of  (delayed_nf * Layout.t) complex_constructors
+    | NPoly_variant of ('s, 'n) nf poly_variant_constructors
+    | NVariant of (('s, 'n) delayed_nf * Layout.t) complex_constructors
     | NVariant_unboxed of
       { name : string;
         variant_uid : Uid.t option;
         arg_name : string option;
         arg_uid : Uid.t option;
-        arg_shape : delayed_nf;
+        arg_shape : ('s, 'n) delayed_nf;
         arg_layout : Layout.t
       }
     | NRecord of
-        { fields : (string * Uid.t option * delayed_nf * Layout.t) list;
+        { fields : (string * Uid.t option * ('s, 'n) delayed_nf * Layout.t) list;
           kind : record_kind
         }
     | NUnknown_type
-    | NAt_layout of nf * Layout.t
+    | NAt_layout of ('s, 'n) nf * Layout.t
 
   (* A type of normal forms for strong call-by-need evaluation.
      The normal form of an abstraction
@@ -185,129 +192,260 @@ end) = struct
      by calling the normalization function as usual, but duplicate
      computations are precisely avoided by memoization.
    *)
-  and delayed_nf = Thunk of local_env * t
+  and ('s, 'n) delayed_nf =
+    Thunk of ('s, 'n) local_env * t
 
-  and local_env =
-    { subst: delayed_nf option Ident.Map.t;
+  and ('s, 'n) subst_data =
+    ('s, 'n) delayed_nf option Ident.Map.t
+
+  and ('s, 'n) subst =
+    (('s, 'n) subst_data, 's) Hashing.Hash_consed.t
+
+  and ('s, 'n) local_env =
+    { subst: ('s, 'n) subst;
       depth: int }
   (* When reducing in the body of an abstraction [Abs(x, body)], we
      bind [x] to [None] in the environment. [Some v] is used for
      actual substitutions, for example in [App(Abs(x, body), t)], when
      [v] is a thunk that will evaluate to the normal form of [t]. *)
 
-  let approx_nf nf = { nf with approximated = true }
+  let equal_subst s1 s2 = Hashing.Hash_consed.equal s1 s2
 
-  let rec equal_local_env t1 t2 =
-    t1.depth = t2.depth &&
-    Ident.Map.equal (Option.equal equal_delayed_nf) t1.subst t2.subst
+  let equal_local_env t1 t2 =
+    t1.depth = t2.depth && equal_subst t1.subst t2.subst
 
-  and equal_delayed_nf t1 t2 =
-    match t1, t2 with
-    | Thunk (l1, t1), Thunk (l2, t2) ->
-      if equal t1 t2 then equal_local_env l1 l2
-      else false
+  let equal_delayed_nf (Thunk (l1, t1)) (Thunk (l2, t2)) =
+    equal_local_env l1 l2 && equal t1 t2
 
-  and equal_nf_desc d1 d2 =
-    match d1, d2 with
-    | NVar v1, NVar v2 -> Ident.equal v1 v2
-    | NAbs (l1, v1, t1, nf1), NAbs (l2, v2, t2, nf2) ->
-      if not (Ident.equal v1 v2) then false
-      else if not (equal t1 t2) then false
-      else if not (equal_delayed_nf nf1 nf2) then false
-      else equal_local_env l1 l2
-    | NApp (v1, t1), NApp (v2, t2) ->
-      if equal_nf v1 v2 then equal_nf t1 t2
-      else false
-    | NLeaf, NLeaf -> true
-    | NStruct t1, NStruct t2 ->
-      Item.Map.equal equal_delayed_nf t1 t2
-    | NProj (t1, i1), NProj (t2, i2) ->
-      if Item.compare i1 i2 <> 0 then false
-      else equal_nf t1 t2
-    | NComp_unit c1, NComp_unit c2 -> String.equal c1 c2
-    | NAlias a1, NAlias a2 -> equal_delayed_nf a1 a2
-    | NError e1, NError e2 -> String.equal e1 e2
-    | NMu (rv1, nf1), NMu (rv2, nf2) ->
-      Shape.Rec_var_ident.equal rv1 rv2 && equal_nf nf1 nf2
-    | NRec_var rv1, NRec_var rv2 -> Shape.Rec_var_ident.equal rv1 rv2
-    | NMutrec defs1, NMutrec defs2 ->
-      Ident.Map.equal equal_nf defs1 defs2
-    | NProj_decl (nf1, id1), NProj_decl (nf2, id2) ->
-      Ident.equal id1 id2 && equal_nf nf1 nf2
-    | NConstr (id1, args1), NConstr (id2, args2) ->
-      Ident.equal id1 id2 && List.equal equal_nf args1 args2
-    | NTuple args1, NTuple args2 ->
-      List.equal equal_nf args1 args2
-    | NUnboxed_tuple args1, NUnboxed_tuple args2 ->
-      List.equal equal_nf args1 args2
-    | NPredef (p1, args1), NPredef (p2, args2) ->
-      Predef.equal p1 p2 && List.equal equal_nf args1 args2
-    | NArrow, NArrow -> true
-    | NPoly_variant constrs1, NPoly_variant constrs2 ->
-      let equal_pv_constructor c1 c2 =
-        String.equal c1.pv_constr_name c2.pv_constr_name &&
-        List.equal equal_nf c1.pv_constr_args c2.pv_constr_args
+  let equal_nf nf1 nf2 = Hashing.Hash_consed.equal nf1 nf2
+
+  module rec Subst_hashable : sig
+    type t = (Subst_table.tbl, Nf_table.tbl) subst_data
+    val initial_size : int
+    val hash : t -> int
+    val equal : t -> t -> bool
+  end = struct
+    type t = (Subst_table.tbl, Nf_table.tbl) subst_data
+
+    let initial_size = 256
+
+    let hash subst =
+      let hash_dnf_opt = function
+        | None -> 0
+        | Some (Thunk (local_env, shape)) ->
+          Hashtbl.hash (Hashing.Hash_consed.hash local_env.subst, local_env.depth, shape.Shape.hash)
       in
-      List.equal equal_pv_constructor constrs1 constrs2
-    | NVariant cc1, NVariant cc2  ->
-      List.equal
-        (Shape.equal_complex_constructor
-          (fun (dnf1, ly1) (dnf2, ly2) ->
-            Layout.equal ly1 ly2 && equal_delayed_nf dnf1 dnf2))
-        cc1 cc2
-    | NVariant_unboxed { name = n1; variant_uid = vu1; arg_name = an1;
-                         arg_uid = au1; arg_shape = as1; arg_layout = al1 },
-      NVariant_unboxed { name = n2; variant_uid = vu2; arg_name = an2;
-                         arg_uid = au2; arg_shape = as2; arg_layout = al2 } ->
-      String.equal n1 n2 &&
-      Option.equal Uid.equal vu1 vu2 &&
-      Option.equal String.equal an1 an2 &&
-      Option.equal Uid.equal au1 au2 &&
-      Layout.equal al1 al2 &&
-      equal_delayed_nf as1 as2
-    | NRecord { fields = f1; kind = k1 }, NRecord { fields = f2; kind = k2 } ->
-      Shape.equal_record_kind k1 k2 &&
-      List.equal
-        (fun (name1, uid1, dnf1, ly1) (name2, uid2, dnf2, ly2) ->
-          String.equal name1 name2 &&
-          Option.equal Shape.Uid.equal uid1 uid2 &&
-          Layout.equal ly1 ly2 &&
-          equal_delayed_nf dnf1 dnf2)
-        f1 f2
-    | NUnknown_type, NUnknown_type -> true
-    | NAt_layout (nf1, layout1), NAt_layout (nf2, layout2) ->
-      equal_nf nf1 nf2 && Layout.equal layout1 layout2
-    | ( ( NVar _ | NLeaf | NApp _ | NAbs _ | NStruct _ | NProj _ | NComp_unit _
-        | NAlias _ | NError _ | NConstr _ | NTuple _ | NUnboxed_tuple _
-        | NPredef _ | NArrow | NPoly_variant _ | NVariant _
-        | NVariant_unboxed _ | NRecord _ | NMutrec _ | NProj_decl _ | NMu _
-        | NRec_var _ | NUnknown_type | NAt_layout _ ), _ ) -> false
+      Ident.Map.fold
+        (fun id dnf_opt acc ->
+          Hashtbl.hash (Ident.hash id, hash_dnf_opt dnf_opt, acc))
+        subst 0
 
-  and equal_nf t1 t2 =
-    if not (Option.equal Uid.equal t1.uid t2.uid) then false
-    else equal_nf_desc t1.desc t2.desc
+    let equal s1 s2 =
+      Ident.Map.equal (Option.equal equal_delayed_nf) s1 s2
+  end
+
+  and Nf_hashable : sig
+    type t = (Subst_table.tbl, Nf_table.tbl) nf_data
+    val initial_size : int
+    val hash : t -> int
+    val equal : t -> t -> bool
+  end = struct
+    type t = (Subst_table.tbl, Nf_table.tbl) nf_data
+
+    let initial_size = 256
+
+    let rec hash nf_data =
+      Hashtbl.hash (
+        Option.map Uid.hash nf_data.uid,
+        hash_nf_desc nf_data.desc,
+        nf_data.approximated)
+
+    and hash_nf_desc desc =
+      match desc with
+      | NVar v -> Hashtbl.hash (0, Ident.hash v)
+      | NApp (nf1, nf2) ->
+        Hashtbl.hash (1, Hashing.Hash_consed.hash nf1, Hashing.Hash_consed.hash nf2)
+      | NAbs (local_env, v, t, dnf) ->
+        Hashtbl.hash (2, Hashing.Hash_consed.hash local_env.subst, local_env.depth,
+                      Ident.hash v, t.Shape.hash, hash_delayed_nf dnf)
+      | NStruct dnf_map ->
+        Hashtbl.hash (3, Item.Map.fold (fun item dnf acc ->
+          Hashtbl.hash (Hashtbl.hash item, hash_delayed_nf dnf, acc)) dnf_map 0)
+      | NAlias dnf -> Hashtbl.hash (4, hash_delayed_nf dnf)
+      | NProj (nf, item) -> Hashtbl.hash (5, Hashing.Hash_consed.hash nf, Hashtbl.hash item)
+      | NLeaf -> 6
+      | NComp_unit s -> Hashtbl.hash (7, Hashtbl.hash s)
+      | NError s -> Hashtbl.hash (8, Hashtbl.hash s)
+      | NMu (rv, nf) -> Hashtbl.hash (9, Shape.Rec_var_ident.hash rv, Hashing.Hash_consed.hash nf)
+      | NRec_var rv -> Hashtbl.hash (10, Shape.Rec_var_ident.hash rv)
+      | NMutrec defs ->
+        Hashtbl.hash (11, Ident.Map.fold (fun id nf acc ->
+          Hashtbl.hash (Ident.hash id, Hashing.Hash_consed.hash nf, acc)) defs 0)
+      | NProj_decl (nf, id) ->
+        Hashtbl.hash (12, Hashing.Hash_consed.hash nf, Ident.hash id)
+      | NConstr (id, args) ->
+        Hashtbl.hash (13, Ident.hash id, List.fold_left (fun acc nf ->
+          Hashtbl.hash (Hashing.Hash_consed.hash nf, acc)) 0 args)
+      | NTuple args ->
+        Hashtbl.hash (14, List.fold_left (fun acc nf ->
+          Hashtbl.hash (Hashing.Hash_consed.hash nf, acc)) 0 args)
+      | NUnboxed_tuple args ->
+        Hashtbl.hash (15, List.fold_left (fun acc nf ->
+          Hashtbl.hash (Hashing.Hash_consed.hash nf, acc)) 0 args)
+      | NPredef (p, args) ->
+        Hashtbl.hash (16, Hashtbl.hash p, List.fold_left (fun acc nf ->
+          Hashtbl.hash (Hashing.Hash_consed.hash nf, acc)) 0 args)
+      | NArrow -> 17
+      | NPoly_variant constrs ->
+        Hashtbl.hash (18, List.fold_left (fun acc c ->
+          Hashtbl.hash (Hashtbl.hash c.pv_constr_name,
+            List.fold_left (fun acc nf ->
+              Hashtbl.hash (Hashing.Hash_consed.hash nf, acc)) 0 c.pv_constr_args,
+            acc)) 0 constrs)
+      | NVariant constrs ->
+        Hashtbl.hash (19, List.fold_left (fun acc c ->
+          let args_hash = List.fold_left (fun acc { field_name; field_uid; field_value = (dnf, layout); _ } ->
+            Hashtbl.hash (Option.map Hashtbl.hash field_name,
+              Option.map Uid.hash field_uid,
+              hash_delayed_nf dnf,
+              Hashtbl.hash layout,
+              acc)) 0 c.args in
+          Hashtbl.hash (Hashtbl.hash c.name,
+            Option.map Uid.hash c.constr_uid,
+            Hashtbl.hash c.kind,
+            args_hash,
+            acc)) 0 constrs)
+      | NVariant_unboxed { name; variant_uid; arg_name; arg_uid; arg_shape; arg_layout } ->
+        Hashtbl.hash (20, Hashtbl.hash name, Option.map Uid.hash variant_uid,
+          Option.map Hashtbl.hash arg_name, Option.map Uid.hash arg_uid,
+          hash_delayed_nf arg_shape, Hashtbl.hash arg_layout)
+      | NRecord { fields; kind } ->
+        Hashtbl.hash (21, Hashtbl.hash kind,
+          List.fold_left (fun acc (name, uid_opt, dnf, layout) ->
+            Hashtbl.hash (Hashtbl.hash name, Option.map Uid.hash uid_opt,
+              hash_delayed_nf dnf, Hashtbl.hash layout, acc)) 0 fields)
+      | NUnknown_type -> 22
+      | NAt_layout (nf, layout) ->
+        Hashtbl.hash (23, Hashing.Hash_consed.hash nf, Hashtbl.hash layout)
+
+    and hash_delayed_nf (Thunk (local_env, shape)) =
+      Hashtbl.hash (Hashing.Hash_consed.hash local_env.subst, local_env.depth, shape.Shape.hash)
+
+    let rec equal nf1 nf2 =
+      if not (Option.equal Uid.equal nf1.uid nf2.uid) then false
+      else if nf1.approximated <> nf2.approximated then false
+      else equal_nf_desc nf1.desc nf2.desc
+
+    and equal_nf_desc d1 d2 =
+      match d1, d2 with
+      | NVar v1, NVar v2 -> Ident.equal v1 v2
+      | NAbs (l1, v1, t1, nf1), NAbs (l2, v2, t2, nf2) ->
+        if not (Ident.equal v1 v2) then false
+        else if not (Shape.equal t1 t2) then false
+        else if not (equal_delayed_nf nf1 nf2) then false
+        else equal_local_env l1 l2
+      | NApp (v1, t1), NApp (v2, t2) ->
+        if Hashing.Hash_consed.equal v1 v2 then Hashing.Hash_consed.equal t1 t2
+        else false
+      | NLeaf, NLeaf -> true
+      | NStruct t1, NStruct t2 ->
+        Item.Map.equal equal_delayed_nf t1 t2
+      | NProj (t1, i1), NProj (t2, i2) ->
+        if Item.compare i1 i2 <> 0 then false
+        else Hashing.Hash_consed.equal t1 t2
+      | NComp_unit c1, NComp_unit c2 -> String.equal c1 c2
+      | NAlias a1, NAlias a2 -> equal_delayed_nf a1 a2
+      | NError e1, NError e2 -> String.equal e1 e2
+      | NMu (rv1, nf1), NMu (rv2, nf2) ->
+        Shape.Rec_var_ident.equal rv1 rv2 && Hashing.Hash_consed.equal nf1 nf2
+      | NRec_var rv1, NRec_var rv2 -> Shape.Rec_var_ident.equal rv1 rv2
+      | NMutrec defs1, NMutrec defs2 ->
+        Ident.Map.equal Hashing.Hash_consed.equal defs1 defs2
+      | NProj_decl (nf1, id1), NProj_decl (nf2, id2) ->
+        Ident.equal id1 id2 && Hashing.Hash_consed.equal nf1 nf2
+      | NConstr (id1, args1), NConstr (id2, args2) ->
+        Ident.equal id1 id2 && List.equal Hashing.Hash_consed.equal args1 args2
+      | NTuple args1, NTuple args2 ->
+        List.equal Hashing.Hash_consed.equal args1 args2
+      | NUnboxed_tuple args1, NUnboxed_tuple args2 ->
+        List.equal Hashing.Hash_consed.equal args1 args2
+      | NPredef (p1, args1), NPredef (p2, args2) ->
+        Predef.equal p1 p2 && List.equal Hashing.Hash_consed.equal args1 args2
+      | NArrow, NArrow -> true
+      | NPoly_variant constrs1, NPoly_variant constrs2 ->
+        let equal_pv_constructor c1 c2 =
+          String.equal c1.pv_constr_name c2.pv_constr_name &&
+          List.equal Hashing.Hash_consed.equal c1.pv_constr_args c2.pv_constr_args
+        in
+        List.equal equal_pv_constructor constrs1 constrs2
+      | NVariant cc1, NVariant cc2  ->
+        List.equal
+          (Shape.equal_complex_constructor
+            (fun (dnf1, ly1) (dnf2, ly2) ->
+              Layout.equal ly1 ly2 && equal_delayed_nf dnf1 dnf2))
+          cc1 cc2
+      | NVariant_unboxed { name = n1; variant_uid = vu1; arg_name = an1;
+                           arg_uid = au1; arg_shape = as1; arg_layout = al1 },
+        NVariant_unboxed { name = n2; variant_uid = vu2; arg_name = an2;
+                           arg_uid = au2; arg_shape = as2; arg_layout = al2 } ->
+        String.equal n1 n2 &&
+        Option.equal Uid.equal vu1 vu2 &&
+        Option.equal String.equal an1 an2 &&
+        Option.equal Uid.equal au1 au2 &&
+        Layout.equal al1 al2 &&
+        equal_delayed_nf as1 as2
+      | NRecord { fields = f1; kind = k1 }, NRecord { fields = f2; kind = k2 } ->
+        Shape.equal_record_kind k1 k2 &&
+        List.equal
+          (fun (name1, uid1, dnf1, ly1) (name2, uid2, dnf2, ly2) ->
+            String.equal name1 name2 &&
+            Option.equal Shape.Uid.equal uid1 uid2 &&
+            Layout.equal ly1 ly2 &&
+            equal_delayed_nf dnf1 dnf2)
+          f1 f2
+      | NUnknown_type, NUnknown_type -> true
+      | NAt_layout (nf1, layout1), NAt_layout (nf2, layout2) ->
+        Hashing.Hash_consed.equal nf1 nf2 && Layout.equal layout1 layout2
+      | ( ( NVar _ | NLeaf | NApp _ | NAbs _ | NStruct _ | NProj _ | NComp_unit _
+          | NAlias _ | NError _ | NConstr _ | NTuple _ | NUnboxed_tuple _
+          | NPredef _ | NArrow | NPoly_variant _ | NVariant _
+          | NVariant_unboxed _ | NRecord _ | NMutrec _ | NProj_decl _ | NMu _
+          | NRec_var _ | NUnknown_type | NAt_layout _ ), _ ) -> false
+  end
+
+  and Subst_table : sig
+    type tbl
+    val create : Subst_hashable.t -> (Subst_hashable.t, tbl) Hashing.Hash_consed.t
+  end = Hashing.Hash_consed.Table (Subst_hashable)
+
+  and Nf_table : sig
+    type tbl
+    val create : Nf_hashable.t -> (Nf_hashable.t, tbl) Hashing.Hash_consed.t
+  end = Hashing.Hash_consed.Table (Nf_hashable)
+
+  let approx_nf nf =
+    let nf_data = Hashing.Hash_consed.value nf in
+    Nf_table.create { nf_data with approximated = true }
 
   module ReduceMemoTable = Hashtbl.Make(struct
-      type nonrec t = local_env * t
+      type t = (Subst_table.tbl, Nf_table.tbl) local_env * Shape.t
 
-      let hash t = Hashtbl.hash t
-      (* CR sspies: The implementation of [hash] should change to use the
-      pre-computed hash value of shapes and match the equality function.  *)
+      let hash (local_env, shape) =
+        Hashtbl.hash
+          ( Hashing.Hash_consed.hash local_env.subst,
+            local_env.depth,
+            shape.Shape.hash )
 
       let equal (env1, t1) (env2, t2) =
-        if equal t1 t2 then equal_local_env env1 env2
-        else false
+        equal_local_env env1 env2 && equal t1 t2
   end)
 
   module ReadBackMemoTable = Hashtbl.Make(struct
-      type nonrec t = nf
+      type t = (Subst_table.tbl, Nf_table.tbl) nf
 
-      let hash t = Hashtbl.hash t
-      (* CR sspies: The implementation of [hash] should change to match the
-         equality function. Perhaps it would also make sense to pre-compute the
-         hash values of the normal forms. *)
+      let hash nf = Hashing.Hash_consed.hash nf
 
-  let equal a b = equal_nf a b
+      let equal a b = equal_nf a b
   end)
 
   let in_reduce_memo_table memo_table memo_key f arg =
@@ -332,13 +470,15 @@ end) = struct
     max_steps_per_variable: MB.t;
     diagnostics: Diagnostics.t;
     global_env: Env.t;
-    local_env: local_env;
-    reduce_memo_table: nf ReduceMemoTable.t;
+    local_env: (Subst_table.tbl, Nf_table.tbl) local_env;
+    reduce_memo_table: (Subst_table.tbl, Nf_table.tbl) nf ReduceMemoTable.t;
     read_back_memo_table: t ReadBackMemoTable.t;
   }
 
   let bind env var shape =
-    let subst = Ident.Map.add var shape env.local_env.subst in
+    let subst_data = Hashing.Hash_consed.value env.local_env.subst in
+    let subst_data = Ident.Map.add var shape subst_data in
+    let subst = Subst_table.create subst_data in
     { env with local_env = { env.local_env with subst } }
 
   let rec reduce_ env t =
@@ -396,8 +536,12 @@ end) = struct
       reduce_ { env with local_env } t
     in
     let delay_reduce env t = Thunk (env.local_env, t) in
-    let return desc = { uid = t.uid; desc; approximated = t.approximated } in
-    let rec force_aliases nf = match nf.desc with
+    let return desc =
+      Nf_table.create { uid = t.uid; desc; approximated = t.approximated }
+    in
+    let rec force_aliases nf =
+      let nf_data = Hashing.Hash_consed.value nf in
+      match nf_data.desc with
       | NAlias delayed_nf ->
           let nf = force env delayed_nf in
           force_aliases nf
@@ -406,11 +550,14 @@ end) = struct
     let reset_uid_if_new_binding t' =
       match t.uid with
       | None -> t'
-      | Some _ as uid -> { t' with uid }
+      | Some _ as uid ->
+        let t' = Hashing.Hash_consed.value t' in
+        Nf_table.create { t' with uid }
     in
     let set_uid_if_none uid t =
-      match t.uid with
-      | None -> { t with uid = uid }
+      let t_data = Hashing.Hash_consed.value t in
+      match t_data.uid with
+      | None -> Nf_table.create { t_data with uid = uid }
       | Some _ -> t
     in
     let delayed_nf_set_uid (Thunk (l, t) as dnf) uid =
@@ -443,7 +590,8 @@ end) = struct
             end)
       | App(f, arg) ->
           let f = reduce env f |> force_aliases in
-          begin match f.desc with
+          let f_data = Hashing.Hash_consed.value f in
+          begin match f_data.desc with
           | NAbs(clos_env, var, body, _body_nf) ->
               let arg = delay_reduce env arg in
               let env = bind { env with local_env = clos_env } var (Some arg) in
@@ -455,7 +603,8 @@ end) = struct
       | Proj(str, item) ->
           let str = reduce env str |> force_aliases in
           let nored () = return (NProj(str, item)) in
-          begin match str.desc with
+          let str_data = Hashing.Hash_consed.value str in
+          begin match str_data.desc with
           | NStruct (items) ->
               begin match Item.Map.find item items with
               | exception Not_found -> nored ()
@@ -483,7 +632,7 @@ end) = struct
                   let sh = delayed_nf_set_uid sh field_uid in
                   force env sh
                 ) args in
-                { desc = NTuple tuple_args; uid = constr_uid;
+                Nf_table.create { desc = NTuple tuple_args; uid = constr_uid;
                   approximated = false }
               else
                 let fields = List.map (fun { field_name; field_uid;
@@ -492,7 +641,7 @@ end) = struct
                   let sh = delayed_nf_set_uid sh field_uid in
                   (name, field_uid, sh, layout)
                 ) args in
-                { desc = NRecord { fields; kind = Record_boxed };
+                Nf_table.create { desc = NRecord { fields; kind = Record_boxed };
                   uid = constr_uid; approximated = false }
             | None -> nored())
           | NVariant_unboxed { name; variant_uid; arg_name; arg_uid;
@@ -505,12 +654,12 @@ end) = struct
                 | Some arg_name ->
                   let sh = delayed_nf_set_uid arg_shape arg_uid in
                   let fields = [(arg_name, arg_uid, sh, arg_layout)] in
-                  { desc = NRecord { fields; kind = Record_boxed };
+                  Nf_table.create { desc = NRecord { fields; kind = Record_boxed };
                     uid = variant_uid; approximated = false }
                 | None ->
                   let sh = delayed_nf_set_uid arg_shape arg_uid in
                   let sh = force env sh in
-                  { desc = NUnboxed_tuple [sh]; uid = variant_uid;
+                  Nf_table.create { desc = NUnboxed_tuple [sh]; uid = variant_uid;
                     approximated = false }
             else nored()
           | NRecord { fields; kind = _ }
@@ -529,7 +678,8 @@ end) = struct
           let body_nf = delay_reduce (bind env var None) body in
           return (NAbs(local_env, var, body, body_nf))
       | Var id ->
-          begin match Ident.Map.find id local_env.subst with
+          let subst_data = Hashing.Hash_consed.value local_env.subst in
+          begin match Ident.Map.find id subst_data with
           (* Note: instead of binding abstraction-bound variables to
              [None], we could unify it with the [Some v] case by
              binding the bound variable [x] to [NVar x].
@@ -541,10 +691,12 @@ end) = struct
              their binding-time [Uid.t]. *)
           | None -> return (NVar id)
           | Some def ->
-              begin match force env def with
-              | { uid = Some _; _  } as nf -> nf
+              let nf = force env def in
+              let nf_data = Hashing.Hash_consed.value nf in
+              begin match nf_data.uid with
+              | Some _ -> nf
                   (* This var already has a binding uid *)
-              | { uid = None; _ } as nf -> { nf with uid = t.uid }
+              | None -> Nf_table.create { nf_data with uid = t.uid }
                   (* Set the var's binding uid *)
               end
           | exception Not_found ->
@@ -612,15 +764,16 @@ end) = struct
           return (NAt_layout (nf, layout))
     )
 
-  and read_back env (nf : nf) : t =
+  and read_back env (nf : (Subst_table.tbl, Nf_table.tbl) nf) : t =
   in_read_back_memo_table env.read_back_memo_table nf (read_back_ env) nf
   (* The [nf] normal form we receive may contain a lot of internal
      sharing due to the use of memoization in the evaluator. We have
      to memoize here again, otherwise the sharing is lost by mapping
      over the term as a tree. *)
 
-  and read_back_ env (nf : nf) : t =
-    read_back_desc ~uid:nf.uid env nf.desc
+  and read_back_ env (nf : (Subst_table.tbl, Nf_table.tbl) nf) : t =
+    let nf_data = Hashing.Hash_consed.value nf in
+    read_back_desc ~uid:nf_data.uid env nf_data.desc
 
   and read_back_desc ~uid env desc =
     let read_back nf = read_back env nf in
@@ -712,7 +865,7 @@ end) = struct
     let max_steps_per_variable =
       Params.max_shape_reduce_steps_per_variable ()
     in
-    let local_env = { subst = Ident.Map.empty; depth = 0 } in
+    let local_env = { subst = Subst_table.create Ident.Map.empty; depth = 0 } in
     let env = {
       fuel;
       fuel_for_compilation_units;
@@ -725,8 +878,9 @@ end) = struct
     } in
     reduce_ env t |> read_back env
 
-  let rec is_stuck_on_comp_unit (nf : nf) =
-    match nf.desc with
+  let rec is_stuck_on_comp_unit (nf : (Subst_table.tbl, Nf_table.tbl) nf) =
+    let nf_data = Hashing.Hash_consed.value nf in
+    match nf_data.desc with
     | NVar _ ->
         (* This should not happen if we only reduce closed terms *)
         false
@@ -742,13 +896,14 @@ end) = struct
     | NPredef _ | NArrow | NPoly_variant _ | NVariant _ | NVariant_unboxed _
     | NRecord _ | NUnknown_type | NAt_layout _ -> false
 
-  let rec reduce_aliases_for_uid env (nf : nf) =
-    match nf with
-    | { uid = Some uid; desc = NAlias dnf; approximated = false; _ } ->
+  let rec reduce_aliases_for_uid env (nf : (Subst_table.tbl, Nf_table.tbl) nf) =
+    let nf_data = Hashing.Hash_consed.value nf in
+    match nf_data with
+    | { uid = Some uid; desc = NAlias dnf; approximated = false } ->
         let result = reduce_aliases_for_uid env (force env dnf) in
         Resolved_alias (uid, result)
     | { uid = Some uid; approximated = false; _ } -> Resolved uid
-    | { uid; approximated = true } -> Approximated uid
+    | { uid; approximated = true; _ } -> Approximated uid
     | { uid = None; approximated = false; _ } ->
       (* A missing Uid after a complete reduction means the Uid was first
          missing in the shape which is a code error. Having the
@@ -760,7 +915,7 @@ end) = struct
   let reduce_for_uid global_env t =
     let fuel = Params.fuel () in
     MB.incr fuel; (* See the comment about [fuel] in [reduce]. *)
-    let local_env = { subst = Ident.Map.empty; depth = 0 } in
+    let local_env = { subst = Subst_table.create Ident.Map.empty; depth = 0 } in
     let env = {
       fuel;
       fuel_for_compilation_units = Params.fuel_for_compilation_units ();

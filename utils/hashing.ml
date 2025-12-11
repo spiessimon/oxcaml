@@ -28,62 +28,78 @@
 (*                                                                        *)
 (**************************************************************************)
 
-module type Dedup = sig
-  (** A deduplicated element wrapping a value with its precomputed hash. *)
-  type t
+module Hash_consed = struct
+  (* The 'tbl is a phantom argument that we use below to associate deduplicated
+     elements with their table to ensure we don't get confused between different
+     memoization tables. *)
+  type ('a, 'tbl) t =
+    { hash : int;
+      value : 'a
+    }
 
-  type value
+  let equal e1 e2 = Int.equal e1.hash e2.hash && e1.value == e2.value
 
-  (** [create tbl v] returns a canonical element for [v]. If an element
-      structurally equal to [v] already exists in [tbl], that element is
-      returned. Otherwise, a new element is created, added to [tbl], and
-      returned. *)
-  val create : value -> t
+  let hash e = e.hash
 
-  (** [equal e1 e2] is [true] iff [e1] and [e2] are physically equal.
-      This is O(1) due to deduplication. *)
-  val equal : t -> t -> bool
+  let value e = e.value
 
-  (** [hash e] returns the precomputed hash of [e]. This is O(1). *)
-  val hash : t -> int
+  module Table (T : sig
+    type t
 
-  (** [value e] returns the underlying value of [e]. *)
-  val value : t -> value
-end
+    val initial_size : int
 
-type 'a dedup =
-  { hash : int;
-    value : 'a
-  }
+    val hash : t -> int
 
-let deduplicate (type a) ~initial_size
-    (module M : Hashtbl.HashedType with type t = a) =
-  let module Table = Hashtbl.Make (struct
-    type nonrec t = a dedup
+    val equal : t -> t -> bool
+  end) =
+  struct
+    type tbl = unit
 
-    let equal e1 e2 = M.equal e1.value e2.value && Int.equal e1.hash e2.hash
+    module Tbl = Hashtbl.Make (struct
+      type nonrec t = (T.t, tbl) t
 
-    let hash e = e.hash
-  end) in
-  let table = Table.create initial_size in
-  let module D = struct
-    type t = a dedup
+      let equal t1 t2 =
+        (* It is crucial that we use [T.equal] here such that the hash table
+           lookup below is up to structural equality. *)
+        Int.equal t1.hash t2.hash && T.equal t1.value t2.value
 
-    type value = M.t
+      (* We hash at creation time, so there is no need to recompute the hash
+         using [T.hash]. *)
+      let hash = hash
+    end)
+
+    let table = Tbl.create T.initial_size
 
     let create value =
-      let hash = M.hash value in
+      let hash = T.hash value in
       let elem = { hash; value } in
-      match Table.find_opt table elem with
+      match Tbl.find_opt table elem with
       | Some existing -> existing
       | None ->
-        Table.add table elem elem;
+        Tbl.add table elem elem;
         elem
+  end
+end
 
-    let equal e1 e2 = e1 == e2
+module Dedup (T : sig
+  type t
 
-    let hash e = e.hash
+  val initial_size : int
 
-    let value e = e.value
-  end in
-  (module D : Dedup with type value = a)
+  val hash : t -> int
+
+  val equal : t -> t -> bool
+end) =
+struct
+  module D = Hash_consed.Table (T)
+
+  type t = (T.t, D.tbl) Hash_consed.t
+
+  let create = D.create
+
+  let equal = Hash_consed.equal
+
+  let hash = Hash_consed.hash
+
+  let value = Hash_consed.value
+end
