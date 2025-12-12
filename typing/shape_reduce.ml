@@ -158,17 +158,17 @@ end) = struct
     | NPredef of Predef.t * ('s, 'n) nf list
     | NArrow
     | NPoly_variant of ('s, 'n) nf poly_variant_constructors
-    | NVariant of (('s, 'n) delayed_nf * Layout.t) complex_constructors
+    | NVariant of (('s, 'n) nf * Layout.t) complex_constructors
     | NVariant_unboxed of
       { name : string;
         variant_uid : Uid.t option;
         arg_name : string option;
         arg_uid : Uid.t option;
-        arg_shape : ('s, 'n) delayed_nf;
+        arg_shape : ('s, 'n) nf;
         arg_layout : Layout.t
       }
     | NRecord of
-        { fields : (string * Uid.t option * ('s, 'n) delayed_nf * Layout.t) list;
+        { fields : (string * Uid.t option * ('s, 'n) nf * Layout.t) list;
           kind : record_kind
         }
     | NUnknown_type
@@ -304,10 +304,10 @@ end) = struct
             acc)) 0 constrs)
       | NVariant constrs ->
         Hashtbl.hash (19, List.fold_left (fun acc c ->
-          let args_hash = List.fold_left (fun acc { field_name; field_uid; field_value = (dnf, layout); _ } ->
+          let args_hash = List.fold_left (fun acc { field_name; field_uid; field_value = (nf, layout); _ } ->
             Hashtbl.hash (Option.map Hashtbl.hash field_name,
               Option.map Uid.hash field_uid,
-              hash_delayed_nf dnf,
+              Hashing.Hash_consed.hash nf,
               Hashtbl.hash layout,
               acc)) 0 c.args in
           Hashtbl.hash (Hashtbl.hash c.name,
@@ -318,12 +318,12 @@ end) = struct
       | NVariant_unboxed { name; variant_uid; arg_name; arg_uid; arg_shape; arg_layout } ->
         Hashtbl.hash (20, Hashtbl.hash name, Option.map Uid.hash variant_uid,
           Option.map Hashtbl.hash arg_name, Option.map Uid.hash arg_uid,
-          hash_delayed_nf arg_shape, Hashtbl.hash arg_layout)
+          Hashing.Hash_consed.hash arg_shape, Hashtbl.hash arg_layout)
       | NRecord { fields; kind } ->
         Hashtbl.hash (21, Hashtbl.hash kind,
-          List.fold_left (fun acc (name, uid_opt, dnf, layout) ->
+          List.fold_left (fun acc (name, uid_opt, nf, layout) ->
             Hashtbl.hash (Hashtbl.hash name, Option.map Uid.hash uid_opt,
-              hash_delayed_nf dnf, Hashtbl.hash layout, acc)) 0 fields)
+              Hashing.Hash_consed.hash nf, Hashtbl.hash layout, acc)) 0 fields)
       | NUnknown_type -> 22
       | NAt_layout (nf, layout) ->
         Hashtbl.hash (23, Hashing.Hash_consed.hash nf, Hashtbl.hash layout)
@@ -381,8 +381,8 @@ end) = struct
       | NVariant cc1, NVariant cc2  ->
         List.equal
           (Shape.equal_complex_constructor
-            (fun (dnf1, ly1) (dnf2, ly2) ->
-              Layout.equal ly1 ly2 && equal_delayed_nf dnf1 dnf2))
+            (fun (nf1, ly1) (nf2, ly2) ->
+              Layout.equal ly1 ly2 && Hashing.Hash_consed.equal nf1 nf2))
           cc1 cc2
       | NVariant_unboxed { name = n1; variant_uid = vu1; arg_name = an1;
                            arg_uid = au1; arg_shape = as1; arg_layout = al1 },
@@ -393,15 +393,15 @@ end) = struct
         Option.equal String.equal an1 an2 &&
         Option.equal Uid.equal au1 au2 &&
         Layout.equal al1 al2 &&
-        equal_delayed_nf as1 as2
+        Hashing.Hash_consed.equal as1 as2
       | NRecord { fields = f1; kind = k1 }, NRecord { fields = f2; kind = k2 } ->
         Shape.equal_record_kind k1 k2 &&
         List.equal
-          (fun (name1, uid1, dnf1, ly1) (name2, uid2, dnf2, ly2) ->
+          (fun (name1, uid1, nf1, ly1) (name2, uid2, nf2, ly2) ->
             String.equal name1 name2 &&
             Option.equal Shape.Uid.equal uid1 uid2 &&
             Layout.equal ly1 ly2 &&
-            equal_delayed_nf dnf1 dnf2)
+            Hashing.Hash_consed.equal nf1 nf2)
           f1 f2
       | NUnknown_type, NUnknown_type -> true
       | NAt_layout (nf1, layout1), NAt_layout (nf2, layout2) ->
@@ -560,11 +560,6 @@ end) = struct
       | None -> Nf_table.create { t_data with uid = uid }
       | Some _ -> t
     in
-    let delayed_nf_set_uid (Thunk (l, t) as dnf) uid =
-      match uid with
-      | None -> dnf
-      | Some uid -> Thunk (l, Shape.set_uid_if_none t uid)
-    in
     if MB.is_depleted fuel
     then approx_nf (return (NError "NoFuelLeft"))
     else if MB.is_depleted max_steps_per_variable
@@ -629,8 +624,7 @@ end) = struct
               if has_unnamed_field then
                 let tuple_args = List.map (fun { field_name = _; field_uid;
                                                field_value = sh, _ } ->
-                  let sh = delayed_nf_set_uid sh field_uid in
-                  force env sh
+                  set_uid_if_none field_uid sh
                 ) args in
                 Nf_table.create { desc = NTuple tuple_args; uid = constr_uid;
                   approximated = false }
@@ -638,7 +632,7 @@ end) = struct
                 let fields = List.map (fun { field_name; field_uid;
                                            field_value = sh, layout } ->
                   let name = Option.get field_name in
-                  let sh = delayed_nf_set_uid sh field_uid in
+                  let sh = set_uid_if_none field_uid sh in
                   (name, field_uid, sh, layout)
                 ) args in
                 Nf_table.create { desc = NRecord { fields; kind = Record_boxed };
@@ -652,13 +646,12 @@ end) = struct
             if String.equal name item_name then
               match arg_name with
                 | Some arg_name ->
-                  let sh = delayed_nf_set_uid arg_shape arg_uid in
+                  let sh = set_uid_if_none arg_uid arg_shape in
                   let fields = [(arg_name, arg_uid, sh, arg_layout)] in
                   Nf_table.create { desc = NRecord { fields; kind = Record_boxed };
                     uid = variant_uid; approximated = false }
                 | None ->
-                  let sh = delayed_nf_set_uid arg_shape arg_uid in
-                  let sh = force env sh in
+                  let sh = set_uid_if_none arg_uid arg_shape in
                   Nf_table.create { desc = NUnboxed_tuple [sh]; uid = variant_uid;
                     approximated = false }
             else nored()
@@ -669,7 +662,7 @@ end) = struct
             (match List.find_opt (fun (name, _, _, _) ->
                String.equal name field_name) fields with
             | Some (_, field_uid, field_shape, _) ->
-              force env field_shape |> set_uid_if_none field_uid
+              set_uid_if_none field_uid field_shape
             | None -> nored())
           | _ ->
               nored ()
@@ -741,22 +734,22 @@ end) = struct
           in
           return (NPoly_variant dnf_constrs)
       | Variant constructors  ->
-          let dnf_constructors =
+          let nf_constructors =
             complex_constructors_map (fun (t, ly) ->
-              (delay_reduce env t, ly)) constructors
+              (reduce env t, ly)) constructors
           in
-          return (NVariant dnf_constructors)
+          return (NVariant nf_constructors)
       | Variant_unboxed { name; variant_uid; arg_name; arg_uid; arg_shape;
                           arg_layout } ->
-          let dnf_arg_shape = delay_reduce env arg_shape in
+          let nf_arg_shape = reduce env arg_shape in
           return (NVariant_unboxed { name; variant_uid; arg_name; arg_uid;
-                                     arg_shape = dnf_arg_shape; arg_layout })
+                                     arg_shape = nf_arg_shape; arg_layout })
       | Record { fields; kind } ->
-          let dnf_fields =
+          let nf_fields =
             List.map (fun (name, uid_opt, t, ly) ->
-                          (name, uid_opt, delay_reduce env t, ly)) fields
+                          (name, uid_opt, reduce env t, ly)) fields
           in
-          return (NRecord { fields = dnf_fields; kind })
+          return (NRecord { fields = nf_fields; kind })
       | Unknown_type ->
           return NUnknown_type
       | At_layout (shape, layout) ->
@@ -828,18 +821,18 @@ end) = struct
     | NVariant constructors ->
       let t_constructors =
         complex_constructors_map
-          (fun (dnf, ly) -> (read_back_force dnf, ly))
+          (fun (nf, ly) -> (read_back nf, ly))
           constructors
       in
       variant ?uid t_constructors
     | NVariant_unboxed { name; variant_uid; arg_name; arg_uid;
                          arg_shape; arg_layout } ->
-      let t_arg_shape = read_back_force arg_shape in
+      let t_arg_shape = read_back arg_shape in
       variant_unboxed ?uid ~variant_uid ~arg_uid name arg_name
         t_arg_shape arg_layout
     | NRecord { fields; kind } ->
-      let t_fields = List.map (fun (name, uid_opt, dnf, ly) ->
-        (name, uid_opt, read_back_force dnf, ly)) fields
+      let t_fields = List.map (fun (name, uid_opt, nf, ly) ->
+        (name, uid_opt, read_back nf, ly)) fields
       in
       record ?uid kind t_fields
     | NUnknown_type ->
