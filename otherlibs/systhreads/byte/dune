@@ -8,7 +8,7 @@
  (wrapped false)
  ; FIXME Fix warning 27 and -no-strict-sequence
  (flags
-  (:standard -no-strict-sequence -g -bin-annot -w -27))
+  (:standard -no-strict-sequence -g -bin-annot -bin-annot-cms -w -27))
  (ocamlopt_flags
   (:include %{project_root}/ocamlopt_flags.sexp))
  (libraries unix)

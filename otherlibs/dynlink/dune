@@ -69,6 +69,7 @@
    -strict-sequence
    -absname
    -bin-annot
+   -bin-annot-cms
    -safe-string
    -strict-formats))
  (ocamlopt_flags
@@ -872,6 +873,8 @@
  (files
   (.dynlink_internal.objs/byte/dynlink.cmti as dynlink/dynlink.cmti)
   (.dynlink_internal.objs/byte/dynlink.cmt as dynlink/dynlink.cmt)
+  (.dynlink_internal.objs/byte/dynlink.cms as dynlink/dynlink.cms)
+  (.dynlink_internal.objs/byte/dynlink.cmsi as dynlink/dynlink.cmsi)
   (.dynlink_internal_common.objs/native/dynlink_common.cmx
    as
    dynlink/dynlink_common.cmx)

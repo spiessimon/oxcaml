@@ -39,6 +39,7 @@
    -strict-sequence
    -absname
    -bin-annot
+   -bin-annot-cms
    -safe-string
    -strict-formats))
  (ocamlopt_flags
@@ -66,6 +67,10 @@
   (.camlinternaleval.objs/byte/camlinternaleval.cmt as camlinternaleval.cmt)
   (.camlinternaleval.objs/byte/camlinternaleval.cmti
    as
-   camlinternaleval.cmti))
+   camlinternaleval.cmti)
+  (.camlinternaleval.objs/byte/camlinternaleval.cms as camlinternaleval.cms)
+  (.camlinternaleval.objs/byte/camlinternaleval.cmsi
+   as
+   camlinternaleval.cmsi))
  (section lib)
  (package ocaml))

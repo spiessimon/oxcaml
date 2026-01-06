@@ -65,6 +65,12 @@
   (.ocamlopttoplevel.objs/byte/opttopdirs.cmti
    as
    compiler-libs/opttopdirs.cmti)
+  (.ocamlopttoplevel.objs/byte/opttopdirs.cms
+   as
+   compiler-libs/opttopdirs.cms)
+  (.ocamlopttoplevel.objs/byte/opttopdirs.cmsi
+   as
+   compiler-libs/opttopdirs.cmsi)
   (opttoploop.mli as compiler-libs/opttoploop.mli)
   (.ocamlopttoplevel.objs/byte/opttoploop.cmi
    as
@@ -75,6 +81,12 @@
   (.ocamlopttoplevel.objs/byte/opttoploop.cmti
    as
    compiler-libs/opttoploop.cmti)
+  (.ocamlopttoplevel.objs/byte/opttoploop.cms
+   as
+   compiler-libs/opttoploop.cms)
+  (.ocamlopttoplevel.objs/byte/opttoploop.cmsi
+   as
+   compiler-libs/opttoploop.cmsi)
   (topmain.mli as compiler-libs/opttopmain.mli))
  (section lib)
  (package ocaml))

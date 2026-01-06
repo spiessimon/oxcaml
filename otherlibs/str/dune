@@ -19,7 +19,7 @@
  (flags (
    :standard
    -strict-sequence -absname -w +67+70
-   -bin-annot -safe-string -strict-formats
+   -bin-annot -bin-annot-cms -safe-string -strict-formats
  ))
  (ocamlopt_flags (:include %{project_root}/ocamlopt_flags.sexp))
  (library_flags (:standard -linkall))
@@ -42,6 +42,8 @@
     (.str.objs/byte/str.cmi as str/str.cmi)
     (.str.objs/byte/str.cmt as str/str.cmt)
     (.str.objs/byte/str.cmti as str/str.cmti)
+    (.str.objs/byte/str.cms as str/str.cms)
+    (.str.objs/byte/str.cmsi as str/str.cmsi)
     (META as str/META)
   )
   (section lib)

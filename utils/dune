@@ -75,6 +75,12 @@
   (.oxcaml_utils.objs/byte/oxcaml_utils.cmi
    as
    compiler-libs/oxcaml_utils.cmi)
+  (.oxcaml_utils.objs/byte/oxcaml_utils.cmt
+   as
+   compiler-libs/oxcaml_utils.cmt)
+  (.oxcaml_utils.objs/byte/oxcaml_utils.cms
+   as
+   compiler-libs/oxcaml_utils.cms)
   (.oxcaml_utils.objs/byte/oxcaml_utils__Doubly_linked_list.cmi
    as
    compiler-libs/oxcaml_utils__Doubly_linked_list.cmi)
@@ -84,6 +90,12 @@
   (.oxcaml_utils.objs/byte/oxcaml_utils__Doubly_linked_list.cmt
    as
    compiler-libs/oxcaml_utils__Doubly_linked_list.cmt)
+  (.oxcaml_utils.objs/byte/oxcaml_utils__Doubly_linked_list.cms
+   as
+   compiler-libs/oxcaml_utils__Doubly_linked_list.cms)
+  (.oxcaml_utils.objs/byte/oxcaml_utils__Doubly_linked_list.cmsi
+   as
+   compiler-libs/oxcaml_utils__Doubly_linked_list.cmsi)
   (.oxcaml_utils.objs/native/oxcaml_utils__Doubly_linked_list.cmx
    as
    compiler-libs/oxcaml_utils__Doubly_linked_list.cmx)

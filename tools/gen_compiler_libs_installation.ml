@@ -16,12 +16,12 @@ let () =
       | "symbol_entry", ".mli"
       | "symbol_utils", ".mli"
       | "optmaindriver", ".cmx"
-      | "relocation_table", (".cmt" | ".cmi" | ".cmti" | ".cmx")
-      | "symbol_entry", (".cmt" | ".cmi" | ".cmti" | ".cmx") ->
+      | "relocation_table", (".cmt" | ".cmi" | ".cmti" | ".cmx" | ".cms" | ".cmsi")
+      | "symbol_entry", (".cmt" | ".cmi" | ".cmti" | ".cmx" | ".cms" | ".cmsi") ->
         None
       | "zero_alloc_checker", ".mli" -> Some "mach_checks"
-      | "cSE", (".cmi" | ".cmt" | ".cmx") -> Some "CSE"
-      | "cSEgen", (".cmi" | ".cmt" | ".cmti" | ".cmx") -> Some "CSEgen"
+      | "cSE", (".cmi" | ".cmt" | ".cmx" | ".cms" | ".cmsi") -> Some "CSE"
+      | "cSEgen", (".cmi" | ".cmt" | ".cmti" | ".cmx" | ".cms" | ".cmsi") -> Some "CSEgen"
       | ( "allowance" | "cmt2annot" | "compression" | "debug" | "diffing"
         | "diffing_with_keys" | "errortrace" | "file_sections" | "global_module"
         | "import_info" | "includemod_errorprinter"

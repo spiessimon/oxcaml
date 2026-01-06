@@ -954,36 +954,36 @@
   ; so this is a bit more repetitive than it could be. Also, as far as I can
   ; tell, (glob_files_rec) simply doesn't work.
   (glob_files *.mli)
-  (glob_files .ocamlbytecomp.objs/byte/*.{cmi,cmo,cmt,cmti})
+  (glob_files .ocamlbytecomp.objs/byte/*.{cmi,cmo,cmt,cmti,cms,cmsi})
   (glob_files .ocamlbytecomp.objs/native/*.cmx)
-  (glob_files .ocamlcommon.objs/byte/*.{cmi,cmo,cmt,cmti})
+  (glob_files .ocamlcommon.objs/byte/*.{cmi,cmo,cmt,cmti,cms,cmsi})
   (glob_files .ocamlcommon.objs/native/*.cmx)
-  (glob_files .ocamloptcomp.objs/byte/*.{cmi,cmo,cmt,cmti})
+  (glob_files .ocamloptcomp.objs/byte/*.{cmi,cmo,cmt,cmti,cms,cmsi})
   (glob_files .ocamloptcomp.objs/native/*.cmx)
   (glob_files
-   backend/asm_targets/.asm_targets.objs/byte/*.{cmi,cmo,cmt,cmti})
+   backend/asm_targets/.asm_targets.objs/byte/*.{cmi,cmo,cmt,cmti,cms,cmsi})
   (glob_files_rec backend/asm_targets/.asm_targets.objs/native/*.cmx)
-  (glob_files middle_end/flambda2/.flambda2objs/byte/flambda2.{cmi,cmt})
+  (glob_files middle_end/flambda2/.flambda2objs/byte/flambda2.{cmi,cmt,cms})
   (glob_files
-   middle_end/flambda2/to_cmm/.flambda2_to_cmm.objs/byte/flambda2_to_cmm{,__To_cmm}.{cmi,cmt})
+   middle_end/flambda2/to_cmm/.flambda2_to_cmm.objs/byte/flambda2_to_cmm{,__To_cmm}.{cmi,cmt,cms})
   (glob_files
-   .oxcaml_common.objs/byte/oxcaml_{args,flags}.{cmi,cmo,cmt,cmti})
+   .oxcaml_common.objs/byte/oxcaml_{args,flags}.{cmi,cmo,cmt,cmti,cms,cmsi})
   (glob_files .oxcaml_common.objs/native/oxcaml_{args,flags}.cmx)
   backend/debug/dwarf/dwarf_flags/dwarf_flags.mli
   (glob_files
-   backend/debug/dwarf/dwarf_flags/.dwarf_flags.objs/byte/dwarf_flags.{cmi,cmo,cmt,cmti})
+   backend/debug/dwarf/dwarf_flags/.dwarf_flags.objs/byte/dwarf_flags.{cmi,cmo,cmt,cmti,cms,cmsi})
   backend/debug/dwarf/dwarf_flags/.dwarf_flags.objs/native/dwarf_flags.cmx
   (glob_files
-   backend/debug/dwarf/dwarf_low/.dwarf_low.objs/byte/*.{cmi,cmo,cmt})
+   backend/debug/dwarf/dwarf_low/.dwarf_low.objs/byte/*.{cmi,cmo,cmt,cms})
   (glob_files backend/debug/dwarf/dwarf_low/.dwarf_low.objs/native/*.cmx)
   (glob_files
-   backend/debug/dwarf/dwarf_high/.dwarf_high.objs/byte/*.{cmi,cmo,cmt})
+   backend/debug/dwarf/dwarf_high/.dwarf_high.objs/byte/*.{cmi,cmo,cmt,cms})
   (glob_files backend/debug/dwarf/dwarf_high/.dwarf_high.objs/native/*.cmx)
   (glob_files backend/debug/dwarf/dwarf_ocaml/.dwarf_ocaml.objs/native/*.cmx)
-  (glob_files external/owee/.compiler_owee.objs/byte/*.{cmi,cmo,cmt,cmti})
+  (glob_files external/owee/.compiler_owee.objs/byte/*.{cmi,cmo,cmt,cmti,cms,cmsi})
   (glob_files external/owee/.compiler_owee.objs/native/*.cmx)
   (glob_files
-   external/gc-timings/.gc_timings.objs/byte/gc_timings.{cmi,cmti})
+   external/gc-timings/.gc_timings.objs/byte/gc_timings.{cmi,cmt,cmti,cms,cmsi})
   external/gc-timings/.gc_timings.objs/native/gc_timings.cmx)
  (action
   (with-stdout-to

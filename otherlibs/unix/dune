@@ -22,6 +22,7 @@
   (:standard
    -absname
    -bin-annot
+   -bin-annot-cms
    -g
    -safe-string
    -strict-sequence
@@ -149,9 +150,13 @@
     (.unix.objs/byte/unix.cmi as unix/unix.cmi)
     (.unix.objs/byte/unix.cmt as unix/unix.cmt)
     (.unix.objs/byte/unix.cmti as unix/unix.cmti)
+    (.unix.objs/byte/unix.cms as unix/unix.cms)
+    (.unix.objs/byte/unix.cmsi as unix/unix.cmsi)
     (.unix.objs/byte/unixLabels.cmi as unix/unixLabels.cmi)
     (.unix.objs/byte/unixLabels.cmt as unix/unixLabels.cmt)
     (.unix.objs/byte/unixLabels.cmti as unix/unixLabels.cmti)
+    (.unix.objs/byte/unixLabels.cms as unix/unixLabels.cms)
+    (.unix.objs/byte/unixLabels.cmsi as unix/unixLabels.cmsi)
     (unix.cmxs as unix/unix.cmxs)
     (unix.mli as unix/unix.mli)
     (unixLabels.mli as unix/unixLabels.mli)

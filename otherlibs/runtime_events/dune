@@ -21,6 +21,7 @@
    -strict-sequence
    -absname
    -bin-annot
+   -bin-annot-cms
    -safe-string
    -strict-formats))
  (ocamlopt_flags (:include %{project_root}/ocamlopt_flags.sexp))
@@ -44,6 +45,8 @@
     (.runtime_events.objs/byte/runtime_events.cmi as runtime_events/runtime_events.cmi)
     (.runtime_events.objs/byte/runtime_events.cmt as runtime_events/runtime_events.cmt)
     (.runtime_events.objs/byte/runtime_events.cmti as runtime_events/runtime_events.cmti)
+    (.runtime_events.objs/byte/runtime_events.cms as runtime_events/runtime_events.cms)
+    (.runtime_events.objs/byte/runtime_events.cmsi as runtime_events/runtime_events.cmsi)
     (caml/runtime_events_consumer.h as caml/runtime_events_consumer.h)
     (META as runtime_events/META)
   )
