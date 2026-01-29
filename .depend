@@ -103,27 +103,38 @@ utils/debug.cmx : \
 utils/debug.cmi :
 utils/diffing.cmo : \
     utils/misc.cmi \
+    utils/format_doc.cmi \
     utils/diffing.cmi
 utils/diffing.cmx : \
     utils/misc.cmx \
+    utils/format_doc.cmx \
     utils/diffing.cmi
 utils/diffing.cmi : \
-    utils/misc.cmi
+    utils/misc.cmi \
+    utils/format_doc.cmi
 utils/diffing_with_keys.cmo : \
     utils/misc.cmi \
+    utils/format_doc.cmi \
     utils/diffing.cmi \
     utils/diffing_with_keys.cmi
 utils/diffing_with_keys.cmx : \
     utils/misc.cmx \
+    utils/format_doc.cmx \
     utils/diffing.cmx \
     utils/diffing_with_keys.cmi
 utils/diffing_with_keys.cmi : \
+    utils/format_doc.cmi \
     utils/diffing.cmi
 utils/domainstate.cmo : \
     utils/domainstate.cmi
 utils/domainstate.cmx : \
     utils/domainstate.cmi
 utils/domainstate.cmi :
+utils/format_doc.cmo : \
+    utils/format_doc.cmi
+utils/format_doc.cmx : \
+    utils/format_doc.cmi
+utils/format_doc.cmi :
 utils/identifiable.cmo : \
     utils/misc.cmi \
     utils/identifiable.cmi
@@ -156,6 +167,7 @@ utils/lazy_backtrack.cmo : \
 utils/lazy_backtrack.cmx : \
     utils/lazy_backtrack.cmi
 utils/lazy_backtrack.cmi :
+<<<<<<< HEAD
 utils/linkage_name.cmo : \
     utils/int_replace_polymorphic_compare.cmi \
     utils/identifiable.cmi \
@@ -166,6 +178,26 @@ utils/linkage_name.cmx : \
     utils/linkage_name.cmi
 utils/linkage_name.cmi : \
     utils/identifiable.cmi
+||||||| parent of 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
+utils/linkdeps.cmo : \
+    utils/misc.cmi \
+    utils/linkdeps.cmi
+utils/linkdeps.cmx : \
+    utils/misc.cmx \
+    utils/linkdeps.cmi
+utils/linkdeps.cmi :
+=======
+utils/linkdeps.cmo : \
+    utils/misc.cmi \
+    utils/format_doc.cmi \
+    utils/linkdeps.cmi
+utils/linkdeps.cmx : \
+    utils/misc.cmx \
+    utils/format_doc.cmx \
+    utils/linkdeps.cmi
+utils/linkdeps.cmi : \
+    utils/format_doc.cmi
+>>>>>>> 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
 utils/load_path.cmo : \
     utils/misc.cmi \
     utils/local_store.cmi \
@@ -185,14 +217,17 @@ utils/local_store.cmx : \
     utils/local_store.cmi
 utils/local_store.cmi :
 utils/misc.cmo : \
+    utils/format_doc.cmi \
     utils/config.cmi \
     utils/build_path_prefix_map.cmi \
     utils/misc.cmi
 utils/misc.cmx : \
+    utils/format_doc.cmx \
     utils/config.cmx \
     utils/build_path_prefix_map.cmx \
     utils/misc.cmi
 utils/misc.cmi : \
+    utils/format_doc.cmi \
     utils/build_path_prefix_map.cmi
 utils/numbers.cmo : \
     utils/misc.cmi \
@@ -272,10 +307,13 @@ utils/terminfo.cmx : \
 utils/terminfo.cmi :
 utils/warnings.cmo : \
     utils/misc.cmi \
+    utils/format_doc.cmi \
     utils/warnings.cmi
 utils/warnings.cmx : \
     utils/misc.cmx \
+    utils/format_doc.cmx \
     utils/warnings.cmi
+<<<<<<< HEAD
 utils/warnings.cmi :
 utils/zero_alloc_annotations.cmo : \
     utils/zero_alloc_annotations.cmi
@@ -289,6 +327,12 @@ utils/zero_alloc_utils.cmx : \
     utils/clflags.cmx \
     utils/zero_alloc_utils.cmi
 utils/zero_alloc_utils.cmi :
+||||||| parent of 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
+utils/warnings.cmi :
+=======
+utils/warnings.cmi : \
+    utils/format_doc.cmi
+>>>>>>> 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
 parsing/ast_helper.cmo : \
     parsing/syntaxerr.cmi \
     parsing/parsetree.cmi \
@@ -348,8 +392,13 @@ parsing/ast_mapper.cmo : \
     parsing/longident.cmi \
     parsing/location.cmi \
     utils/load_path.cmi \
+<<<<<<< HEAD
     typing/jkind.cmi \
     parsing/docstrings.cmi \
+||||||| parent of 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
+=======
+    utils/format_doc.cmi \
+>>>>>>> 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
     utils/config.cmi \
     utils/clflags.cmi \
     parsing/asttypes.cmi \
@@ -361,8 +410,13 @@ parsing/ast_mapper.cmx : \
     parsing/longident.cmx \
     parsing/location.cmx \
     utils/load_path.cmx \
+<<<<<<< HEAD
     typing/jkind.cmx \
     parsing/docstrings.cmx \
+||||||| parent of 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
+=======
+    utils/format_doc.cmx \
+>>>>>>> 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
     utils/config.cmx \
     utils/clflags.cmx \
     parsing/asttypes.cmi \
@@ -376,18 +430,21 @@ parsing/asttypes.cmi : \
 parsing/attr_helper.cmo : \
     parsing/parsetree.cmi \
     parsing/location.cmi \
+    utils/format_doc.cmi \
     parsing/builtin_attributes.cmi \
     parsing/asttypes.cmi \
     parsing/attr_helper.cmi
 parsing/attr_helper.cmx : \
     parsing/parsetree.cmi \
     parsing/location.cmx \
+    utils/format_doc.cmx \
     parsing/builtin_attributes.cmx \
     parsing/asttypes.cmi \
     parsing/attr_helper.cmi
 parsing/attr_helper.cmi : \
     parsing/parsetree.cmi \
     parsing/location.cmi \
+    utils/format_doc.cmi \
     parsing/asttypes.cmi
 parsing/builtin_attributes.cmo : \
     utils/zero_alloc_utils.cmi \
@@ -397,7 +454,12 @@ parsing/builtin_attributes.cmo : \
     utils/misc.cmi \
     parsing/longident.cmi \
     parsing/location.cmi \
+<<<<<<< HEAD
     utils/config.cmi \
+||||||| parent of 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
+=======
+    utils/format_doc.cmi \
+>>>>>>> 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
     utils/clflags.cmi \
     parsing/asttypes.cmi \
     parsing/ast_iterator.cmi \
@@ -411,7 +473,12 @@ parsing/builtin_attributes.cmx : \
     utils/misc.cmx \
     parsing/longident.cmx \
     parsing/location.cmx \
+<<<<<<< HEAD
     utils/config.cmx \
+||||||| parent of 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
+=======
+    utils/format_doc.cmx \
+>>>>>>> 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
     utils/clflags.cmx \
     parsing/asttypes.cmi \
     parsing/ast_iterator.cmx \
@@ -477,6 +544,7 @@ parsing/lexer.cmo : \
     parsing/parser.cmi \
     utils/misc.cmi \
     parsing/location.cmi \
+    utils/format_doc.cmi \
     parsing/docstrings.cmi \
     parsing/lexer.cmi
 parsing/lexer.cmx : \
@@ -484,6 +552,7 @@ parsing/lexer.cmx : \
     parsing/parser.cmx \
     utils/misc.cmx \
     parsing/location.cmx \
+    utils/format_doc.cmx \
     parsing/docstrings.cmx \
     parsing/lexer.cmi
 parsing/lexer.cmi : \
@@ -493,6 +562,7 @@ parsing/location.cmo : \
     utils/warnings.cmi \
     utils/terminfo.cmi \
     utils/misc.cmi \
+    utils/format_doc.cmi \
     utils/clflags.cmi \
     utils/build_path_prefix_map.cmi \
     parsing/location.cmi
@@ -500,11 +570,13 @@ parsing/location.cmx : \
     utils/warnings.cmx \
     utils/terminfo.cmx \
     utils/misc.cmx \
+    utils/format_doc.cmx \
     utils/clflags.cmx \
     utils/build_path_prefix_map.cmx \
     parsing/location.cmi
 parsing/location.cmi : \
-    utils/warnings.cmi
+    utils/warnings.cmi \
+    utils/format_doc.cmi
 parsing/longident.cmo : \
     utils/misc.cmi \
     parsing/longident.cmi
@@ -518,6 +590,7 @@ parsing/parse.cmo : \
     parsing/parser.cmi \
     parsing/location.cmi \
     parsing/lexer.cmi \
+    utils/format_doc.cmi \
     parsing/docstrings.cmi \
     parsing/parse.cmi
 parsing/parse.cmx : \
@@ -526,6 +599,7 @@ parsing/parse.cmx : \
     parsing/parser.cmx \
     parsing/location.cmx \
     parsing/lexer.cmx \
+    utils/format_doc.cmx \
     parsing/docstrings.cmx \
     parsing/parse.cmi
 parsing/parse.cmi : \
@@ -574,7 +648,14 @@ parsing/pprintast.cmo : \
     utils/misc.cmi \
     parsing/longident.cmi \
     parsing/location.cmi \
+<<<<<<< HEAD
     parsing/language_extension.cmi \
+||||||| parent of 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
+    parsing/lexer.cmi \
+=======
+    parsing/lexer.cmi \
+    utils/format_doc.cmi \
+>>>>>>> 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
     parsing/asttypes.cmi \
     parsing/ast_helper.cmi \
     parsing/pprintast.cmi
@@ -583,13 +664,23 @@ parsing/pprintast.cmx : \
     utils/misc.cmx \
     parsing/longident.cmx \
     parsing/location.cmx \
+<<<<<<< HEAD
     parsing/language_extension.cmx \
     parsing/asttypes.cmi \
     parsing/ast_helper.cmx \
+||||||| parent of 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
+    parsing/lexer.cmx \
+    parsing/asttypes.cmx \
+=======
+    parsing/lexer.cmx \
+    utils/format_doc.cmx \
+    parsing/asttypes.cmx \
+>>>>>>> 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
     parsing/pprintast.cmi
 parsing/pprintast.cmi : \
     parsing/parsetree.cmi \
-    parsing/longident.cmi
+    parsing/longident.cmi \
+    utils/format_doc.cmi
 parsing/printast.cmo : \
     parsing/parsetree.cmi \
     parsing/longident.cmi \
@@ -684,6 +775,7 @@ typing/ctype.cmo : \
     parsing/language_extension.cmi \
     typing/jkind.cmi \
     typing/ident.cmi \
+    utils/format_doc.cmi \
     typing/errortrace.cmi \
     typing/env.cmi \
     utils/clflags.cmi \
@@ -704,6 +796,7 @@ typing/ctype.cmx : \
     parsing/language_extension.cmx \
     typing/jkind.cmx \
     typing/ident.cmx \
+    utils/format_doc.cmx \
     typing/errortrace.cmx \
     typing/env.cmx \
     utils/clflags.cmx \
@@ -767,6 +860,7 @@ typing/env.cmo : \
     parsing/language_extension.cmi \
     typing/jkind.cmi \
     typing/ident.cmi \
+    utils/format_doc.cmi \
     typing/datarepr.cmi \
     utils/compilation_unit.cmi \
     file_formats/cmi_format.cmi \
@@ -793,6 +887,7 @@ typing/env.cmx : \
     parsing/language_extension.cmx \
     typing/jkind.cmx \
     typing/ident.cmx \
+    utils/format_doc.cmx \
     typing/datarepr.cmx \
     utils/compilation_unit.cmx \
     file_formats/cmi_format.cmx \
@@ -815,7 +910,12 @@ typing/env.cmi : \
     typing/jkind.cmi \
     utils/import_info.cmi \
     typing/ident.cmi \
+<<<<<<< HEAD
     utils/compilation_unit.cmi \
+||||||| parent of 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
+=======
+    utils/format_doc.cmi \
+>>>>>>> 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
     file_formats/cmi_format.cmi \
     parsing/asttypes.cmi
 typing/envaux.cmo : \
@@ -824,6 +924,7 @@ typing/envaux.cmo : \
     typing/path.cmi \
     parsing/location.cmi \
     typing/ident.cmi \
+    utils/format_doc.cmi \
     typing/env.cmi \
     parsing/asttypes.cmi \
     typing/envaux.cmi
@@ -833,48 +934,77 @@ typing/envaux.cmx : \
     typing/path.cmx \
     parsing/location.cmx \
     typing/ident.cmx \
+    utils/format_doc.cmx \
     typing/env.cmx \
     parsing/asttypes.cmi \
     typing/envaux.cmi
 typing/envaux.cmi : \
     typing/subst.cmi \
     typing/path.cmi \
+    utils/format_doc.cmi \
     typing/env.cmi
 typing/errortrace.cmo : \
     typing/types.cmi \
     typing/path.cmi \
+<<<<<<< HEAD
     typing/jkind.cmi \
+||||||| parent of 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
+=======
+    utils/format_doc.cmi \
+>>>>>>> 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
     parsing/asttypes.cmi \
     typing/errortrace.cmi
 typing/errortrace.cmx : \
     typing/types.cmx \
     typing/path.cmx \
+<<<<<<< HEAD
     typing/jkind.cmx \
     parsing/asttypes.cmi \
+||||||| parent of 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
+    parsing/asttypes.cmx \
+=======
+    utils/format_doc.cmx \
+    parsing/asttypes.cmx \
+>>>>>>> 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
     typing/errortrace.cmi
 typing/errortrace.cmi : \
     typing/types.cmi \
     typing/path.cmi \
+<<<<<<< HEAD
     typing/jkind.cmi \
+||||||| parent of 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
+=======
+    utils/format_doc.cmi \
+>>>>>>> 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
     parsing/asttypes.cmi
 typing/ident.cmo : \
     utils/misc.cmi \
     utils/local_store.cmi \
     utils/identifiable.cmi \
+    utils/format_doc.cmi \
     utils/clflags.cmi \
     typing/ident.cmi
 typing/ident.cmx : \
     utils/misc.cmx \
     utils/local_store.cmx \
     utils/identifiable.cmx \
+    utils/format_doc.cmx \
     utils/clflags.cmx \
     typing/ident.cmi
 typing/ident.cmi : \
-    utils/identifiable.cmi
+    utils/identifiable.cmi \
+    utils/format_doc.cmi
 typing/includeclass.cmo : \
     typing/types.cmi \
     typing/printtyp.cmi \
     typing/path.cmi \
+<<<<<<< HEAD
+||||||| parent of 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
+    utils/misc.cmi \
+=======
+    utils/misc.cmi \
+    utils/format_doc.cmi \
+>>>>>>> 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
     typing/ctype.cmi \
     parsing/builtin_attributes.cmi \
     typing/includeclass.cmi
@@ -882,6 +1012,13 @@ typing/includeclass.cmx : \
     typing/types.cmx \
     typing/printtyp.cmx \
     typing/path.cmx \
+<<<<<<< HEAD
+||||||| parent of 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
+    utils/misc.cmx \
+=======
+    utils/misc.cmx \
+    utils/format_doc.cmx \
+>>>>>>> 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
     typing/ctype.cmx \
     parsing/builtin_attributes.cmx \
     typing/includeclass.cmi
@@ -889,6 +1026,7 @@ typing/includeclass.cmi : \
     typing/types.cmi \
     typing/printtyp.cmi \
     parsing/location.cmi \
+    utils/format_doc.cmi \
     typing/env.cmi \
     typing/ctype.cmi
 typing/includecore.cmo : \
@@ -902,6 +1040,7 @@ typing/includecore.cmo : \
     utils/misc.cmi \
     typing/jkind.cmi \
     typing/ident.cmi \
+    utils/format_doc.cmi \
     typing/errortrace.cmi \
     typing/env.cmi \
     utils/diffing_with_keys.cmi \
@@ -921,6 +1060,7 @@ typing/includecore.cmx : \
     utils/misc.cmx \
     typing/jkind.cmx \
     typing/ident.cmx \
+    utils/format_doc.cmx \
     typing/errortrace.cmx \
     typing/env.cmx \
     utils/diffing_with_keys.cmx \
@@ -937,6 +1077,7 @@ typing/includecore.cmi : \
     parsing/location.cmi \
     typing/jkind.cmi \
     typing/ident.cmi \
+    utils/format_doc.cmi \
     typing/errortrace.cmi \
     typing/env.cmi \
     utils/diffing_with_keys.cmi
@@ -1011,7 +1152,14 @@ typing/includemod_errorprinter.cmo : \
     typing/includecore.cmi \
     typing/includeclass.cmi \
     typing/ident.cmi \
+<<<<<<< HEAD
     typing/errortrace.cmi \
+||||||| parent of 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
+    typing/env.cmi \
+=======
+    utils/format_doc.cmi \
+    typing/env.cmi \
+>>>>>>> 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
     utils/diffing.cmi \
     utils/clflags.cmi \
     typing/includemod_errorprinter.cmi
@@ -1028,7 +1176,14 @@ typing/includemod_errorprinter.cmx : \
     typing/includecore.cmx \
     typing/includeclass.cmx \
     typing/ident.cmx \
+<<<<<<< HEAD
     typing/errortrace.cmx \
+||||||| parent of 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
+    typing/env.cmx \
+=======
+    utils/format_doc.cmx \
+    typing/env.cmx \
+>>>>>>> 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
     utils/diffing.cmx \
     utils/clflags.cmx \
     typing/includemod_errorprinter.cmi
@@ -1037,6 +1192,7 @@ typing/includemod_errorprinter.cmi : \
 typing/jkind.cmo : \
     parsing/pprintast.cmi \
     typing/types.cmi \
+<<<<<<< HEAD
     typing/primitive.cmi \
     typing/path.cmi \
     parsing/parsetree.cmi \
@@ -1104,6 +1260,16 @@ typing/mode.cmi : \
 typing/mode_intf.cmi : \
     typing/solver_intf.cmi \
     typing/solver.cmi
+||||||| parent of 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
+    typing/typedtree.cmi \
+    typing/includemod.cmi \
+    typing/env.cmi
+=======
+    typing/typedtree.cmi \
+    typing/includemod.cmi \
+    utils/format_doc.cmi \
+    typing/env.cmi
+>>>>>>> 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
 typing/mtype.cmo : \
     typing/types.cmi \
     typing/subst.cmi \
@@ -1139,19 +1305,43 @@ typing/mtype.cmi : \
 typing/oprint.cmo : \
     parsing/pprintast.cmi \
     typing/outcometree.cmi \
+<<<<<<< HEAD
     typing/jkind.cmi \
+||||||| parent of 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
+    parsing/lexer.cmi \
+=======
+    parsing/lexer.cmi \
+    utils/format_doc.cmi \
+>>>>>>> 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
     parsing/asttypes.cmi \
     typing/oprint.cmi
 typing/oprint.cmx : \
     parsing/pprintast.cmx \
     typing/outcometree.cmi \
+<<<<<<< HEAD
     typing/jkind.cmx \
     parsing/asttypes.cmi \
+||||||| parent of 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
+    parsing/lexer.cmx \
+    parsing/asttypes.cmx \
+=======
+    parsing/lexer.cmx \
+    utils/format_doc.cmx \
+    parsing/asttypes.cmx \
+>>>>>>> 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
     typing/oprint.cmi
 typing/oprint.cmi : \
-    typing/outcometree.cmi
+    typing/outcometree.cmi \
+    utils/format_doc.cmi
 typing/outcometree.cmi : \
+<<<<<<< HEAD
     typing/jkind_types.cmi \
+||||||| parent of 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
+    typing/type_immediacy.cmi \
+=======
+    typing/type_immediacy.cmi \
+    utils/format_doc.cmi \
+>>>>>>> 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
     parsing/asttypes.cmi
 typing/parmatch.cmo : \
     utils/warnings.cmi \
@@ -1170,6 +1360,7 @@ typing/parmatch.cmo : \
     parsing/location.cmi \
     typing/jkind.cmi \
     typing/ident.cmi \
+    utils/format_doc.cmi \
     typing/env.cmi \
     typing/ctype.cmi \
     typing/btype.cmi \
@@ -1192,6 +1383,7 @@ typing/parmatch.cmx : \
     parsing/location.cmx \
     typing/jkind.cmx \
     typing/ident.cmx \
+    utils/format_doc.cmx \
     typing/env.cmx \
     typing/ctype.cmx \
     typing/btype.cmx \
@@ -1206,12 +1398,15 @@ typing/parmatch.cmi : \
     parsing/asttypes.cmi
 typing/path.cmo : \
     typing/ident.cmi \
+    utils/format_doc.cmi \
     typing/path.cmi
 typing/path.cmx : \
     typing/ident.cmx \
+    utils/format_doc.cmx \
     typing/path.cmi
 typing/path.cmi : \
-    typing/ident.cmi
+    typing/ident.cmi \
+    utils/format_doc.cmi
 typing/patterns.cmo : \
     typing/types.cmi \
     typing/typedtree.cmi \
@@ -1252,8 +1447,13 @@ typing/persistent_env.cmo : \
     parsing/location.cmi \
     utils/load_path.cmi \
     utils/lazy_backtrack.cmi \
+<<<<<<< HEAD
     utils/import_info.cmi \
     typing/ident.cmi \
+||||||| parent of 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
+=======
+    utils/format_doc.cmi \
+>>>>>>> 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
     utils/consistbl.cmi \
     utils/compilation_unit.cmi \
     file_formats/cmi_format.cmi \
@@ -1267,8 +1467,13 @@ typing/persistent_env.cmx : \
     parsing/location.cmx \
     utils/load_path.cmx \
     utils/lazy_backtrack.cmx \
+<<<<<<< HEAD
     utils/import_info.cmx \
     typing/ident.cmx \
+||||||| parent of 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
+=======
+    utils/format_doc.cmx \
+>>>>>>> 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
     utils/consistbl.cmx \
     utils/compilation_unit.cmx \
     file_formats/cmi_format.cmx \
@@ -1281,8 +1486,13 @@ typing/persistent_env.cmi : \
     parsing/location.cmi \
     utils/load_path.cmi \
     utils/lazy_backtrack.cmi \
+<<<<<<< HEAD
     utils/import_info.cmi \
     typing/ident.cmi \
+||||||| parent of 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
+=======
+    utils/format_doc.cmi \
+>>>>>>> 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
     utils/consistbl.cmi \
     utils/compilation_unit.cmi \
     file_formats/cmi_format.cmi
@@ -1320,8 +1530,13 @@ typing/primitive.cmo : \
     typing/outcometree.cmi \
     utils/misc.cmi \
     parsing/location.cmi \
+<<<<<<< HEAD
     parsing/language_extension.cmi \
     typing/jkind_types.cmi \
+||||||| parent of 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
+=======
+    utils/format_doc.cmi \
+>>>>>>> 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
     parsing/attr_helper.cmi \
     typing/primitive.cmi
 typing/primitive.cmx : \
@@ -1329,8 +1544,13 @@ typing/primitive.cmx : \
     typing/outcometree.cmi \
     utils/misc.cmx \
     parsing/location.cmx \
+<<<<<<< HEAD
     parsing/language_extension.cmx \
     typing/jkind_types.cmx \
+||||||| parent of 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
+=======
+    utils/format_doc.cmx \
+>>>>>>> 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
     parsing/attr_helper.cmx \
     typing/primitive.cmi
 typing/primitive.cmi : \
@@ -1343,6 +1563,7 @@ typing/printpat.cmo : \
     typing/typedtree.cmi \
     utils/misc.cmi \
     typing/ident.cmi \
+    utils/format_doc.cmi \
     parsing/asttypes.cmi \
     typing/printpat.cmi
 typing/printpat.cmx : \
@@ -1350,10 +1571,26 @@ typing/printpat.cmx : \
     typing/typedtree.cmx \
     utils/misc.cmx \
     typing/ident.cmx \
+<<<<<<< HEAD
     parsing/asttypes.cmi \
+||||||| parent of 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
+    parsing/asttypes.cmx \
+=======
+    utils/format_doc.cmx \
+    parsing/asttypes.cmx \
+>>>>>>> 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
     typing/printpat.cmi
 typing/printpat.cmi : \
+<<<<<<< HEAD
     typing/typedtree.cmi
+||||||| parent of 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
+    typing/typedtree.cmi \
+    parsing/asttypes.cmi
+=======
+    typing/typedtree.cmi \
+    utils/format_doc.cmi \
+    parsing/asttypes.cmi
+>>>>>>> 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
 typing/printtyp.cmo : \
     utils/warnings.cmi \
     typing/types.cmi \
@@ -1371,6 +1608,7 @@ typing/printtyp.cmo : \
     parsing/location.cmi \
     typing/jkind.cmi \
     typing/ident.cmi \
+    utils/format_doc.cmi \
     typing/errortrace.cmi \
     typing/env.cmi \
     typing/ctype.cmi \
@@ -1396,6 +1634,7 @@ typing/printtyp.cmx : \
     parsing/location.cmx \
     typing/jkind.cmx \
     typing/ident.cmx \
+    utils/format_doc.cmx \
     typing/errortrace.cmx \
     typing/env.cmx \
     typing/ctype.cmx \
@@ -1413,8 +1652,10 @@ typing/printtyp.cmi : \
     parsing/longident.cmi \
     parsing/location.cmi \
     typing/ident.cmi \
+    utils/format_doc.cmi \
     typing/errortrace.cmi \
-    typing/env.cmi
+    typing/env.cmi \
+    parsing/asttypes.cmi
 typing/printtyped.cmo : \
     utils/zero_alloc_utils.cmi \
     typing/types.cmi \
@@ -1449,6 +1690,40 @@ typing/printtyped.cmx : \
     typing/printtyped.cmi
 typing/printtyped.cmi : \
     typing/typedtree.cmi
+<<<<<<< HEAD
+||||||| parent of 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
+typing/rawprinttyp.cmo : \
+    typing/types.cmi \
+    parsing/pprintast.cmi \
+    typing/path.cmi \
+    parsing/asttypes.cmi \
+    typing/rawprinttyp.cmi
+typing/rawprinttyp.cmx : \
+    typing/types.cmx \
+    parsing/pprintast.cmx \
+    typing/path.cmx \
+    parsing/asttypes.cmx \
+    typing/rawprinttyp.cmi
+typing/rawprinttyp.cmi : \
+    typing/types.cmi
+=======
+typing/rawprinttyp.cmo : \
+    typing/types.cmi \
+    parsing/pprintast.cmi \
+    typing/path.cmi \
+    utils/format_doc.cmi \
+    parsing/asttypes.cmi \
+    typing/rawprinttyp.cmi
+typing/rawprinttyp.cmx : \
+    typing/types.cmx \
+    parsing/pprintast.cmx \
+    typing/path.cmx \
+    utils/format_doc.cmx \
+    parsing/asttypes.cmx \
+    typing/rawprinttyp.cmi
+typing/rawprinttyp.cmi : \
+    typing/types.cmi
+>>>>>>> 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
 typing/shape.cmo : \
     parsing/unit_info.cmi \
     typing/path.cmi \
@@ -1515,6 +1790,7 @@ typing/stypes.cmo : \
     typing/printtyp.cmi \
     utils/misc.cmi \
     parsing/location.cmi \
+    utils/format_doc.cmi \
     utils/clflags.cmi \
     typing/annot.cmi \
     typing/stypes.cmi
@@ -1523,6 +1799,7 @@ typing/stypes.cmx : \
     typing/printtyp.cmx \
     utils/misc.cmx \
     parsing/location.cmx \
+    utils/format_doc.cmx \
     utils/clflags.cmx \
     typing/annot.cmi \
     typing/stypes.cmi
@@ -1632,6 +1909,7 @@ typing/typeclass.cmo : \
     typing/jkind.cmi \
     typing/includeclass.cmi \
     typing/ident.cmi \
+    utils/format_doc.cmi \
     typing/errortrace.cmi \
     typing/env.cmi \
     typing/ctype.cmi \
@@ -1663,6 +1941,7 @@ typing/typeclass.cmx : \
     typing/jkind.cmx \
     typing/includeclass.cmx \
     typing/ident.cmx \
+    utils/format_doc.cmx \
     typing/errortrace.cmx \
     typing/env.cmx \
     typing/ctype.cmx \
@@ -1681,6 +1960,7 @@ typing/typeclass.cmi : \
     parsing/location.cmi \
     typing/jkind.cmi \
     typing/ident.cmi \
+    utils/format_doc.cmi \
     typing/errortrace.cmi \
     typing/env.cmi \
     typing/ctype.cmi \
@@ -1702,7 +1982,6 @@ typing/typecore.cmo : \
     typing/printpat.cmi \
     typing/primitive.cmi \
     typing/predef.cmi \
-    parsing/pprintast.cmi \
     typing/persistent_env.cmi \
     typing/path.cmi \
     parsing/parsetree.cmi \
@@ -1716,6 +1995,7 @@ typing/typecore.cmo : \
     parsing/language_extension.cmi \
     typing/jkind.cmi \
     typing/ident.cmi \
+    utils/format_doc.cmi \
     typing/errortrace.cmi \
     typing/env.cmi \
     typing/ctype.cmi \
@@ -1743,7 +2023,6 @@ typing/typecore.cmx : \
     typing/printpat.cmx \
     typing/primitive.cmx \
     typing/predef.cmx \
-    parsing/pprintast.cmx \
     typing/persistent_env.cmx \
     typing/path.cmx \
     parsing/parsetree.cmi \
@@ -1757,6 +2036,7 @@ typing/typecore.cmx : \
     parsing/language_extension.cmx \
     typing/jkind.cmx \
     typing/ident.cmx \
+    utils/format_doc.cmx \
     typing/errortrace.cmx \
     typing/env.cmx \
     typing/ctype.cmx \
@@ -1807,6 +2087,7 @@ typing/typedecl.cmo : \
     typing/jkind.cmi \
     typing/includecore.cmi \
     typing/ident.cmi \
+    utils/format_doc.cmi \
     typing/errortrace.cmi \
     typing/env.cmi \
     typing/ctype.cmi \
@@ -1844,6 +2125,7 @@ typing/typedecl.cmx : \
     typing/jkind.cmx \
     typing/includecore.cmx \
     typing/ident.cmx \
+    utils/format_doc.cmx \
     typing/errortrace.cmx \
     typing/env.cmx \
     typing/ctype.cmx \
@@ -1871,6 +2153,7 @@ typing/typedecl.cmi : \
     typing/jkind.cmi \
     typing/includecore.cmi \
     typing/ident.cmi \
+    utils/format_doc.cmi \
     typing/errortrace.cmi \
     typing/env.cmi \
     parsing/builtin_attributes.cmi \
@@ -1963,6 +2246,7 @@ typing/typedtree.cmo : \
     parsing/location.cmi \
     typing/jkind.cmi \
     typing/ident.cmi \
+    utils/format_doc.cmi \
     typing/env.cmi \
     parsing/builtin_attributes.cmi \
     parsing/asttypes.cmi \
@@ -1980,6 +2264,7 @@ typing/typedtree.cmx : \
     parsing/location.cmx \
     typing/jkind.cmx \
     typing/ident.cmx \
+    utils/format_doc.cmx \
     typing/env.cmx \
     parsing/builtin_attributes.cmx \
     parsing/asttypes.cmi \
@@ -1997,6 +2282,7 @@ typing/typedtree.cmi : \
     parsing/location.cmi \
     typing/jkind.cmi \
     typing/ident.cmi \
+    utils/format_doc.cmi \
     typing/env.cmi \
     parsing/builtin_attributes.cmi \
     parsing/asttypes.cmi
@@ -2028,7 +2314,14 @@ typing/typemod.cmo : \
     typing/includecore.cmi \
     utils/import_info.cmi \
     typing/ident.cmi \
+<<<<<<< HEAD
     typing/envaux.cmi \
+||||||| parent of 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
+    typing/errortrace.cmi \
+=======
+    utils/format_doc.cmi \
+    typing/errortrace.cmi \
+>>>>>>> 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
     typing/env.cmi \
     typing/ctype.cmi \
     utils/config.cmi \
@@ -2071,7 +2364,14 @@ typing/typemod.cmx : \
     typing/includecore.cmx \
     utils/import_info.cmx \
     typing/ident.cmx \
+<<<<<<< HEAD
     typing/envaux.cmx \
+||||||| parent of 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
+    typing/errortrace.cmx \
+=======
+    utils/format_doc.cmx \
+    typing/errortrace.cmx \
+>>>>>>> 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
     typing/env.cmx \
     typing/ctype.cmx \
     utils/config.cmx \
@@ -2214,8 +2514,13 @@ typing/typetexp.cmo : \
     utils/misc.cmi \
     parsing/longident.cmi \
     parsing/location.cmi \
+<<<<<<< HEAD
     parsing/language_extension.cmi \
     typing/jkind.cmi \
+||||||| parent of 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
+=======
+    utils/format_doc.cmi \
+>>>>>>> 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
     typing/errortrace.cmi \
     typing/env.cmi \
     typing/ctype.cmi \
@@ -2238,8 +2543,13 @@ typing/typetexp.cmx : \
     utils/misc.cmx \
     parsing/longident.cmx \
     parsing/location.cmx \
+<<<<<<< HEAD
     parsing/language_extension.cmx \
     typing/jkind.cmx \
+||||||| parent of 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
+=======
+    utils/format_doc.cmx \
+>>>>>>> 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
     typing/errortrace.cmx \
     typing/env.cmx \
     typing/ctype.cmx \
@@ -2256,8 +2566,13 @@ typing/typetexp.cmi : \
     typing/mode.cmi \
     parsing/longident.cmi \
     parsing/location.cmi \
+<<<<<<< HEAD
     parsing/language_extension.cmi \
     typing/jkind.cmi \
+||||||| parent of 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
+=======
+    utils/format_doc.cmi \
+>>>>>>> 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
     typing/errortrace.cmi \
     typing/env.cmi \
     parsing/asttypes.cmi
@@ -2421,6 +2736,13 @@ bytecomp/bytelibrarian.cmo : \
     utils/misc.cmi \
     parsing/location.cmi \
     utils/load_path.cmi \
+<<<<<<< HEAD
+||||||| parent of 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
+    utils/linkdeps.cmi \
+=======
+    utils/linkdeps.cmi \
+    utils/format_doc.cmi \
+>>>>>>> 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
     bytecomp/emitcode.cmi \
     utils/config.cmi \
     file_formats/cmo_format.cmi \
@@ -2431,13 +2753,29 @@ bytecomp/bytelibrarian.cmx : \
     utils/misc.cmx \
     parsing/location.cmx \
     utils/load_path.cmx \
+<<<<<<< HEAD
+||||||| parent of 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
+    utils/linkdeps.cmx \
+=======
+    utils/linkdeps.cmx \
+    utils/format_doc.cmx \
+>>>>>>> 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
     bytecomp/emitcode.cmx \
     utils/config.cmx \
     file_formats/cmo_format.cmi \
     utils/clflags.cmx \
     bytecomp/bytelink.cmx \
     bytecomp/bytelibrarian.cmi
+<<<<<<< HEAD
 bytecomp/bytelibrarian.cmi :
+||||||| parent of 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
+bytecomp/bytelibrarian.cmi : \
+    utils/linkdeps.cmi
+=======
+bytecomp/bytelibrarian.cmi : \
+    utils/linkdeps.cmi \
+    utils/format_doc.cmi
+>>>>>>> 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
 bytecomp/bytelink.cmo : \
     bytecomp/symtable.cmi \
     bytecomp/opcodes.cmi \
@@ -2445,8 +2783,13 @@ bytecomp/bytelink.cmo : \
     parsing/location.cmi \
     utils/load_path.cmi \
     bytecomp/instruct.cmi \
+<<<<<<< HEAD
     utils/import_info.cmi \
     typing/ident.cmi \
+||||||| parent of 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
+=======
+    utils/format_doc.cmi \
+>>>>>>> 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
     bytecomp/emitcode.cmi \
     bytecomp/dll.cmi \
     utils/consistbl.cmi \
@@ -2464,8 +2807,13 @@ bytecomp/bytelink.cmx : \
     parsing/location.cmx \
     utils/load_path.cmx \
     bytecomp/instruct.cmx \
+<<<<<<< HEAD
     utils/import_info.cmx \
     typing/ident.cmx \
+||||||| parent of 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
+=======
+    utils/format_doc.cmx \
+>>>>>>> 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
     bytecomp/emitcode.cmx \
     bytecomp/dll.cmx \
     utils/consistbl.cmx \
@@ -2479,8 +2827,15 @@ bytecomp/bytelink.cmx : \
 bytecomp/bytelink.cmi : \
     bytecomp/symtable.cmi \
     utils/misc.cmi \
+<<<<<<< HEAD
     utils/import_info.cmi \
     utils/compilation_unit.cmi \
+||||||| parent of 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
+    utils/linkdeps.cmi \
+=======
+    utils/linkdeps.cmi \
+    utils/format_doc.cmi \
+>>>>>>> 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
     file_formats/cmo_format.cmi
 bytecomp/bytepackager.cmo : \
     typing/typemod.cmi \
@@ -2496,6 +2851,7 @@ bytecomp/bytepackager.cmo : \
     bytecomp/instruct.cmi \
     utils/import_info.cmi \
     typing/ident.cmi \
+    utils/format_doc.cmi \
     typing/env.cmi \
     bytecomp/emitcode.cmi \
     utils/config.cmi \
@@ -2519,6 +2875,7 @@ bytecomp/bytepackager.cmx : \
     bytecomp/instruct.cmx \
     utils/import_info.cmx \
     typing/ident.cmx \
+    utils/format_doc.cmx \
     typing/env.cmx \
     bytecomp/emitcode.cmx \
     utils/config.cmx \
@@ -2529,7 +2886,12 @@ bytecomp/bytepackager.cmx : \
     bytecomp/bytegen.cmx \
     bytecomp/bytepackager.cmi
 bytecomp/bytepackager.cmi : \
+<<<<<<< HEAD
     typing/ident.cmi \
+||||||| parent of 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
+=======
+    utils/format_doc.cmi \
+>>>>>>> 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
     typing/env.cmi \
     utils/compilation_unit.cmi
 bytecomp/bytesections.cmo : \
@@ -2564,6 +2926,13 @@ bytecomp/emitcode.cmo : \
     parsing/location.cmi \
     lambda/lambda.cmi \
     bytecomp/instruct.cmi \
+<<<<<<< HEAD
+||||||| parent of 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
+    typing/ident.cmi \
+=======
+    typing/ident.cmi \
+    utils/format_doc.cmi \
+>>>>>>> 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
     typing/env.cmi \
     utils/config.cmi \
     utils/compilation_unit.cmi \
@@ -2580,6 +2949,13 @@ bytecomp/emitcode.cmx : \
     parsing/location.cmx \
     lambda/lambda.cmx \
     bytecomp/instruct.cmx \
+<<<<<<< HEAD
+||||||| parent of 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
+    typing/ident.cmx \
+=======
+    typing/ident.cmx \
+    utils/format_doc.cmx \
+>>>>>>> 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
     typing/env.cmx \
     utils/config.cmx \
     utils/compilation_unit.cmx \
@@ -2658,6 +3034,7 @@ bytecomp/symtable.cmo : \
     lambda/lambda.cmi \
     utils/import_info.cmi \
     typing/ident.cmi \
+    utils/format_doc.cmi \
     bytecomp/dll.cmi \
     utils/config.cmi \
     file_formats/cmo_format.cmi \
@@ -2673,6 +3050,7 @@ bytecomp/symtable.cmx : \
     lambda/lambda.cmx \
     utils/import_info.cmx \
     typing/ident.cmx \
+    utils/format_doc.cmx \
     bytecomp/dll.cmx \
     utils/config.cmx \
     file_formats/cmo_format.cmi \
@@ -2684,6 +3062,7 @@ bytecomp/symtable.cmi : \
     lambda/lambda.cmi \
     utils/import_info.cmi \
     typing/ident.cmi \
+    utils/format_doc.cmi \
     file_formats/cmo_format.cmi
 asmcomp/CSE.cmo : \
     asmcomp/mach.cmi \
@@ -2770,6 +3149,13 @@ asmcomp/asmgen.cmo : \
     lambda/lambda.cmi \
     asmcomp/interval.cmi \
     asmcomp/interf.cmi \
+<<<<<<< HEAD
+||||||| parent of 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
+    typing/ident.cmi \
+=======
+    typing/ident.cmi \
+    utils/format_doc.cmi \
+>>>>>>> 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
     asmcomp/emitaux.cmi \
     asmcomp/emit.cmi \
     asmcomp/deadcode.cmi \
@@ -2813,6 +3199,13 @@ asmcomp/asmgen.cmx : \
     lambda/lambda.cmx \
     asmcomp/interval.cmx \
     asmcomp/interf.cmx \
+<<<<<<< HEAD
+||||||| parent of 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
+    typing/ident.cmx \
+=======
+    typing/ident.cmx \
+    utils/format_doc.cmx \
+>>>>>>> 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
     asmcomp/emitaux.cmx \
     asmcomp/emit.cmx \
     asmcomp/deadcode.cmx \
@@ -2832,6 +3225,7 @@ asmcomp/asmgen.cmx : \
     asmcomp/asmgen.cmi
 asmcomp/asmgen.cmi : \
     lambda/lambda.cmi \
+    utils/format_doc.cmi \
     asmcomp/emitaux.cmi \
     utils/compilation_unit.cmi \
     asmcomp/cmm.cmi \
@@ -2841,6 +3235,13 @@ asmcomp/asmlibrarian.cmo : \
     utils/misc.cmi \
     parsing/location.cmi \
     utils/load_path.cmi \
+<<<<<<< HEAD
+||||||| parent of 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
+    utils/linkdeps.cmi \
+=======
+    utils/linkdeps.cmi \
+    utils/format_doc.cmi \
+>>>>>>> 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
     middle_end/flambda/export_info.cmi \
     utils/config.cmi \
     middle_end/compilenv.cmi \
@@ -2854,6 +3255,13 @@ asmcomp/asmlibrarian.cmx : \
     utils/misc.cmx \
     parsing/location.cmx \
     utils/load_path.cmx \
+<<<<<<< HEAD
+||||||| parent of 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
+    utils/linkdeps.cmx \
+=======
+    utils/linkdeps.cmx \
+    utils/format_doc.cmx \
+>>>>>>> 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
     middle_end/flambda/export_info.cmx \
     utils/config.cmx \
     middle_end/compilenv.cmx \
@@ -2863,7 +3271,16 @@ asmcomp/asmlibrarian.cmx : \
     utils/ccomp.cmx \
     asmcomp/asmlink.cmx \
     asmcomp/asmlibrarian.cmi
+<<<<<<< HEAD
 asmcomp/asmlibrarian.cmi :
+||||||| parent of 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
+asmcomp/asmlibrarian.cmi : \
+    utils/linkdeps.cmi
+=======
+asmcomp/asmlibrarian.cmi : \
+    utils/linkdeps.cmi \
+    utils/format_doc.cmi
+>>>>>>> 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
 asmcomp/asmlink.cmo : \
     utils/symbol.cmi \
     lambda/runtimedef.cmi \
@@ -2871,7 +3288,14 @@ asmcomp/asmlink.cmo : \
     utils/misc.cmi \
     parsing/location.cmi \
     utils/load_path.cmi \
+<<<<<<< HEAD
     utils/import_info.cmi \
+||||||| parent of 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
+    utils/linkdeps.cmi \
+=======
+    utils/linkdeps.cmi \
+    utils/format_doc.cmi \
+>>>>>>> 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
     asmcomp/emitaux.cmi \
     asmcomp/emit.cmi \
     utils/consistbl.cmi \
@@ -2892,7 +3316,14 @@ asmcomp/asmlink.cmx : \
     utils/misc.cmx \
     parsing/location.cmx \
     utils/load_path.cmx \
+<<<<<<< HEAD
     utils/import_info.cmx \
+||||||| parent of 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
+    utils/linkdeps.cmx \
+=======
+    utils/linkdeps.cmx \
+    utils/format_doc.cmx \
+>>>>>>> 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
     asmcomp/emitaux.cmx \
     asmcomp/emit.cmx \
     utils/consistbl.cmx \
@@ -2908,8 +3339,15 @@ asmcomp/asmlink.cmx : \
     asmcomp/asmlink.cmi
 asmcomp/asmlink.cmi : \
     utils/misc.cmi \
+<<<<<<< HEAD
     utils/import_info.cmi \
     utils/compilation_unit.cmi \
+||||||| parent of 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
+    utils/linkdeps.cmi \
+=======
+    utils/linkdeps.cmi \
+    utils/format_doc.cmi \
+>>>>>>> 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
     file_formats/cmx_format.cmi
 asmcomp/asmpackager.cmo : \
     typing/typemod.cmi \
@@ -2922,7 +3360,14 @@ asmcomp/asmpackager.cmo : \
     utils/load_path.cmi \
     utils/linkage_name.cmi \
     lambda/lambda.cmi \
+<<<<<<< HEAD
     utils/import_info.cmi \
+||||||| parent of 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
+    typing/ident.cmi \
+=======
+    typing/ident.cmi \
+    utils/format_doc.cmi \
+>>>>>>> 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
     middle_end/flambda/flambda_middle_end.cmi \
     middle_end/flambda/export_info.cmi \
     typing/env.cmi \
@@ -2947,7 +3392,14 @@ asmcomp/asmpackager.cmx : \
     utils/load_path.cmx \
     utils/linkage_name.cmx \
     lambda/lambda.cmx \
+<<<<<<< HEAD
     utils/import_info.cmx \
+||||||| parent of 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
+    typing/ident.cmx \
+=======
+    typing/ident.cmx \
+    utils/format_doc.cmx \
+>>>>>>> 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
     middle_end/flambda/flambda_middle_end.cmx \
     middle_end/flambda/export_info.cmx \
     typing/env.cmx \
@@ -2962,6 +3414,7 @@ asmcomp/asmpackager.cmx : \
     asmcomp/asmgen.cmx \
     asmcomp/asmpackager.cmi
 asmcomp/asmpackager.cmi : \
+    utils/format_doc.cmi \
     typing/env.cmi \
     utils/compilation_unit.cmi \
     middle_end/backend_intf.cmi
@@ -3249,8 +3702,13 @@ asmcomp/emit.cmi : \
     asmcomp/linear.cmi \
     asmcomp/cmm.cmi
 asmcomp/emitaux.cmo : \
+<<<<<<< HEAD
     utils/misc.cmi \
     asmcomp/linear.cmi \
+||||||| parent of 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
+=======
+    utils/format_doc.cmi \
+>>>>>>> 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
     asmcomp/emitenv.cmi \
     lambda/debuginfo.cmi \
     utils/config.cmi \
@@ -3259,8 +3717,13 @@ asmcomp/emitaux.cmo : \
     asmcomp/arch.cmi \
     asmcomp/emitaux.cmi
 asmcomp/emitaux.cmx : \
+<<<<<<< HEAD
     utils/misc.cmx \
     asmcomp/linear.cmx \
+||||||| parent of 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
+=======
+    utils/format_doc.cmx \
+>>>>>>> 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
     asmcomp/emitenv.cmi \
     lambda/debuginfo.cmx \
     utils/config.cmx \
@@ -3270,6 +3733,7 @@ asmcomp/emitaux.cmx : \
     asmcomp/emitaux.cmi
 asmcomp/emitaux.cmi : \
     asmcomp/linear.cmi \
+    utils/format_doc.cmi \
     asmcomp/emitenv.cmi \
     lambda/debuginfo.cmi
 asmcomp/emitenv.cmi : \
@@ -3400,6 +3864,7 @@ asmcomp/polling.cmo : \
     utils/misc.cmi \
     asmcomp/mach.cmi \
     parsing/location.cmi \
+    utils/format_doc.cmi \
     lambda/debuginfo.cmi \
     asmcomp/dataflow.cmi \
     asmcomp/cmm.cmi \
@@ -3409,6 +3874,7 @@ asmcomp/polling.cmx : \
     utils/misc.cmx \
     asmcomp/mach.cmx \
     parsing/location.cmx \
+    utils/format_doc.cmx \
     lambda/debuginfo.cmx \
     asmcomp/dataflow.cmx \
     asmcomp/cmm.cmx \
@@ -3749,12 +4215,14 @@ middle_end/backend_intf.cmi : \
 middle_end/backend_var.cmo : \
     typing/path.cmi \
     typing/ident.cmi \
+    utils/format_doc.cmi \
     lambda/debuginfo.cmi \
     utils/clflags.cmi \
     middle_end/backend_var.cmi
 middle_end/backend_var.cmx : \
     typing/path.cmx \
     typing/ident.cmx \
+    utils/format_doc.cmx \
     lambda/debuginfo.cmx \
     utils/clflags.cmx \
     middle_end/backend_var.cmi
@@ -3813,6 +4281,7 @@ middle_end/compilenv.cmo : \
     utils/linkage_name.cmi \
     utils/import_info.cmi \
     typing/ident.cmi \
+    utils/format_doc.cmi \
     middle_end/flambda/export_info.cmi \
     typing/env.cmi \
     utils/config.cmi \
@@ -3833,6 +4302,7 @@ middle_end/compilenv.cmx : \
     utils/linkage_name.cmx \
     utils/import_info.cmx \
     typing/ident.cmx \
+    utils/format_doc.cmx \
     middle_end/flambda/export_info.cmx \
     typing/env.cmx \
     utils/config.cmx \
@@ -3844,7 +4314,16 @@ middle_end/compilenv.cmx : \
 middle_end/compilenv.cmi : \
     middle_end/flambda/simple_value_approx.cmi \
     middle_end/flambda/base_types/set_of_closures_id.cmi \
+<<<<<<< HEAD
     lambda/lambda.cmi \
+||||||| parent of 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
+    middle_end/linkage_name.cmi \
+    typing/ident.cmi \
+=======
+    middle_end/linkage_name.cmi \
+    typing/ident.cmi \
+    utils/format_doc.cmi \
+>>>>>>> 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
     middle_end/flambda/export_info.cmi \
     utils/compilation_unit.cmi \
     file_formats/cmx_format.cmi \
@@ -4157,6 +4636,7 @@ lambda/tmc.cmo : \
     parsing/location.cmi \
     lambda/lambda.cmi \
     typing/ident.cmi \
+    utils/format_doc.cmi \
     lambda/debuginfo.cmi \
     lambda/tmc.cmi
 lambda/tmc.cmx : \
@@ -4164,6 +4644,7 @@ lambda/tmc.cmx : \
     parsing/location.cmx \
     lambda/lambda.cmx \
     typing/ident.cmx \
+    utils/format_doc.cmx \
     lambda/debuginfo.cmx \
     lambda/tmc.cmi
 lambda/tmc.cmi : \
@@ -4285,6 +4766,7 @@ lambda/translclass.cmo : \
     lambda/lambda.cmi \
     typing/jkind.cmi \
     typing/ident.cmi \
+    utils/format_doc.cmi \
     typing/env.cmi \
     lambda/debuginfo.cmi \
     utils/clflags.cmi \
@@ -4304,6 +4786,7 @@ lambda/translclass.cmx : \
     lambda/lambda.cmx \
     typing/jkind.cmx \
     typing/ident.cmx \
+    utils/format_doc.cmx \
     typing/env.cmx \
     lambda/debuginfo.cmx \
     utils/clflags.cmx \
@@ -4316,6 +4799,7 @@ lambda/translclass.cmi : \
     parsing/location.cmi \
     lambda/lambda.cmi \
     typing/ident.cmi \
+    utils/format_doc.cmi \
     lambda/debuginfo.cmi \
     parsing/asttypes.cmi
 lambda/translcore.cmo : \
@@ -4345,6 +4829,7 @@ lambda/translcore.cmo : \
     lambda/lambda.cmi \
     typing/jkind.cmi \
     typing/ident.cmi \
+    utils/format_doc.cmi \
     typing/env.cmi \
     lambda/debuginfo.cmi \
     typing/ctype.cmi \
@@ -4381,6 +4866,7 @@ lambda/translcore.cmx : \
     lambda/lambda.cmx \
     typing/jkind.cmx \
     typing/ident.cmx \
+    utils/format_doc.cmx \
     typing/env.cmx \
     lambda/debuginfo.cmx \
     typing/ctype.cmx \
@@ -4398,6 +4884,7 @@ lambda/translcore.cmi : \
     lambda/lambda.cmi \
     typing/jkind.cmi \
     typing/ident.cmi \
+    utils/format_doc.cmi \
     typing/env.cmi \
     lambda/debuginfo.cmi \
     parsing/asttypes.cmi
@@ -4423,7 +4910,12 @@ lambda/translmod.cmo : \
     typing/jkind.cmi \
     typing/includemod.cmi \
     typing/ident.cmi \
+<<<<<<< HEAD
     utils/global.cmi \
+||||||| parent of 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
+=======
+    utils/format_doc.cmi \
+>>>>>>> 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
     typing/env.cmi \
     lambda/debuginfo.cmi \
     typing/ctype.cmi \
@@ -4453,7 +4945,12 @@ lambda/translmod.cmx : \
     typing/jkind.cmx \
     typing/includemod.cmx \
     typing/ident.cmx \
+<<<<<<< HEAD
     utils/global.cmx \
+||||||| parent of 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
+=======
+    utils/format_doc.cmx \
+>>>>>>> 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
     typing/env.cmx \
     lambda/debuginfo.cmx \
     typing/ctype.cmx \
@@ -4485,6 +4982,7 @@ lambda/translobj.cmo : \
     utils/misc.cmi \
     lambda/lambda.cmi \
     typing/ident.cmi \
+    utils/format_doc.cmi \
     typing/env.cmi \
     lambda/debuginfo.cmi \
     utils/config.cmi \
@@ -4495,6 +4993,7 @@ lambda/translobj.cmx : \
     utils/misc.cmx \
     lambda/lambda.cmx \
     typing/ident.cmx \
+    utils/format_doc.cmx \
     typing/env.cmx \
     lambda/debuginfo.cmx \
     utils/config.cmx \
@@ -4560,8 +5059,15 @@ lambda/translprim.cmi : \
     lambda/lambda.cmi \
     typing/jkind.cmi \
     typing/ident.cmi \
+<<<<<<< HEAD
     typing/env.cmi \
     utils/compilation_unit.cmi
+||||||| parent of 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
+    typing/env.cmi
+=======
+    utils/format_doc.cmi \
+    typing/env.cmi
+>>>>>>> 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
 lambda/value_rec_compiler.cmo : \
     typing/value_rec_types.cmi \
     utils/misc.cmi \
@@ -4587,7 +5093,12 @@ file_formats/cmi_format.cmo : \
     typing/subst.cmi \
     utils/misc.cmi \
     parsing/location.cmi \
+<<<<<<< HEAD
     utils/import_info.cmi \
+||||||| parent of 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
+=======
+    utils/format_doc.cmi \
+>>>>>>> 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
     utils/config.cmi \
     utils/compilation_unit.cmi \
     file_formats/cmi_format.cmi
@@ -4596,12 +5107,18 @@ file_formats/cmi_format.cmx : \
     typing/subst.cmx \
     utils/misc.cmx \
     parsing/location.cmx \
+<<<<<<< HEAD
     utils/import_info.cmx \
+||||||| parent of 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
+=======
+    utils/format_doc.cmx \
+>>>>>>> 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
     utils/config.cmx \
     utils/compilation_unit.cmx \
     file_formats/cmi_format.cmi
 file_formats/cmi_format.cmi : \
     typing/types.cmi \
+<<<<<<< HEAD
     typing/subst.cmi \
     utils/misc.cmi \
     utils/import_info.cmi \
@@ -4648,6 +5165,14 @@ file_formats/cms_format.cmi : \
     parsing/location.cmi \
     utils/compilation_unit.cmi \
     file_formats/cmt_format.cmi
+||||||| parent of 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
+    utils/misc.cmi
+file_formats/cmo_format.cmi :
+=======
+    utils/misc.cmi \
+    utils/format_doc.cmi
+file_formats/cmo_format.cmi :
+>>>>>>> 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
 file_formats/cmt_format.cmo : \
     typing/types.cmi \
     typing/typedtree.cmi \
@@ -4720,6 +5245,7 @@ file_formats/linear_format.cmo : \
     utils/misc.cmi \
     parsing/location.cmi \
     asmcomp/linear.cmi \
+    utils/format_doc.cmi \
     utils/config.cmi \
     utils/compilation_unit.cmi \
     asmcomp/cmm.cmi \
@@ -4728,6 +5254,7 @@ file_formats/linear_format.cmx : \
     utils/misc.cmx \
     parsing/location.cmx \
     asmcomp/linear.cmx \
+    utils/format_doc.cmx \
     utils/config.cmx \
     utils/compilation_unit.cmx \
     asmcomp/cmm.cmx \
@@ -7014,6 +7541,7 @@ driver/pparse.cmo : \
     parsing/parse.cmi \
     utils/misc.cmi \
     parsing/location.cmi \
+    utils/format_doc.cmi \
     utils/config.cmi \
     utils/clflags.cmi \
     utils/ccomp.cmi \
@@ -7027,6 +7555,7 @@ driver/pparse.cmx : \
     parsing/parse.cmx \
     utils/misc.cmx \
     parsing/location.cmx \
+    utils/format_doc.cmx \
     utils/config.cmx \
     utils/clflags.cmx \
     utils/ccomp.cmx \
@@ -7034,7 +7563,8 @@ driver/pparse.cmx : \
     parsing/ast_invariants.cmx \
     driver/pparse.cmi
 driver/pparse.cmi : \
-    parsing/parsetree.cmi
+    parsing/parsetree.cmi \
+    utils/format_doc.cmi
 toplevel/expunge.cmo : \
     bytecomp/symtable.cmi \
     lambda/runtimedef.cmi \
@@ -7069,6 +7599,7 @@ toplevel/genprintval.cmo : \
     parsing/lexer.cmi \
     typing/jkind.cmi \
     typing/ident.cmi \
+    utils/format_doc.cmi \
     typing/env.cmi \
     typing/datarepr.cmi \
     typing/ctype.cmi \
@@ -7091,6 +7622,7 @@ toplevel/genprintval.cmx : \
     parsing/lexer.cmx \
     typing/jkind.cmx \
     typing/ident.cmx \
+    utils/format_doc.cmx \
     typing/env.cmx \
     typing/datarepr.cmx \
     typing/ctype.cmx \
@@ -7122,6 +7654,7 @@ toplevel/topcommon.cmo : \
     parsing/lexer.cmi \
     typing/ident.cmi \
     toplevel/genprintval.cmi \
+    utils/format_doc.cmi \
     typing/env.cmi \
     bytecomp/dll.cmi \
     utils/config.cmi \
@@ -7151,6 +7684,7 @@ toplevel/topcommon.cmx : \
     parsing/lexer.cmx \
     typing/ident.cmx \
     toplevel/genprintval.cmx \
+    utils/format_doc.cmx \
     typing/env.cmx \
     bytecomp/dll.cmx \
     utils/config.cmx \
@@ -7168,6 +7702,7 @@ toplevel/topcommon.cmi : \
     typing/path.cmi \
     parsing/parsetree.cmi \
     typing/outcometree.cmi \
+    typing/oprint.cmi \
     parsing/longident.cmi \
     parsing/location.cmi \
     utils/load_path.cmi \
@@ -7242,6 +7777,7 @@ toplevel/toploop.cmo : \
     parsing/location.cmi \
     utils/load_path.cmi \
     parsing/lexer.cmi \
+    utils/format_doc.cmi \
     typing/env.cmi \
     utils/config.cmi \
     driver/compmisc.cmi \
@@ -7258,6 +7794,7 @@ toplevel/toploop.cmx : \
     parsing/location.cmx \
     utils/load_path.cmx \
     parsing/lexer.cmx \
+    utils/format_doc.cmx \
     typing/env.cmx \
     utils/config.cmx \
     driver/compmisc.cmx \
@@ -7271,6 +7808,7 @@ toplevel/toploop.cmi : \
     typing/path.cmi \
     parsing/parsetree.cmi \
     typing/outcometree.cmi \
+    typing/oprint.cmi \
     parsing/longident.cmi \
     parsing/location.cmi \
     utils/load_path.cmi \
@@ -7738,7 +8276,12 @@ tools/dumpobj.cmo : \
     parsing/location.cmi \
     lambda/lambda.cmi \
     bytecomp/instruct.cmi \
+<<<<<<< HEAD
     typing/ident.cmi \
+||||||| parent of 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
+=======
+    utils/format_doc.cmi \
+>>>>>>> 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
     utils/config.cmi \
     file_formats/cmo_format.cmi \
     bytecomp/bytesections.cmi \
@@ -7752,7 +8295,12 @@ tools/dumpobj.cmx : \
     parsing/location.cmx \
     lambda/lambda.cmx \
     bytecomp/instruct.cmx \
+<<<<<<< HEAD
     typing/ident.cmx \
+||||||| parent of 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
+=======
+    utils/format_doc.cmx \
+>>>>>>> 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
     utils/config.cmx \
     file_formats/cmo_format.cmi \
     bytecomp/bytesections.cmx \
@@ -7810,6 +8358,7 @@ tools/objinfo.cmo : \
     lambda/lambda.cmi \
     utils/import_info.cmi \
     typing/ident.cmi \
+    utils/format_doc.cmi \
     middle_end/flambda/export_info.cmi \
     utils/compilation_unit.cmi \
     file_formats/cmxs_format.cmi \
@@ -7834,6 +8383,7 @@ tools/objinfo.cmx : \
     lambda/lambda.cmx \
     utils/import_info.cmx \
     typing/ident.cmx \
+    utils/format_doc.cmx \
     middle_end/flambda/export_info.cmx \
     utils/compilation_unit.cmx \
     file_formats/cmxs_format.cmi \
@@ -8004,3 +8554,4615 @@ tools/stripdebug.cmx : \
     bytecomp/bytesections.cmx \
     tools/stripdebug.cmi
 tools/stripdebug.cmi :
+<<<<<<< HEAD
+||||||| parent of 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
+debugger/breakpoints.cmo : \
+    debugger/symbols.cmi \
+    debugger/pos.cmi \
+    debugger/parameters.cmi \
+    utils/misc.cmi \
+    bytecomp/instruct.cmi \
+    debugger/exec.cmi \
+    debugger/events.cmi \
+    debugger/debugger_config.cmi \
+    debugger/debugcom.cmi \
+    debugger/checkpoints.cmi \
+    debugger/breakpoints.cmi
+debugger/breakpoints.cmx : \
+    debugger/symbols.cmx \
+    debugger/pos.cmx \
+    debugger/parameters.cmx \
+    utils/misc.cmx \
+    bytecomp/instruct.cmx \
+    debugger/exec.cmx \
+    debugger/events.cmx \
+    debugger/debugger_config.cmx \
+    debugger/debugcom.cmx \
+    debugger/checkpoints.cmx \
+    debugger/breakpoints.cmi
+debugger/breakpoints.cmi : \
+    debugger/events.cmi \
+    debugger/debugcom.cmi
+debugger/checkpoints.cmo : \
+    debugger/primitives.cmi \
+    debugger/int64ops.cmi \
+    debugger/debugcom.cmi \
+    debugger/checkpoints.cmi
+debugger/checkpoints.cmx : \
+    debugger/primitives.cmx \
+    debugger/int64ops.cmx \
+    debugger/debugcom.cmx \
+    debugger/checkpoints.cmi
+debugger/checkpoints.cmi : \
+    debugger/primitives.cmi \
+    debugger/debugcom.cmi
+debugger/command_line.cmo : \
+    debugger/unix_tools.cmi \
+    otherlibs/unix/unix.cmi \
+    parsing/unit_info.cmi \
+    typing/types.cmi \
+    debugger/time_travel.cmi \
+    debugger/symbols.cmi \
+    debugger/source.cmi \
+    debugger/show_source.cmi \
+    debugger/show_information.cmi \
+    debugger/question.cmi \
+    debugger/program_management.cmi \
+    debugger/program_loading.cmi \
+    debugger/printval.cmi \
+    debugger/primitives.cmi \
+    debugger/pos.cmi \
+    debugger/parser_aux.cmi \
+    debugger/parameters.cmi \
+    parsing/longident.cmi \
+    parsing/location.cmi \
+    debugger/loadprinter.cmi \
+    utils/load_path.cmi \
+    debugger/int64ops.cmi \
+    bytecomp/instruct.cmi \
+    debugger/input_handling.cmi \
+    debugger/history.cmi \
+    debugger/frames.cmi \
+    debugger/events.cmi \
+    debugger/eval.cmi \
+    typing/envaux.cmi \
+    typing/env.cmi \
+    debugger/debugger_parser.cmi \
+    debugger/debugger_lexer.cmi \
+    debugger/debugger_config.cmi \
+    debugger/debugcom.cmi \
+    driver/compmisc.cmi \
+    debugger/checkpoints.cmi \
+    debugger/breakpoints.cmi \
+    debugger/command_line.cmi
+debugger/command_line.cmx : \
+    debugger/unix_tools.cmx \
+    otherlibs/unix/unix.cmx \
+    parsing/unit_info.cmx \
+    typing/types.cmx \
+    debugger/time_travel.cmx \
+    debugger/symbols.cmx \
+    debugger/source.cmx \
+    debugger/show_source.cmx \
+    debugger/show_information.cmx \
+    debugger/question.cmx \
+    debugger/program_management.cmx \
+    debugger/program_loading.cmx \
+    debugger/printval.cmx \
+    debugger/primitives.cmx \
+    debugger/pos.cmx \
+    debugger/parser_aux.cmi \
+    debugger/parameters.cmx \
+    parsing/longident.cmx \
+    parsing/location.cmx \
+    debugger/loadprinter.cmx \
+    utils/load_path.cmx \
+    debugger/int64ops.cmx \
+    bytecomp/instruct.cmx \
+    debugger/input_handling.cmx \
+    debugger/history.cmx \
+    debugger/frames.cmx \
+    debugger/events.cmx \
+    debugger/eval.cmx \
+    typing/envaux.cmx \
+    typing/env.cmx \
+    debugger/debugger_parser.cmx \
+    debugger/debugger_lexer.cmx \
+    debugger/debugger_config.cmx \
+    debugger/debugcom.cmx \
+    driver/compmisc.cmx \
+    debugger/checkpoints.cmx \
+    debugger/breakpoints.cmx \
+    debugger/command_line.cmi
+debugger/command_line.cmi :
+debugger/debugcom.cmo : \
+    debugger/primitives.cmi \
+    utils/misc.cmi \
+    debugger/int64ops.cmi \
+    bytecomp/instruct.cmi \
+    debugger/input_handling.cmi \
+    debugger/debugcom.cmi
+debugger/debugcom.cmx : \
+    debugger/primitives.cmx \
+    utils/misc.cmx \
+    debugger/int64ops.cmx \
+    bytecomp/instruct.cmx \
+    debugger/input_handling.cmx \
+    debugger/debugcom.cmi
+debugger/debugcom.cmi : \
+    debugger/primitives.cmi \
+    bytecomp/instruct.cmi
+debugger/debugger_config.cmo : \
+    debugger/int64ops.cmi \
+    debugger/debugger_config.cmi
+debugger/debugger_config.cmx : \
+    debugger/int64ops.cmx \
+    debugger/debugger_config.cmi
+debugger/debugger_config.cmi :
+debugger/debugger_lexer.cmo : \
+    debugger/debugger_parser.cmi \
+    debugger/debugger_lexer.cmi
+debugger/debugger_lexer.cmx : \
+    debugger/debugger_parser.cmx \
+    debugger/debugger_lexer.cmi
+debugger/debugger_lexer.cmi : \
+    debugger/debugger_parser.cmi
+debugger/debugger_parser.cmo : \
+    debugger/parser_aux.cmi \
+    parsing/longident.cmi \
+    debugger/int64ops.cmi \
+    debugger/input_handling.cmi \
+    debugger/debugcom.cmi \
+    debugger/debugger_parser.cmi
+debugger/debugger_parser.cmx : \
+    debugger/parser_aux.cmi \
+    parsing/longident.cmx \
+    debugger/int64ops.cmx \
+    debugger/input_handling.cmx \
+    debugger/debugcom.cmx \
+    debugger/debugger_parser.cmi
+debugger/debugger_parser.cmi : \
+    debugger/parser_aux.cmi \
+    parsing/longident.cmi
+debugger/eval.cmo : \
+    typing/types.cmi \
+    bytecomp/symtable.cmi \
+    typing/subst.cmi \
+    debugger/printval.cmi \
+    typing/printtyp.cmi \
+    typing/predef.cmi \
+    typing/path.cmi \
+    debugger/parser_aux.cmi \
+    utils/misc.cmi \
+    parsing/longident.cmi \
+    bytecomp/instruct.cmi \
+    typing/ident.cmi \
+    debugger/frames.cmi \
+    debugger/events.cmi \
+    typing/env.cmi \
+    debugger/debugcom.cmi \
+    typing/ctype.cmi \
+    typing/btype.cmi \
+    debugger/eval.cmi
+debugger/eval.cmx : \
+    typing/types.cmx \
+    bytecomp/symtable.cmx \
+    typing/subst.cmx \
+    debugger/printval.cmx \
+    typing/printtyp.cmx \
+    typing/predef.cmx \
+    typing/path.cmx \
+    debugger/parser_aux.cmi \
+    utils/misc.cmx \
+    parsing/longident.cmx \
+    bytecomp/instruct.cmx \
+    typing/ident.cmx \
+    debugger/frames.cmx \
+    debugger/events.cmx \
+    typing/env.cmx \
+    debugger/debugcom.cmx \
+    typing/ctype.cmx \
+    typing/btype.cmx \
+    debugger/eval.cmi
+debugger/eval.cmi : \
+    typing/types.cmi \
+    typing/path.cmi \
+    debugger/parser_aux.cmi \
+    parsing/longident.cmi \
+    typing/ident.cmi \
+    debugger/events.cmi \
+    typing/env.cmi \
+    debugger/debugcom.cmi
+debugger/events.cmo : \
+    parsing/location.cmi \
+    bytecomp/instruct.cmi \
+    debugger/events.cmi
+debugger/events.cmx : \
+    parsing/location.cmx \
+    bytecomp/instruct.cmx \
+    debugger/events.cmi
+debugger/events.cmi : \
+    bytecomp/instruct.cmi
+debugger/exec.cmo : \
+    debugger/exec.cmi
+debugger/exec.cmx : \
+    debugger/exec.cmi
+debugger/exec.cmi :
+debugger/frames.cmo : \
+    debugger/symbols.cmi \
+    utils/misc.cmi \
+    bytecomp/instruct.cmi \
+    debugger/events.cmi \
+    debugger/debugcom.cmi \
+    debugger/frames.cmi
+debugger/frames.cmx : \
+    debugger/symbols.cmx \
+    utils/misc.cmx \
+    bytecomp/instruct.cmx \
+    debugger/events.cmx \
+    debugger/debugcom.cmx \
+    debugger/frames.cmi
+debugger/frames.cmi : \
+    debugger/events.cmi
+debugger/history.cmo : \
+    debugger/primitives.cmi \
+    debugger/int64ops.cmi \
+    debugger/debugger_config.cmi \
+    debugger/checkpoints.cmi \
+    debugger/history.cmi
+debugger/history.cmx : \
+    debugger/primitives.cmx \
+    debugger/int64ops.cmx \
+    debugger/debugger_config.cmx \
+    debugger/checkpoints.cmx \
+    debugger/history.cmi
+debugger/history.cmi :
+debugger/input_handling.cmo : \
+    otherlibs/unix/unix.cmi \
+    debugger/primitives.cmi \
+    debugger/parameters.cmi \
+    debugger/input_handling.cmi
+debugger/input_handling.cmx : \
+    otherlibs/unix/unix.cmx \
+    debugger/primitives.cmx \
+    debugger/parameters.cmx \
+    debugger/input_handling.cmi
+debugger/input_handling.cmi : \
+    debugger/primitives.cmi
+debugger/int64ops.cmo : \
+    debugger/int64ops.cmi
+debugger/int64ops.cmx : \
+    debugger/int64ops.cmi
+debugger/int64ops.cmi :
+debugger/loadprinter.cmo : \
+    parsing/unit_info.cmi \
+    typing/types.cmi \
+    toplevel/topprinters.cmi \
+    bytecomp/symtable.cmi \
+    debugger/printval.cmi \
+    typing/printtyp.cmi \
+    typing/path.cmi \
+    utils/misc.cmi \
+    parsing/longident.cmi \
+    utils/load_path.cmi \
+    typing/ident.cmi \
+    typing/env.cmi \
+    otherlibs/dynlink/dynlink.cmi \
+    typing/ctype.cmi \
+    file_formats/cmo_format.cmi \
+    debugger/loadprinter.cmi
+debugger/loadprinter.cmx : \
+    parsing/unit_info.cmx \
+    typing/types.cmx \
+    toplevel/topprinters.cmx \
+    bytecomp/symtable.cmx \
+    debugger/printval.cmx \
+    typing/printtyp.cmx \
+    typing/path.cmx \
+    utils/misc.cmx \
+    parsing/longident.cmx \
+    utils/load_path.cmx \
+    typing/ident.cmx \
+    typing/env.cmx \
+    otherlibs/dynlink/dynlink.cmi \
+    typing/ctype.cmx \
+    file_formats/cmo_format.cmi \
+    debugger/loadprinter.cmi
+debugger/loadprinter.cmi : \
+    parsing/longident.cmi \
+    otherlibs/dynlink/dynlink.cmi
+debugger/main.cmo : \
+    debugger/unix_tools.cmi \
+    otherlibs/unix/unix.cmi \
+    debugger/time_travel.cmi \
+    debugger/show_information.cmi \
+    debugger/question.cmi \
+    debugger/program_management.cmi \
+    debugger/primitives.cmi \
+    typing/persistent_env.cmi \
+    debugger/parameters.cmi \
+    utils/misc.cmi \
+    utils/load_path.cmi \
+    debugger/input_handling.cmi \
+    debugger/frames.cmi \
+    debugger/exec.cmi \
+    debugger/debugger_config.cmi \
+    utils/config.cmi \
+    driver/compmisc.cmi \
+    debugger/command_line.cmi \
+    file_formats/cmi_format.cmi \
+    utils/clflags.cmi \
+    debugger/checkpoints.cmi \
+    debugger/main.cmi
+debugger/main.cmx : \
+    debugger/unix_tools.cmx \
+    otherlibs/unix/unix.cmx \
+    debugger/time_travel.cmx \
+    debugger/show_information.cmx \
+    debugger/question.cmx \
+    debugger/program_management.cmx \
+    debugger/primitives.cmx \
+    typing/persistent_env.cmx \
+    debugger/parameters.cmx \
+    utils/misc.cmx \
+    utils/load_path.cmx \
+    debugger/input_handling.cmx \
+    debugger/frames.cmx \
+    debugger/exec.cmx \
+    debugger/debugger_config.cmx \
+    utils/config.cmx \
+    driver/compmisc.cmx \
+    debugger/command_line.cmx \
+    file_formats/cmi_format.cmx \
+    utils/clflags.cmx \
+    debugger/checkpoints.cmx \
+    debugger/main.cmi
+debugger/main.cmi :
+debugger/ocamldebug_entry.cmo : \
+    otherlibs/unix/unix.cmi \
+    debugger/ocamldebug_entry.cmi
+debugger/ocamldebug_entry.cmx : \
+    otherlibs/unix/unix.cmx \
+    debugger/ocamldebug_entry.cmi
+debugger/ocamldebug_entry.cmi :
+debugger/parameters.cmo : \
+    utils/load_path.cmi \
+    typing/envaux.cmi \
+    debugger/debugger_config.cmi \
+    utils/config.cmi \
+    debugger/parameters.cmi
+debugger/parameters.cmx : \
+    utils/load_path.cmx \
+    typing/envaux.cmx \
+    debugger/debugger_config.cmx \
+    utils/config.cmx \
+    debugger/parameters.cmi
+debugger/parameters.cmi :
+debugger/parser_aux.cmi : \
+    parsing/longident.cmi \
+    debugger/debugcom.cmi
+debugger/pos.cmo : \
+    parsing/location.cmi \
+    bytecomp/instruct.cmi \
+    debugger/events.cmi \
+    debugger/pos.cmi
+debugger/pos.cmx : \
+    parsing/location.cmx \
+    bytecomp/instruct.cmx \
+    debugger/events.cmx \
+    debugger/pos.cmi
+debugger/pos.cmi : \
+    debugger/events.cmi
+debugger/primitives.cmo : \
+    otherlibs/unix/unix.cmi \
+    debugger/primitives.cmi
+debugger/primitives.cmx : \
+    otherlibs/unix/unix.cmx \
+    debugger/primitives.cmi
+debugger/primitives.cmi : \
+    otherlibs/unix/unix.cmi
+debugger/printval.cmo : \
+    typing/types.cmi \
+    bytecomp/symtable.cmi \
+    typing/printtyp.cmi \
+    debugger/parser_aux.cmi \
+    typing/outcometree.cmi \
+    typing/oprint.cmi \
+    toplevel/genprintval.cmi \
+    typing/env.cmi \
+    debugger/debugcom.cmi \
+    debugger/printval.cmi
+debugger/printval.cmx : \
+    typing/types.cmx \
+    bytecomp/symtable.cmx \
+    typing/printtyp.cmx \
+    debugger/parser_aux.cmi \
+    typing/outcometree.cmi \
+    typing/oprint.cmx \
+    toplevel/genprintval.cmx \
+    typing/env.cmx \
+    debugger/debugcom.cmx \
+    debugger/printval.cmi
+debugger/printval.cmi : \
+    typing/types.cmi \
+    typing/path.cmi \
+    debugger/parser_aux.cmi \
+    typing/env.cmi \
+    debugger/debugcom.cmi
+debugger/program_loading.cmo : \
+    debugger/unix_tools.cmi \
+    otherlibs/unix/unix.cmi \
+    debugger/primitives.cmi \
+    debugger/parameters.cmi \
+    debugger/input_handling.cmi \
+    debugger/debugger_config.cmi \
+    debugger/program_loading.cmi
+debugger/program_loading.cmx : \
+    debugger/unix_tools.cmx \
+    otherlibs/unix/unix.cmx \
+    debugger/primitives.cmx \
+    debugger/parameters.cmx \
+    debugger/input_handling.cmx \
+    debugger/debugger_config.cmx \
+    debugger/program_loading.cmi
+debugger/program_loading.cmi : \
+    debugger/primitives.cmi
+debugger/program_management.cmo : \
+    debugger/unix_tools.cmi \
+    otherlibs/unix/unix.cmi \
+    debugger/time_travel.cmi \
+    debugger/symbols.cmi \
+    debugger/question.cmi \
+    debugger/program_loading.cmi \
+    debugger/primitives.cmi \
+    debugger/parameters.cmi \
+    utils/load_path.cmi \
+    debugger/int64ops.cmi \
+    debugger/input_handling.cmi \
+    debugger/history.cmi \
+    typing/envaux.cmi \
+    debugger/debugger_config.cmi \
+    debugger/debugcom.cmi \
+    driver/compmisc.cmi \
+    debugger/breakpoints.cmi \
+    debugger/program_management.cmi
+debugger/program_management.cmx : \
+    debugger/unix_tools.cmx \
+    otherlibs/unix/unix.cmx \
+    debugger/time_travel.cmx \
+    debugger/symbols.cmx \
+    debugger/question.cmx \
+    debugger/program_loading.cmx \
+    debugger/primitives.cmx \
+    debugger/parameters.cmx \
+    utils/load_path.cmx \
+    debugger/int64ops.cmx \
+    debugger/input_handling.cmx \
+    debugger/history.cmx \
+    typing/envaux.cmx \
+    debugger/debugger_config.cmx \
+    debugger/debugcom.cmx \
+    driver/compmisc.cmx \
+    debugger/breakpoints.cmx \
+    debugger/program_management.cmi
+debugger/program_management.cmi :
+debugger/question.cmo : \
+    debugger/primitives.cmi \
+    debugger/input_handling.cmi \
+    debugger/debugger_lexer.cmi \
+    debugger/question.cmi
+debugger/question.cmx : \
+    debugger/primitives.cmx \
+    debugger/input_handling.cmx \
+    debugger/debugger_lexer.cmx \
+    debugger/question.cmi
+debugger/question.cmi :
+debugger/show_information.cmo : \
+    debugger/symbols.cmi \
+    debugger/source.cmi \
+    debugger/show_source.cmi \
+    debugger/printval.cmi \
+    debugger/parameters.cmi \
+    utils/misc.cmi \
+    bytecomp/instruct.cmi \
+    debugger/frames.cmi \
+    debugger/events.cmi \
+    debugger/debugcom.cmi \
+    debugger/checkpoints.cmi \
+    debugger/breakpoints.cmi \
+    debugger/show_information.cmi
+debugger/show_information.cmx : \
+    debugger/symbols.cmx \
+    debugger/source.cmx \
+    debugger/show_source.cmx \
+    debugger/printval.cmx \
+    debugger/parameters.cmx \
+    utils/misc.cmx \
+    bytecomp/instruct.cmx \
+    debugger/frames.cmx \
+    debugger/events.cmx \
+    debugger/debugcom.cmx \
+    debugger/checkpoints.cmx \
+    debugger/breakpoints.cmx \
+    debugger/show_information.cmi
+debugger/show_information.cmi : \
+    debugger/events.cmi
+debugger/show_source.cmo : \
+    debugger/source.cmi \
+    debugger/primitives.cmi \
+    debugger/parameters.cmi \
+    parsing/location.cmi \
+    bytecomp/instruct.cmi \
+    debugger/events.cmi \
+    debugger/debugger_config.cmi \
+    debugger/show_source.cmi
+debugger/show_source.cmx : \
+    debugger/source.cmx \
+    debugger/primitives.cmx \
+    debugger/parameters.cmx \
+    parsing/location.cmx \
+    bytecomp/instruct.cmx \
+    debugger/events.cmx \
+    debugger/debugger_config.cmx \
+    debugger/show_source.cmi
+debugger/show_source.cmi : \
+    bytecomp/instruct.cmi
+debugger/source.cmo : \
+    debugger/primitives.cmi \
+    utils/misc.cmi \
+    utils/load_path.cmi \
+    debugger/debugger_config.cmi \
+    debugger/source.cmi
+debugger/source.cmx : \
+    debugger/primitives.cmx \
+    utils/misc.cmx \
+    utils/load_path.cmx \
+    debugger/debugger_config.cmx \
+    debugger/source.cmi
+debugger/source.cmi :
+debugger/symbols.cmo : \
+    bytecomp/symtable.cmi \
+    debugger/program_loading.cmi \
+    utils/misc.cmi \
+    bytecomp/instruct.cmi \
+    debugger/events.cmi \
+    debugger/debugger_config.cmi \
+    debugger/debugcom.cmi \
+    debugger/checkpoints.cmi \
+    bytecomp/bytesections.cmi \
+    debugger/symbols.cmi
+debugger/symbols.cmx : \
+    bytecomp/symtable.cmx \
+    debugger/program_loading.cmx \
+    utils/misc.cmx \
+    bytecomp/instruct.cmx \
+    debugger/events.cmx \
+    debugger/debugger_config.cmx \
+    debugger/debugcom.cmx \
+    debugger/checkpoints.cmx \
+    bytecomp/bytesections.cmx \
+    debugger/symbols.cmi
+debugger/symbols.cmi : \
+    bytecomp/instruct.cmi \
+    debugger/events.cmi \
+    debugger/debugcom.cmi
+debugger/time_travel.cmo : \
+    debugger/trap_barrier.cmi \
+    debugger/symbols.cmi \
+    debugger/question.cmi \
+    debugger/program_loading.cmi \
+    debugger/primitives.cmi \
+    utils/misc.cmi \
+    debugger/int64ops.cmi \
+    bytecomp/instruct.cmi \
+    debugger/input_handling.cmi \
+    debugger/exec.cmi \
+    debugger/events.cmi \
+    debugger/debugger_config.cmi \
+    debugger/debugcom.cmi \
+    debugger/checkpoints.cmi \
+    debugger/breakpoints.cmi \
+    debugger/time_travel.cmi
+debugger/time_travel.cmx : \
+    debugger/trap_barrier.cmx \
+    debugger/symbols.cmx \
+    debugger/question.cmx \
+    debugger/program_loading.cmx \
+    debugger/primitives.cmx \
+    utils/misc.cmx \
+    debugger/int64ops.cmx \
+    bytecomp/instruct.cmx \
+    debugger/input_handling.cmx \
+    debugger/exec.cmx \
+    debugger/events.cmx \
+    debugger/debugger_config.cmx \
+    debugger/debugcom.cmx \
+    debugger/checkpoints.cmx \
+    debugger/breakpoints.cmx \
+    debugger/time_travel.cmi
+debugger/time_travel.cmi : \
+    debugger/primitives.cmi
+debugger/trap_barrier.cmo : \
+    debugger/exec.cmi \
+    debugger/debugcom.cmi \
+    debugger/checkpoints.cmi \
+    debugger/trap_barrier.cmi
+debugger/trap_barrier.cmx : \
+    debugger/exec.cmx \
+    debugger/debugcom.cmx \
+    debugger/checkpoints.cmx \
+    debugger/trap_barrier.cmi
+debugger/trap_barrier.cmi : \
+    debugger/debugcom.cmi
+debugger/unix_tools.cmo : \
+    otherlibs/unix/unix.cmi \
+    utils/misc.cmi \
+    debugger/unix_tools.cmi
+debugger/unix_tools.cmx : \
+    otherlibs/unix/unix.cmx \
+    utils/misc.cmx \
+    debugger/unix_tools.cmi
+debugger/unix_tools.cmi : \
+    otherlibs/unix/unix.cmi
+ocamldoc/odoc.cmo : \
+    ocamldoc/odoc_messages.cmi \
+    ocamldoc/odoc_info.cmi \
+    ocamldoc/odoc_global.cmi \
+    ocamldoc/odoc_gen.cmi \
+    ocamldoc/odoc_config.cmi \
+    ocamldoc/odoc_args.cmi \
+    ocamldoc/odoc_analyse.cmi \
+    otherlibs/dynlink/dynlink.cmi \
+    ocamldoc/odoc.cmi
+ocamldoc/odoc.cmx : \
+    ocamldoc/odoc_messages.cmx \
+    ocamldoc/odoc_info.cmx \
+    ocamldoc/odoc_global.cmx \
+    ocamldoc/odoc_gen.cmx \
+    ocamldoc/odoc_config.cmx \
+    ocamldoc/odoc_args.cmx \
+    ocamldoc/odoc_analyse.cmx \
+    otherlibs/dynlink/dynlink.cmi \
+    ocamldoc/odoc.cmi
+ocamldoc/odoc.cmi :
+ocamldoc/odoc_analyse.cmo : \
+    utils/warnings.cmi \
+    parsing/unit_info.cmi \
+    typing/types.cmi \
+    typing/typemod.cmi \
+    typing/typedtree.cmi \
+    parsing/syntaxerr.cmi \
+    driver/pparse.cmi \
+    parsing/parse.cmi \
+    ocamldoc/odoc_types.cmi \
+    ocamldoc/odoc_text.cmi \
+    ocamldoc/odoc_sig.cmi \
+    ocamldoc/odoc_module.cmi \
+    ocamldoc/odoc_misc.cmi \
+    ocamldoc/odoc_messages.cmi \
+    ocamldoc/odoc_merge.cmi \
+    ocamldoc/odoc_global.cmi \
+    ocamldoc/odoc_dep.cmi \
+    ocamldoc/odoc_cross.cmi \
+    ocamldoc/odoc_comments.cmi \
+    ocamldoc/odoc_class.cmi \
+    ocamldoc/odoc_ast.cmi \
+    parsing/location.cmi \
+    parsing/lexer.cmi \
+    typing/env.cmi \
+    driver/compmisc.cmi \
+    utils/clflags.cmi \
+    ocamldoc/odoc_analyse.cmi
+ocamldoc/odoc_analyse.cmx : \
+    utils/warnings.cmx \
+    parsing/unit_info.cmx \
+    typing/types.cmx \
+    typing/typemod.cmx \
+    typing/typedtree.cmx \
+    parsing/syntaxerr.cmx \
+    driver/pparse.cmx \
+    parsing/parse.cmx \
+    ocamldoc/odoc_types.cmx \
+    ocamldoc/odoc_text.cmx \
+    ocamldoc/odoc_sig.cmx \
+    ocamldoc/odoc_module.cmx \
+    ocamldoc/odoc_misc.cmx \
+    ocamldoc/odoc_messages.cmx \
+    ocamldoc/odoc_merge.cmx \
+    ocamldoc/odoc_global.cmx \
+    ocamldoc/odoc_dep.cmx \
+    ocamldoc/odoc_cross.cmx \
+    ocamldoc/odoc_comments.cmx \
+    ocamldoc/odoc_class.cmx \
+    ocamldoc/odoc_ast.cmx \
+    parsing/location.cmx \
+    parsing/lexer.cmx \
+    typing/env.cmx \
+    driver/compmisc.cmx \
+    utils/clflags.cmx \
+    ocamldoc/odoc_analyse.cmi
+ocamldoc/odoc_analyse.cmi : \
+    ocamldoc/odoc_module.cmi \
+    ocamldoc/odoc_global.cmi
+ocamldoc/odoc_args.cmo : \
+    otherlibs/str/str.cmi \
+    ocamldoc/odoc_types.cmi \
+    ocamldoc/odoc_texi.cmi \
+    ocamldoc/odoc_messages.cmi \
+    ocamldoc/odoc_man.cmi \
+    ocamldoc/odoc_latex.cmi \
+    ocamldoc/odoc_html.cmi \
+    ocamldoc/odoc_global.cmi \
+    ocamldoc/odoc_gen.cmi \
+    ocamldoc/odoc_dot.cmi \
+    ocamldoc/odoc_config.cmi \
+    driver/main_args.cmi \
+    utils/config.cmi \
+    driver/compenv.cmi \
+    ocamldoc/odoc_args.cmi
+ocamldoc/odoc_args.cmx : \
+    otherlibs/str/str.cmx \
+    ocamldoc/odoc_types.cmx \
+    ocamldoc/odoc_texi.cmx \
+    ocamldoc/odoc_messages.cmx \
+    ocamldoc/odoc_man.cmx \
+    ocamldoc/odoc_latex.cmx \
+    ocamldoc/odoc_html.cmx \
+    ocamldoc/odoc_global.cmx \
+    ocamldoc/odoc_gen.cmx \
+    ocamldoc/odoc_dot.cmx \
+    ocamldoc/odoc_config.cmx \
+    driver/main_args.cmx \
+    utils/config.cmx \
+    driver/compenv.cmx \
+    ocamldoc/odoc_args.cmi
+ocamldoc/odoc_args.cmi : \
+    ocamldoc/odoc_gen.cmi
+ocamldoc/odoc_ast.cmo : \
+    parsing/unit_info.cmi \
+    typing/types.cmi \
+    typing/typedtree.cmi \
+    typing/predef.cmi \
+    typing/path.cmi \
+    parsing/parsetree.cmi \
+    ocamldoc/odoc_value.cmi \
+    ocamldoc/odoc_types.cmi \
+    ocamldoc/odoc_type.cmi \
+    ocamldoc/odoc_sig.cmi \
+    ocamldoc/odoc_parameter.cmi \
+    ocamldoc/odoc_module.cmi \
+    ocamldoc/odoc_messages.cmi \
+    ocamldoc/odoc_global.cmi \
+    ocamldoc/odoc_extension.cmi \
+    ocamldoc/odoc_exception.cmi \
+    ocamldoc/odoc_env.cmi \
+    ocamldoc/odoc_class.cmi \
+    parsing/location.cmi \
+    typing/ident.cmi \
+    typing/btype.cmi \
+    parsing/asttypes.cmi \
+    ocamldoc/odoc_ast.cmi
+ocamldoc/odoc_ast.cmx : \
+    parsing/unit_info.cmx \
+    typing/types.cmx \
+    typing/typedtree.cmx \
+    typing/predef.cmx \
+    typing/path.cmx \
+    parsing/parsetree.cmi \
+    ocamldoc/odoc_value.cmx \
+    ocamldoc/odoc_types.cmx \
+    ocamldoc/odoc_type.cmx \
+    ocamldoc/odoc_sig.cmx \
+    ocamldoc/odoc_parameter.cmx \
+    ocamldoc/odoc_module.cmx \
+    ocamldoc/odoc_messages.cmx \
+    ocamldoc/odoc_global.cmx \
+    ocamldoc/odoc_extension.cmx \
+    ocamldoc/odoc_exception.cmx \
+    ocamldoc/odoc_env.cmx \
+    ocamldoc/odoc_class.cmx \
+    parsing/location.cmx \
+    typing/ident.cmx \
+    typing/btype.cmx \
+    parsing/asttypes.cmx \
+    ocamldoc/odoc_ast.cmi
+ocamldoc/odoc_ast.cmi : \
+    typing/types.cmi \
+    typing/typedtree.cmi \
+    parsing/parsetree.cmi \
+    ocamldoc/odoc_sig.cmi \
+    ocamldoc/odoc_name.cmi \
+    ocamldoc/odoc_module.cmi
+ocamldoc/odoc_class.cmo : \
+    typing/types.cmi \
+    ocamldoc/odoc_value.cmi \
+    ocamldoc/odoc_types.cmi \
+    ocamldoc/odoc_parameter.cmi \
+    ocamldoc/odoc_name.cmi \
+    ocamldoc/odoc_class.cmi
+ocamldoc/odoc_class.cmx : \
+    typing/types.cmx \
+    ocamldoc/odoc_value.cmx \
+    ocamldoc/odoc_types.cmx \
+    ocamldoc/odoc_parameter.cmx \
+    ocamldoc/odoc_name.cmx \
+    ocamldoc/odoc_class.cmi
+ocamldoc/odoc_class.cmi : \
+    typing/types.cmi \
+    ocamldoc/odoc_value.cmi \
+    ocamldoc/odoc_types.cmi \
+    ocamldoc/odoc_parameter.cmi \
+    ocamldoc/odoc_name.cmi
+ocamldoc/odoc_comments.cmo : \
+    otherlibs/str/str.cmi \
+    ocamldoc/odoc_types.cmi \
+    ocamldoc/odoc_text.cmi \
+    ocamldoc/odoc_see_lexer.cmi \
+    ocamldoc/odoc_parser.cmi \
+    ocamldoc/odoc_misc.cmi \
+    ocamldoc/odoc_messages.cmi \
+    ocamldoc/odoc_merge.cmi \
+    ocamldoc/odoc_lexer.cmi \
+    ocamldoc/odoc_global.cmi \
+    ocamldoc/odoc_cross.cmi \
+    ocamldoc/odoc_comments_global.cmi \
+    ocamldoc/odoc_comments.cmi
+ocamldoc/odoc_comments.cmx : \
+    otherlibs/str/str.cmx \
+    ocamldoc/odoc_types.cmx \
+    ocamldoc/odoc_text.cmx \
+    ocamldoc/odoc_see_lexer.cmx \
+    ocamldoc/odoc_parser.cmx \
+    ocamldoc/odoc_misc.cmx \
+    ocamldoc/odoc_messages.cmx \
+    ocamldoc/odoc_merge.cmx \
+    ocamldoc/odoc_lexer.cmx \
+    ocamldoc/odoc_global.cmx \
+    ocamldoc/odoc_cross.cmx \
+    ocamldoc/odoc_comments_global.cmx \
+    ocamldoc/odoc_comments.cmi
+ocamldoc/odoc_comments.cmi : \
+    ocamldoc/odoc_types.cmi \
+    ocamldoc/odoc_module.cmi
+ocamldoc/odoc_comments_global.cmo : \
+    ocamldoc/odoc_comments_global.cmi
+ocamldoc/odoc_comments_global.cmx : \
+    ocamldoc/odoc_comments_global.cmi
+ocamldoc/odoc_comments_global.cmi :
+ocamldoc/odoc_config.cmo : \
+    utils/config.cmi \
+    ocamldoc/odoc_config.cmi
+ocamldoc/odoc_config.cmx : \
+    utils/config.cmx \
+    ocamldoc/odoc_config.cmi
+ocamldoc/odoc_config.cmi :
+ocamldoc/odoc_cross.cmo : \
+    otherlibs/str/str.cmi \
+    ocamldoc/odoc_value.cmi \
+    ocamldoc/odoc_types.cmi \
+    ocamldoc/odoc_type.cmi \
+    ocamldoc/odoc_search.cmi \
+    ocamldoc/odoc_scan.cmi \
+    ocamldoc/odoc_parameter.cmi \
+    ocamldoc/odoc_name.cmi \
+    ocamldoc/odoc_module.cmi \
+    ocamldoc/odoc_misc.cmi \
+    ocamldoc/odoc_messages.cmi \
+    ocamldoc/odoc_global.cmi \
+    ocamldoc/odoc_extension.cmi \
+    ocamldoc/odoc_exception.cmi \
+    ocamldoc/odoc_class.cmi \
+    utils/misc.cmi \
+    ocamldoc/odoc_cross.cmi
+ocamldoc/odoc_cross.cmx : \
+    otherlibs/str/str.cmx \
+    ocamldoc/odoc_value.cmx \
+    ocamldoc/odoc_types.cmx \
+    ocamldoc/odoc_type.cmx \
+    ocamldoc/odoc_search.cmx \
+    ocamldoc/odoc_scan.cmx \
+    ocamldoc/odoc_parameter.cmx \
+    ocamldoc/odoc_name.cmx \
+    ocamldoc/odoc_module.cmx \
+    ocamldoc/odoc_misc.cmx \
+    ocamldoc/odoc_messages.cmx \
+    ocamldoc/odoc_global.cmx \
+    ocamldoc/odoc_extension.cmx \
+    ocamldoc/odoc_exception.cmx \
+    ocamldoc/odoc_class.cmx \
+    utils/misc.cmx \
+    ocamldoc/odoc_cross.cmi
+ocamldoc/odoc_cross.cmi : \
+    ocamldoc/odoc_types.cmi \
+    ocamldoc/odoc_module.cmi
+ocamldoc/odoc_dag2html.cmo : \
+    ocamldoc/odoc_info.cmi \
+    ocamldoc/odoc_dag2html.cmi
+ocamldoc/odoc_dag2html.cmx : \
+    ocamldoc/odoc_info.cmx \
+    ocamldoc/odoc_dag2html.cmi
+ocamldoc/odoc_dag2html.cmi : \
+    ocamldoc/odoc_info.cmi
+ocamldoc/odoc_dep.cmo : \
+    otherlibs/str/str.cmi \
+    parsing/parsetree.cmi \
+    ocamldoc/odoc_type.cmi \
+    ocamldoc/odoc_print.cmi \
+    ocamldoc/odoc_module.cmi \
+    utils/misc.cmi \
+    parsing/depend.cmi \
+    ocamldoc/odoc_dep.cmi
+ocamldoc/odoc_dep.cmx : \
+    otherlibs/str/str.cmx \
+    parsing/parsetree.cmi \
+    ocamldoc/odoc_type.cmx \
+    ocamldoc/odoc_print.cmx \
+    ocamldoc/odoc_module.cmx \
+    utils/misc.cmx \
+    parsing/depend.cmx \
+    ocamldoc/odoc_dep.cmi
+ocamldoc/odoc_dep.cmi : \
+    parsing/parsetree.cmi \
+    ocamldoc/odoc_type.cmi \
+    ocamldoc/odoc_module.cmi \
+    utils/misc.cmi
+ocamldoc/odoc_dot.cmo : \
+    ocamldoc/odoc_messages.cmi \
+    ocamldoc/odoc_info.cmi \
+    ocamldoc/odoc_dot.cmi
+ocamldoc/odoc_dot.cmx : \
+    ocamldoc/odoc_messages.cmx \
+    ocamldoc/odoc_info.cmx \
+    ocamldoc/odoc_dot.cmi
+ocamldoc/odoc_dot.cmi : \
+    ocamldoc/odoc_info.cmi
+ocamldoc/odoc_env.cmo : \
+    typing/types.cmi \
+    typing/predef.cmi \
+    typing/path.cmi \
+    ocamldoc/odoc_name.cmi \
+    typing/btype.cmi \
+    ocamldoc/odoc_env.cmi
+ocamldoc/odoc_env.cmx : \
+    typing/types.cmx \
+    typing/predef.cmx \
+    typing/path.cmx \
+    ocamldoc/odoc_name.cmx \
+    typing/btype.cmx \
+    ocamldoc/odoc_env.cmi
+ocamldoc/odoc_env.cmi : \
+    typing/types.cmi \
+    ocamldoc/odoc_name.cmi
+ocamldoc/odoc_exception.cmo : \
+    typing/types.cmi \
+    ocamldoc/odoc_types.cmi \
+    ocamldoc/odoc_type.cmi \
+    ocamldoc/odoc_name.cmi \
+    ocamldoc/odoc_exception.cmi
+ocamldoc/odoc_exception.cmx : \
+    typing/types.cmx \
+    ocamldoc/odoc_types.cmx \
+    ocamldoc/odoc_type.cmx \
+    ocamldoc/odoc_name.cmx \
+    ocamldoc/odoc_exception.cmi
+ocamldoc/odoc_exception.cmi : \
+    typing/types.cmi \
+    ocamldoc/odoc_types.cmi \
+    ocamldoc/odoc_type.cmi \
+    ocamldoc/odoc_name.cmi
+ocamldoc/odoc_extension.cmo : \
+    typing/types.cmi \
+    ocamldoc/odoc_types.cmi \
+    ocamldoc/odoc_type.cmi \
+    ocamldoc/odoc_name.cmi \
+    parsing/asttypes.cmi \
+    ocamldoc/odoc_extension.cmi
+ocamldoc/odoc_extension.cmx : \
+    typing/types.cmx \
+    ocamldoc/odoc_types.cmx \
+    ocamldoc/odoc_type.cmx \
+    ocamldoc/odoc_name.cmx \
+    parsing/asttypes.cmx \
+    ocamldoc/odoc_extension.cmi
+ocamldoc/odoc_extension.cmi : \
+    typing/types.cmi \
+    ocamldoc/odoc_types.cmi \
+    ocamldoc/odoc_type.cmi \
+    ocamldoc/odoc_name.cmi \
+    parsing/asttypes.cmi
+ocamldoc/odoc_gen.cmo : \
+    ocamldoc/odoc_texi.cmi \
+    ocamldoc/odoc_module.cmi \
+    ocamldoc/odoc_man.cmi \
+    ocamldoc/odoc_latex.cmi \
+    ocamldoc/odoc_html.cmi \
+    ocamldoc/odoc_dot.cmi \
+    ocamldoc/odoc_gen.cmi
+ocamldoc/odoc_gen.cmx : \
+    ocamldoc/odoc_texi.cmx \
+    ocamldoc/odoc_module.cmx \
+    ocamldoc/odoc_man.cmx \
+    ocamldoc/odoc_latex.cmx \
+    ocamldoc/odoc_html.cmx \
+    ocamldoc/odoc_dot.cmx \
+    ocamldoc/odoc_gen.cmi
+ocamldoc/odoc_gen.cmi : \
+    ocamldoc/odoc_texi.cmi \
+    ocamldoc/odoc_module.cmi \
+    ocamldoc/odoc_man.cmi \
+    ocamldoc/odoc_latex.cmi \
+    ocamldoc/odoc_html.cmi \
+    ocamldoc/odoc_dot.cmi
+ocamldoc/odoc_global.cmo : \
+    ocamldoc/odoc_types.cmi \
+    ocamldoc/odoc_messages.cmi \
+    ocamldoc/odoc_config.cmi \
+    utils/clflags.cmi \
+    ocamldoc/odoc_global.cmi
+ocamldoc/odoc_global.cmx : \
+    ocamldoc/odoc_types.cmx \
+    ocamldoc/odoc_messages.cmx \
+    ocamldoc/odoc_config.cmx \
+    utils/clflags.cmx \
+    ocamldoc/odoc_global.cmi
+ocamldoc/odoc_global.cmi : \
+    ocamldoc/odoc_types.cmi
+ocamldoc/odoc_html.cmo : \
+    otherlibs/str/str.cmi \
+    middle_end/flambda/parameter.cmi \
+    ocamldoc/odoc_text.cmi \
+    ocamldoc/odoc_ocamlhtml.cmi \
+    ocamldoc/odoc_messages.cmi \
+    ocamldoc/odoc_info.cmi \
+    ocamldoc/odoc_global.cmi \
+    ocamldoc/odoc_dag2html.cmi \
+    utils/misc.cmi \
+    parsing/asttypes.cmi \
+    ocamldoc/odoc_html.cmi
+ocamldoc/odoc_html.cmx : \
+    otherlibs/str/str.cmx \
+    middle_end/flambda/parameter.cmx \
+    ocamldoc/odoc_text.cmx \
+    ocamldoc/odoc_ocamlhtml.cmx \
+    ocamldoc/odoc_messages.cmx \
+    ocamldoc/odoc_info.cmx \
+    ocamldoc/odoc_global.cmx \
+    ocamldoc/odoc_dag2html.cmx \
+    utils/misc.cmx \
+    parsing/asttypes.cmx \
+    ocamldoc/odoc_html.cmi
+ocamldoc/odoc_html.cmi : \
+    typing/types.cmi \
+    ocamldoc/odoc_types.cmi \
+    ocamldoc/odoc_parameter.cmi \
+    ocamldoc/odoc_info.cmi \
+    ocamldoc/odoc_dag2html.cmi \
+    utils/misc.cmi
+ocamldoc/odoc_info.cmo : \
+    typing/printtyp.cmi \
+    ocamldoc/odoc_value.cmi \
+    ocamldoc/odoc_types.cmi \
+    ocamldoc/odoc_type.cmi \
+    ocamldoc/odoc_text.cmi \
+    ocamldoc/odoc_str.cmi \
+    ocamldoc/odoc_search.cmi \
+    ocamldoc/odoc_scan.cmi \
+    ocamldoc/odoc_print.cmi \
+    ocamldoc/odoc_parameter.cmi \
+    ocamldoc/odoc_name.cmi \
+    ocamldoc/odoc_module.cmi \
+    ocamldoc/odoc_misc.cmi \
+    ocamldoc/odoc_global.cmi \
+    ocamldoc/odoc_extension.cmi \
+    ocamldoc/odoc_exception.cmi \
+    ocamldoc/odoc_dep.cmi \
+    ocamldoc/odoc_config.cmi \
+    ocamldoc/odoc_comments.cmi \
+    ocamldoc/odoc_class.cmi \
+    ocamldoc/odoc_analyse.cmi \
+    parsing/location.cmi \
+    ocamldoc/odoc_info.cmi
+ocamldoc/odoc_info.cmx : \
+    typing/printtyp.cmx \
+    ocamldoc/odoc_value.cmx \
+    ocamldoc/odoc_types.cmx \
+    ocamldoc/odoc_type.cmx \
+    ocamldoc/odoc_text.cmx \
+    ocamldoc/odoc_str.cmx \
+    ocamldoc/odoc_search.cmx \
+    ocamldoc/odoc_scan.cmx \
+    ocamldoc/odoc_print.cmx \
+    ocamldoc/odoc_parameter.cmx \
+    ocamldoc/odoc_name.cmx \
+    ocamldoc/odoc_module.cmx \
+    ocamldoc/odoc_misc.cmx \
+    ocamldoc/odoc_global.cmx \
+    ocamldoc/odoc_extension.cmx \
+    ocamldoc/odoc_exception.cmx \
+    ocamldoc/odoc_dep.cmx \
+    ocamldoc/odoc_config.cmx \
+    ocamldoc/odoc_comments.cmx \
+    ocamldoc/odoc_class.cmx \
+    ocamldoc/odoc_analyse.cmx \
+    parsing/location.cmx \
+    ocamldoc/odoc_info.cmi
+ocamldoc/odoc_info.cmi : \
+    typing/types.cmi \
+    otherlibs/str/str.cmi \
+    ocamldoc/odoc_value.cmi \
+    ocamldoc/odoc_types.cmi \
+    ocamldoc/odoc_type.cmi \
+    ocamldoc/odoc_search.cmi \
+    ocamldoc/odoc_parameter.cmi \
+    ocamldoc/odoc_module.cmi \
+    ocamldoc/odoc_global.cmi \
+    ocamldoc/odoc_extension.cmi \
+    ocamldoc/odoc_exception.cmi \
+    ocamldoc/odoc_class.cmi \
+    parsing/location.cmi \
+    parsing/asttypes.cmi
+ocamldoc/odoc_latex.cmo : \
+    otherlibs/str/str.cmi \
+    ocamldoc/odoc_to_text.cmi \
+    ocamldoc/odoc_messages.cmi \
+    ocamldoc/odoc_latex_style.cmi \
+    ocamldoc/odoc_info.cmi \
+    parsing/asttypes.cmi \
+    ocamldoc/odoc_latex.cmi
+ocamldoc/odoc_latex.cmx : \
+    otherlibs/str/str.cmx \
+    ocamldoc/odoc_to_text.cmx \
+    ocamldoc/odoc_messages.cmx \
+    ocamldoc/odoc_latex_style.cmx \
+    ocamldoc/odoc_info.cmx \
+    parsing/asttypes.cmx \
+    ocamldoc/odoc_latex.cmi
+ocamldoc/odoc_latex.cmi : \
+    typing/types.cmi \
+    otherlibs/str/str.cmi \
+    ocamldoc/odoc_types.cmi \
+    ocamldoc/odoc_info.cmi
+ocamldoc/odoc_latex_style.cmo : \
+    ocamldoc/odoc_latex_style.cmi
+ocamldoc/odoc_latex_style.cmx : \
+    ocamldoc/odoc_latex_style.cmi
+ocamldoc/odoc_latex_style.cmi :
+ocamldoc/odoc_lexer.cmo : \
+    otherlibs/str/str.cmi \
+    ocamldoc/odoc_parser.cmi \
+    ocamldoc/odoc_messages.cmi \
+    ocamldoc/odoc_global.cmi \
+    ocamldoc/odoc_comments_global.cmi \
+    ocamldoc/odoc_lexer.cmi
+ocamldoc/odoc_lexer.cmx : \
+    otherlibs/str/str.cmx \
+    ocamldoc/odoc_parser.cmx \
+    ocamldoc/odoc_messages.cmx \
+    ocamldoc/odoc_global.cmx \
+    ocamldoc/odoc_comments_global.cmx \
+    ocamldoc/odoc_lexer.cmi
+ocamldoc/odoc_lexer.cmi : \
+    ocamldoc/odoc_parser.cmi
+ocamldoc/odoc_man.cmo : \
+    otherlibs/str/str.cmi \
+    middle_end/flambda/parameter.cmi \
+    ocamldoc/odoc_str.cmi \
+    ocamldoc/odoc_print.cmi \
+    ocamldoc/odoc_misc.cmi \
+    ocamldoc/odoc_messages.cmi \
+    ocamldoc/odoc_info.cmi \
+    parsing/asttypes.cmi \
+    ocamldoc/odoc_man.cmi
+ocamldoc/odoc_man.cmx : \
+    otherlibs/str/str.cmx \
+    middle_end/flambda/parameter.cmx \
+    ocamldoc/odoc_str.cmx \
+    ocamldoc/odoc_print.cmx \
+    ocamldoc/odoc_misc.cmx \
+    ocamldoc/odoc_messages.cmx \
+    ocamldoc/odoc_info.cmx \
+    parsing/asttypes.cmx \
+    ocamldoc/odoc_man.cmi
+ocamldoc/odoc_man.cmi : \
+    typing/types.cmi \
+    ocamldoc/odoc_types.cmi \
+    ocamldoc/odoc_info.cmi
+ocamldoc/odoc_merge.cmo : \
+    otherlibs/str/str.cmi \
+    ocamldoc/odoc_value.cmi \
+    ocamldoc/odoc_types.cmi \
+    ocamldoc/odoc_type.cmi \
+    ocamldoc/odoc_parameter.cmi \
+    ocamldoc/odoc_module.cmi \
+    ocamldoc/odoc_messages.cmi \
+    ocamldoc/odoc_global.cmi \
+    ocamldoc/odoc_extension.cmi \
+    ocamldoc/odoc_exception.cmi \
+    ocamldoc/odoc_class.cmi \
+    ocamldoc/odoc_merge.cmi
+ocamldoc/odoc_merge.cmx : \
+    otherlibs/str/str.cmx \
+    ocamldoc/odoc_value.cmx \
+    ocamldoc/odoc_types.cmx \
+    ocamldoc/odoc_type.cmx \
+    ocamldoc/odoc_parameter.cmx \
+    ocamldoc/odoc_module.cmx \
+    ocamldoc/odoc_messages.cmx \
+    ocamldoc/odoc_global.cmx \
+    ocamldoc/odoc_extension.cmx \
+    ocamldoc/odoc_exception.cmx \
+    ocamldoc/odoc_class.cmx \
+    ocamldoc/odoc_merge.cmi
+ocamldoc/odoc_merge.cmi : \
+    ocamldoc/odoc_types.cmi \
+    ocamldoc/odoc_module.cmi
+ocamldoc/odoc_messages.cmo : \
+    otherlibs/str/str.cmi \
+    utils/config.cmi \
+    ocamldoc/odoc_messages.cmi
+ocamldoc/odoc_messages.cmx : \
+    otherlibs/str/str.cmx \
+    utils/config.cmx \
+    ocamldoc/odoc_messages.cmi
+ocamldoc/odoc_messages.cmi :
+ocamldoc/odoc_misc.cmo : \
+    otherlibs/unix/unix.cmi \
+    typing/types.cmi \
+    typing/predef.cmi \
+    typing/path.cmi \
+    ocamldoc/odoc_types.cmi \
+    ocamldoc/odoc_messages.cmi \
+    parsing/longident.cmi \
+    typing/btype.cmi \
+    ocamldoc/odoc_misc.cmi
+ocamldoc/odoc_misc.cmx : \
+    otherlibs/unix/unix.cmx \
+    typing/types.cmx \
+    typing/predef.cmx \
+    typing/path.cmx \
+    ocamldoc/odoc_types.cmx \
+    ocamldoc/odoc_messages.cmx \
+    parsing/longident.cmx \
+    typing/btype.cmx \
+    ocamldoc/odoc_misc.cmi
+ocamldoc/odoc_misc.cmi : \
+    typing/types.cmi \
+    ocamldoc/odoc_types.cmi \
+    parsing/longident.cmi \
+    parsing/asttypes.cmi
+ocamldoc/odoc_module.cmo : \
+    typing/types.cmi \
+    ocamldoc/odoc_value.cmi \
+    ocamldoc/odoc_types.cmi \
+    ocamldoc/odoc_type.cmi \
+    ocamldoc/odoc_name.cmi \
+    ocamldoc/odoc_extension.cmi \
+    ocamldoc/odoc_exception.cmi \
+    ocamldoc/odoc_class.cmi \
+    utils/misc.cmi \
+    ocamldoc/odoc_module.cmi
+ocamldoc/odoc_module.cmx : \
+    typing/types.cmx \
+    ocamldoc/odoc_value.cmx \
+    ocamldoc/odoc_types.cmx \
+    ocamldoc/odoc_type.cmx \
+    ocamldoc/odoc_name.cmx \
+    ocamldoc/odoc_extension.cmx \
+    ocamldoc/odoc_exception.cmx \
+    ocamldoc/odoc_class.cmx \
+    utils/misc.cmx \
+    ocamldoc/odoc_module.cmi
+ocamldoc/odoc_module.cmi : \
+    typing/types.cmi \
+    ocamldoc/odoc_value.cmi \
+    ocamldoc/odoc_types.cmi \
+    ocamldoc/odoc_type.cmi \
+    ocamldoc/odoc_name.cmi \
+    ocamldoc/odoc_extension.cmi \
+    ocamldoc/odoc_exception.cmi \
+    ocamldoc/odoc_class.cmi \
+    utils/misc.cmi
+ocamldoc/odoc_name.cmo : \
+    parsing/unit_info.cmi \
+    otherlibs/str/str.cmi \
+    typing/path.cmi \
+    ocamldoc/odoc_misc.cmi \
+    typing/ident.cmi \
+    ocamldoc/odoc_name.cmi
+ocamldoc/odoc_name.cmx : \
+    parsing/unit_info.cmx \
+    otherlibs/str/str.cmx \
+    typing/path.cmx \
+    ocamldoc/odoc_misc.cmx \
+    typing/ident.cmx \
+    ocamldoc/odoc_name.cmi
+ocamldoc/odoc_name.cmi : \
+    typing/path.cmi \
+    parsing/longident.cmi \
+    typing/ident.cmi
+ocamldoc/odoc_ocamlhtml.cmo : \
+    otherlibs/str/str.cmi \
+    ocamldoc/odoc_ocamlhtml.cmi
+ocamldoc/odoc_ocamlhtml.cmx : \
+    otherlibs/str/str.cmx \
+    ocamldoc/odoc_ocamlhtml.cmi
+ocamldoc/odoc_ocamlhtml.cmi :
+ocamldoc/odoc_parameter.cmo : \
+    typing/types.cmi \
+    ocamldoc/odoc_types.cmi \
+    ocamldoc/odoc_parameter.cmi
+ocamldoc/odoc_parameter.cmx : \
+    typing/types.cmx \
+    ocamldoc/odoc_types.cmx \
+    ocamldoc/odoc_parameter.cmi
+ocamldoc/odoc_parameter.cmi : \
+    typing/types.cmi \
+    ocamldoc/odoc_types.cmi
+ocamldoc/odoc_parser.cmo : \
+    ocamldoc/odoc_types.cmi \
+    ocamldoc/odoc_comments_global.cmi \
+    ocamldoc/odoc_parser.cmi
+ocamldoc/odoc_parser.cmx : \
+    ocamldoc/odoc_types.cmx \
+    ocamldoc/odoc_comments_global.cmx \
+    ocamldoc/odoc_parser.cmi
+ocamldoc/odoc_parser.cmi : \
+    ocamldoc/odoc_types.cmi
+ocamldoc/odoc_print.cmo : \
+    typing/types.cmi \
+    typing/printtyp.cmi \
+    typing/btype.cmi \
+    ocamldoc/odoc_print.cmi
+ocamldoc/odoc_print.cmx : \
+    typing/types.cmx \
+    typing/printtyp.cmx \
+    typing/btype.cmx \
+    ocamldoc/odoc_print.cmi
+ocamldoc/odoc_print.cmi : \
+    typing/types.cmi
+ocamldoc/odoc_scan.cmo : \
+    ocamldoc/odoc_value.cmi \
+    ocamldoc/odoc_types.cmi \
+    ocamldoc/odoc_type.cmi \
+    ocamldoc/odoc_module.cmi \
+    ocamldoc/odoc_extension.cmi \
+    ocamldoc/odoc_exception.cmi \
+    ocamldoc/odoc_class.cmi \
+    ocamldoc/odoc_scan.cmi
+ocamldoc/odoc_scan.cmx : \
+    ocamldoc/odoc_value.cmx \
+    ocamldoc/odoc_types.cmx \
+    ocamldoc/odoc_type.cmx \
+    ocamldoc/odoc_module.cmx \
+    ocamldoc/odoc_extension.cmx \
+    ocamldoc/odoc_exception.cmx \
+    ocamldoc/odoc_class.cmx \
+    ocamldoc/odoc_scan.cmi
+ocamldoc/odoc_scan.cmi : \
+    ocamldoc/odoc_value.cmi \
+    ocamldoc/odoc_types.cmi \
+    ocamldoc/odoc_type.cmi \
+    ocamldoc/odoc_module.cmi \
+    ocamldoc/odoc_extension.cmi \
+    ocamldoc/odoc_exception.cmi \
+    ocamldoc/odoc_class.cmi
+ocamldoc/odoc_search.cmo : \
+    otherlibs/str/str.cmi \
+    ocamldoc/odoc_value.cmi \
+    ocamldoc/odoc_types.cmi \
+    ocamldoc/odoc_type.cmi \
+    ocamldoc/odoc_module.cmi \
+    ocamldoc/odoc_misc.cmi \
+    ocamldoc/odoc_extension.cmi \
+    ocamldoc/odoc_exception.cmi \
+    ocamldoc/odoc_class.cmi \
+    ocamldoc/odoc_search.cmi
+ocamldoc/odoc_search.cmx : \
+    otherlibs/str/str.cmx \
+    ocamldoc/odoc_value.cmx \
+    ocamldoc/odoc_types.cmx \
+    ocamldoc/odoc_type.cmx \
+    ocamldoc/odoc_module.cmx \
+    ocamldoc/odoc_misc.cmx \
+    ocamldoc/odoc_extension.cmx \
+    ocamldoc/odoc_exception.cmx \
+    ocamldoc/odoc_class.cmx \
+    ocamldoc/odoc_search.cmi
+ocamldoc/odoc_search.cmi : \
+    otherlibs/str/str.cmi \
+    ocamldoc/odoc_value.cmi \
+    ocamldoc/odoc_types.cmi \
+    ocamldoc/odoc_type.cmi \
+    ocamldoc/odoc_module.cmi \
+    ocamldoc/odoc_extension.cmi \
+    ocamldoc/odoc_exception.cmi \
+    ocamldoc/odoc_class.cmi
+ocamldoc/odoc_see_lexer.cmo : \
+    ocamldoc/odoc_parser.cmi \
+    ocamldoc/odoc_see_lexer.cmi
+ocamldoc/odoc_see_lexer.cmx : \
+    ocamldoc/odoc_parser.cmx \
+    ocamldoc/odoc_see_lexer.cmi
+ocamldoc/odoc_see_lexer.cmi : \
+    ocamldoc/odoc_parser.cmi
+ocamldoc/odoc_sig.cmo : \
+    parsing/unit_info.cmi \
+    typing/types.cmi \
+    typing/typedtree.cmi \
+    parsing/parsetree.cmi \
+    ocamldoc/odoc_value.cmi \
+    ocamldoc/odoc_types.cmi \
+    ocamldoc/odoc_type.cmi \
+    ocamldoc/odoc_parameter.cmi \
+    ocamldoc/odoc_module.cmi \
+    ocamldoc/odoc_misc.cmi \
+    ocamldoc/odoc_messages.cmi \
+    ocamldoc/odoc_merge.cmi \
+    ocamldoc/odoc_global.cmi \
+    ocamldoc/odoc_extension.cmi \
+    ocamldoc/odoc_exception.cmi \
+    ocamldoc/odoc_env.cmi \
+    ocamldoc/odoc_class.cmi \
+    parsing/longident.cmi \
+    parsing/location.cmi \
+    typing/ident.cmi \
+    typing/ctype.cmi \
+    typing/btype.cmi \
+    parsing/asttypes.cmi \
+    ocamldoc/odoc_sig.cmi
+ocamldoc/odoc_sig.cmx : \
+    parsing/unit_info.cmx \
+    typing/types.cmx \
+    typing/typedtree.cmx \
+    parsing/parsetree.cmi \
+    ocamldoc/odoc_value.cmx \
+    ocamldoc/odoc_types.cmx \
+    ocamldoc/odoc_type.cmx \
+    ocamldoc/odoc_parameter.cmx \
+    ocamldoc/odoc_module.cmx \
+    ocamldoc/odoc_misc.cmx \
+    ocamldoc/odoc_messages.cmx \
+    ocamldoc/odoc_merge.cmx \
+    ocamldoc/odoc_global.cmx \
+    ocamldoc/odoc_extension.cmx \
+    ocamldoc/odoc_exception.cmx \
+    ocamldoc/odoc_env.cmx \
+    ocamldoc/odoc_class.cmx \
+    parsing/longident.cmx \
+    parsing/location.cmx \
+    typing/ident.cmx \
+    typing/ctype.cmx \
+    typing/btype.cmx \
+    parsing/asttypes.cmx \
+    ocamldoc/odoc_sig.cmi
+ocamldoc/odoc_sig.cmi : \
+    typing/types.cmi \
+    typing/typedtree.cmi \
+    parsing/parsetree.cmi \
+    ocamldoc/odoc_types.cmi \
+    ocamldoc/odoc_type.cmi \
+    ocamldoc/odoc_name.cmi \
+    ocamldoc/odoc_module.cmi \
+    ocamldoc/odoc_env.cmi \
+    ocamldoc/odoc_class.cmi \
+    parsing/location.cmi
+ocamldoc/odoc_str.cmo : \
+    typing/types.cmi \
+    typing/printtyp.cmi \
+    ocamldoc/odoc_value.cmi \
+    ocamldoc/odoc_type.cmi \
+    ocamldoc/odoc_print.cmi \
+    ocamldoc/odoc_name.cmi \
+    ocamldoc/odoc_misc.cmi \
+    ocamldoc/odoc_messages.cmi \
+    ocamldoc/odoc_extension.cmi \
+    ocamldoc/odoc_exception.cmi \
+    ocamldoc/odoc_class.cmi \
+    parsing/asttypes.cmi \
+    ocamldoc/odoc_str.cmi
+ocamldoc/odoc_str.cmx : \
+    typing/types.cmx \
+    typing/printtyp.cmx \
+    ocamldoc/odoc_value.cmx \
+    ocamldoc/odoc_type.cmx \
+    ocamldoc/odoc_print.cmx \
+    ocamldoc/odoc_name.cmx \
+    ocamldoc/odoc_misc.cmx \
+    ocamldoc/odoc_messages.cmx \
+    ocamldoc/odoc_extension.cmx \
+    ocamldoc/odoc_exception.cmx \
+    ocamldoc/odoc_class.cmx \
+    parsing/asttypes.cmx \
+    ocamldoc/odoc_str.cmi
+ocamldoc/odoc_str.cmi : \
+    typing/types.cmi \
+    ocamldoc/odoc_value.cmi \
+    ocamldoc/odoc_type.cmi \
+    ocamldoc/odoc_extension.cmi \
+    ocamldoc/odoc_exception.cmi \
+    ocamldoc/odoc_class.cmi
+ocamldoc/odoc_test.cmo : \
+    ocamldoc/odoc_info.cmi \
+    ocamldoc/odoc_gen.cmi \
+    ocamldoc/odoc_args.cmi \
+    ocamldoc/odoc_test.cmi
+ocamldoc/odoc_test.cmx : \
+    ocamldoc/odoc_info.cmx \
+    ocamldoc/odoc_gen.cmx \
+    ocamldoc/odoc_args.cmx \
+    ocamldoc/odoc_test.cmi
+ocamldoc/odoc_test.cmi :
+ocamldoc/odoc_texi.cmo : \
+    typing/types.cmi \
+    otherlibs/str/str.cmi \
+    ocamldoc/odoc_to_text.cmi \
+    ocamldoc/odoc_messages.cmi \
+    ocamldoc/odoc_info.cmi \
+    parsing/asttypes.cmi \
+    ocamldoc/odoc_texi.cmi
+ocamldoc/odoc_texi.cmx : \
+    typing/types.cmx \
+    otherlibs/str/str.cmx \
+    ocamldoc/odoc_to_text.cmx \
+    ocamldoc/odoc_messages.cmx \
+    ocamldoc/odoc_info.cmx \
+    parsing/asttypes.cmx \
+    ocamldoc/odoc_texi.cmi
+ocamldoc/odoc_texi.cmi : \
+    typing/types.cmi \
+    ocamldoc/odoc_types.cmi \
+    ocamldoc/odoc_info.cmi
+ocamldoc/odoc_text.cmo : \
+    ocamldoc/odoc_types.cmi \
+    ocamldoc/odoc_text_parser.cmi \
+    ocamldoc/odoc_text_lexer.cmi \
+    ocamldoc/odoc_text.cmi
+ocamldoc/odoc_text.cmx : \
+    ocamldoc/odoc_types.cmx \
+    ocamldoc/odoc_text_parser.cmx \
+    ocamldoc/odoc_text_lexer.cmx \
+    ocamldoc/odoc_text.cmi
+ocamldoc/odoc_text.cmi : \
+    ocamldoc/odoc_types.cmi
+ocamldoc/odoc_text_lexer.cmo : \
+    otherlibs/str/str.cmi \
+    ocamldoc/odoc_text_parser.cmi \
+    ocamldoc/odoc_misc.cmi \
+    ocamldoc/odoc_text_lexer.cmi
+ocamldoc/odoc_text_lexer.cmx : \
+    otherlibs/str/str.cmx \
+    ocamldoc/odoc_text_parser.cmx \
+    ocamldoc/odoc_misc.cmx \
+    ocamldoc/odoc_text_lexer.cmi
+ocamldoc/odoc_text_lexer.cmi : \
+    ocamldoc/odoc_text_parser.cmi
+ocamldoc/odoc_text_parser.cmo : \
+    otherlibs/str/str.cmi \
+    ocamldoc/odoc_types.cmi \
+    ocamldoc/odoc_misc.cmi \
+    ocamldoc/odoc_text_parser.cmi
+ocamldoc/odoc_text_parser.cmx : \
+    otherlibs/str/str.cmx \
+    ocamldoc/odoc_types.cmx \
+    ocamldoc/odoc_misc.cmx \
+    ocamldoc/odoc_text_parser.cmi
+ocamldoc/odoc_text_parser.cmi : \
+    ocamldoc/odoc_types.cmi
+ocamldoc/odoc_to_text.cmo : \
+    otherlibs/str/str.cmi \
+    middle_end/flambda/parameter.cmi \
+    ocamldoc/odoc_str.cmi \
+    ocamldoc/odoc_module.cmi \
+    ocamldoc/odoc_messages.cmi \
+    ocamldoc/odoc_info.cmi \
+    ocamldoc/odoc_to_text.cmi
+ocamldoc/odoc_to_text.cmx : \
+    otherlibs/str/str.cmx \
+    middle_end/flambda/parameter.cmx \
+    ocamldoc/odoc_str.cmx \
+    ocamldoc/odoc_module.cmx \
+    ocamldoc/odoc_messages.cmx \
+    ocamldoc/odoc_info.cmx \
+    ocamldoc/odoc_to_text.cmi
+ocamldoc/odoc_to_text.cmi : \
+    typing/types.cmi \
+    ocamldoc/odoc_types.cmi \
+    ocamldoc/odoc_info.cmi
+ocamldoc/odoc_type.cmo : \
+    typing/types.cmi \
+    ocamldoc/odoc_types.cmi \
+    ocamldoc/odoc_name.cmi \
+    parsing/asttypes.cmi \
+    ocamldoc/odoc_type.cmi
+ocamldoc/odoc_type.cmx : \
+    typing/types.cmx \
+    ocamldoc/odoc_types.cmx \
+    ocamldoc/odoc_name.cmx \
+    parsing/asttypes.cmx \
+    ocamldoc/odoc_type.cmi
+ocamldoc/odoc_type.cmi : \
+    typing/types.cmi \
+    ocamldoc/odoc_types.cmi \
+    ocamldoc/odoc_name.cmi \
+    parsing/asttypes.cmi
+ocamldoc/odoc_types.cmo : \
+    ocamldoc/odoc_messages.cmi \
+    parsing/location.cmi \
+    ocamldoc/odoc_types.cmi
+ocamldoc/odoc_types.cmx : \
+    ocamldoc/odoc_messages.cmx \
+    parsing/location.cmx \
+    ocamldoc/odoc_types.cmi
+ocamldoc/odoc_types.cmi : \
+    parsing/location.cmi
+ocamldoc/odoc_value.cmo : \
+    typing/types.cmi \
+    ocamldoc/odoc_types.cmi \
+    ocamldoc/odoc_parameter.cmi \
+    ocamldoc/odoc_name.cmi \
+    ocamldoc/odoc_misc.cmi \
+    parsing/asttypes.cmi \
+    ocamldoc/odoc_value.cmi
+ocamldoc/odoc_value.cmx : \
+    typing/types.cmx \
+    ocamldoc/odoc_types.cmx \
+    ocamldoc/odoc_parameter.cmx \
+    ocamldoc/odoc_name.cmx \
+    ocamldoc/odoc_misc.cmx \
+    parsing/asttypes.cmx \
+    ocamldoc/odoc_value.cmi
+ocamldoc/odoc_value.cmi : \
+    typing/types.cmi \
+    ocamldoc/odoc_types.cmi \
+    ocamldoc/odoc_parameter.cmi \
+    ocamldoc/odoc_name.cmi
+ocamltest/actions.cmo : \
+    ocamltest/variables.cmi \
+    ocamltest/result.cmi \
+    ocamltest/environments.cmi \
+    ocamltest/actions.cmi
+ocamltest/actions.cmx : \
+    ocamltest/variables.cmx \
+    ocamltest/result.cmx \
+    ocamltest/environments.cmx \
+    ocamltest/actions.cmi
+ocamltest/actions.cmi : \
+    ocamltest/variables.cmi \
+    ocamltest/result.cmi \
+    ocamltest/environments.cmi
+ocamltest/actions_helpers.cmo : \
+    ocamltest/variables.cmi \
+    otherlibs/unix/unix.cmi \
+    ocamltest/strace.cmi \
+    ocamltest/run_command.cmi \
+    ocamltest/result.cmi \
+    ocamltest/ocamltest_stdlib.cmi \
+    ocamltest/modifier_parser.cmi \
+    ocamltest/filecompare.cmi \
+    ocamltest/environments.cmi \
+    ocamltest/builtin_variables.cmi \
+    ocamltest/actions.cmi \
+    ocamltest/actions_helpers.cmi
+ocamltest/actions_helpers.cmx : \
+    ocamltest/variables.cmx \
+    otherlibs/unix/unix.cmx \
+    ocamltest/strace.cmx \
+    ocamltest/run_command.cmx \
+    ocamltest/result.cmx \
+    ocamltest/ocamltest_stdlib.cmx \
+    ocamltest/modifier_parser.cmx \
+    ocamltest/filecompare.cmx \
+    ocamltest/environments.cmx \
+    ocamltest/builtin_variables.cmx \
+    ocamltest/actions.cmx \
+    ocamltest/actions_helpers.cmi
+ocamltest/actions_helpers.cmi : \
+    ocamltest/variables.cmi \
+    ocamltest/result.cmi \
+    ocamltest/environments.cmi \
+    ocamltest/actions.cmi
+ocamltest/builtin_actions.cmo : \
+    otherlibs/unix/unix.cmi \
+    ocamltest/result.cmi \
+    ocamltest/ocamltest_stdlib.cmi \
+    ocamltest/ocamltest_config.cmi \
+    ocamltest/environments.cmi \
+    ocamltest/builtin_variables.cmi \
+    ocamltest/actions_helpers.cmi \
+    ocamltest/actions.cmi \
+    ocamltest/builtin_actions.cmi
+ocamltest/builtin_actions.cmx : \
+    otherlibs/unix/unix.cmx \
+    ocamltest/result.cmx \
+    ocamltest/ocamltest_stdlib.cmx \
+    ocamltest/ocamltest_config.cmx \
+    ocamltest/environments.cmx \
+    ocamltest/builtin_variables.cmx \
+    ocamltest/actions_helpers.cmx \
+    ocamltest/actions.cmx \
+    ocamltest/builtin_actions.cmi
+ocamltest/builtin_actions.cmi : \
+    ocamltest/actions.cmi
+ocamltest/builtin_variables.cmo : \
+    ocamltest/variables.cmi \
+    ocamltest/builtin_variables.cmi
+ocamltest/builtin_variables.cmx : \
+    ocamltest/variables.cmx \
+    ocamltest/builtin_variables.cmi
+ocamltest/builtin_variables.cmi : \
+    ocamltest/variables.cmi
+ocamltest/environments.cmo : \
+    ocamltest/variables.cmi \
+    ocamltest/ocamltest_stdlib.cmi \
+    ocamltest/environments.cmi
+ocamltest/environments.cmx : \
+    ocamltest/variables.cmx \
+    ocamltest/ocamltest_stdlib.cmx \
+    ocamltest/environments.cmi
+ocamltest/environments.cmi : \
+    ocamltest/variables.cmi
+ocamltest/filecompare.cmo : \
+    ocamltest/run_command.cmi \
+    ocamltest/ocamltest_stdlib.cmi \
+    ocamltest/ocamltest_config.cmi \
+    ocamltest/filecompare.cmi
+ocamltest/filecompare.cmx : \
+    ocamltest/run_command.cmx \
+    ocamltest/ocamltest_stdlib.cmx \
+    ocamltest/ocamltest_config.cmx \
+    ocamltest/filecompare.cmi
+ocamltest/filecompare.cmi :
+ocamltest/main.cmo : \
+    ocamltest/variables.cmi \
+    otherlibs/unix/unix.cmi \
+    ocamltest/tsl_semantics.cmi \
+    ocamltest/tsl_parser.cmi \
+    ocamltest/tsl_lexer.cmi \
+    ocamltest/tsl_ast.cmi \
+    ocamltest/translate.cmi \
+    ocamltest/tests.cmi \
+    ocamltest/result.cmi \
+    ocamltest/options.cmi \
+    ocamltest/ocamltest_stdlib.cmi \
+    ocamltest/ocaml_actions.cmi \
+    parsing/location.cmi \
+    ocamltest/environments.cmi \
+    ocamltest/builtin_variables.cmi \
+    ocamltest/actions_helpers.cmi \
+    ocamltest/actions.cmi \
+    ocamltest/main.cmi
+ocamltest/main.cmx : \
+    ocamltest/variables.cmx \
+    otherlibs/unix/unix.cmx \
+    ocamltest/tsl_semantics.cmx \
+    ocamltest/tsl_parser.cmx \
+    ocamltest/tsl_lexer.cmx \
+    ocamltest/tsl_ast.cmx \
+    ocamltest/translate.cmx \
+    ocamltest/tests.cmx \
+    ocamltest/result.cmx \
+    ocamltest/options.cmx \
+    ocamltest/ocamltest_stdlib.cmx \
+    ocamltest/ocaml_actions.cmx \
+    parsing/location.cmx \
+    ocamltest/environments.cmx \
+    ocamltest/builtin_variables.cmx \
+    ocamltest/actions_helpers.cmx \
+    ocamltest/actions.cmx \
+    ocamltest/main.cmi
+ocamltest/main.cmi :
+ocamltest/modifier_parser.cmo : \
+    ocamltest/variables.cmi \
+    ocamltest/tsl_lexer.cmi \
+    ocamltest/ocamltest_stdlib.cmi \
+    ocamltest/environments.cmi \
+    ocamltest/modifier_parser.cmi
+ocamltest/modifier_parser.cmx : \
+    ocamltest/variables.cmx \
+    ocamltest/tsl_lexer.cmx \
+    ocamltest/ocamltest_stdlib.cmx \
+    ocamltest/environments.cmx \
+    ocamltest/modifier_parser.cmi
+ocamltest/modifier_parser.cmi : \
+    ocamltest/environments.cmi
+ocamltest/ocaml_actions.cmo : \
+    ocamltest/result.cmi \
+    ocamltest/ocamltest_stdlib.cmi \
+    ocamltest/ocamltest_config.cmi \
+    ocamltest/ocaml_variables.cmi \
+    ocamltest/ocaml_toplevels.cmi \
+    ocamltest/ocaml_tools.cmi \
+    ocamltest/ocaml_modifiers.cmi \
+    ocamltest/ocaml_flags.cmi \
+    ocamltest/ocaml_filetypes.cmi \
+    ocamltest/ocaml_files.cmi \
+    ocamltest/ocaml_directories.cmi \
+    ocamltest/ocaml_compilers.cmi \
+    ocamltest/ocaml_commands.cmi \
+    ocamltest/ocaml_backends.cmi \
+    utils/misc.cmi \
+    ocamltest/filecompare.cmi \
+    ocamltest/environments.cmi \
+    utils/config.cmi \
+    file_formats/cmo_format.cmi \
+    utils/clflags.cmi \
+    ocamltest/builtin_variables.cmi \
+    ocamltest/actions_helpers.cmi \
+    ocamltest/actions.cmi \
+    ocamltest/ocaml_actions.cmi
+ocamltest/ocaml_actions.cmx : \
+    ocamltest/result.cmx \
+    ocamltest/ocamltest_stdlib.cmx \
+    ocamltest/ocamltest_config.cmx \
+    ocamltest/ocaml_variables.cmx \
+    ocamltest/ocaml_toplevels.cmx \
+    ocamltest/ocaml_tools.cmx \
+    ocamltest/ocaml_modifiers.cmx \
+    ocamltest/ocaml_flags.cmx \
+    ocamltest/ocaml_filetypes.cmx \
+    ocamltest/ocaml_files.cmx \
+    ocamltest/ocaml_directories.cmx \
+    ocamltest/ocaml_compilers.cmx \
+    ocamltest/ocaml_commands.cmx \
+    ocamltest/ocaml_backends.cmx \
+    utils/misc.cmx \
+    ocamltest/filecompare.cmx \
+    ocamltest/environments.cmx \
+    utils/config.cmx \
+    file_formats/cmo_format.cmi \
+    utils/clflags.cmx \
+    ocamltest/builtin_variables.cmx \
+    ocamltest/actions_helpers.cmx \
+    ocamltest/actions.cmx \
+    ocamltest/ocaml_actions.cmi
+ocamltest/ocaml_actions.cmi : \
+    ocamltest/actions.cmi
+ocamltest/ocaml_backends.cmo : \
+    ocamltest/ocaml_backends.cmi
+ocamltest/ocaml_backends.cmx : \
+    ocamltest/ocaml_backends.cmi
+ocamltest/ocaml_backends.cmi :
+ocamltest/ocaml_commands.cmo : \
+    ocamltest/ocaml_files.cmi \
+    ocamltest/ocaml_commands.cmi
+ocamltest/ocaml_commands.cmx : \
+    ocamltest/ocaml_files.cmx \
+    ocamltest/ocaml_commands.cmi
+ocamltest/ocaml_commands.cmi :
+ocamltest/ocaml_compilers.cmo : \
+    ocamltest/variables.cmi \
+    ocamltest/ocamltest_stdlib.cmi \
+    ocamltest/ocaml_variables.cmi \
+    ocamltest/ocaml_tools.cmi \
+    ocamltest/ocaml_files.cmi \
+    ocamltest/ocaml_commands.cmi \
+    ocamltest/ocaml_backends.cmi \
+    ocamltest/builtin_variables.cmi \
+    ocamltest/ocaml_compilers.cmi
+ocamltest/ocaml_compilers.cmx : \
+    ocamltest/variables.cmx \
+    ocamltest/ocamltest_stdlib.cmx \
+    ocamltest/ocaml_variables.cmx \
+    ocamltest/ocaml_tools.cmx \
+    ocamltest/ocaml_files.cmx \
+    ocamltest/ocaml_commands.cmx \
+    ocamltest/ocaml_backends.cmx \
+    ocamltest/builtin_variables.cmx \
+    ocamltest/ocaml_compilers.cmi
+ocamltest/ocaml_compilers.cmi : \
+    ocamltest/variables.cmi \
+    ocamltest/ocaml_tools.cmi \
+    ocamltest/ocaml_backends.cmi
+ocamltest/ocaml_directories.cmo : \
+    ocamltest/ocamltest_stdlib.cmi \
+    ocamltest/ocamltest_config.cmi \
+    ocamltest/ocaml_directories.cmi
+ocamltest/ocaml_directories.cmx : \
+    ocamltest/ocamltest_stdlib.cmx \
+    ocamltest/ocamltest_config.cmx \
+    ocamltest/ocaml_directories.cmi
+ocamltest/ocaml_directories.cmi :
+ocamltest/ocaml_files.cmo : \
+    ocamltest/ocamltest_stdlib.cmi \
+    ocamltest/ocamltest_config.cmi \
+    ocamltest/ocaml_directories.cmi \
+    ocamltest/ocaml_files.cmi
+ocamltest/ocaml_files.cmx : \
+    ocamltest/ocamltest_stdlib.cmx \
+    ocamltest/ocamltest_config.cmx \
+    ocamltest/ocaml_directories.cmx \
+    ocamltest/ocaml_files.cmi
+ocamltest/ocaml_files.cmi :
+ocamltest/ocaml_filetypes.cmo : \
+    ocamltest/ocamltest_config.cmi \
+    ocamltest/ocaml_backends.cmi \
+    ocamltest/ocaml_filetypes.cmi
+ocamltest/ocaml_filetypes.cmx : \
+    ocamltest/ocamltest_config.cmx \
+    ocamltest/ocaml_backends.cmx \
+    ocamltest/ocaml_filetypes.cmi
+ocamltest/ocaml_filetypes.cmi : \
+    ocamltest/ocaml_backends.cmi
+ocamltest/ocaml_flags.cmo : \
+    ocamltest/ocaml_variables.cmi \
+    ocamltest/ocaml_files.cmi \
+    ocamltest/ocaml_directories.cmi \
+    ocamltest/ocaml_backends.cmi \
+    ocamltest/environments.cmi \
+    ocamltest/ocaml_flags.cmi
+ocamltest/ocaml_flags.cmx : \
+    ocamltest/ocaml_variables.cmx \
+    ocamltest/ocaml_files.cmx \
+    ocamltest/ocaml_directories.cmx \
+    ocamltest/ocaml_backends.cmx \
+    ocamltest/environments.cmx \
+    ocamltest/ocaml_flags.cmi
+ocamltest/ocaml_flags.cmi : \
+    ocamltest/ocaml_backends.cmi \
+    ocamltest/environments.cmi
+ocamltest/ocaml_modifiers.cmo : \
+    ocamltest/ocamltest_stdlib.cmi \
+    ocamltest/ocamltest_config.cmi \
+    ocamltest/ocaml_variables.cmi \
+    ocamltest/environments.cmi \
+    ocamltest/ocaml_modifiers.cmi
+ocamltest/ocaml_modifiers.cmx : \
+    ocamltest/ocamltest_stdlib.cmx \
+    ocamltest/ocamltest_config.cmx \
+    ocamltest/ocaml_variables.cmx \
+    ocamltest/environments.cmx \
+    ocamltest/ocaml_modifiers.cmi
+ocamltest/ocaml_modifiers.cmi : \
+    ocamltest/environments.cmi
+ocamltest/ocaml_tests.cmo : \
+    ocamltest/tests.cmi \
+    ocamltest/ocamltest_config.cmi \
+    ocamltest/ocaml_actions.cmi \
+    ocamltest/builtin_actions.cmi \
+    ocamltest/actions_helpers.cmi \
+    ocamltest/ocaml_tests.cmi
+ocamltest/ocaml_tests.cmx : \
+    ocamltest/tests.cmx \
+    ocamltest/ocamltest_config.cmx \
+    ocamltest/ocaml_actions.cmx \
+    ocamltest/builtin_actions.cmx \
+    ocamltest/actions_helpers.cmx \
+    ocamltest/ocaml_tests.cmi
+ocamltest/ocaml_tests.cmi : \
+    ocamltest/tests.cmi
+ocamltest/ocaml_tools.cmo : \
+    ocamltest/variables.cmi \
+    ocamltest/ocamltest_stdlib.cmi \
+    ocamltest/ocaml_variables.cmi \
+    ocamltest/ocaml_files.cmi \
+    ocamltest/environments.cmi \
+    ocamltest/actions_helpers.cmi \
+    ocamltest/ocaml_tools.cmi
+ocamltest/ocaml_tools.cmx : \
+    ocamltest/variables.cmx \
+    ocamltest/ocamltest_stdlib.cmx \
+    ocamltest/ocaml_variables.cmx \
+    ocamltest/ocaml_files.cmx \
+    ocamltest/environments.cmx \
+    ocamltest/actions_helpers.cmx \
+    ocamltest/ocaml_tools.cmi
+ocamltest/ocaml_tools.cmi : \
+    ocamltest/variables.cmi \
+    ocamltest/environments.cmi
+ocamltest/ocaml_toplevels.cmo : \
+    ocamltest/variables.cmi \
+    ocamltest/ocamltest_stdlib.cmi \
+    ocamltest/ocaml_variables.cmi \
+    ocamltest/ocaml_tools.cmi \
+    ocamltest/ocaml_files.cmi \
+    ocamltest/ocaml_compilers.cmi \
+    ocamltest/ocaml_commands.cmi \
+    ocamltest/ocaml_backends.cmi \
+    ocamltest/ocaml_toplevels.cmi
+ocamltest/ocaml_toplevels.cmx : \
+    ocamltest/variables.cmx \
+    ocamltest/ocamltest_stdlib.cmx \
+    ocamltest/ocaml_variables.cmx \
+    ocamltest/ocaml_tools.cmx \
+    ocamltest/ocaml_files.cmx \
+    ocamltest/ocaml_compilers.cmx \
+    ocamltest/ocaml_commands.cmx \
+    ocamltest/ocaml_backends.cmx \
+    ocamltest/ocaml_toplevels.cmi
+ocamltest/ocaml_toplevels.cmi : \
+    ocamltest/variables.cmi \
+    ocamltest/ocaml_tools.cmi \
+    ocamltest/ocaml_compilers.cmi \
+    ocamltest/ocaml_backends.cmi
+ocamltest/ocaml_variables.cmo : \
+    ocamltest/variables.cmi \
+    ocamltest/ocamltest_stdlib.cmi \
+    ocamltest/ocaml_variables.cmi
+ocamltest/ocaml_variables.cmx : \
+    ocamltest/variables.cmx \
+    ocamltest/ocamltest_stdlib.cmx \
+    ocamltest/ocaml_variables.cmi
+ocamltest/ocaml_variables.cmi : \
+    ocamltest/variables.cmi
+ocamltest/ocamltest_config.cmo : \
+    ocamltest/ocamltest_config.cmi
+ocamltest/ocamltest_config.cmx : \
+    ocamltest/ocamltest_config.cmi
+ocamltest/ocamltest_config.cmi :
+ocamltest/ocamltest_stdlib.cmo : \
+    ocamltest/ocamltest_unix.cmi \
+    ocamltest/ocamltest_config.cmi \
+    utils/misc.cmi \
+    ocamltest/ocamltest_stdlib.cmi
+ocamltest/ocamltest_stdlib.cmx : \
+    ocamltest/ocamltest_unix.cmx \
+    ocamltest/ocamltest_config.cmx \
+    utils/misc.cmx \
+    ocamltest/ocamltest_stdlib.cmi
+ocamltest/ocamltest_stdlib.cmi : \
+    ocamltest/ocamltest_unix.cmi \
+    utils/misc.cmi
+ocamltest/ocamltest_unix.cmo : \
+    otherlibs/unix/unix.cmi \
+    ocamltest/ocamltest_unix.cmi
+ocamltest/ocamltest_unix.cmx : \
+    otherlibs/unix/unix.cmx \
+    ocamltest/ocamltest_unix.cmi
+ocamltest/ocamltest_unix.cmi :
+ocamltest/ocamltest_unix_dummy.cmo :
+ocamltest/ocamltest_unix_dummy.cmx :
+ocamltest/ocamltest_unix_real.cmo : \
+    otherlibs/unix/unix.cmi
+ocamltest/ocamltest_unix_real.cmx : \
+    otherlibs/unix/unix.cmx
+ocamltest/options.cmo : \
+    ocamltest/variables.cmi \
+    ocamltest/translate.cmi \
+    ocamltest/tests.cmi \
+    ocamltest/actions.cmi \
+    ocamltest/options.cmi
+ocamltest/options.cmx : \
+    ocamltest/variables.cmx \
+    ocamltest/translate.cmx \
+    ocamltest/tests.cmx \
+    ocamltest/actions.cmx \
+    ocamltest/options.cmi
+ocamltest/options.cmi : \
+    ocamltest/translate.cmi
+ocamltest/result.cmo : \
+    ocamltest/result.cmi
+ocamltest/result.cmx : \
+    ocamltest/result.cmi
+ocamltest/result.cmi :
+ocamltest/run_command.cmo : \
+    ocamltest/ocamltest_stdlib.cmi \
+    ocamltest/run_command.cmi
+ocamltest/run_command.cmx : \
+    ocamltest/ocamltest_stdlib.cmx \
+    ocamltest/run_command.cmi
+ocamltest/run_command.cmi :
+ocamltest/strace.cmo : \
+    ocamltest/variables.cmi \
+    ocamltest/strace.cmi
+ocamltest/strace.cmx : \
+    ocamltest/variables.cmx \
+    ocamltest/strace.cmi
+ocamltest/strace.cmi : \
+    ocamltest/variables.cmi
+ocamltest/tests.cmo : \
+    ocamltest/result.cmi \
+    ocamltest/actions.cmi \
+    ocamltest/tests.cmi
+ocamltest/tests.cmx : \
+    ocamltest/result.cmx \
+    ocamltest/actions.cmx \
+    ocamltest/tests.cmi
+ocamltest/tests.cmi : \
+    ocamltest/result.cmi \
+    ocamltest/environments.cmi \
+    ocamltest/actions.cmi
+ocamltest/translate.cmo : \
+    ocamltest/tsl_semantics.cmi \
+    ocamltest/tsl_parser.cmi \
+    ocamltest/tsl_lexer.cmi \
+    ocamltest/tsl_ast.cmi \
+    parsing/location.cmi \
+    ocamltest/translate.cmi
+ocamltest/translate.cmx : \
+    ocamltest/tsl_semantics.cmx \
+    ocamltest/tsl_parser.cmx \
+    ocamltest/tsl_lexer.cmx \
+    ocamltest/tsl_ast.cmx \
+    parsing/location.cmx \
+    ocamltest/translate.cmi
+ocamltest/translate.cmi :
+ocamltest/tsl_ast.cmo : \
+    parsing/location.cmi \
+    ocamltest/tsl_ast.cmi
+ocamltest/tsl_ast.cmx : \
+    parsing/location.cmx \
+    ocamltest/tsl_ast.cmi
+ocamltest/tsl_ast.cmi : \
+    parsing/location.cmi
+ocamltest/tsl_lexer.cmo : \
+    ocamltest/tsl_parser.cmi \
+    ocamltest/tsl_lexer.cmi
+ocamltest/tsl_lexer.cmx : \
+    ocamltest/tsl_parser.cmx \
+    ocamltest/tsl_lexer.cmi
+ocamltest/tsl_lexer.cmi : \
+    ocamltest/tsl_parser.cmi
+ocamltest/tsl_parser.cmo : \
+    ocamltest/tsl_ast.cmi \
+    parsing/location.cmi \
+    ocamltest/tsl_parser.cmi
+ocamltest/tsl_parser.cmx : \
+    ocamltest/tsl_ast.cmx \
+    parsing/location.cmx \
+    ocamltest/tsl_parser.cmi
+ocamltest/tsl_parser.cmi : \
+    ocamltest/tsl_ast.cmi
+ocamltest/tsl_semantics.cmo : \
+    ocamltest/variables.cmi \
+    ocamltest/tsl_ast.cmi \
+    ocamltest/tests.cmi \
+    parsing/location.cmi \
+    ocamltest/environments.cmi \
+    ocamltest/actions.cmi \
+    ocamltest/tsl_semantics.cmi
+ocamltest/tsl_semantics.cmx : \
+    ocamltest/variables.cmx \
+    ocamltest/tsl_ast.cmx \
+    ocamltest/tests.cmx \
+    parsing/location.cmx \
+    ocamltest/environments.cmx \
+    ocamltest/actions.cmx \
+    ocamltest/tsl_semantics.cmi
+ocamltest/tsl_semantics.cmi : \
+    ocamltest/tsl_ast.cmi \
+    ocamltest/tests.cmi \
+    ocamltest/environments.cmi \
+    ocamltest/actions.cmi
+ocamltest/variables.cmo : \
+    ocamltest/variables.cmi
+ocamltest/variables.cmx : \
+    ocamltest/variables.cmi
+ocamltest/variables.cmi :
+testsuite/lib/lib.cmo : \
+    testsuite/lib/lib.cmi
+testsuite/lib/lib.cmx : \
+    testsuite/lib/lib.cmi
+testsuite/lib/lib.cmi :
+testsuite/lib/testing.cmo : \
+    testsuite/lib/testing.cmi
+testsuite/lib/testing.cmx : \
+    testsuite/lib/testing.cmi
+testsuite/lib/testing.cmi :
+testsuite/tools/codegen_main.cmo : \
+    utils/profile.cmi \
+    testsuite/tools/parsecmmaux.cmi \
+    testsuite/tools/parsecmm.cmi \
+    testsuite/tools/lexcmm.cmi \
+    asmcomp/emitaux.cmi \
+    asmcomp/emit.cmi \
+    middle_end/compilenv.cmi \
+    utils/clflags.cmi \
+    asmcomp/asmgen.cmi \
+    testsuite/tools/codegen_main.cmi
+testsuite/tools/codegen_main.cmx : \
+    utils/profile.cmx \
+    testsuite/tools/parsecmmaux.cmx \
+    testsuite/tools/parsecmm.cmx \
+    testsuite/tools/lexcmm.cmx \
+    asmcomp/emitaux.cmx \
+    asmcomp/emit.cmx \
+    middle_end/compilenv.cmx \
+    utils/clflags.cmx \
+    asmcomp/asmgen.cmx \
+    testsuite/tools/codegen_main.cmi
+testsuite/tools/codegen_main.cmi :
+testsuite/tools/expect.cmo : \
+    utils/warnings.cmi \
+    toplevel/toploop.cmi \
+    parsing/printast.cmi \
+    parsing/pprintast.cmi \
+    parsing/parsetree.cmi \
+    parsing/parse.cmi \
+    utils/misc.cmi \
+    driver/main_args.cmi \
+    parsing/location.cmi \
+    utils/load_path.cmi \
+    driver/compmisc.cmi \
+    driver/compenv.cmi \
+    utils/clflags.cmi \
+    typing/btype.cmi \
+    parsing/asttypes.cmi \
+    parsing/ast_mapper.cmi \
+    testsuite/tools/expect.cmi
+testsuite/tools/expect.cmx : \
+    utils/warnings.cmx \
+    toplevel/toploop.cmx \
+    parsing/printast.cmx \
+    parsing/pprintast.cmx \
+    parsing/parsetree.cmi \
+    parsing/parse.cmx \
+    utils/misc.cmx \
+    driver/main_args.cmx \
+    parsing/location.cmx \
+    utils/load_path.cmx \
+    driver/compmisc.cmx \
+    driver/compenv.cmx \
+    utils/clflags.cmx \
+    typing/btype.cmx \
+    parsing/asttypes.cmx \
+    parsing/ast_mapper.cmx \
+    testsuite/tools/expect.cmi
+testsuite/tools/expect.cmi : \
+    parsing/location.cmi
+testsuite/tools/lexcmm.cmo : \
+    testsuite/tools/parsecmm.cmi \
+    utils/misc.cmi \
+    parsing/location.cmi \
+    lambda/lambda.cmi \
+    testsuite/tools/lexcmm.cmi
+testsuite/tools/lexcmm.cmx : \
+    testsuite/tools/parsecmm.cmx \
+    utils/misc.cmx \
+    parsing/location.cmx \
+    lambda/lambda.cmx \
+    testsuite/tools/lexcmm.cmi
+testsuite/tools/lexcmm.cmi : \
+    testsuite/tools/parsecmm.cmi
+testsuite/tools/parsecmm.cmo : \
+    testsuite/tools/parsecmmaux.cmi \
+    utils/misc.cmi \
+    parsing/location.cmi \
+    lambda/lambda.cmi \
+    lambda/debuginfo.cmi \
+    utils/config.cmi \
+    asmcomp/cmm.cmi \
+    parsing/asttypes.cmi \
+    asmcomp/arch.cmi \
+    testsuite/tools/parsecmm.cmi
+testsuite/tools/parsecmm.cmx : \
+    testsuite/tools/parsecmmaux.cmx \
+    utils/misc.cmx \
+    parsing/location.cmx \
+    lambda/lambda.cmx \
+    lambda/debuginfo.cmx \
+    utils/config.cmx \
+    asmcomp/cmm.cmx \
+    parsing/asttypes.cmx \
+    asmcomp/arch.cmx \
+    testsuite/tools/parsecmm.cmi
+testsuite/tools/parsecmm.cmi : \
+    parsing/location.cmi \
+    lambda/lambda.cmi \
+    asmcomp/cmm.cmi
+testsuite/tools/parsecmmaux.cmo : \
+    parsing/location.cmi \
+    lambda/lambda.cmi \
+    lambda/debuginfo.cmi \
+    middle_end/backend_var.cmi \
+    testsuite/tools/parsecmmaux.cmi
+testsuite/tools/parsecmmaux.cmx : \
+    parsing/location.cmx \
+    lambda/lambda.cmx \
+    lambda/debuginfo.cmx \
+    middle_end/backend_var.cmx \
+    testsuite/tools/parsecmmaux.cmi
+testsuite/tools/parsecmmaux.cmi : \
+    parsing/location.cmi \
+    lambda/debuginfo.cmi \
+    middle_end/backend_var.cmi
+=======
+debugger/breakpoints.cmo : \
+    debugger/symbols.cmi \
+    debugger/pos.cmi \
+    debugger/parameters.cmi \
+    utils/misc.cmi \
+    bytecomp/instruct.cmi \
+    debugger/exec.cmi \
+    debugger/events.cmi \
+    debugger/debugger_config.cmi \
+    debugger/debugcom.cmi \
+    debugger/checkpoints.cmi \
+    debugger/breakpoints.cmi
+debugger/breakpoints.cmx : \
+    debugger/symbols.cmx \
+    debugger/pos.cmx \
+    debugger/parameters.cmx \
+    utils/misc.cmx \
+    bytecomp/instruct.cmx \
+    debugger/exec.cmx \
+    debugger/events.cmx \
+    debugger/debugger_config.cmx \
+    debugger/debugcom.cmx \
+    debugger/checkpoints.cmx \
+    debugger/breakpoints.cmi
+debugger/breakpoints.cmi : \
+    debugger/events.cmi \
+    debugger/debugcom.cmi
+debugger/checkpoints.cmo : \
+    debugger/primitives.cmi \
+    debugger/int64ops.cmi \
+    debugger/debugcom.cmi \
+    debugger/checkpoints.cmi
+debugger/checkpoints.cmx : \
+    debugger/primitives.cmx \
+    debugger/int64ops.cmx \
+    debugger/debugcom.cmx \
+    debugger/checkpoints.cmi
+debugger/checkpoints.cmi : \
+    debugger/primitives.cmi \
+    debugger/debugcom.cmi
+debugger/command_line.cmo : \
+    debugger/unix_tools.cmi \
+    otherlibs/unix/unix.cmi \
+    parsing/unit_info.cmi \
+    typing/types.cmi \
+    debugger/time_travel.cmi \
+    debugger/symbols.cmi \
+    debugger/source.cmi \
+    debugger/show_source.cmi \
+    debugger/show_information.cmi \
+    debugger/question.cmi \
+    debugger/program_management.cmi \
+    debugger/program_loading.cmi \
+    debugger/printval.cmi \
+    debugger/primitives.cmi \
+    debugger/pos.cmi \
+    debugger/parser_aux.cmi \
+    debugger/parameters.cmi \
+    parsing/longident.cmi \
+    parsing/location.cmi \
+    debugger/loadprinter.cmi \
+    utils/load_path.cmi \
+    debugger/int64ops.cmi \
+    bytecomp/instruct.cmi \
+    debugger/input_handling.cmi \
+    debugger/history.cmi \
+    debugger/frames.cmi \
+    utils/format_doc.cmi \
+    debugger/events.cmi \
+    debugger/eval.cmi \
+    typing/envaux.cmi \
+    typing/env.cmi \
+    debugger/debugger_parser.cmi \
+    debugger/debugger_lexer.cmi \
+    debugger/debugger_config.cmi \
+    debugger/debugcom.cmi \
+    driver/compmisc.cmi \
+    debugger/checkpoints.cmi \
+    debugger/breakpoints.cmi \
+    debugger/command_line.cmi
+debugger/command_line.cmx : \
+    debugger/unix_tools.cmx \
+    otherlibs/unix/unix.cmx \
+    parsing/unit_info.cmx \
+    typing/types.cmx \
+    debugger/time_travel.cmx \
+    debugger/symbols.cmx \
+    debugger/source.cmx \
+    debugger/show_source.cmx \
+    debugger/show_information.cmx \
+    debugger/question.cmx \
+    debugger/program_management.cmx \
+    debugger/program_loading.cmx \
+    debugger/printval.cmx \
+    debugger/primitives.cmx \
+    debugger/pos.cmx \
+    debugger/parser_aux.cmi \
+    debugger/parameters.cmx \
+    parsing/longident.cmx \
+    parsing/location.cmx \
+    debugger/loadprinter.cmx \
+    utils/load_path.cmx \
+    debugger/int64ops.cmx \
+    bytecomp/instruct.cmx \
+    debugger/input_handling.cmx \
+    debugger/history.cmx \
+    debugger/frames.cmx \
+    utils/format_doc.cmx \
+    debugger/events.cmx \
+    debugger/eval.cmx \
+    typing/envaux.cmx \
+    typing/env.cmx \
+    debugger/debugger_parser.cmx \
+    debugger/debugger_lexer.cmx \
+    debugger/debugger_config.cmx \
+    debugger/debugcom.cmx \
+    driver/compmisc.cmx \
+    debugger/checkpoints.cmx \
+    debugger/breakpoints.cmx \
+    debugger/command_line.cmi
+debugger/command_line.cmi :
+debugger/debugcom.cmo : \
+    debugger/primitives.cmi \
+    utils/misc.cmi \
+    debugger/int64ops.cmi \
+    bytecomp/instruct.cmi \
+    debugger/input_handling.cmi \
+    debugger/debugcom.cmi
+debugger/debugcom.cmx : \
+    debugger/primitives.cmx \
+    utils/misc.cmx \
+    debugger/int64ops.cmx \
+    bytecomp/instruct.cmx \
+    debugger/input_handling.cmx \
+    debugger/debugcom.cmi
+debugger/debugcom.cmi : \
+    debugger/primitives.cmi \
+    bytecomp/instruct.cmi
+debugger/debugger_config.cmo : \
+    debugger/int64ops.cmi \
+    debugger/debugger_config.cmi
+debugger/debugger_config.cmx : \
+    debugger/int64ops.cmx \
+    debugger/debugger_config.cmi
+debugger/debugger_config.cmi :
+debugger/debugger_lexer.cmo : \
+    debugger/debugger_parser.cmi \
+    debugger/debugger_lexer.cmi
+debugger/debugger_lexer.cmx : \
+    debugger/debugger_parser.cmx \
+    debugger/debugger_lexer.cmi
+debugger/debugger_lexer.cmi : \
+    debugger/debugger_parser.cmi
+debugger/debugger_parser.cmo : \
+    debugger/parser_aux.cmi \
+    parsing/longident.cmi \
+    debugger/int64ops.cmi \
+    debugger/input_handling.cmi \
+    debugger/debugcom.cmi \
+    debugger/debugger_parser.cmi
+debugger/debugger_parser.cmx : \
+    debugger/parser_aux.cmi \
+    parsing/longident.cmx \
+    debugger/int64ops.cmx \
+    debugger/input_handling.cmx \
+    debugger/debugcom.cmx \
+    debugger/debugger_parser.cmi
+debugger/debugger_parser.cmi : \
+    debugger/parser_aux.cmi \
+    parsing/longident.cmi
+debugger/eval.cmo : \
+    typing/types.cmi \
+    bytecomp/symtable.cmi \
+    typing/subst.cmi \
+    debugger/printval.cmi \
+    typing/printtyp.cmi \
+    typing/predef.cmi \
+    typing/path.cmi \
+    debugger/parser_aux.cmi \
+    utils/misc.cmi \
+    parsing/longident.cmi \
+    bytecomp/instruct.cmi \
+    typing/ident.cmi \
+    debugger/frames.cmi \
+    utils/format_doc.cmi \
+    debugger/events.cmi \
+    typing/env.cmi \
+    debugger/debugcom.cmi \
+    typing/ctype.cmi \
+    typing/btype.cmi \
+    debugger/eval.cmi
+debugger/eval.cmx : \
+    typing/types.cmx \
+    bytecomp/symtable.cmx \
+    typing/subst.cmx \
+    debugger/printval.cmx \
+    typing/printtyp.cmx \
+    typing/predef.cmx \
+    typing/path.cmx \
+    debugger/parser_aux.cmi \
+    utils/misc.cmx \
+    parsing/longident.cmx \
+    bytecomp/instruct.cmx \
+    typing/ident.cmx \
+    debugger/frames.cmx \
+    utils/format_doc.cmx \
+    debugger/events.cmx \
+    typing/env.cmx \
+    debugger/debugcom.cmx \
+    typing/ctype.cmx \
+    typing/btype.cmx \
+    debugger/eval.cmi
+debugger/eval.cmi : \
+    typing/types.cmi \
+    typing/path.cmi \
+    debugger/parser_aux.cmi \
+    parsing/longident.cmi \
+    typing/ident.cmi \
+    debugger/events.cmi \
+    typing/env.cmi \
+    debugger/debugcom.cmi
+debugger/events.cmo : \
+    parsing/location.cmi \
+    bytecomp/instruct.cmi \
+    debugger/events.cmi
+debugger/events.cmx : \
+    parsing/location.cmx \
+    bytecomp/instruct.cmx \
+    debugger/events.cmi
+debugger/events.cmi : \
+    bytecomp/instruct.cmi
+debugger/exec.cmo : \
+    debugger/exec.cmi
+debugger/exec.cmx : \
+    debugger/exec.cmi
+debugger/exec.cmi :
+debugger/frames.cmo : \
+    debugger/symbols.cmi \
+    utils/misc.cmi \
+    bytecomp/instruct.cmi \
+    debugger/events.cmi \
+    debugger/debugcom.cmi \
+    debugger/frames.cmi
+debugger/frames.cmx : \
+    debugger/symbols.cmx \
+    utils/misc.cmx \
+    bytecomp/instruct.cmx \
+    debugger/events.cmx \
+    debugger/debugcom.cmx \
+    debugger/frames.cmi
+debugger/frames.cmi : \
+    debugger/events.cmi
+debugger/history.cmo : \
+    debugger/primitives.cmi \
+    debugger/int64ops.cmi \
+    debugger/debugger_config.cmi \
+    debugger/checkpoints.cmi \
+    debugger/history.cmi
+debugger/history.cmx : \
+    debugger/primitives.cmx \
+    debugger/int64ops.cmx \
+    debugger/debugger_config.cmx \
+    debugger/checkpoints.cmx \
+    debugger/history.cmi
+debugger/history.cmi :
+debugger/input_handling.cmo : \
+    otherlibs/unix/unix.cmi \
+    debugger/primitives.cmi \
+    debugger/parameters.cmi \
+    debugger/input_handling.cmi
+debugger/input_handling.cmx : \
+    otherlibs/unix/unix.cmx \
+    debugger/primitives.cmx \
+    debugger/parameters.cmx \
+    debugger/input_handling.cmi
+debugger/input_handling.cmi : \
+    debugger/primitives.cmi
+debugger/int64ops.cmo : \
+    debugger/int64ops.cmi
+debugger/int64ops.cmx : \
+    debugger/int64ops.cmi
+debugger/int64ops.cmi :
+debugger/loadprinter.cmo : \
+    parsing/unit_info.cmi \
+    typing/types.cmi \
+    toplevel/topprinters.cmi \
+    bytecomp/symtable.cmi \
+    debugger/printval.cmi \
+    typing/printtyp.cmi \
+    typing/path.cmi \
+    utils/misc.cmi \
+    parsing/longident.cmi \
+    utils/load_path.cmi \
+    typing/ident.cmi \
+    utils/format_doc.cmi \
+    typing/env.cmi \
+    otherlibs/dynlink/dynlink.cmi \
+    typing/ctype.cmi \
+    file_formats/cmo_format.cmi \
+    debugger/loadprinter.cmi
+debugger/loadprinter.cmx : \
+    parsing/unit_info.cmx \
+    typing/types.cmx \
+    toplevel/topprinters.cmx \
+    bytecomp/symtable.cmx \
+    debugger/printval.cmx \
+    typing/printtyp.cmx \
+    typing/path.cmx \
+    utils/misc.cmx \
+    parsing/longident.cmx \
+    utils/load_path.cmx \
+    typing/ident.cmx \
+    utils/format_doc.cmx \
+    typing/env.cmx \
+    otherlibs/dynlink/dynlink.cmi \
+    typing/ctype.cmx \
+    file_formats/cmo_format.cmi \
+    debugger/loadprinter.cmi
+debugger/loadprinter.cmi : \
+    parsing/longident.cmi \
+    otherlibs/dynlink/dynlink.cmi
+debugger/main.cmo : \
+    debugger/unix_tools.cmi \
+    otherlibs/unix/unix.cmi \
+    debugger/time_travel.cmi \
+    debugger/show_information.cmi \
+    debugger/question.cmi \
+    debugger/program_management.cmi \
+    debugger/primitives.cmi \
+    typing/persistent_env.cmi \
+    debugger/parameters.cmi \
+    utils/misc.cmi \
+    utils/load_path.cmi \
+    debugger/input_handling.cmi \
+    debugger/frames.cmi \
+    utils/format_doc.cmi \
+    debugger/exec.cmi \
+    debugger/debugger_config.cmi \
+    utils/config.cmi \
+    driver/compmisc.cmi \
+    debugger/command_line.cmi \
+    file_formats/cmi_format.cmi \
+    utils/clflags.cmi \
+    debugger/checkpoints.cmi \
+    debugger/main.cmi
+debugger/main.cmx : \
+    debugger/unix_tools.cmx \
+    otherlibs/unix/unix.cmx \
+    debugger/time_travel.cmx \
+    debugger/show_information.cmx \
+    debugger/question.cmx \
+    debugger/program_management.cmx \
+    debugger/primitives.cmx \
+    typing/persistent_env.cmx \
+    debugger/parameters.cmx \
+    utils/misc.cmx \
+    utils/load_path.cmx \
+    debugger/input_handling.cmx \
+    debugger/frames.cmx \
+    utils/format_doc.cmx \
+    debugger/exec.cmx \
+    debugger/debugger_config.cmx \
+    utils/config.cmx \
+    driver/compmisc.cmx \
+    debugger/command_line.cmx \
+    file_formats/cmi_format.cmx \
+    utils/clflags.cmx \
+    debugger/checkpoints.cmx \
+    debugger/main.cmi
+debugger/main.cmi :
+debugger/ocamldebug_entry.cmo : \
+    otherlibs/unix/unix.cmi \
+    debugger/ocamldebug_entry.cmi
+debugger/ocamldebug_entry.cmx : \
+    otherlibs/unix/unix.cmx \
+    debugger/ocamldebug_entry.cmi
+debugger/ocamldebug_entry.cmi :
+debugger/parameters.cmo : \
+    utils/load_path.cmi \
+    typing/envaux.cmi \
+    debugger/debugger_config.cmi \
+    utils/config.cmi \
+    debugger/parameters.cmi
+debugger/parameters.cmx : \
+    utils/load_path.cmx \
+    typing/envaux.cmx \
+    debugger/debugger_config.cmx \
+    utils/config.cmx \
+    debugger/parameters.cmi
+debugger/parameters.cmi :
+debugger/parser_aux.cmi : \
+    parsing/longident.cmi \
+    debugger/debugcom.cmi
+debugger/pos.cmo : \
+    parsing/location.cmi \
+    bytecomp/instruct.cmi \
+    debugger/events.cmi \
+    debugger/pos.cmi
+debugger/pos.cmx : \
+    parsing/location.cmx \
+    bytecomp/instruct.cmx \
+    debugger/events.cmx \
+    debugger/pos.cmi
+debugger/pos.cmi : \
+    debugger/events.cmi
+debugger/primitives.cmo : \
+    otherlibs/unix/unix.cmi \
+    debugger/primitives.cmi
+debugger/primitives.cmx : \
+    otherlibs/unix/unix.cmx \
+    debugger/primitives.cmi
+debugger/primitives.cmi : \
+    otherlibs/unix/unix.cmi
+debugger/printval.cmo : \
+    typing/types.cmi \
+    bytecomp/symtable.cmi \
+    typing/printtyp.cmi \
+    debugger/parser_aux.cmi \
+    typing/outcometree.cmi \
+    typing/oprint.cmi \
+    toplevel/genprintval.cmi \
+    typing/env.cmi \
+    debugger/debugcom.cmi \
+    debugger/printval.cmi
+debugger/printval.cmx : \
+    typing/types.cmx \
+    bytecomp/symtable.cmx \
+    typing/printtyp.cmx \
+    debugger/parser_aux.cmi \
+    typing/outcometree.cmi \
+    typing/oprint.cmx \
+    toplevel/genprintval.cmx \
+    typing/env.cmx \
+    debugger/debugcom.cmx \
+    debugger/printval.cmi
+debugger/printval.cmi : \
+    typing/types.cmi \
+    typing/path.cmi \
+    debugger/parser_aux.cmi \
+    typing/env.cmi \
+    debugger/debugcom.cmi
+debugger/program_loading.cmo : \
+    debugger/unix_tools.cmi \
+    otherlibs/unix/unix.cmi \
+    debugger/primitives.cmi \
+    debugger/parameters.cmi \
+    debugger/input_handling.cmi \
+    debugger/debugger_config.cmi \
+    debugger/program_loading.cmi
+debugger/program_loading.cmx : \
+    debugger/unix_tools.cmx \
+    otherlibs/unix/unix.cmx \
+    debugger/primitives.cmx \
+    debugger/parameters.cmx \
+    debugger/input_handling.cmx \
+    debugger/debugger_config.cmx \
+    debugger/program_loading.cmi
+debugger/program_loading.cmi : \
+    debugger/primitives.cmi
+debugger/program_management.cmo : \
+    debugger/unix_tools.cmi \
+    otherlibs/unix/unix.cmi \
+    debugger/time_travel.cmi \
+    debugger/symbols.cmi \
+    debugger/question.cmi \
+    debugger/program_loading.cmi \
+    debugger/primitives.cmi \
+    debugger/parameters.cmi \
+    utils/load_path.cmi \
+    debugger/int64ops.cmi \
+    debugger/input_handling.cmi \
+    debugger/history.cmi \
+    typing/envaux.cmi \
+    debugger/debugger_config.cmi \
+    debugger/debugcom.cmi \
+    driver/compmisc.cmi \
+    debugger/breakpoints.cmi \
+    debugger/program_management.cmi
+debugger/program_management.cmx : \
+    debugger/unix_tools.cmx \
+    otherlibs/unix/unix.cmx \
+    debugger/time_travel.cmx \
+    debugger/symbols.cmx \
+    debugger/question.cmx \
+    debugger/program_loading.cmx \
+    debugger/primitives.cmx \
+    debugger/parameters.cmx \
+    utils/load_path.cmx \
+    debugger/int64ops.cmx \
+    debugger/input_handling.cmx \
+    debugger/history.cmx \
+    typing/envaux.cmx \
+    debugger/debugger_config.cmx \
+    debugger/debugcom.cmx \
+    driver/compmisc.cmx \
+    debugger/breakpoints.cmx \
+    debugger/program_management.cmi
+debugger/program_management.cmi :
+debugger/question.cmo : \
+    debugger/primitives.cmi \
+    debugger/input_handling.cmi \
+    debugger/debugger_lexer.cmi \
+    debugger/question.cmi
+debugger/question.cmx : \
+    debugger/primitives.cmx \
+    debugger/input_handling.cmx \
+    debugger/debugger_lexer.cmx \
+    debugger/question.cmi
+debugger/question.cmi :
+debugger/show_information.cmo : \
+    debugger/symbols.cmi \
+    debugger/source.cmi \
+    debugger/show_source.cmi \
+    debugger/printval.cmi \
+    debugger/parameters.cmi \
+    utils/misc.cmi \
+    bytecomp/instruct.cmi \
+    debugger/frames.cmi \
+    debugger/events.cmi \
+    debugger/debugcom.cmi \
+    debugger/checkpoints.cmi \
+    debugger/breakpoints.cmi \
+    debugger/show_information.cmi
+debugger/show_information.cmx : \
+    debugger/symbols.cmx \
+    debugger/source.cmx \
+    debugger/show_source.cmx \
+    debugger/printval.cmx \
+    debugger/parameters.cmx \
+    utils/misc.cmx \
+    bytecomp/instruct.cmx \
+    debugger/frames.cmx \
+    debugger/events.cmx \
+    debugger/debugcom.cmx \
+    debugger/checkpoints.cmx \
+    debugger/breakpoints.cmx \
+    debugger/show_information.cmi
+debugger/show_information.cmi : \
+    debugger/events.cmi
+debugger/show_source.cmo : \
+    debugger/source.cmi \
+    debugger/primitives.cmi \
+    debugger/parameters.cmi \
+    parsing/location.cmi \
+    bytecomp/instruct.cmi \
+    debugger/events.cmi \
+    debugger/debugger_config.cmi \
+    debugger/show_source.cmi
+debugger/show_source.cmx : \
+    debugger/source.cmx \
+    debugger/primitives.cmx \
+    debugger/parameters.cmx \
+    parsing/location.cmx \
+    bytecomp/instruct.cmx \
+    debugger/events.cmx \
+    debugger/debugger_config.cmx \
+    debugger/show_source.cmi
+debugger/show_source.cmi : \
+    bytecomp/instruct.cmi
+debugger/source.cmo : \
+    debugger/primitives.cmi \
+    utils/misc.cmi \
+    utils/load_path.cmi \
+    debugger/debugger_config.cmi \
+    debugger/source.cmi
+debugger/source.cmx : \
+    debugger/primitives.cmx \
+    utils/misc.cmx \
+    utils/load_path.cmx \
+    debugger/debugger_config.cmx \
+    debugger/source.cmi
+debugger/source.cmi :
+debugger/symbols.cmo : \
+    bytecomp/symtable.cmi \
+    debugger/program_loading.cmi \
+    utils/misc.cmi \
+    bytecomp/instruct.cmi \
+    debugger/events.cmi \
+    debugger/debugger_config.cmi \
+    debugger/debugcom.cmi \
+    debugger/checkpoints.cmi \
+    bytecomp/bytesections.cmi \
+    debugger/symbols.cmi
+debugger/symbols.cmx : \
+    bytecomp/symtable.cmx \
+    debugger/program_loading.cmx \
+    utils/misc.cmx \
+    bytecomp/instruct.cmx \
+    debugger/events.cmx \
+    debugger/debugger_config.cmx \
+    debugger/debugcom.cmx \
+    debugger/checkpoints.cmx \
+    bytecomp/bytesections.cmx \
+    debugger/symbols.cmi
+debugger/symbols.cmi : \
+    bytecomp/instruct.cmi \
+    debugger/events.cmi \
+    debugger/debugcom.cmi
+debugger/time_travel.cmo : \
+    debugger/trap_barrier.cmi \
+    debugger/symbols.cmi \
+    debugger/question.cmi \
+    debugger/program_loading.cmi \
+    debugger/primitives.cmi \
+    utils/misc.cmi \
+    debugger/int64ops.cmi \
+    bytecomp/instruct.cmi \
+    debugger/input_handling.cmi \
+    debugger/exec.cmi \
+    debugger/events.cmi \
+    debugger/debugger_config.cmi \
+    debugger/debugcom.cmi \
+    debugger/checkpoints.cmi \
+    debugger/breakpoints.cmi \
+    debugger/time_travel.cmi
+debugger/time_travel.cmx : \
+    debugger/trap_barrier.cmx \
+    debugger/symbols.cmx \
+    debugger/question.cmx \
+    debugger/program_loading.cmx \
+    debugger/primitives.cmx \
+    utils/misc.cmx \
+    debugger/int64ops.cmx \
+    bytecomp/instruct.cmx \
+    debugger/input_handling.cmx \
+    debugger/exec.cmx \
+    debugger/events.cmx \
+    debugger/debugger_config.cmx \
+    debugger/debugcom.cmx \
+    debugger/checkpoints.cmx \
+    debugger/breakpoints.cmx \
+    debugger/time_travel.cmi
+debugger/time_travel.cmi : \
+    debugger/primitives.cmi
+debugger/trap_barrier.cmo : \
+    debugger/exec.cmi \
+    debugger/debugcom.cmi \
+    debugger/checkpoints.cmi \
+    debugger/trap_barrier.cmi
+debugger/trap_barrier.cmx : \
+    debugger/exec.cmx \
+    debugger/debugcom.cmx \
+    debugger/checkpoints.cmx \
+    debugger/trap_barrier.cmi
+debugger/trap_barrier.cmi : \
+    debugger/debugcom.cmi
+debugger/unix_tools.cmo : \
+    otherlibs/unix/unix.cmi \
+    utils/misc.cmi \
+    debugger/unix_tools.cmi
+debugger/unix_tools.cmx : \
+    otherlibs/unix/unix.cmx \
+    utils/misc.cmx \
+    debugger/unix_tools.cmi
+debugger/unix_tools.cmi : \
+    otherlibs/unix/unix.cmi
+ocamldoc/odoc.cmo : \
+    ocamldoc/odoc_messages.cmi \
+    ocamldoc/odoc_info.cmi \
+    ocamldoc/odoc_global.cmi \
+    ocamldoc/odoc_gen.cmi \
+    ocamldoc/odoc_config.cmi \
+    ocamldoc/odoc_args.cmi \
+    ocamldoc/odoc_analyse.cmi \
+    otherlibs/dynlink/dynlink.cmi \
+    ocamldoc/odoc.cmi
+ocamldoc/odoc.cmx : \
+    ocamldoc/odoc_messages.cmx \
+    ocamldoc/odoc_info.cmx \
+    ocamldoc/odoc_global.cmx \
+    ocamldoc/odoc_gen.cmx \
+    ocamldoc/odoc_config.cmx \
+    ocamldoc/odoc_args.cmx \
+    ocamldoc/odoc_analyse.cmx \
+    otherlibs/dynlink/dynlink.cmi \
+    ocamldoc/odoc.cmi
+ocamldoc/odoc.cmi :
+ocamldoc/odoc_analyse.cmo : \
+    utils/warnings.cmi \
+    parsing/unit_info.cmi \
+    typing/types.cmi \
+    typing/typemod.cmi \
+    typing/typedtree.cmi \
+    parsing/syntaxerr.cmi \
+    driver/pparse.cmi \
+    parsing/parse.cmi \
+    ocamldoc/odoc_types.cmi \
+    ocamldoc/odoc_text.cmi \
+    ocamldoc/odoc_sig.cmi \
+    ocamldoc/odoc_module.cmi \
+    ocamldoc/odoc_misc.cmi \
+    ocamldoc/odoc_messages.cmi \
+    ocamldoc/odoc_merge.cmi \
+    ocamldoc/odoc_global.cmi \
+    ocamldoc/odoc_dep.cmi \
+    ocamldoc/odoc_cross.cmi \
+    ocamldoc/odoc_comments.cmi \
+    ocamldoc/odoc_class.cmi \
+    ocamldoc/odoc_ast.cmi \
+    parsing/location.cmi \
+    parsing/lexer.cmi \
+    utils/format_doc.cmi \
+    typing/env.cmi \
+    driver/compmisc.cmi \
+    utils/clflags.cmi \
+    ocamldoc/odoc_analyse.cmi
+ocamldoc/odoc_analyse.cmx : \
+    utils/warnings.cmx \
+    parsing/unit_info.cmx \
+    typing/types.cmx \
+    typing/typemod.cmx \
+    typing/typedtree.cmx \
+    parsing/syntaxerr.cmx \
+    driver/pparse.cmx \
+    parsing/parse.cmx \
+    ocamldoc/odoc_types.cmx \
+    ocamldoc/odoc_text.cmx \
+    ocamldoc/odoc_sig.cmx \
+    ocamldoc/odoc_module.cmx \
+    ocamldoc/odoc_misc.cmx \
+    ocamldoc/odoc_messages.cmx \
+    ocamldoc/odoc_merge.cmx \
+    ocamldoc/odoc_global.cmx \
+    ocamldoc/odoc_dep.cmx \
+    ocamldoc/odoc_cross.cmx \
+    ocamldoc/odoc_comments.cmx \
+    ocamldoc/odoc_class.cmx \
+    ocamldoc/odoc_ast.cmx \
+    parsing/location.cmx \
+    parsing/lexer.cmx \
+    utils/format_doc.cmx \
+    typing/env.cmx \
+    driver/compmisc.cmx \
+    utils/clflags.cmx \
+    ocamldoc/odoc_analyse.cmi
+ocamldoc/odoc_analyse.cmi : \
+    ocamldoc/odoc_module.cmi \
+    ocamldoc/odoc_global.cmi
+ocamldoc/odoc_args.cmo : \
+    otherlibs/str/str.cmi \
+    ocamldoc/odoc_types.cmi \
+    ocamldoc/odoc_texi.cmi \
+    ocamldoc/odoc_messages.cmi \
+    ocamldoc/odoc_man.cmi \
+    ocamldoc/odoc_latex.cmi \
+    ocamldoc/odoc_html.cmi \
+    ocamldoc/odoc_global.cmi \
+    ocamldoc/odoc_gen.cmi \
+    ocamldoc/odoc_dot.cmi \
+    ocamldoc/odoc_config.cmi \
+    driver/main_args.cmi \
+    utils/config.cmi \
+    driver/compenv.cmi \
+    ocamldoc/odoc_args.cmi
+ocamldoc/odoc_args.cmx : \
+    otherlibs/str/str.cmx \
+    ocamldoc/odoc_types.cmx \
+    ocamldoc/odoc_texi.cmx \
+    ocamldoc/odoc_messages.cmx \
+    ocamldoc/odoc_man.cmx \
+    ocamldoc/odoc_latex.cmx \
+    ocamldoc/odoc_html.cmx \
+    ocamldoc/odoc_global.cmx \
+    ocamldoc/odoc_gen.cmx \
+    ocamldoc/odoc_dot.cmx \
+    ocamldoc/odoc_config.cmx \
+    driver/main_args.cmx \
+    utils/config.cmx \
+    driver/compenv.cmx \
+    ocamldoc/odoc_args.cmi
+ocamldoc/odoc_args.cmi : \
+    ocamldoc/odoc_gen.cmi
+ocamldoc/odoc_ast.cmo : \
+    parsing/unit_info.cmi \
+    typing/types.cmi \
+    typing/typedtree.cmi \
+    typing/predef.cmi \
+    typing/path.cmi \
+    parsing/parsetree.cmi \
+    ocamldoc/odoc_value.cmi \
+    ocamldoc/odoc_types.cmi \
+    ocamldoc/odoc_type.cmi \
+    ocamldoc/odoc_sig.cmi \
+    ocamldoc/odoc_parameter.cmi \
+    ocamldoc/odoc_module.cmi \
+    ocamldoc/odoc_messages.cmi \
+    ocamldoc/odoc_global.cmi \
+    ocamldoc/odoc_extension.cmi \
+    ocamldoc/odoc_exception.cmi \
+    ocamldoc/odoc_env.cmi \
+    ocamldoc/odoc_class.cmi \
+    parsing/location.cmi \
+    typing/ident.cmi \
+    typing/btype.cmi \
+    parsing/asttypes.cmi \
+    ocamldoc/odoc_ast.cmi
+ocamldoc/odoc_ast.cmx : \
+    parsing/unit_info.cmx \
+    typing/types.cmx \
+    typing/typedtree.cmx \
+    typing/predef.cmx \
+    typing/path.cmx \
+    parsing/parsetree.cmi \
+    ocamldoc/odoc_value.cmx \
+    ocamldoc/odoc_types.cmx \
+    ocamldoc/odoc_type.cmx \
+    ocamldoc/odoc_sig.cmx \
+    ocamldoc/odoc_parameter.cmx \
+    ocamldoc/odoc_module.cmx \
+    ocamldoc/odoc_messages.cmx \
+    ocamldoc/odoc_global.cmx \
+    ocamldoc/odoc_extension.cmx \
+    ocamldoc/odoc_exception.cmx \
+    ocamldoc/odoc_env.cmx \
+    ocamldoc/odoc_class.cmx \
+    parsing/location.cmx \
+    typing/ident.cmx \
+    typing/btype.cmx \
+    parsing/asttypes.cmx \
+    ocamldoc/odoc_ast.cmi
+ocamldoc/odoc_ast.cmi : \
+    typing/types.cmi \
+    typing/typedtree.cmi \
+    parsing/parsetree.cmi \
+    ocamldoc/odoc_sig.cmi \
+    ocamldoc/odoc_name.cmi \
+    ocamldoc/odoc_module.cmi
+ocamldoc/odoc_class.cmo : \
+    typing/types.cmi \
+    ocamldoc/odoc_value.cmi \
+    ocamldoc/odoc_types.cmi \
+    ocamldoc/odoc_parameter.cmi \
+    ocamldoc/odoc_name.cmi \
+    ocamldoc/odoc_class.cmi
+ocamldoc/odoc_class.cmx : \
+    typing/types.cmx \
+    ocamldoc/odoc_value.cmx \
+    ocamldoc/odoc_types.cmx \
+    ocamldoc/odoc_parameter.cmx \
+    ocamldoc/odoc_name.cmx \
+    ocamldoc/odoc_class.cmi
+ocamldoc/odoc_class.cmi : \
+    typing/types.cmi \
+    ocamldoc/odoc_value.cmi \
+    ocamldoc/odoc_types.cmi \
+    ocamldoc/odoc_parameter.cmi \
+    ocamldoc/odoc_name.cmi
+ocamldoc/odoc_comments.cmo : \
+    otherlibs/str/str.cmi \
+    ocamldoc/odoc_types.cmi \
+    ocamldoc/odoc_text.cmi \
+    ocamldoc/odoc_see_lexer.cmi \
+    ocamldoc/odoc_parser.cmi \
+    ocamldoc/odoc_misc.cmi \
+    ocamldoc/odoc_messages.cmi \
+    ocamldoc/odoc_merge.cmi \
+    ocamldoc/odoc_lexer.cmi \
+    ocamldoc/odoc_global.cmi \
+    ocamldoc/odoc_cross.cmi \
+    ocamldoc/odoc_comments_global.cmi \
+    ocamldoc/odoc_comments.cmi
+ocamldoc/odoc_comments.cmx : \
+    otherlibs/str/str.cmx \
+    ocamldoc/odoc_types.cmx \
+    ocamldoc/odoc_text.cmx \
+    ocamldoc/odoc_see_lexer.cmx \
+    ocamldoc/odoc_parser.cmx \
+    ocamldoc/odoc_misc.cmx \
+    ocamldoc/odoc_messages.cmx \
+    ocamldoc/odoc_merge.cmx \
+    ocamldoc/odoc_lexer.cmx \
+    ocamldoc/odoc_global.cmx \
+    ocamldoc/odoc_cross.cmx \
+    ocamldoc/odoc_comments_global.cmx \
+    ocamldoc/odoc_comments.cmi
+ocamldoc/odoc_comments.cmi : \
+    ocamldoc/odoc_types.cmi \
+    ocamldoc/odoc_module.cmi
+ocamldoc/odoc_comments_global.cmo : \
+    ocamldoc/odoc_comments_global.cmi
+ocamldoc/odoc_comments_global.cmx : \
+    ocamldoc/odoc_comments_global.cmi
+ocamldoc/odoc_comments_global.cmi :
+ocamldoc/odoc_config.cmo : \
+    utils/config.cmi \
+    ocamldoc/odoc_config.cmi
+ocamldoc/odoc_config.cmx : \
+    utils/config.cmx \
+    ocamldoc/odoc_config.cmi
+ocamldoc/odoc_config.cmi :
+ocamldoc/odoc_cross.cmo : \
+    otherlibs/str/str.cmi \
+    ocamldoc/odoc_value.cmi \
+    ocamldoc/odoc_types.cmi \
+    ocamldoc/odoc_type.cmi \
+    ocamldoc/odoc_search.cmi \
+    ocamldoc/odoc_scan.cmi \
+    ocamldoc/odoc_parameter.cmi \
+    ocamldoc/odoc_name.cmi \
+    ocamldoc/odoc_module.cmi \
+    ocamldoc/odoc_misc.cmi \
+    ocamldoc/odoc_messages.cmi \
+    ocamldoc/odoc_global.cmi \
+    ocamldoc/odoc_extension.cmi \
+    ocamldoc/odoc_exception.cmi \
+    ocamldoc/odoc_class.cmi \
+    utils/misc.cmi \
+    ocamldoc/odoc_cross.cmi
+ocamldoc/odoc_cross.cmx : \
+    otherlibs/str/str.cmx \
+    ocamldoc/odoc_value.cmx \
+    ocamldoc/odoc_types.cmx \
+    ocamldoc/odoc_type.cmx \
+    ocamldoc/odoc_search.cmx \
+    ocamldoc/odoc_scan.cmx \
+    ocamldoc/odoc_parameter.cmx \
+    ocamldoc/odoc_name.cmx \
+    ocamldoc/odoc_module.cmx \
+    ocamldoc/odoc_misc.cmx \
+    ocamldoc/odoc_messages.cmx \
+    ocamldoc/odoc_global.cmx \
+    ocamldoc/odoc_extension.cmx \
+    ocamldoc/odoc_exception.cmx \
+    ocamldoc/odoc_class.cmx \
+    utils/misc.cmx \
+    ocamldoc/odoc_cross.cmi
+ocamldoc/odoc_cross.cmi : \
+    ocamldoc/odoc_types.cmi \
+    ocamldoc/odoc_module.cmi
+ocamldoc/odoc_dag2html.cmo : \
+    ocamldoc/odoc_info.cmi \
+    ocamldoc/odoc_dag2html.cmi
+ocamldoc/odoc_dag2html.cmx : \
+    ocamldoc/odoc_info.cmx \
+    ocamldoc/odoc_dag2html.cmi
+ocamldoc/odoc_dag2html.cmi : \
+    ocamldoc/odoc_info.cmi
+ocamldoc/odoc_dep.cmo : \
+    otherlibs/str/str.cmi \
+    parsing/parsetree.cmi \
+    ocamldoc/odoc_type.cmi \
+    ocamldoc/odoc_print.cmi \
+    ocamldoc/odoc_module.cmi \
+    utils/misc.cmi \
+    parsing/depend.cmi \
+    ocamldoc/odoc_dep.cmi
+ocamldoc/odoc_dep.cmx : \
+    otherlibs/str/str.cmx \
+    parsing/parsetree.cmi \
+    ocamldoc/odoc_type.cmx \
+    ocamldoc/odoc_print.cmx \
+    ocamldoc/odoc_module.cmx \
+    utils/misc.cmx \
+    parsing/depend.cmx \
+    ocamldoc/odoc_dep.cmi
+ocamldoc/odoc_dep.cmi : \
+    parsing/parsetree.cmi \
+    ocamldoc/odoc_type.cmi \
+    ocamldoc/odoc_module.cmi \
+    utils/misc.cmi
+ocamldoc/odoc_dot.cmo : \
+    ocamldoc/odoc_messages.cmi \
+    ocamldoc/odoc_info.cmi \
+    ocamldoc/odoc_dot.cmi
+ocamldoc/odoc_dot.cmx : \
+    ocamldoc/odoc_messages.cmx \
+    ocamldoc/odoc_info.cmx \
+    ocamldoc/odoc_dot.cmi
+ocamldoc/odoc_dot.cmi : \
+    ocamldoc/odoc_info.cmi
+ocamldoc/odoc_env.cmo : \
+    typing/types.cmi \
+    typing/predef.cmi \
+    typing/path.cmi \
+    ocamldoc/odoc_name.cmi \
+    typing/btype.cmi \
+    ocamldoc/odoc_env.cmi
+ocamldoc/odoc_env.cmx : \
+    typing/types.cmx \
+    typing/predef.cmx \
+    typing/path.cmx \
+    ocamldoc/odoc_name.cmx \
+    typing/btype.cmx \
+    ocamldoc/odoc_env.cmi
+ocamldoc/odoc_env.cmi : \
+    typing/types.cmi \
+    ocamldoc/odoc_name.cmi
+ocamldoc/odoc_exception.cmo : \
+    typing/types.cmi \
+    ocamldoc/odoc_types.cmi \
+    ocamldoc/odoc_type.cmi \
+    ocamldoc/odoc_name.cmi \
+    ocamldoc/odoc_exception.cmi
+ocamldoc/odoc_exception.cmx : \
+    typing/types.cmx \
+    ocamldoc/odoc_types.cmx \
+    ocamldoc/odoc_type.cmx \
+    ocamldoc/odoc_name.cmx \
+    ocamldoc/odoc_exception.cmi
+ocamldoc/odoc_exception.cmi : \
+    typing/types.cmi \
+    ocamldoc/odoc_types.cmi \
+    ocamldoc/odoc_type.cmi \
+    ocamldoc/odoc_name.cmi
+ocamldoc/odoc_extension.cmo : \
+    typing/types.cmi \
+    ocamldoc/odoc_types.cmi \
+    ocamldoc/odoc_type.cmi \
+    ocamldoc/odoc_name.cmi \
+    parsing/asttypes.cmi \
+    ocamldoc/odoc_extension.cmi
+ocamldoc/odoc_extension.cmx : \
+    typing/types.cmx \
+    ocamldoc/odoc_types.cmx \
+    ocamldoc/odoc_type.cmx \
+    ocamldoc/odoc_name.cmx \
+    parsing/asttypes.cmx \
+    ocamldoc/odoc_extension.cmi
+ocamldoc/odoc_extension.cmi : \
+    typing/types.cmi \
+    ocamldoc/odoc_types.cmi \
+    ocamldoc/odoc_type.cmi \
+    ocamldoc/odoc_name.cmi \
+    parsing/asttypes.cmi
+ocamldoc/odoc_gen.cmo : \
+    ocamldoc/odoc_texi.cmi \
+    ocamldoc/odoc_module.cmi \
+    ocamldoc/odoc_man.cmi \
+    ocamldoc/odoc_latex.cmi \
+    ocamldoc/odoc_html.cmi \
+    ocamldoc/odoc_dot.cmi \
+    ocamldoc/odoc_gen.cmi
+ocamldoc/odoc_gen.cmx : \
+    ocamldoc/odoc_texi.cmx \
+    ocamldoc/odoc_module.cmx \
+    ocamldoc/odoc_man.cmx \
+    ocamldoc/odoc_latex.cmx \
+    ocamldoc/odoc_html.cmx \
+    ocamldoc/odoc_dot.cmx \
+    ocamldoc/odoc_gen.cmi
+ocamldoc/odoc_gen.cmi : \
+    ocamldoc/odoc_texi.cmi \
+    ocamldoc/odoc_module.cmi \
+    ocamldoc/odoc_man.cmi \
+    ocamldoc/odoc_latex.cmi \
+    ocamldoc/odoc_html.cmi \
+    ocamldoc/odoc_dot.cmi
+ocamldoc/odoc_global.cmo : \
+    ocamldoc/odoc_types.cmi \
+    ocamldoc/odoc_messages.cmi \
+    ocamldoc/odoc_config.cmi \
+    utils/clflags.cmi \
+    ocamldoc/odoc_global.cmi
+ocamldoc/odoc_global.cmx : \
+    ocamldoc/odoc_types.cmx \
+    ocamldoc/odoc_messages.cmx \
+    ocamldoc/odoc_config.cmx \
+    utils/clflags.cmx \
+    ocamldoc/odoc_global.cmi
+ocamldoc/odoc_global.cmi : \
+    ocamldoc/odoc_types.cmi
+ocamldoc/odoc_html.cmo : \
+    otherlibs/str/str.cmi \
+    middle_end/flambda/parameter.cmi \
+    ocamldoc/odoc_text.cmi \
+    ocamldoc/odoc_ocamlhtml.cmi \
+    ocamldoc/odoc_messages.cmi \
+    ocamldoc/odoc_info.cmi \
+    ocamldoc/odoc_global.cmi \
+    ocamldoc/odoc_dag2html.cmi \
+    utils/misc.cmi \
+    parsing/asttypes.cmi \
+    ocamldoc/odoc_html.cmi
+ocamldoc/odoc_html.cmx : \
+    otherlibs/str/str.cmx \
+    middle_end/flambda/parameter.cmx \
+    ocamldoc/odoc_text.cmx \
+    ocamldoc/odoc_ocamlhtml.cmx \
+    ocamldoc/odoc_messages.cmx \
+    ocamldoc/odoc_info.cmx \
+    ocamldoc/odoc_global.cmx \
+    ocamldoc/odoc_dag2html.cmx \
+    utils/misc.cmx \
+    parsing/asttypes.cmx \
+    ocamldoc/odoc_html.cmi
+ocamldoc/odoc_html.cmi : \
+    typing/types.cmi \
+    ocamldoc/odoc_types.cmi \
+    ocamldoc/odoc_parameter.cmi \
+    ocamldoc/odoc_info.cmi \
+    ocamldoc/odoc_dag2html.cmi \
+    utils/misc.cmi
+ocamldoc/odoc_info.cmo : \
+    typing/printtyp.cmi \
+    ocamldoc/odoc_value.cmi \
+    ocamldoc/odoc_types.cmi \
+    ocamldoc/odoc_type.cmi \
+    ocamldoc/odoc_text.cmi \
+    ocamldoc/odoc_str.cmi \
+    ocamldoc/odoc_search.cmi \
+    ocamldoc/odoc_scan.cmi \
+    ocamldoc/odoc_print.cmi \
+    ocamldoc/odoc_parameter.cmi \
+    ocamldoc/odoc_name.cmi \
+    ocamldoc/odoc_module.cmi \
+    ocamldoc/odoc_misc.cmi \
+    ocamldoc/odoc_global.cmi \
+    ocamldoc/odoc_extension.cmi \
+    ocamldoc/odoc_exception.cmi \
+    ocamldoc/odoc_dep.cmi \
+    ocamldoc/odoc_config.cmi \
+    ocamldoc/odoc_comments.cmi \
+    ocamldoc/odoc_class.cmi \
+    ocamldoc/odoc_analyse.cmi \
+    parsing/location.cmi \
+    ocamldoc/odoc_info.cmi
+ocamldoc/odoc_info.cmx : \
+    typing/printtyp.cmx \
+    ocamldoc/odoc_value.cmx \
+    ocamldoc/odoc_types.cmx \
+    ocamldoc/odoc_type.cmx \
+    ocamldoc/odoc_text.cmx \
+    ocamldoc/odoc_str.cmx \
+    ocamldoc/odoc_search.cmx \
+    ocamldoc/odoc_scan.cmx \
+    ocamldoc/odoc_print.cmx \
+    ocamldoc/odoc_parameter.cmx \
+    ocamldoc/odoc_name.cmx \
+    ocamldoc/odoc_module.cmx \
+    ocamldoc/odoc_misc.cmx \
+    ocamldoc/odoc_global.cmx \
+    ocamldoc/odoc_extension.cmx \
+    ocamldoc/odoc_exception.cmx \
+    ocamldoc/odoc_dep.cmx \
+    ocamldoc/odoc_config.cmx \
+    ocamldoc/odoc_comments.cmx \
+    ocamldoc/odoc_class.cmx \
+    ocamldoc/odoc_analyse.cmx \
+    parsing/location.cmx \
+    ocamldoc/odoc_info.cmi
+ocamldoc/odoc_info.cmi : \
+    typing/types.cmi \
+    otherlibs/str/str.cmi \
+    ocamldoc/odoc_value.cmi \
+    ocamldoc/odoc_types.cmi \
+    ocamldoc/odoc_type.cmi \
+    ocamldoc/odoc_search.cmi \
+    ocamldoc/odoc_parameter.cmi \
+    ocamldoc/odoc_module.cmi \
+    ocamldoc/odoc_global.cmi \
+    ocamldoc/odoc_extension.cmi \
+    ocamldoc/odoc_exception.cmi \
+    ocamldoc/odoc_class.cmi \
+    parsing/location.cmi \
+    parsing/asttypes.cmi
+ocamldoc/odoc_latex.cmo : \
+    otherlibs/str/str.cmi \
+    ocamldoc/odoc_to_text.cmi \
+    ocamldoc/odoc_messages.cmi \
+    ocamldoc/odoc_latex_style.cmi \
+    ocamldoc/odoc_info.cmi \
+    parsing/asttypes.cmi \
+    ocamldoc/odoc_latex.cmi
+ocamldoc/odoc_latex.cmx : \
+    otherlibs/str/str.cmx \
+    ocamldoc/odoc_to_text.cmx \
+    ocamldoc/odoc_messages.cmx \
+    ocamldoc/odoc_latex_style.cmx \
+    ocamldoc/odoc_info.cmx \
+    parsing/asttypes.cmx \
+    ocamldoc/odoc_latex.cmi
+ocamldoc/odoc_latex.cmi : \
+    typing/types.cmi \
+    otherlibs/str/str.cmi \
+    ocamldoc/odoc_types.cmi \
+    ocamldoc/odoc_info.cmi
+ocamldoc/odoc_latex_style.cmo : \
+    ocamldoc/odoc_latex_style.cmi
+ocamldoc/odoc_latex_style.cmx : \
+    ocamldoc/odoc_latex_style.cmi
+ocamldoc/odoc_latex_style.cmi :
+ocamldoc/odoc_lexer.cmo : \
+    otherlibs/str/str.cmi \
+    ocamldoc/odoc_parser.cmi \
+    ocamldoc/odoc_messages.cmi \
+    ocamldoc/odoc_global.cmi \
+    ocamldoc/odoc_comments_global.cmi \
+    ocamldoc/odoc_lexer.cmi
+ocamldoc/odoc_lexer.cmx : \
+    otherlibs/str/str.cmx \
+    ocamldoc/odoc_parser.cmx \
+    ocamldoc/odoc_messages.cmx \
+    ocamldoc/odoc_global.cmx \
+    ocamldoc/odoc_comments_global.cmx \
+    ocamldoc/odoc_lexer.cmi
+ocamldoc/odoc_lexer.cmi : \
+    ocamldoc/odoc_parser.cmi
+ocamldoc/odoc_man.cmo : \
+    otherlibs/str/str.cmi \
+    middle_end/flambda/parameter.cmi \
+    ocamldoc/odoc_str.cmi \
+    ocamldoc/odoc_print.cmi \
+    ocamldoc/odoc_misc.cmi \
+    ocamldoc/odoc_messages.cmi \
+    ocamldoc/odoc_info.cmi \
+    parsing/asttypes.cmi \
+    ocamldoc/odoc_man.cmi
+ocamldoc/odoc_man.cmx : \
+    otherlibs/str/str.cmx \
+    middle_end/flambda/parameter.cmx \
+    ocamldoc/odoc_str.cmx \
+    ocamldoc/odoc_print.cmx \
+    ocamldoc/odoc_misc.cmx \
+    ocamldoc/odoc_messages.cmx \
+    ocamldoc/odoc_info.cmx \
+    parsing/asttypes.cmx \
+    ocamldoc/odoc_man.cmi
+ocamldoc/odoc_man.cmi : \
+    typing/types.cmi \
+    ocamldoc/odoc_types.cmi \
+    ocamldoc/odoc_info.cmi
+ocamldoc/odoc_merge.cmo : \
+    otherlibs/str/str.cmi \
+    ocamldoc/odoc_value.cmi \
+    ocamldoc/odoc_types.cmi \
+    ocamldoc/odoc_type.cmi \
+    ocamldoc/odoc_parameter.cmi \
+    ocamldoc/odoc_module.cmi \
+    ocamldoc/odoc_messages.cmi \
+    ocamldoc/odoc_global.cmi \
+    ocamldoc/odoc_extension.cmi \
+    ocamldoc/odoc_exception.cmi \
+    ocamldoc/odoc_class.cmi \
+    ocamldoc/odoc_merge.cmi
+ocamldoc/odoc_merge.cmx : \
+    otherlibs/str/str.cmx \
+    ocamldoc/odoc_value.cmx \
+    ocamldoc/odoc_types.cmx \
+    ocamldoc/odoc_type.cmx \
+    ocamldoc/odoc_parameter.cmx \
+    ocamldoc/odoc_module.cmx \
+    ocamldoc/odoc_messages.cmx \
+    ocamldoc/odoc_global.cmx \
+    ocamldoc/odoc_extension.cmx \
+    ocamldoc/odoc_exception.cmx \
+    ocamldoc/odoc_class.cmx \
+    ocamldoc/odoc_merge.cmi
+ocamldoc/odoc_merge.cmi : \
+    ocamldoc/odoc_types.cmi \
+    ocamldoc/odoc_module.cmi
+ocamldoc/odoc_messages.cmo : \
+    otherlibs/str/str.cmi \
+    utils/config.cmi \
+    ocamldoc/odoc_messages.cmi
+ocamldoc/odoc_messages.cmx : \
+    otherlibs/str/str.cmx \
+    utils/config.cmx \
+    ocamldoc/odoc_messages.cmi
+ocamldoc/odoc_messages.cmi :
+ocamldoc/odoc_misc.cmo : \
+    otherlibs/unix/unix.cmi \
+    typing/types.cmi \
+    typing/predef.cmi \
+    typing/path.cmi \
+    ocamldoc/odoc_types.cmi \
+    ocamldoc/odoc_messages.cmi \
+    parsing/longident.cmi \
+    typing/btype.cmi \
+    ocamldoc/odoc_misc.cmi
+ocamldoc/odoc_misc.cmx : \
+    otherlibs/unix/unix.cmx \
+    typing/types.cmx \
+    typing/predef.cmx \
+    typing/path.cmx \
+    ocamldoc/odoc_types.cmx \
+    ocamldoc/odoc_messages.cmx \
+    parsing/longident.cmx \
+    typing/btype.cmx \
+    ocamldoc/odoc_misc.cmi
+ocamldoc/odoc_misc.cmi : \
+    typing/types.cmi \
+    ocamldoc/odoc_types.cmi \
+    parsing/longident.cmi \
+    parsing/asttypes.cmi
+ocamldoc/odoc_module.cmo : \
+    typing/types.cmi \
+    ocamldoc/odoc_value.cmi \
+    ocamldoc/odoc_types.cmi \
+    ocamldoc/odoc_type.cmi \
+    ocamldoc/odoc_name.cmi \
+    ocamldoc/odoc_extension.cmi \
+    ocamldoc/odoc_exception.cmi \
+    ocamldoc/odoc_class.cmi \
+    utils/misc.cmi \
+    ocamldoc/odoc_module.cmi
+ocamldoc/odoc_module.cmx : \
+    typing/types.cmx \
+    ocamldoc/odoc_value.cmx \
+    ocamldoc/odoc_types.cmx \
+    ocamldoc/odoc_type.cmx \
+    ocamldoc/odoc_name.cmx \
+    ocamldoc/odoc_extension.cmx \
+    ocamldoc/odoc_exception.cmx \
+    ocamldoc/odoc_class.cmx \
+    utils/misc.cmx \
+    ocamldoc/odoc_module.cmi
+ocamldoc/odoc_module.cmi : \
+    typing/types.cmi \
+    ocamldoc/odoc_value.cmi \
+    ocamldoc/odoc_types.cmi \
+    ocamldoc/odoc_type.cmi \
+    ocamldoc/odoc_name.cmi \
+    ocamldoc/odoc_extension.cmi \
+    ocamldoc/odoc_exception.cmi \
+    ocamldoc/odoc_class.cmi \
+    utils/misc.cmi
+ocamldoc/odoc_name.cmo : \
+    parsing/unit_info.cmi \
+    otherlibs/str/str.cmi \
+    typing/path.cmi \
+    ocamldoc/odoc_misc.cmi \
+    typing/ident.cmi \
+    ocamldoc/odoc_name.cmi
+ocamldoc/odoc_name.cmx : \
+    parsing/unit_info.cmx \
+    otherlibs/str/str.cmx \
+    typing/path.cmx \
+    ocamldoc/odoc_misc.cmx \
+    typing/ident.cmx \
+    ocamldoc/odoc_name.cmi
+ocamldoc/odoc_name.cmi : \
+    typing/path.cmi \
+    parsing/longident.cmi \
+    typing/ident.cmi
+ocamldoc/odoc_ocamlhtml.cmo : \
+    otherlibs/str/str.cmi \
+    ocamldoc/odoc_ocamlhtml.cmi
+ocamldoc/odoc_ocamlhtml.cmx : \
+    otherlibs/str/str.cmx \
+    ocamldoc/odoc_ocamlhtml.cmi
+ocamldoc/odoc_ocamlhtml.cmi :
+ocamldoc/odoc_parameter.cmo : \
+    typing/types.cmi \
+    ocamldoc/odoc_types.cmi \
+    ocamldoc/odoc_parameter.cmi
+ocamldoc/odoc_parameter.cmx : \
+    typing/types.cmx \
+    ocamldoc/odoc_types.cmx \
+    ocamldoc/odoc_parameter.cmi
+ocamldoc/odoc_parameter.cmi : \
+    typing/types.cmi \
+    ocamldoc/odoc_types.cmi
+ocamldoc/odoc_parser.cmo : \
+    ocamldoc/odoc_types.cmi \
+    ocamldoc/odoc_comments_global.cmi \
+    ocamldoc/odoc_parser.cmi
+ocamldoc/odoc_parser.cmx : \
+    ocamldoc/odoc_types.cmx \
+    ocamldoc/odoc_comments_global.cmx \
+    ocamldoc/odoc_parser.cmi
+ocamldoc/odoc_parser.cmi : \
+    ocamldoc/odoc_types.cmi
+ocamldoc/odoc_print.cmo : \
+    typing/types.cmi \
+    typing/printtyp.cmi \
+    typing/btype.cmi \
+    ocamldoc/odoc_print.cmi
+ocamldoc/odoc_print.cmx : \
+    typing/types.cmx \
+    typing/printtyp.cmx \
+    typing/btype.cmx \
+    ocamldoc/odoc_print.cmi
+ocamldoc/odoc_print.cmi : \
+    typing/types.cmi
+ocamldoc/odoc_scan.cmo : \
+    ocamldoc/odoc_value.cmi \
+    ocamldoc/odoc_types.cmi \
+    ocamldoc/odoc_type.cmi \
+    ocamldoc/odoc_module.cmi \
+    ocamldoc/odoc_extension.cmi \
+    ocamldoc/odoc_exception.cmi \
+    ocamldoc/odoc_class.cmi \
+    ocamldoc/odoc_scan.cmi
+ocamldoc/odoc_scan.cmx : \
+    ocamldoc/odoc_value.cmx \
+    ocamldoc/odoc_types.cmx \
+    ocamldoc/odoc_type.cmx \
+    ocamldoc/odoc_module.cmx \
+    ocamldoc/odoc_extension.cmx \
+    ocamldoc/odoc_exception.cmx \
+    ocamldoc/odoc_class.cmx \
+    ocamldoc/odoc_scan.cmi
+ocamldoc/odoc_scan.cmi : \
+    ocamldoc/odoc_value.cmi \
+    ocamldoc/odoc_types.cmi \
+    ocamldoc/odoc_type.cmi \
+    ocamldoc/odoc_module.cmi \
+    ocamldoc/odoc_extension.cmi \
+    ocamldoc/odoc_exception.cmi \
+    ocamldoc/odoc_class.cmi
+ocamldoc/odoc_search.cmo : \
+    otherlibs/str/str.cmi \
+    ocamldoc/odoc_value.cmi \
+    ocamldoc/odoc_types.cmi \
+    ocamldoc/odoc_type.cmi \
+    ocamldoc/odoc_module.cmi \
+    ocamldoc/odoc_misc.cmi \
+    ocamldoc/odoc_extension.cmi \
+    ocamldoc/odoc_exception.cmi \
+    ocamldoc/odoc_class.cmi \
+    ocamldoc/odoc_search.cmi
+ocamldoc/odoc_search.cmx : \
+    otherlibs/str/str.cmx \
+    ocamldoc/odoc_value.cmx \
+    ocamldoc/odoc_types.cmx \
+    ocamldoc/odoc_type.cmx \
+    ocamldoc/odoc_module.cmx \
+    ocamldoc/odoc_misc.cmx \
+    ocamldoc/odoc_extension.cmx \
+    ocamldoc/odoc_exception.cmx \
+    ocamldoc/odoc_class.cmx \
+    ocamldoc/odoc_search.cmi
+ocamldoc/odoc_search.cmi : \
+    otherlibs/str/str.cmi \
+    ocamldoc/odoc_value.cmi \
+    ocamldoc/odoc_types.cmi \
+    ocamldoc/odoc_type.cmi \
+    ocamldoc/odoc_module.cmi \
+    ocamldoc/odoc_extension.cmi \
+    ocamldoc/odoc_exception.cmi \
+    ocamldoc/odoc_class.cmi
+ocamldoc/odoc_see_lexer.cmo : \
+    ocamldoc/odoc_parser.cmi \
+    ocamldoc/odoc_see_lexer.cmi
+ocamldoc/odoc_see_lexer.cmx : \
+    ocamldoc/odoc_parser.cmx \
+    ocamldoc/odoc_see_lexer.cmi
+ocamldoc/odoc_see_lexer.cmi : \
+    ocamldoc/odoc_parser.cmi
+ocamldoc/odoc_sig.cmo : \
+    parsing/unit_info.cmi \
+    typing/types.cmi \
+    typing/typedtree.cmi \
+    parsing/parsetree.cmi \
+    ocamldoc/odoc_value.cmi \
+    ocamldoc/odoc_types.cmi \
+    ocamldoc/odoc_type.cmi \
+    ocamldoc/odoc_parameter.cmi \
+    ocamldoc/odoc_module.cmi \
+    ocamldoc/odoc_misc.cmi \
+    ocamldoc/odoc_messages.cmi \
+    ocamldoc/odoc_merge.cmi \
+    ocamldoc/odoc_global.cmi \
+    ocamldoc/odoc_extension.cmi \
+    ocamldoc/odoc_exception.cmi \
+    ocamldoc/odoc_env.cmi \
+    ocamldoc/odoc_class.cmi \
+    parsing/longident.cmi \
+    parsing/location.cmi \
+    typing/ident.cmi \
+    typing/ctype.cmi \
+    typing/btype.cmi \
+    parsing/asttypes.cmi \
+    ocamldoc/odoc_sig.cmi
+ocamldoc/odoc_sig.cmx : \
+    parsing/unit_info.cmx \
+    typing/types.cmx \
+    typing/typedtree.cmx \
+    parsing/parsetree.cmi \
+    ocamldoc/odoc_value.cmx \
+    ocamldoc/odoc_types.cmx \
+    ocamldoc/odoc_type.cmx \
+    ocamldoc/odoc_parameter.cmx \
+    ocamldoc/odoc_module.cmx \
+    ocamldoc/odoc_misc.cmx \
+    ocamldoc/odoc_messages.cmx \
+    ocamldoc/odoc_merge.cmx \
+    ocamldoc/odoc_global.cmx \
+    ocamldoc/odoc_extension.cmx \
+    ocamldoc/odoc_exception.cmx \
+    ocamldoc/odoc_env.cmx \
+    ocamldoc/odoc_class.cmx \
+    parsing/longident.cmx \
+    parsing/location.cmx \
+    typing/ident.cmx \
+    typing/ctype.cmx \
+    typing/btype.cmx \
+    parsing/asttypes.cmx \
+    ocamldoc/odoc_sig.cmi
+ocamldoc/odoc_sig.cmi : \
+    typing/types.cmi \
+    typing/typedtree.cmi \
+    parsing/parsetree.cmi \
+    ocamldoc/odoc_types.cmi \
+    ocamldoc/odoc_type.cmi \
+    ocamldoc/odoc_name.cmi \
+    ocamldoc/odoc_module.cmi \
+    ocamldoc/odoc_env.cmi \
+    ocamldoc/odoc_class.cmi \
+    parsing/location.cmi
+ocamldoc/odoc_str.cmo : \
+    typing/types.cmi \
+    typing/printtyp.cmi \
+    ocamldoc/odoc_value.cmi \
+    ocamldoc/odoc_type.cmi \
+    ocamldoc/odoc_print.cmi \
+    ocamldoc/odoc_name.cmi \
+    ocamldoc/odoc_misc.cmi \
+    ocamldoc/odoc_messages.cmi \
+    ocamldoc/odoc_extension.cmi \
+    ocamldoc/odoc_exception.cmi \
+    ocamldoc/odoc_class.cmi \
+    parsing/asttypes.cmi \
+    ocamldoc/odoc_str.cmi
+ocamldoc/odoc_str.cmx : \
+    typing/types.cmx \
+    typing/printtyp.cmx \
+    ocamldoc/odoc_value.cmx \
+    ocamldoc/odoc_type.cmx \
+    ocamldoc/odoc_print.cmx \
+    ocamldoc/odoc_name.cmx \
+    ocamldoc/odoc_misc.cmx \
+    ocamldoc/odoc_messages.cmx \
+    ocamldoc/odoc_extension.cmx \
+    ocamldoc/odoc_exception.cmx \
+    ocamldoc/odoc_class.cmx \
+    parsing/asttypes.cmx \
+    ocamldoc/odoc_str.cmi
+ocamldoc/odoc_str.cmi : \
+    typing/types.cmi \
+    ocamldoc/odoc_value.cmi \
+    ocamldoc/odoc_type.cmi \
+    ocamldoc/odoc_extension.cmi \
+    ocamldoc/odoc_exception.cmi \
+    ocamldoc/odoc_class.cmi
+ocamldoc/odoc_test.cmo : \
+    ocamldoc/odoc_info.cmi \
+    ocamldoc/odoc_gen.cmi \
+    ocamldoc/odoc_args.cmi \
+    ocamldoc/odoc_test.cmi
+ocamldoc/odoc_test.cmx : \
+    ocamldoc/odoc_info.cmx \
+    ocamldoc/odoc_gen.cmx \
+    ocamldoc/odoc_args.cmx \
+    ocamldoc/odoc_test.cmi
+ocamldoc/odoc_test.cmi :
+ocamldoc/odoc_texi.cmo : \
+    typing/types.cmi \
+    otherlibs/str/str.cmi \
+    ocamldoc/odoc_to_text.cmi \
+    ocamldoc/odoc_messages.cmi \
+    ocamldoc/odoc_info.cmi \
+    parsing/asttypes.cmi \
+    ocamldoc/odoc_texi.cmi
+ocamldoc/odoc_texi.cmx : \
+    typing/types.cmx \
+    otherlibs/str/str.cmx \
+    ocamldoc/odoc_to_text.cmx \
+    ocamldoc/odoc_messages.cmx \
+    ocamldoc/odoc_info.cmx \
+    parsing/asttypes.cmx \
+    ocamldoc/odoc_texi.cmi
+ocamldoc/odoc_texi.cmi : \
+    typing/types.cmi \
+    ocamldoc/odoc_types.cmi \
+    ocamldoc/odoc_info.cmi
+ocamldoc/odoc_text.cmo : \
+    ocamldoc/odoc_types.cmi \
+    ocamldoc/odoc_text_parser.cmi \
+    ocamldoc/odoc_text_lexer.cmi \
+    ocamldoc/odoc_text.cmi
+ocamldoc/odoc_text.cmx : \
+    ocamldoc/odoc_types.cmx \
+    ocamldoc/odoc_text_parser.cmx \
+    ocamldoc/odoc_text_lexer.cmx \
+    ocamldoc/odoc_text.cmi
+ocamldoc/odoc_text.cmi : \
+    ocamldoc/odoc_types.cmi
+ocamldoc/odoc_text_lexer.cmo : \
+    otherlibs/str/str.cmi \
+    ocamldoc/odoc_text_parser.cmi \
+    ocamldoc/odoc_misc.cmi \
+    ocamldoc/odoc_text_lexer.cmi
+ocamldoc/odoc_text_lexer.cmx : \
+    otherlibs/str/str.cmx \
+    ocamldoc/odoc_text_parser.cmx \
+    ocamldoc/odoc_misc.cmx \
+    ocamldoc/odoc_text_lexer.cmi
+ocamldoc/odoc_text_lexer.cmi : \
+    ocamldoc/odoc_text_parser.cmi
+ocamldoc/odoc_text_parser.cmo : \
+    otherlibs/str/str.cmi \
+    ocamldoc/odoc_types.cmi \
+    ocamldoc/odoc_misc.cmi \
+    ocamldoc/odoc_text_parser.cmi
+ocamldoc/odoc_text_parser.cmx : \
+    otherlibs/str/str.cmx \
+    ocamldoc/odoc_types.cmx \
+    ocamldoc/odoc_misc.cmx \
+    ocamldoc/odoc_text_parser.cmi
+ocamldoc/odoc_text_parser.cmi : \
+    ocamldoc/odoc_types.cmi
+ocamldoc/odoc_to_text.cmo : \
+    otherlibs/str/str.cmi \
+    middle_end/flambda/parameter.cmi \
+    ocamldoc/odoc_str.cmi \
+    ocamldoc/odoc_module.cmi \
+    ocamldoc/odoc_messages.cmi \
+    ocamldoc/odoc_info.cmi \
+    ocamldoc/odoc_to_text.cmi
+ocamldoc/odoc_to_text.cmx : \
+    otherlibs/str/str.cmx \
+    middle_end/flambda/parameter.cmx \
+    ocamldoc/odoc_str.cmx \
+    ocamldoc/odoc_module.cmx \
+    ocamldoc/odoc_messages.cmx \
+    ocamldoc/odoc_info.cmx \
+    ocamldoc/odoc_to_text.cmi
+ocamldoc/odoc_to_text.cmi : \
+    typing/types.cmi \
+    ocamldoc/odoc_types.cmi \
+    ocamldoc/odoc_info.cmi
+ocamldoc/odoc_type.cmo : \
+    typing/types.cmi \
+    ocamldoc/odoc_types.cmi \
+    ocamldoc/odoc_name.cmi \
+    parsing/asttypes.cmi \
+    ocamldoc/odoc_type.cmi
+ocamldoc/odoc_type.cmx : \
+    typing/types.cmx \
+    ocamldoc/odoc_types.cmx \
+    ocamldoc/odoc_name.cmx \
+    parsing/asttypes.cmx \
+    ocamldoc/odoc_type.cmi
+ocamldoc/odoc_type.cmi : \
+    typing/types.cmi \
+    ocamldoc/odoc_types.cmi \
+    ocamldoc/odoc_name.cmi \
+    parsing/asttypes.cmi
+ocamldoc/odoc_types.cmo : \
+    ocamldoc/odoc_messages.cmi \
+    parsing/location.cmi \
+    ocamldoc/odoc_types.cmi
+ocamldoc/odoc_types.cmx : \
+    ocamldoc/odoc_messages.cmx \
+    parsing/location.cmx \
+    ocamldoc/odoc_types.cmi
+ocamldoc/odoc_types.cmi : \
+    parsing/location.cmi
+ocamldoc/odoc_value.cmo : \
+    typing/types.cmi \
+    ocamldoc/odoc_types.cmi \
+    ocamldoc/odoc_parameter.cmi \
+    ocamldoc/odoc_name.cmi \
+    ocamldoc/odoc_misc.cmi \
+    parsing/asttypes.cmi \
+    ocamldoc/odoc_value.cmi
+ocamldoc/odoc_value.cmx : \
+    typing/types.cmx \
+    ocamldoc/odoc_types.cmx \
+    ocamldoc/odoc_parameter.cmx \
+    ocamldoc/odoc_name.cmx \
+    ocamldoc/odoc_misc.cmx \
+    parsing/asttypes.cmx \
+    ocamldoc/odoc_value.cmi
+ocamldoc/odoc_value.cmi : \
+    typing/types.cmi \
+    ocamldoc/odoc_types.cmi \
+    ocamldoc/odoc_parameter.cmi \
+    ocamldoc/odoc_name.cmi
+ocamltest/actions.cmo : \
+    ocamltest/variables.cmi \
+    ocamltest/result.cmi \
+    ocamltest/environments.cmi \
+    ocamltest/actions.cmi
+ocamltest/actions.cmx : \
+    ocamltest/variables.cmx \
+    ocamltest/result.cmx \
+    ocamltest/environments.cmx \
+    ocamltest/actions.cmi
+ocamltest/actions.cmi : \
+    ocamltest/variables.cmi \
+    ocamltest/result.cmi \
+    ocamltest/environments.cmi
+ocamltest/actions_helpers.cmo : \
+    ocamltest/variables.cmi \
+    otherlibs/unix/unix.cmi \
+    ocamltest/strace.cmi \
+    ocamltest/run_command.cmi \
+    ocamltest/result.cmi \
+    ocamltest/ocamltest_stdlib.cmi \
+    ocamltest/modifier_parser.cmi \
+    ocamltest/filecompare.cmi \
+    ocamltest/environments.cmi \
+    ocamltest/builtin_variables.cmi \
+    ocamltest/actions.cmi \
+    ocamltest/actions_helpers.cmi
+ocamltest/actions_helpers.cmx : \
+    ocamltest/variables.cmx \
+    otherlibs/unix/unix.cmx \
+    ocamltest/strace.cmx \
+    ocamltest/run_command.cmx \
+    ocamltest/result.cmx \
+    ocamltest/ocamltest_stdlib.cmx \
+    ocamltest/modifier_parser.cmx \
+    ocamltest/filecompare.cmx \
+    ocamltest/environments.cmx \
+    ocamltest/builtin_variables.cmx \
+    ocamltest/actions.cmx \
+    ocamltest/actions_helpers.cmi
+ocamltest/actions_helpers.cmi : \
+    ocamltest/variables.cmi \
+    ocamltest/result.cmi \
+    ocamltest/environments.cmi \
+    ocamltest/actions.cmi
+ocamltest/builtin_actions.cmo : \
+    otherlibs/unix/unix.cmi \
+    ocamltest/result.cmi \
+    ocamltest/ocamltest_stdlib.cmi \
+    ocamltest/ocamltest_config.cmi \
+    ocamltest/environments.cmi \
+    ocamltest/builtin_variables.cmi \
+    ocamltest/actions_helpers.cmi \
+    ocamltest/actions.cmi \
+    ocamltest/builtin_actions.cmi
+ocamltest/builtin_actions.cmx : \
+    otherlibs/unix/unix.cmx \
+    ocamltest/result.cmx \
+    ocamltest/ocamltest_stdlib.cmx \
+    ocamltest/ocamltest_config.cmx \
+    ocamltest/environments.cmx \
+    ocamltest/builtin_variables.cmx \
+    ocamltest/actions_helpers.cmx \
+    ocamltest/actions.cmx \
+    ocamltest/builtin_actions.cmi
+ocamltest/builtin_actions.cmi : \
+    ocamltest/actions.cmi
+ocamltest/builtin_variables.cmo : \
+    ocamltest/variables.cmi \
+    ocamltest/builtin_variables.cmi
+ocamltest/builtin_variables.cmx : \
+    ocamltest/variables.cmx \
+    ocamltest/builtin_variables.cmi
+ocamltest/builtin_variables.cmi : \
+    ocamltest/variables.cmi
+ocamltest/environments.cmo : \
+    ocamltest/variables.cmi \
+    ocamltest/ocamltest_stdlib.cmi \
+    ocamltest/environments.cmi
+ocamltest/environments.cmx : \
+    ocamltest/variables.cmx \
+    ocamltest/ocamltest_stdlib.cmx \
+    ocamltest/environments.cmi
+ocamltest/environments.cmi : \
+    ocamltest/variables.cmi
+ocamltest/filecompare.cmo : \
+    ocamltest/run_command.cmi \
+    ocamltest/ocamltest_stdlib.cmi \
+    ocamltest/ocamltest_config.cmi \
+    ocamltest/filecompare.cmi
+ocamltest/filecompare.cmx : \
+    ocamltest/run_command.cmx \
+    ocamltest/ocamltest_stdlib.cmx \
+    ocamltest/ocamltest_config.cmx \
+    ocamltest/filecompare.cmi
+ocamltest/filecompare.cmi :
+ocamltest/main.cmo : \
+    ocamltest/variables.cmi \
+    otherlibs/unix/unix.cmi \
+    ocamltest/tsl_semantics.cmi \
+    ocamltest/tsl_parser.cmi \
+    ocamltest/tsl_lexer.cmi \
+    ocamltest/tsl_ast.cmi \
+    ocamltest/translate.cmi \
+    ocamltest/tests.cmi \
+    ocamltest/result.cmi \
+    ocamltest/options.cmi \
+    ocamltest/ocamltest_stdlib.cmi \
+    ocamltest/ocaml_actions.cmi \
+    parsing/location.cmi \
+    ocamltest/environments.cmi \
+    ocamltest/builtin_variables.cmi \
+    ocamltest/actions_helpers.cmi \
+    ocamltest/actions.cmi \
+    ocamltest/main.cmi
+ocamltest/main.cmx : \
+    ocamltest/variables.cmx \
+    otherlibs/unix/unix.cmx \
+    ocamltest/tsl_semantics.cmx \
+    ocamltest/tsl_parser.cmx \
+    ocamltest/tsl_lexer.cmx \
+    ocamltest/tsl_ast.cmx \
+    ocamltest/translate.cmx \
+    ocamltest/tests.cmx \
+    ocamltest/result.cmx \
+    ocamltest/options.cmx \
+    ocamltest/ocamltest_stdlib.cmx \
+    ocamltest/ocaml_actions.cmx \
+    parsing/location.cmx \
+    ocamltest/environments.cmx \
+    ocamltest/builtin_variables.cmx \
+    ocamltest/actions_helpers.cmx \
+    ocamltest/actions.cmx \
+    ocamltest/main.cmi
+ocamltest/main.cmi :
+ocamltest/modifier_parser.cmo : \
+    ocamltest/variables.cmi \
+    ocamltest/tsl_lexer.cmi \
+    ocamltest/ocamltest_stdlib.cmi \
+    ocamltest/environments.cmi \
+    ocamltest/modifier_parser.cmi
+ocamltest/modifier_parser.cmx : \
+    ocamltest/variables.cmx \
+    ocamltest/tsl_lexer.cmx \
+    ocamltest/ocamltest_stdlib.cmx \
+    ocamltest/environments.cmx \
+    ocamltest/modifier_parser.cmi
+ocamltest/modifier_parser.cmi : \
+    ocamltest/environments.cmi
+ocamltest/ocaml_actions.cmo : \
+    ocamltest/result.cmi \
+    ocamltest/ocamltest_stdlib.cmi \
+    ocamltest/ocamltest_config.cmi \
+    ocamltest/ocaml_variables.cmi \
+    ocamltest/ocaml_toplevels.cmi \
+    ocamltest/ocaml_tools.cmi \
+    ocamltest/ocaml_modifiers.cmi \
+    ocamltest/ocaml_flags.cmi \
+    ocamltest/ocaml_filetypes.cmi \
+    ocamltest/ocaml_files.cmi \
+    ocamltest/ocaml_directories.cmi \
+    ocamltest/ocaml_compilers.cmi \
+    ocamltest/ocaml_commands.cmi \
+    ocamltest/ocaml_backends.cmi \
+    utils/misc.cmi \
+    ocamltest/filecompare.cmi \
+    ocamltest/environments.cmi \
+    utils/config.cmi \
+    file_formats/cmo_format.cmi \
+    utils/clflags.cmi \
+    ocamltest/builtin_variables.cmi \
+    ocamltest/actions_helpers.cmi \
+    ocamltest/actions.cmi \
+    ocamltest/ocaml_actions.cmi
+ocamltest/ocaml_actions.cmx : \
+    ocamltest/result.cmx \
+    ocamltest/ocamltest_stdlib.cmx \
+    ocamltest/ocamltest_config.cmx \
+    ocamltest/ocaml_variables.cmx \
+    ocamltest/ocaml_toplevels.cmx \
+    ocamltest/ocaml_tools.cmx \
+    ocamltest/ocaml_modifiers.cmx \
+    ocamltest/ocaml_flags.cmx \
+    ocamltest/ocaml_filetypes.cmx \
+    ocamltest/ocaml_files.cmx \
+    ocamltest/ocaml_directories.cmx \
+    ocamltest/ocaml_compilers.cmx \
+    ocamltest/ocaml_commands.cmx \
+    ocamltest/ocaml_backends.cmx \
+    utils/misc.cmx \
+    ocamltest/filecompare.cmx \
+    ocamltest/environments.cmx \
+    utils/config.cmx \
+    file_formats/cmo_format.cmi \
+    utils/clflags.cmx \
+    ocamltest/builtin_variables.cmx \
+    ocamltest/actions_helpers.cmx \
+    ocamltest/actions.cmx \
+    ocamltest/ocaml_actions.cmi
+ocamltest/ocaml_actions.cmi : \
+    ocamltest/actions.cmi
+ocamltest/ocaml_backends.cmo : \
+    ocamltest/ocaml_backends.cmi
+ocamltest/ocaml_backends.cmx : \
+    ocamltest/ocaml_backends.cmi
+ocamltest/ocaml_backends.cmi :
+ocamltest/ocaml_commands.cmo : \
+    ocamltest/ocaml_files.cmi \
+    ocamltest/ocaml_commands.cmi
+ocamltest/ocaml_commands.cmx : \
+    ocamltest/ocaml_files.cmx \
+    ocamltest/ocaml_commands.cmi
+ocamltest/ocaml_commands.cmi :
+ocamltest/ocaml_compilers.cmo : \
+    ocamltest/variables.cmi \
+    ocamltest/ocamltest_stdlib.cmi \
+    ocamltest/ocaml_variables.cmi \
+    ocamltest/ocaml_tools.cmi \
+    ocamltest/ocaml_files.cmi \
+    ocamltest/ocaml_commands.cmi \
+    ocamltest/ocaml_backends.cmi \
+    ocamltest/builtin_variables.cmi \
+    ocamltest/ocaml_compilers.cmi
+ocamltest/ocaml_compilers.cmx : \
+    ocamltest/variables.cmx \
+    ocamltest/ocamltest_stdlib.cmx \
+    ocamltest/ocaml_variables.cmx \
+    ocamltest/ocaml_tools.cmx \
+    ocamltest/ocaml_files.cmx \
+    ocamltest/ocaml_commands.cmx \
+    ocamltest/ocaml_backends.cmx \
+    ocamltest/builtin_variables.cmx \
+    ocamltest/ocaml_compilers.cmi
+ocamltest/ocaml_compilers.cmi : \
+    ocamltest/variables.cmi \
+    ocamltest/ocaml_tools.cmi \
+    ocamltest/ocaml_backends.cmi
+ocamltest/ocaml_directories.cmo : \
+    ocamltest/ocamltest_stdlib.cmi \
+    ocamltest/ocamltest_config.cmi \
+    ocamltest/ocaml_directories.cmi
+ocamltest/ocaml_directories.cmx : \
+    ocamltest/ocamltest_stdlib.cmx \
+    ocamltest/ocamltest_config.cmx \
+    ocamltest/ocaml_directories.cmi
+ocamltest/ocaml_directories.cmi :
+ocamltest/ocaml_files.cmo : \
+    ocamltest/ocamltest_stdlib.cmi \
+    ocamltest/ocamltest_config.cmi \
+    ocamltest/ocaml_directories.cmi \
+    ocamltest/ocaml_files.cmi
+ocamltest/ocaml_files.cmx : \
+    ocamltest/ocamltest_stdlib.cmx \
+    ocamltest/ocamltest_config.cmx \
+    ocamltest/ocaml_directories.cmx \
+    ocamltest/ocaml_files.cmi
+ocamltest/ocaml_files.cmi :
+ocamltest/ocaml_filetypes.cmo : \
+    ocamltest/ocamltest_config.cmi \
+    ocamltest/ocaml_backends.cmi \
+    ocamltest/ocaml_filetypes.cmi
+ocamltest/ocaml_filetypes.cmx : \
+    ocamltest/ocamltest_config.cmx \
+    ocamltest/ocaml_backends.cmx \
+    ocamltest/ocaml_filetypes.cmi
+ocamltest/ocaml_filetypes.cmi : \
+    ocamltest/ocaml_backends.cmi
+ocamltest/ocaml_flags.cmo : \
+    ocamltest/ocaml_variables.cmi \
+    ocamltest/ocaml_files.cmi \
+    ocamltest/ocaml_directories.cmi \
+    ocamltest/ocaml_backends.cmi \
+    ocamltest/environments.cmi \
+    ocamltest/ocaml_flags.cmi
+ocamltest/ocaml_flags.cmx : \
+    ocamltest/ocaml_variables.cmx \
+    ocamltest/ocaml_files.cmx \
+    ocamltest/ocaml_directories.cmx \
+    ocamltest/ocaml_backends.cmx \
+    ocamltest/environments.cmx \
+    ocamltest/ocaml_flags.cmi
+ocamltest/ocaml_flags.cmi : \
+    ocamltest/ocaml_backends.cmi \
+    ocamltest/environments.cmi
+ocamltest/ocaml_modifiers.cmo : \
+    ocamltest/ocamltest_stdlib.cmi \
+    ocamltest/ocamltest_config.cmi \
+    ocamltest/ocaml_variables.cmi \
+    ocamltest/environments.cmi \
+    ocamltest/ocaml_modifiers.cmi
+ocamltest/ocaml_modifiers.cmx : \
+    ocamltest/ocamltest_stdlib.cmx \
+    ocamltest/ocamltest_config.cmx \
+    ocamltest/ocaml_variables.cmx \
+    ocamltest/environments.cmx \
+    ocamltest/ocaml_modifiers.cmi
+ocamltest/ocaml_modifiers.cmi : \
+    ocamltest/environments.cmi
+ocamltest/ocaml_tests.cmo : \
+    ocamltest/tests.cmi \
+    ocamltest/ocamltest_config.cmi \
+    ocamltest/ocaml_actions.cmi \
+    ocamltest/builtin_actions.cmi \
+    ocamltest/actions_helpers.cmi \
+    ocamltest/ocaml_tests.cmi
+ocamltest/ocaml_tests.cmx : \
+    ocamltest/tests.cmx \
+    ocamltest/ocamltest_config.cmx \
+    ocamltest/ocaml_actions.cmx \
+    ocamltest/builtin_actions.cmx \
+    ocamltest/actions_helpers.cmx \
+    ocamltest/ocaml_tests.cmi
+ocamltest/ocaml_tests.cmi : \
+    ocamltest/tests.cmi
+ocamltest/ocaml_tools.cmo : \
+    ocamltest/variables.cmi \
+    ocamltest/ocamltest_stdlib.cmi \
+    ocamltest/ocaml_variables.cmi \
+    ocamltest/ocaml_files.cmi \
+    ocamltest/environments.cmi \
+    ocamltest/actions_helpers.cmi \
+    ocamltest/ocaml_tools.cmi
+ocamltest/ocaml_tools.cmx : \
+    ocamltest/variables.cmx \
+    ocamltest/ocamltest_stdlib.cmx \
+    ocamltest/ocaml_variables.cmx \
+    ocamltest/ocaml_files.cmx \
+    ocamltest/environments.cmx \
+    ocamltest/actions_helpers.cmx \
+    ocamltest/ocaml_tools.cmi
+ocamltest/ocaml_tools.cmi : \
+    ocamltest/variables.cmi \
+    ocamltest/environments.cmi
+ocamltest/ocaml_toplevels.cmo : \
+    ocamltest/variables.cmi \
+    ocamltest/ocamltest_stdlib.cmi \
+    ocamltest/ocaml_variables.cmi \
+    ocamltest/ocaml_tools.cmi \
+    ocamltest/ocaml_files.cmi \
+    ocamltest/ocaml_compilers.cmi \
+    ocamltest/ocaml_commands.cmi \
+    ocamltest/ocaml_backends.cmi \
+    ocamltest/ocaml_toplevels.cmi
+ocamltest/ocaml_toplevels.cmx : \
+    ocamltest/variables.cmx \
+    ocamltest/ocamltest_stdlib.cmx \
+    ocamltest/ocaml_variables.cmx \
+    ocamltest/ocaml_tools.cmx \
+    ocamltest/ocaml_files.cmx \
+    ocamltest/ocaml_compilers.cmx \
+    ocamltest/ocaml_commands.cmx \
+    ocamltest/ocaml_backends.cmx \
+    ocamltest/ocaml_toplevels.cmi
+ocamltest/ocaml_toplevels.cmi : \
+    ocamltest/variables.cmi \
+    ocamltest/ocaml_tools.cmi \
+    ocamltest/ocaml_compilers.cmi \
+    ocamltest/ocaml_backends.cmi
+ocamltest/ocaml_variables.cmo : \
+    ocamltest/variables.cmi \
+    ocamltest/ocamltest_stdlib.cmi \
+    ocamltest/ocaml_variables.cmi
+ocamltest/ocaml_variables.cmx : \
+    ocamltest/variables.cmx \
+    ocamltest/ocamltest_stdlib.cmx \
+    ocamltest/ocaml_variables.cmi
+ocamltest/ocaml_variables.cmi : \
+    ocamltest/variables.cmi
+ocamltest/ocamltest_config.cmo : \
+    ocamltest/ocamltest_config.cmi
+ocamltest/ocamltest_config.cmx : \
+    ocamltest/ocamltest_config.cmi
+ocamltest/ocamltest_config.cmi :
+ocamltest/ocamltest_stdlib.cmo : \
+    ocamltest/ocamltest_unix.cmi \
+    ocamltest/ocamltest_config.cmi \
+    utils/misc.cmi \
+    ocamltest/ocamltest_stdlib.cmi
+ocamltest/ocamltest_stdlib.cmx : \
+    ocamltest/ocamltest_unix.cmx \
+    ocamltest/ocamltest_config.cmx \
+    utils/misc.cmx \
+    ocamltest/ocamltest_stdlib.cmi
+ocamltest/ocamltest_stdlib.cmi : \
+    ocamltest/ocamltest_unix.cmi \
+    utils/misc.cmi
+ocamltest/ocamltest_unix.cmo : \
+    otherlibs/unix/unix.cmi \
+    ocamltest/ocamltest_unix.cmi
+ocamltest/ocamltest_unix.cmx : \
+    otherlibs/unix/unix.cmx \
+    ocamltest/ocamltest_unix.cmi
+ocamltest/ocamltest_unix.cmi :
+ocamltest/ocamltest_unix_dummy.cmo :
+ocamltest/ocamltest_unix_dummy.cmx :
+ocamltest/ocamltest_unix_real.cmo : \
+    otherlibs/unix/unix.cmi
+ocamltest/ocamltest_unix_real.cmx : \
+    otherlibs/unix/unix.cmx
+ocamltest/options.cmo : \
+    ocamltest/variables.cmi \
+    ocamltest/translate.cmi \
+    ocamltest/tests.cmi \
+    ocamltest/actions.cmi \
+    ocamltest/options.cmi
+ocamltest/options.cmx : \
+    ocamltest/variables.cmx \
+    ocamltest/translate.cmx \
+    ocamltest/tests.cmx \
+    ocamltest/actions.cmx \
+    ocamltest/options.cmi
+ocamltest/options.cmi : \
+    ocamltest/translate.cmi
+ocamltest/result.cmo : \
+    ocamltest/result.cmi
+ocamltest/result.cmx : \
+    ocamltest/result.cmi
+ocamltest/result.cmi :
+ocamltest/run_command.cmo : \
+    ocamltest/ocamltest_stdlib.cmi \
+    ocamltest/run_command.cmi
+ocamltest/run_command.cmx : \
+    ocamltest/ocamltest_stdlib.cmx \
+    ocamltest/run_command.cmi
+ocamltest/run_command.cmi :
+ocamltest/strace.cmo : \
+    ocamltest/variables.cmi \
+    ocamltest/strace.cmi
+ocamltest/strace.cmx : \
+    ocamltest/variables.cmx \
+    ocamltest/strace.cmi
+ocamltest/strace.cmi : \
+    ocamltest/variables.cmi
+ocamltest/tests.cmo : \
+    ocamltest/result.cmi \
+    ocamltest/actions.cmi \
+    ocamltest/tests.cmi
+ocamltest/tests.cmx : \
+    ocamltest/result.cmx \
+    ocamltest/actions.cmx \
+    ocamltest/tests.cmi
+ocamltest/tests.cmi : \
+    ocamltest/result.cmi \
+    ocamltest/environments.cmi \
+    ocamltest/actions.cmi
+ocamltest/translate.cmo : \
+    ocamltest/tsl_semantics.cmi \
+    ocamltest/tsl_parser.cmi \
+    ocamltest/tsl_lexer.cmi \
+    ocamltest/tsl_ast.cmi \
+    parsing/location.cmi \
+    ocamltest/translate.cmi
+ocamltest/translate.cmx : \
+    ocamltest/tsl_semantics.cmx \
+    ocamltest/tsl_parser.cmx \
+    ocamltest/tsl_lexer.cmx \
+    ocamltest/tsl_ast.cmx \
+    parsing/location.cmx \
+    ocamltest/translate.cmi
+ocamltest/translate.cmi :
+ocamltest/tsl_ast.cmo : \
+    parsing/location.cmi \
+    ocamltest/tsl_ast.cmi
+ocamltest/tsl_ast.cmx : \
+    parsing/location.cmx \
+    ocamltest/tsl_ast.cmi
+ocamltest/tsl_ast.cmi : \
+    parsing/location.cmi
+ocamltest/tsl_lexer.cmo : \
+    ocamltest/tsl_parser.cmi \
+    ocamltest/tsl_lexer.cmi
+ocamltest/tsl_lexer.cmx : \
+    ocamltest/tsl_parser.cmx \
+    ocamltest/tsl_lexer.cmi
+ocamltest/tsl_lexer.cmi : \
+    ocamltest/tsl_parser.cmi
+ocamltest/tsl_parser.cmo : \
+    ocamltest/tsl_ast.cmi \
+    parsing/location.cmi \
+    ocamltest/tsl_parser.cmi
+ocamltest/tsl_parser.cmx : \
+    ocamltest/tsl_ast.cmx \
+    parsing/location.cmx \
+    ocamltest/tsl_parser.cmi
+ocamltest/tsl_parser.cmi : \
+    ocamltest/tsl_ast.cmi
+ocamltest/tsl_semantics.cmo : \
+    ocamltest/variables.cmi \
+    ocamltest/tsl_ast.cmi \
+    ocamltest/tests.cmi \
+    parsing/location.cmi \
+    ocamltest/environments.cmi \
+    ocamltest/actions.cmi \
+    ocamltest/tsl_semantics.cmi
+ocamltest/tsl_semantics.cmx : \
+    ocamltest/variables.cmx \
+    ocamltest/tsl_ast.cmx \
+    ocamltest/tests.cmx \
+    parsing/location.cmx \
+    ocamltest/environments.cmx \
+    ocamltest/actions.cmx \
+    ocamltest/tsl_semantics.cmi
+ocamltest/tsl_semantics.cmi : \
+    ocamltest/tsl_ast.cmi \
+    ocamltest/tests.cmi \
+    ocamltest/environments.cmi \
+    ocamltest/actions.cmi
+ocamltest/variables.cmo : \
+    ocamltest/variables.cmi
+ocamltest/variables.cmx : \
+    ocamltest/variables.cmi
+ocamltest/variables.cmi :
+testsuite/lib/lib.cmo : \
+    testsuite/lib/lib.cmi
+testsuite/lib/lib.cmx : \
+    testsuite/lib/lib.cmi
+testsuite/lib/lib.cmi :
+testsuite/lib/testing.cmo : \
+    testsuite/lib/testing.cmi
+testsuite/lib/testing.cmx : \
+    testsuite/lib/testing.cmi
+testsuite/lib/testing.cmi :
+testsuite/tools/codegen_main.cmo : \
+    utils/profile.cmi \
+    testsuite/tools/parsecmmaux.cmi \
+    testsuite/tools/parsecmm.cmi \
+    testsuite/tools/lexcmm.cmi \
+    asmcomp/emitaux.cmi \
+    asmcomp/emit.cmi \
+    middle_end/compilenv.cmi \
+    utils/clflags.cmi \
+    asmcomp/asmgen.cmi \
+    testsuite/tools/codegen_main.cmi
+testsuite/tools/codegen_main.cmx : \
+    utils/profile.cmx \
+    testsuite/tools/parsecmmaux.cmx \
+    testsuite/tools/parsecmm.cmx \
+    testsuite/tools/lexcmm.cmx \
+    asmcomp/emitaux.cmx \
+    asmcomp/emit.cmx \
+    middle_end/compilenv.cmx \
+    utils/clflags.cmx \
+    asmcomp/asmgen.cmx \
+    testsuite/tools/codegen_main.cmi
+testsuite/tools/codegen_main.cmi :
+testsuite/tools/expect.cmo : \
+    utils/warnings.cmi \
+    toplevel/toploop.cmi \
+    parsing/printast.cmi \
+    parsing/pprintast.cmi \
+    parsing/parsetree.cmi \
+    parsing/parse.cmi \
+    utils/misc.cmi \
+    driver/main_args.cmi \
+    parsing/location.cmi \
+    utils/load_path.cmi \
+    driver/compmisc.cmi \
+    driver/compenv.cmi \
+    utils/clflags.cmi \
+    typing/btype.cmi \
+    parsing/asttypes.cmi \
+    parsing/ast_mapper.cmi \
+    testsuite/tools/expect.cmi
+testsuite/tools/expect.cmx : \
+    utils/warnings.cmx \
+    toplevel/toploop.cmx \
+    parsing/printast.cmx \
+    parsing/pprintast.cmx \
+    parsing/parsetree.cmi \
+    parsing/parse.cmx \
+    utils/misc.cmx \
+    driver/main_args.cmx \
+    parsing/location.cmx \
+    utils/load_path.cmx \
+    driver/compmisc.cmx \
+    driver/compenv.cmx \
+    utils/clflags.cmx \
+    typing/btype.cmx \
+    parsing/asttypes.cmx \
+    parsing/ast_mapper.cmx \
+    testsuite/tools/expect.cmi
+testsuite/tools/expect.cmi : \
+    parsing/location.cmi
+testsuite/tools/lexcmm.cmo : \
+    testsuite/tools/parsecmm.cmi \
+    utils/misc.cmi \
+    parsing/location.cmi \
+    lambda/lambda.cmi \
+    testsuite/tools/lexcmm.cmi
+testsuite/tools/lexcmm.cmx : \
+    testsuite/tools/parsecmm.cmx \
+    utils/misc.cmx \
+    parsing/location.cmx \
+    lambda/lambda.cmx \
+    testsuite/tools/lexcmm.cmi
+testsuite/tools/lexcmm.cmi : \
+    testsuite/tools/parsecmm.cmi
+testsuite/tools/parsecmm.cmo : \
+    testsuite/tools/parsecmmaux.cmi \
+    utils/misc.cmi \
+    parsing/location.cmi \
+    lambda/lambda.cmi \
+    lambda/debuginfo.cmi \
+    utils/config.cmi \
+    asmcomp/cmm.cmi \
+    parsing/asttypes.cmi \
+    asmcomp/arch.cmi \
+    testsuite/tools/parsecmm.cmi
+testsuite/tools/parsecmm.cmx : \
+    testsuite/tools/parsecmmaux.cmx \
+    utils/misc.cmx \
+    parsing/location.cmx \
+    lambda/lambda.cmx \
+    lambda/debuginfo.cmx \
+    utils/config.cmx \
+    asmcomp/cmm.cmx \
+    parsing/asttypes.cmx \
+    asmcomp/arch.cmx \
+    testsuite/tools/parsecmm.cmi
+testsuite/tools/parsecmm.cmi : \
+    parsing/location.cmi \
+    lambda/lambda.cmi \
+    asmcomp/cmm.cmi
+testsuite/tools/parsecmmaux.cmo : \
+    parsing/location.cmi \
+    lambda/lambda.cmi \
+    lambda/debuginfo.cmi \
+    middle_end/backend_var.cmi \
+    testsuite/tools/parsecmmaux.cmi
+testsuite/tools/parsecmmaux.cmx : \
+    parsing/location.cmx \
+    lambda/lambda.cmx \
+    lambda/debuginfo.cmx \
+    middle_end/backend_var.cmx \
+    testsuite/tools/parsecmmaux.cmi
+testsuite/tools/parsecmmaux.cmi : \
+    parsing/location.cmi \
+    lambda/debuginfo.cmi \
+    middle_end/backend_var.cmi
+>>>>>>> 1b09b92c85 (Merge pull request #13169 from Octachron/format_doc_for_error_messages)
