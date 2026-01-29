@@ -2565,9 +2565,8 @@ let disambiguate_sort_lid_a_list
   (* These ambiguity check warnings could probably use [ambiguity] *)
   if !w_pr then
     Location.prerr_warning loc
-      (not_principal
-         ("this type-based " ^ (record_form_to_string record_form)
-          ^ " disambiguation"))
+      (not_principal "this type-based %s disambiguation"
+         (record_form_to_string record_form))
   else begin
     match List.rev !w_amb with
       (_,types,ex)::_ as amb ->

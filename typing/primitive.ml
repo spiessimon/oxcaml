@@ -1004,7 +1004,7 @@ let report_error ppf err =
       Style.inline_code "[@unboxed]"
       Style.inline_code  "[@untagged]"
   | Old_style_float_with_non_value ->
-    Format.fprintf ppf "Cannot use %a in conjunction with \
+    Format_doc.fprintf ppf "Cannot use %a in conjunction with \
                         types of non-value layouts."
       Style.inline_code "float"
   | Old_style_noalloc_with_noalloc_attribute ->

@@ -2392,7 +2392,7 @@ let mk_is_abstract env p =
     try Env.find_type p env
     with Not_found ->
       Misc.fatal_errorf "mk_is_abstract: type %a not found in environment"
-        Path.print p
+        (Format_doc.compat Path.print) p
   in
   match decl.type_kind with
   | Type_abstract _ ->

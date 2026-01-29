@@ -1688,7 +1688,7 @@ end = struct
                 dbg.dinfo_scopes))
         |> String.concat ","
       in
-      Format.fprintf ppf
+      Format_doc.fprintf ppf
         "Annotation check for zero_alloc%s failed on function %s (%s).%s"
         (if Annotation.is_strict t.a then " strict" else "")
         scoped_name t.fun_name
@@ -1711,16 +1711,18 @@ end = struct
         let items = List.rev items in
         if !Oxcaml_flags.zero_alloc_checker_details_extra
         then
-          Format.fprintf ppf "\ninlined from\n%a"
-            (print_debuginfo ~sep:"\n" ~include_fs:true ~include_scope:true)
+          Format_doc.fprintf ppf "\ninlined from\n%a"
+            (Format_doc.compat
+               (print_debuginfo ~sep:"\n" ~include_fs:true ~include_scope:true))
             items
         else
-          Format.fprintf ppf " (%a)"
-            (print_debuginfo ~sep:";" ~include_fs:false ~include_scope:false)
+          Format_doc.fprintf ppf " (%a)"
+            (Format_doc.compat
+               (print_debuginfo ~sep:";" ~include_fs:false ~include_scope:false))
             items
     in
     let pp_alloc_block_kind ppf k =
-      let pp s = Format.fprintf ppf " for %s" s in
+      let pp s = Format_doc.fprintf ppf " for %s" s in
       match (k : Cmm.alloc_block_kind) with
       | Alloc_block_kind_other -> ()
       | Alloc_block_kind_closure -> pp "closure"
@@ -1748,7 +1750,7 @@ end = struct
     in
     let pp_alloc_dbginfo_item (item : Cmm.alloc_dbginfo_item) =
       let pp_alloc ppf =
-        Format.fprintf ppf "allocate %d words%a%a" item.alloc_words
+        Format_doc.fprintf ppf "allocate %d words%a%a" item.alloc_words
           pp_alloc_block_kind item.alloc_block_kind pp_inlined_dbg
           item.alloc_dbg
       in
@@ -1759,7 +1761,7 @@ end = struct
       match dbg with
       | [] -> "", []
       | [item] ->
-        Format.asprintf "%a" pp_alloc_block_kind item.Cmm.alloc_block_kind, []
+        Format_doc.asprintf "%a" pp_alloc_block_kind item.Cmm.alloc_block_kind, []
       | alloc_dbginfo ->
         (* If one Ialloc is a result of combining multiple allocations, print
            details of each location. Currently, this cannot happen because
