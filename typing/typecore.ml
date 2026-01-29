@@ -11267,7 +11267,7 @@ let report_type_expected_explanation expl =
   | Comprehension_when ->
       because "a when-clause in a comprehension"
   | Error_message_attr msg ->
-      fprintf ppf "@\n@[%s@]" msg
+      doc_printf "@\n@[%s@]" msg
 
 let escaping_submode_reason_hint =
   function

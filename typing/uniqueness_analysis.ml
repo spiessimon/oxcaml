@@ -2760,17 +2760,17 @@ let report_multi_use inner first_is_of_second =
   let error =
     match first_or_second, axis with
     | First, Uniqueness ->
-      Format.dprintf "This value is %s here,@ but %s %s %s as unique:"
+      Format_doc.dprintf "This value is %s here,@ but %s %s %s as unique:"
         second_usage first_is_of_second access_order first_usage
     | First, Linearity ->
-      Format.dprintf
+      Format_doc.dprintf
         "This value is %s here,@ but %s is defined as once and %s %s:"
         second_usage first_is_of_second access_order first_usage
     | Second, Uniqueness ->
-      Format.dprintf "This value is %s here as unique,@ but %s %s %s:"
+      Format_doc.dprintf "This value is %s here as unique,@ but %s %s %s:"
         second_usage first_is_of_second access_order first_usage
     | Second, Linearity ->
-      Format.dprintf "This value is defined as once and %s here,@ but %s %s %s:"
+      Format_doc.dprintf "This value is defined as once and %s here,@ but %s %s %s:"
         second_usage first_is_of_second access_order first_usage
   in
   let sub = [Location.msg ~loc:first.loc ""] in
