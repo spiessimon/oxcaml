@@ -648,7 +648,7 @@ let print_unsafe_mode_crossing ppf umc =
     Jkind.With_bounds.format umc.unsafe_with_bounds
 
 let report_unsafe_mode_crossing_mismatch first second ppf e =
-  let pr fmt = Format.fprintf ppf fmt in
+  let pr fmt = Fmt.fprintf ppf fmt in
   match e with
   | Mode_crossing_only_on ord ->
     pr "%s has [%@%@unsafe_allow_any_mode_crossing], but %s does not"
