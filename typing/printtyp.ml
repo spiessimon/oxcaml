@@ -3288,7 +3288,7 @@ let explanation (type variety) intro prev env
         Jkind.(format_history ~intro:(
           dprintf "The layout of %a is %a" prepared_type_expr t format k) ppf k)
       in
-      Some (dprintf "@ because the layouts of their variables are different.\
+      Some (doc_printf "@ because the layouts of their variables are different.\
                      @ @[<v>%t@;%t@]"
               (fmt_history t1 k1) (fmt_history t2 k2))
   | Errortrace.Unequal_tof_kind_jkinds (k1, k2) ->
@@ -3296,7 +3296,7 @@ let explanation (type variety) intro prev env
         Jkind.(format_history ~intro:(
           dprintf "The kind of %s is %a" which format k) ppf k)
       in
-      Some (dprintf "@ because their kinds are different.\
+      Some (doc_printf "@ because their kinds are different.\
                      @ @[<v>%t@;%t@]"
               (fmt_history "the first" k1) (fmt_history "the second" k2))
 
