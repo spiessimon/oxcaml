@@ -25,6 +25,9 @@ end
 let pp_concat pp ppf list =
   Format.pp_print_list ~pp_sep:Format.pp_print_cut pp ppf list
 
+let pp_concat_doc pp ppf list =
+  Format_doc.pp_print_list ~pp_sep:Format_doc.pp_print_cut pp ppf list
+
 type 'value duplicate =
   | Duplicate of { name : Parameter_name.t; value1 : 'value; value2 : 'value }
 
@@ -179,8 +182,15 @@ end = struct
 
   let to_string = print |> Misc.to_string_of_print
 
-  let print_doc ppf t =
-    Format_doc.deprecated_printer (fun fmt -> print fmt t) ppf
+  let rec print_doc ppf ({ head; args } : t) =
+    match args with
+    | [] -> Format_doc.fprintf ppf "%s" head
+    | _ ->
+        Format_doc.fprintf ppf "@[<hov 1>%s%a@]"
+          head
+          (pp_concat_doc print_doc_arg_pair) args
+  and print_doc_arg_pair ppf ({ param = name; value = arg } : argument) =
+    Format_doc.fprintf ppf "[%a:%a]" Parameter_name.print_doc name print_doc arg
 end
 
 module T0 : sig
@@ -194,6 +204,8 @@ module T0 : sig
   and argument = t Argument.t
 
   include Identifiable.S with type t := t
+
+  val print_doc : Format_doc.formatter -> t -> unit
 
   val create
      : string
@@ -222,21 +234,23 @@ end = struct
   }
   and argument = t Argument.t
 
-  let rec print ppf { head; visible_args; hidden_args } =
+  let rec print_doc ppf { head; visible_args; hidden_args } =
     let hidden_args =
       (* Assume the value is just the name (because it is) *)
       List.map (fun ({ param; value = _ } : argument) -> param) hidden_args
     in
     print_syntax ppf ~head ~visible_args ~hidden_args
   and print_syntax ppf ~head ~visible_args ~hidden_args =
-    Format.fprintf ppf "@[<hov 1>%s%a%a@]"
+    Format_doc.fprintf ppf "@[<hov 1>%s%a%a@]"
       head
-      (pp_concat print_visible_pair) visible_args
-      (pp_concat print_hidden_pair) hidden_args
+      (pp_concat_doc print_visible_pair) visible_args
+      (pp_concat_doc print_hidden_pair) hidden_args
   and print_visible_pair ppf ({ param = name; value } : argument) =
-    Format.fprintf ppf "[%a:%a]" Parameter_name.print name print value
+    Format_doc.fprintf ppf "[%a:%a]" Parameter_name.print_doc name print_doc value
   and print_hidden_pair ppf name =
-    Format.fprintf ppf "{%a}" Parameter_name.print name
+    Format_doc.fprintf ppf "{%a}" Parameter_name.print_doc name
+
+  let print ppf t = Format_doc.compat print_doc ppf t
 
   include Identifiable.Make (struct
     type nonrec t = t
@@ -284,7 +298,8 @@ end = struct
     | Ok t -> t
     | Error (Duplicate _) ->
       Misc.fatal_errorf "Names of arguments and parameters must be unique:@ %a"
-        (fun ppf () -> print_syntax ppf ~head ~visible_args ~hidden_args) ()
+        (Format_doc.compat (fun ppf () ->
+           print_syntax ppf ~head ~visible_args ~hidden_args)) ()
 
   let unsafe_create_unchecked head visible_args ~hidden_args =
     { head; visible_args; hidden_args }
@@ -377,10 +392,10 @@ module Precision = struct
   type t = Exact | Approximate
 
   let print ppf = function
-    | Exact -> Format.fprintf ppf "exact"
-    | Approximate -> Format.fprintf ppf "approx"
+    | Exact -> Format_doc.fprintf ppf "exact"
+    | Approximate -> Format_doc.fprintf ppf "approx"
 
-  let output = Misc.output_of_print print
+  let output = Misc.output_of_print (Format_doc.compat print)
 
   let equal t1 t2 =
     match t1, t2 with
@@ -394,10 +409,10 @@ module With_precision = struct
 
   let print ppf (t, prec) =
     match (prec : Precision.t) with
-    | Exact -> print ppf t
-    | Approximate -> Format.fprintf ppf "@[<hv 2>%a@ (approx)@]" print t
+    | Exact -> print_doc ppf t
+    | Approximate -> Format_doc.fprintf ppf "@[<hv 2>%a@ (approx)@]" print_doc t
 
-  let output = Misc.output_of_print print
+  let output = Misc.output_of_print (Format_doc.compat print)
 
   exception Inconsistent
 

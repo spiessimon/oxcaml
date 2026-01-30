@@ -4946,8 +4946,8 @@ let report_error ppf = function
       let Mode.Value.Error (ax, {left; right}) = Mode.Value.to_simple_error e in
       fprintf ppf "@[This constructor is at mode %a, \
         but expected to be at mode %a.@]"
-        (Style.as_inline_code (Mode.Value.Const.print_axis ax)) left
-        (Style.as_inline_code (Mode.Value.Const.print_axis ax)) right;
+        (Style.as_inline_code (Mode.Value.Const.print_axis_doc ax)) left
+        (Style.as_inline_code (Mode.Value.Const.print_axis_doc ax)) right;
       fprintf ppf "@[<hv>@[@{<hint>Hint@}: all argument types must \
         mode-cross for rebinding to succeed.@]"
   | Atomic_field_in_mixed_block ->

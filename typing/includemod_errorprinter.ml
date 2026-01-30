@@ -190,7 +190,8 @@ module Err = Includemod.Error
 
 let is_big p =
   let size = !Clflags.error_size in
-  size > 0 && Misc.is_print_longer_than size p
+  let format_p ppf = Fmt.Doc.format ppf (Fmt.doc_printf "%t" p) in
+  size > 0 && Misc.is_print_longer_than size format_p
 
 let show_loc msg ppf loc =
   let pos = loc.Location.loc_start in
@@ -281,13 +282,13 @@ let zap_axis_to_ceil
         (Mode.Value.proj_monadic ax m)
 
 let print_out_mode
-: type a. ?in_structure:_ -> a Mode.Value.Axis.t -> a -> _
+: type a. ?in_structure:_ -> a Mode.Value.Axis.t -> a -> Fmt.formatter -> unit
 = fun ?(in_structure=false) ax mode ->
-  let print = Mode.Value.Const.print_axis ax in
+  let print = Mode.Value.Const.print_axis_doc ax in
   if in_structure then
-    Format.dprintf " (* in a structure at %a *)" print mode
+    fun ppf -> Fmt.fprintf ppf " (* in a structure at %a *)" print mode
   else
-    Format.dprintf " @@ %a" print mode
+    fun ppf -> Fmt.fprintf ppf " @@ %a" print mode
 
 let maybe_print_mode_l ~is_modal mode =
   let mode = Mode.Value.disallow_right mode in

@@ -97,6 +97,8 @@ val create_exn : string -> argument list -> hidden_args:Parameter_name.t list ->
 
 val to_string : t -> string
 
+val print_doc : Format_doc.formatter -> t -> unit
+
 val to_name : t -> Name.t
 
 (** A map from parameter names to their values. *)
@@ -152,7 +154,7 @@ module Precision : sig
         (** The base module takes some subset of the arguments being passed
             (possibly all of them). *)
 
-  val print : Format.formatter -> t -> unit
+  val print : Format_doc.formatter -> t -> unit
 
   val output : out_channel -> t -> unit
 end
@@ -174,7 +176,7 @@ module With_precision : sig
       intersection). *)
   val meet : t -> t -> t
 
-  val print : Format.formatter -> t -> unit
+  val print : Format_doc.formatter -> t -> unit
 
   val output : out_channel -> t -> unit
 end
