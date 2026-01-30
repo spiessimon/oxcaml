@@ -448,19 +448,17 @@ let remember_global { globals; _ } global ~precision ~mentioned_by =
       | exception Global_module.With_precision.Inconsistent ->
           let pp_mentioned_by ppf = function
             | Current ->
-                Format.fprintf ppf "this compilation unit"
+                Format_doc.fprintf ppf "this compilation unit"
             | Other modname ->
-                Style.as_inline_code_format Global_module.Name.print ppf modname
+                Style.as_inline_code Global_module.Name.print_doc ppf modname
           in
-          Misc.fatal_errorf
+          Misc.fatal_errorf_doc
             "@[<hov>The name %a@ was bound to %a@ by %a@ \
              but it is instead bound to %a@ by %a.@]"
-            (Style.as_inline_code_format Global_module.Name.print) global_name
-            (Style.as_inline_code_format Global_module.With_precision.print)
-              old_global
+            (Style.as_inline_code Global_module.Name.print_doc) global_name
+            (Style.as_inline_code Global_module.With_precision.print) old_global
             pp_mentioned_by first_mentioned_by
-            (Style.as_inline_code_format Global_module.With_precision.print)
-              new_global
+            (Style.as_inline_code Global_module.With_precision.print) new_global
             pp_mentioned_by mentioned_by
 
 let rec approximate_global_by_name penv global_name =

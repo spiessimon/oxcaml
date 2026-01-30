@@ -3561,5 +3561,11 @@ module Compat = struct
   let signature = Fmt.compat signature
   let class_type = Fmt.compat class_type
   let modtype = Fmt.compat modtype
-  let string_of_label = string_of_label
+  let string_of_label (lbl : Asttypes.arg_label) =
+    let lbl : Types.arg_label = match lbl with
+      | Nolabel -> Nolabel
+      | Labelled s -> Labelled s
+      | Optional s -> Optional s
+    in
+    string_of_label lbl
 end
