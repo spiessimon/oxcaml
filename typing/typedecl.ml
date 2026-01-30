@@ -4814,7 +4814,7 @@ let report_error ppf = function
     fprintf ppf
       "@[Type %a has layout %a.@ %s may not yet contain types of this layout.@]"
       (Style.as_inline_code Printtyp.type_expr) typ
-      (Style.as_inline_code Jkind.Sort.Const.format) sort_const
+      (Style.as_inline_code Jkind.Sort.Const.format_doc) sort_const
       struct_desc
   | Illegal_mixed_product error -> begin
       match error with
@@ -4835,7 +4835,7 @@ let report_error ppf = function
             max_value_prefix_len value_prefix_len
       | Insufficient_level { required_layouts_level; mixed_product_kind } -> (
         let hint ppf =
-          Format.fprintf ppf "You must enable -extension %s to use this feature."
+          fprintf ppf "You must enable -extension %s to use this feature."
             (Language_extension.to_command_line_string Layouts
                required_layouts_level)
         in
