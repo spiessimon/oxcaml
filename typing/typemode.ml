@@ -20,17 +20,17 @@ type 'ax annot_type =
 
 let print_annot_type (type a) ppf (annot_type : a annot_type) =
   match annot_type with
-  | Modifier -> Format.fprintf ppf "modifier"
-  | Mode -> Format.fprintf ppf "mode"
-  | Modality -> Format.fprintf ppf "modality"
+  | Modifier -> Format_doc.fprintf ppf "modifier"
+  | Mode -> Format_doc.fprintf ppf "mode"
+  | Modality -> Format_doc.fprintf ppf "modality"
 
 let print_annot_axis (type a) (annot_type : a annot_type) ppf (ax : a) =
   match annot_type with
-  | Modifier -> Format.fprintf ppf "%s" (Axis.name ax)
-  | Mode -> Alloc.Axis.print ppf ax
+  | Modifier -> Format_doc.fprintf ppf "%s" (Axis.name ax)
+  | Mode -> Alloc.Axis.print_doc ppf ax
   | Modality ->
     let (P ax) = Modality.Axis.to_value (P ax) in
-    Value.Axis.print ppf ax
+    Value.Axis.print_doc ppf ax
 
 type forbidden_modality_kind =
   | Global_and_unique

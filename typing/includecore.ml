@@ -1399,9 +1399,12 @@ let type_declarations ?(equality = false) ~loc env ~mark name
         | None -> Misc.fatal_errorf
                     "Unification in type_declarations failed, \
                      but not with Bad_jkind:@;<1 2>%t"
-              (fun ppf -> Printtyp.report_unification_error ppf env err
-               (fun ppf -> Format.fprintf ppf "The type")
-               (fun ppf -> Format.fprintf ppf "does not unify with the type"))
+                    (fun ppf ->
+                       Fmt.compat (fun ppf () ->
+                         Printtyp.report_unification_error ppf env err
+                           (Fmt.doc_printf "The type")
+                           (Fmt.doc_printf "does not unify with the type"))
+                         ppf ())
         end
       | () -> None
   in

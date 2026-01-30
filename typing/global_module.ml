@@ -100,6 +100,8 @@ module Name : sig
 
   val to_string : t -> string
 
+  val print_doc : Format_doc.formatter -> t -> unit
+
   include Identifiable.S with type t := t
 end = struct
   type t = {
@@ -176,6 +178,9 @@ end = struct
     | None -> false
 
   let to_string = print |> Misc.to_string_of_print
+
+  let print_doc ppf t =
+    Format_doc.deprecated_printer (fun fmt -> print fmt t) ppf
 end
 
 module T0 : sig
