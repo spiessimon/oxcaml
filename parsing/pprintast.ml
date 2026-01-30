@@ -140,7 +140,6 @@ end
 
 let longident ppf l = Format_doc.compat Doc.longident ppf l
 let ident_of_name ppf i = Format_doc.compat Doc.ident_of_name ppf i
-let ident_of_name_loc ppf s = ident_of_name ppf s.txt
 
 let is_curry_attr attr =
   attr.attr_name.txt = Builtin_attributes.curry_attr_name

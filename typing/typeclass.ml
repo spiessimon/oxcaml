@@ -2398,7 +2398,7 @@ let report_error env ppf =
     fprintf ppf
       "@[The types of variables bound by a 'let' in a class function@ \
        must have layout value. Instead, %s's type has layout %a.@]"
-      nm Jkind.Sort.format sort
+      nm Jkind.Sort.format_doc sort
   | Nonoptional_call_pos_label label ->
     fprintf ppf
       "@[the argument labeled '%s' is a [%%call_pos] argument, filled in @ \

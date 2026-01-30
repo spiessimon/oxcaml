@@ -230,7 +230,8 @@ module Conflicts = struct
 
   let pp_explanation ppf r=
     Fmt.fprintf ppf "@[<v 2>%a:@,Definition of %s %a@]"
-      Location.Doc.loc r.location (Sig_component_kind.to_string r.kind)
+      (Location.Doc.loc ~capitalize_first:true) r.location
+      (Sig_component_kind.to_string r.kind)
       Style.inline_code r.name
 
   let print_located_explanations ppf l =
@@ -456,7 +457,7 @@ let instance_name global =
     String.concat "" (head :: List.map string_of_arg args)
   and string_of_arg arg =
     let ({ param; value } : Global_module.Name.argument) = arg in
-    sprintf "(%s)(%s)"
+    Printf.sprintf "(%s)(%s)"
       (Global_module.Parameter_name.to_string param) (string_of_global value)
   in
   let printed_name =
@@ -591,8 +592,7 @@ let tree_of_path namespace = function
 let tree_of_path namespace p =
   tree_of_path namespace (rewrite_double_underscore_paths !printing_env p)
 
-let path ppf p =
-  !Oprint.out_ident ppf (tree_of_path ~disambiguation:false None p)
+let path ppf p = !Oprint.out_ident ppf (tree_of_path None p)
 
 let string_of_path p =
   Format.asprintf "%a" (Fmt.compat path) p
@@ -769,7 +769,7 @@ let raw_type_expr ppf t =
   raw_type ppf t;
   visited := []; kind_vars := []
 
-let () = Btype.print_raw := raw_type_expr
+let () = Btype.print_raw := compat raw_type_expr
 
 (* Normalize paths *)
 
@@ -1844,13 +1844,13 @@ let tree_of_type_scheme ty =
   tree_of_typexp Type_scheme ty
 
 let () =
-  Env.print_type_expr := type_expr;
+  Env.print_type_expr := compat type_expr;
   Jkind.set_outcometrees_of_types (fun tys ->
     prepare_for_printing tys;
     List.map (tree_of_typexp Type) tys);
   Jkind.set_outcometree_of_modalities tree_of_modalities;
-  Jkind.set_print_type_expr type_expr;
-  Jkind.set_raw_type_expr raw_type_expr
+  Jkind.set_print_type_expr (compat type_expr);
+  Jkind.set_raw_type_expr (compat raw_type_expr)
 
 (* Print one type declaration *)
 
@@ -2873,7 +2873,7 @@ let printed_signature sourcefile ppf sg =
   if Warnings.(is_active @@ Erroneous_printed_signature "")
   && Conflicts.exists ()
   then begin
-    let conflicts = Format.asprintf "%t" Conflicts.print_explanations in
+    let conflicts = Format_doc.asprintf "%t" Conflicts.print_explanations in
     Location.prerr_warning (Location.in_file sourcefile)
       (Warnings.Erroneous_printed_signature conflicts);
     Warnings.check_fatal ()

@@ -1180,7 +1180,7 @@ let classify_lazy_argument : Typedtree.expression ->
        `Other
 
 (* Error report *)
-open Format
+open Format_doc
 
 let report_error ppf = function
   | Non_value_layout (ty, err) ->
@@ -1197,7 +1197,7 @@ let report_error ppf = function
            ~level:(Ctype.get_current_level ())) err
       end
   | Sort_without_extension (sort, maturity, ty) ->
-      fprintf ppf "Non-value layout %a detected" Jkind.Sort.format sort;
+      fprintf ppf "Non-value layout %a detected" Jkind.Sort.format_doc sort;
       begin match ty with
       | None -> ()
       | Some ty -> fprintf ppf " as sort for type@ %a" Printtyp.type_expr ty
@@ -1209,7 +1209,7 @@ let report_error ppf = function
          Otherwise, please report this error to the Jane Street compilers team."
         (Language_extension.to_command_line_string Layouts maturity)
   | Small_number_sort_without_extension (sort, ty) ->
-      fprintf ppf "Non-value layout %a detected" Jkind.Sort.format sort;
+      fprintf ppf "Non-value layout %a detected" Jkind.Sort.format_doc sort;
       begin match ty with
       | None -> ()
       | Some ty -> fprintf ppf " as sort for type@ %a" Printtyp.type_expr ty
@@ -1229,7 +1229,7 @@ let report_error ppf = function
          Otherwise, please report this error to the Jane Street compilers team."
         extension verb flags
   | Simd_sort_without_extension (sort, ty) ->
-      fprintf ppf "Non-value layout %a detected" Jkind.Sort.format sort;
+      fprintf ppf "Non-value layout %a detected" Jkind.Sort.format_doc sort;
       begin match ty with
       | None -> ()
       | Some ty -> fprintf ppf " as sort for type@ %a" Printtyp.type_expr ty
@@ -1252,12 +1252,12 @@ let report_error ppf = function
       fprintf ppf "A representable layout is required here.@ %a"
         (Jkind.Violation.report_with_offender
            ~offender:(fun ppf -> Printtyp.type_expr ppf ty)
-           ~level:(Ctype.get_current_level ()) ) err
+           ~level:(Ctype.get_current_level ())) err
   | Unsupported_product_in_lazy const ->
       fprintf ppf
         "Product layout %a detected in [lazy] in [Typeopt.Layout]@ \
          Please report this error to the Jane Street compilers team."
-        Jkind.Sort.Const.format const
+        Jkind.Sort.Const.format_doc const
   | Unsupported_vector_in_product_array ->
       fprintf ppf
         "Unboxed vector types are not yet supported in arrays of unboxed@ \
@@ -1276,7 +1276,7 @@ let report_error ppf = function
          @[Hint: if the array contents should not be scanned, annotating@ \
          contained abstract types as [mod external] may resolve this error.@]"
         Printtyp.type_expr elt_ty
-        Jkind.Sort.Const.format const
+        Jkind.Sort.Const.format_doc const
   | Opaque_array_non_value { array_type; elt_kinding_failure }  ->
       begin match elt_kinding_failure with
       | Some (ty, err) ->

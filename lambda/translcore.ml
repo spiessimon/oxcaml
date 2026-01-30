@@ -1688,7 +1688,7 @@ and add_type_shapes_of_pattern ~env pattern =
   if !Clflags.debug && !Clflags.shape_format = Clflags.Debugging_shapes then
     let var_list = Typedtree.pat_bound_idents_full pattern in
     List.iter (fun (_ident, _loc, type_expr, var_uid, var_sort) ->
-      let type_name = Format.asprintf "%a" Printtyp.type_expr type_expr in
+      let type_name = Format.asprintf "%a" (Format_doc.compat Printtyp.type_expr) type_expr in
       Type_shape.add_to_type_shapes var_uid type_expr var_sort ~name:type_name
         (Env.shape_for_constr env))
     var_list
@@ -2721,12 +2721,12 @@ let report_error ppf = function
       fprintf ppf "Unreachable expression was reached"
   | Bad_probe_layout id ->
       fprintf ppf "Variables in probe handlers must have jkind value, \
-                   but %s in this handler does not." (Ident.name id)
+                   but %a in this handler does not." Ident.doc_print id
   | Unknown_probe_layout id ->
       fprintf ppf
         "Unknown variable %a appearing in probe:@ Please \
          report this error to the Jane Street compilers team."
-        Ident.print id
+        Ident.doc_print id
   | Illegal_void_record_field ->
       fprintf ppf
         "Void sort detected where value was expected in a record field:@ Please \
@@ -2735,7 +2735,7 @@ let report_error ppf = function
       fprintf ppf
         "Product sort %a detected in a record field:@ Please \
          report this error to the Jane Street compilers team."
-        Jkind.Sort.Const.format c
+        Jkind.Sort.Const.format_doc c
   | Void_sort ty ->
       fprintf ppf
         "Void detected in translation for type %a:@ Please report this error \

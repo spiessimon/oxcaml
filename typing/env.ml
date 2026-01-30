@@ -808,8 +808,8 @@ type no_open_quotations_context =
   | Variant_tag_with_attribute_qt
 
 let print_structure_components_reason ppf = function
-  | Project -> Format.fprintf ppf "have any components"
-  | Open -> Format.fprintf ppf "be opend"
+  | Project -> Format_doc.fprintf ppf "have any components"
+  | Open -> Format_doc.fprintf ppf "be opend"
 
 (* CR-someday aivaskovic: consider extending this enum to include all items
    affected by stages, and attach information to `Incompatible_stage`;
@@ -3331,7 +3331,7 @@ let assert_does_not_cross_quotation ~loc_use ~loc_def path locks =
   | Error _ ->
       Misc.fatal_errorf
         "Identifier %a defined at %a crosses quotation at %a."
-        Path.print path
+        (Format_doc.compat Path.print) path
         Location.print_loc loc_def
         Location.print_loc loc_use
 
@@ -4901,14 +4901,14 @@ let report_lookup_error ~level _loc env ppf = function
       in
       (match label_of_other_form with
       | Some other_form ->
-        Format.fprintf ppf
+        fprintf ppf
           "@\n@{<hint>Hint@}: @[There is %s field with this name." other_form;
         (match record_form, usage with
         | Unboxed_product, _ ->
           (* If an unboxed field isn't in scope but a boxed field is, then
              the boxed field must come from a record that didn't get an unboxed
              version. *)
-          Format.fprintf ppf
+          fprintf ppf
             "@ Note that float- and [%@%@unboxed]- records don't get unboxed \
              versions."
         | Legacy, Projection ->
@@ -4920,7 +4920,7 @@ let report_lookup_error ~level _loc env ppf = function
             (Style.as_inline_code print_projection) (".#", lid)
             (Style.as_inline_code print_projection) (".", lid)
         | _ -> ());
-        Format.fprintf ppf "@]"
+        fprintf ppf "@]"
       | None -> ());
   | Unbound_class lid -> begin
       fprintf ppf "Unbound class %a"
