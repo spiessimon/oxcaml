@@ -282,15 +282,15 @@ module Doc = struct
   let filename ppf file =
     Fmt.pp_print_string ppf (show_filename file)
 
-let linenum ppf line =
-  if !Clflags.locs
-  then Format.fprintf ppf "%i" line
-  else Format.fprintf ppf "_"
+  let linenum ppf line =
+    if !Clflags.locs
+    then Fmt.fprintf ppf "%i" line
+    else Fmt.fprintf ppf "_"
 
-let colnum ppf char =
-  if !Clflags.locs
-  then Format.fprintf ppf "%i" char
-  else Format.fprintf ppf "_"
+  let colnum ppf char =
+    if !Clflags.locs
+    then Fmt.fprintf ppf "%i" char
+    else Fmt.fprintf ppf "_"
 
 (* Best-effort printing of the text describing a location, of the form
    'File "foo.ml", line 3, characters 10-12'.

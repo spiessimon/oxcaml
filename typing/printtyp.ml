@@ -695,8 +695,8 @@ and raw_type_desc ppf = function
   | Tarrow((l,arg,ret),t1,t2,c) ->
       fprintf ppf "@[<hov1>Tarrow((\"%s\",%a,%a),@,%a,@,%a,@,%s)@]"
         (string_of_label l)
-        (Alloc.print ~verbose:true ()) arg
-        (Alloc.print ~verbose:true ()) ret
+        (Alloc.print_doc ~verbose:true ()) arg
+        (Alloc.print_doc ~verbose:true ()) ret
         raw_type t1 raw_type t2
         (if is_commu_ok c then "Cok" else "Cunknown")
   | Ttuple tl ->
@@ -3274,12 +3274,12 @@ let explanation (type variety) intro prev env
         *)
     end
   | Errortrace.Bad_jkind (t,e) ->
-      Some (dprintf "@ @[<hov>%a@]"
+      Some (doc_printf "@ @[<hov>%a@]"
               (Jkind.Violation.report_with_offender
                  ~offender:(fun ppf -> type_expr ppf t)
                  ~level:(get_current_level ())) e)
   | Errortrace.Bad_jkind_sort (t,e) ->
-      Some (dprintf "@ @[<hov>%a@]"
+      Some (doc_printf "@ @[<hov>%a@]"
               (Jkind.Violation.report_with_offender_sort
                  ~offender:(fun ppf -> type_expr ppf t)
                  ~level:(get_current_level ())) e)

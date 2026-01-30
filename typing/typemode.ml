@@ -657,11 +657,11 @@ let transl_alloc_mode annots =
 (* Error reporting *)
 
 let report_error ppf =
-  let open Format in
+  let open Format_doc in
   function
   | Duplicated_axis (annot_type, axis) ->
     fprintf ppf "The %a axis has already been specified."
-      (print_annot_axis annot_type)
+      (print_annot_axis_doc annot_type)
       axis
   | Forbidden_modality (annot_type, Global_and_unique) ->
     fprintf ppf "The %a %a can't be used together with %a" print_annot_type

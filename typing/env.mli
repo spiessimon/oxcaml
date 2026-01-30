@@ -689,7 +689,7 @@ val print_path: Path.t Format_doc.printer ref
 val print_type_expr: (Format.formatter -> Types.type_expr -> unit) ref
 (* Forward declaration to break mutual recursion with Jkind. *)
 val report_jkind_violation_with_offender:
-  (offender:(Format.formatter -> unit) -> level:int -> Format.formatter ->
+  (offender:(Format_doc.formatter -> unit) -> level:int -> Format_doc.formatter ->
    Jkind.Violation.t -> unit) ref
 
 
@@ -735,7 +735,7 @@ type address_head =
 
 val address_head : address -> address_head
 
-val print_stage : Format.formatter -> stage -> unit
+val print_stage : Format_doc.formatter -> stage -> unit
 
 val print_with_quote_promote :
-  Format.formatter -> (string * stage * stage) -> unit
+  Format_doc.formatter -> (string * stage * stage) -> unit

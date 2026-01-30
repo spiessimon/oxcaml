@@ -899,15 +899,15 @@ let check_pers_struct ~allow_hidden penv f ~loc name =
               " %a@ contains the compiled interface for @ \
                %a when %a was expected"
               Location.Doc.quoted_filename filename
-              (Style.as_inline_code CU.Name.print) ps_name
-              (Style.as_inline_code CU.Name.print) name
+              CU.Name.print_in_error ps_name
+              CU.Name.print_in_error name
         | Inconsistent_import _ ->
             (* Can't be raised by [find_pers_struct ~check:false] *)
             assert false
         | Need_recursive_types name ->
             Format_doc.doc_printf
               "%a uses recursive types"
-              (Style.as_inline_code CU.Name.print) name
+              CU.Name.print_in_error name
         | Inconsistent_package_declaration_between_imports _ ->
             (* Can't be raised by [find_pers_struct ~check:false] *)
             assert false
@@ -1115,30 +1115,30 @@ let report_error ppf =
       "Wrong file naming: %a@ contains the compiled interface for@ \
        %a when %a was expected"
       Location.Doc.quoted_filename filename
-      (Style.as_inline_code CU.Name.print) ps_name
-      (Style.as_inline_code CU.Name.print) modname
+      CU.Name.print_in_error ps_name
+      CU.Name.print_in_error modname
   | Inconsistent_import(name, source1, source2) -> fprintf ppf
       "@[<hov>The files %a@ and %a@ \
               make inconsistent assumptions@ over interface %a@]"
       Location.Doc.quoted_filename source1
       Location.Doc.quoted_filename source2
-      (Style.as_inline_code CU.Name.print) name
+      CU.Name.print_in_error name
   | Need_recursive_types(import) ->
       fprintf ppf
         "@[<hov>Invalid import of %a, which uses recursive types.@ \
          The compilation flag %a is required@]"
-        (Style.as_inline_code CU.Name.print) import
+        CU.Name.print_in_error import
         Style.inline_code "-rectypes"
   | Inconsistent_package_declaration_between_imports (filename, unit1, unit2) ->
       fprintf ppf
         "@[<hov>The file %s@ is imported both as %a@ and as %a.@]"
         filename
-        (Style.as_inline_code CU.print) unit1
-        (Style.as_inline_code CU.print) unit2
+        CU.print_in_error unit1
+        CU.print_in_error unit2
   | Direct_reference_from_wrong_package(unit, filename, prefix) ->
       fprintf ppf
         "@[<hov>Invalid reference to %a (in file %s) from %a.@ %s]"
-        (Style.as_inline_code CU.print) unit
+        CU.print_in_error unit
         filename
         describe_prefix prefix
         "Can only access members of this library's package or a containing package"
@@ -1149,9 +1149,9 @@ let report_error ppf =
          @[<hov>@{<hint>Hint@}: \
            @[<hov>Compile the current unit with \
            @{<inline_code>-parameter %a@}.@]@]"
-        (Style.as_inline_code Location.print_filename) filename
-        (Style.as_inline_code Global_module.Name.print) modname
-        Global_module.Name.print modname
+        Location.Doc.quoted_filename filename
+        (Style.as_inline_code Global_module.Name.print_doc) modname
+        Global_module.Name.print_doc modname
   | Not_compiled_as_parameter modname ->
       fprintf ppf
         "@[<hov>The module %a@ is a parameter but is not declared as such for the \
@@ -1159,8 +1159,8 @@ let report_error ppf =
          @[<hov>@{<hint>Hint@}: \
            @[<hov>Compile the current unit with @{<inline_code>-parameter \
            %a@}.@]@]"
-        (Style.as_inline_code Global_module.Name.print) modname
-        Global_module.Name.print modname
+        (Style.as_inline_code Global_module.Name.print_doc) modname
+        (Style.as_inline_code Global_module.Name.print_doc) modname
   | Imported_module_has_unset_parameter
         { imported = modname; parameter = param } ->
       fprintf ppf
@@ -1169,10 +1169,10 @@ let report_error ppf =
          @[<hov>@{<hint>Hint@}: \
            @[<hov>Pass @{<inline_code>-parameter %a@}@ to add %a@ as a parameter@ \
            of the current unit.@]@]"
-        (Style.as_inline_code Global_module.Name.print) modname
-        (Style.as_inline_code Global_module.Parameter_name.print) param
-        Global_module.Parameter_name.print param
-        (Style.as_inline_code Global_module.Parameter_name.print) param
+        (Style.as_inline_code Global_module.Name.print_doc) modname
+        (Style.as_inline_code Global_module.Parameter_name.print_doc) param
+        Global_module.Parameter_name.print_doc param
+        (Style.as_inline_code Global_module.Parameter_name.print_doc) param
   | Imported_module_has_no_such_parameter
         { valid_parameters; imported = modname; parameter = param; value = _; } ->
       let pp_hint ppf () =
@@ -1181,22 +1181,22 @@ let report_error ppf =
             fprintf ppf
               "Compile %a@ with @{<inline_code>-parameter %a@}@ to make it a \
                parameter."
-              (Style.as_inline_code CU.Name.print) modname
-              Global_module.Parameter_name.print param
+              CU.Name.print_in_error modname
+              Global_module.Parameter_name.print_doc param
         | _ ->
           let print_params =
-            Format.pp_print_list ~pp_sep:Format.pp_print_space
-              (Style.as_inline_code Global_module.Parameter_name.print)
+            Format_doc.pp_print_list ~pp_sep:Format_doc.pp_print_space
+              (Style.as_inline_code Global_module.Parameter_name.print_doc)
           in
           fprintf ppf "Parameters for %a:@ @[<hov>%a@]"
-            (Style.as_inline_code CU.Name.print) modname
+            CU.Name.print_in_error modname
             print_params valid_parameters
       in
       fprintf ppf
         "@[<hov>The module %a@ has no parameter %a.@]@.\
          @[<hov>@{<hint>Hint@}: @[<hov>%a@]@]"
-        (Style.as_inline_code CU.Name.print) modname
-        (Style.as_inline_code Global_module.Parameter_name.print) param
+        CU.Name.print_in_error modname
+        (Style.as_inline_code Global_module.Parameter_name.print_doc ) param
         pp_hint ()
   | Not_compiled_as_argument { param; value; filename } ->
       fprintf ppf
@@ -1204,10 +1204,10 @@ let report_error ppf =
            %a.@]@.\
          @[<hov>@{<hint>Hint@}: \
            @[<hov>Compile %a@ with @{<inline_code>-as-argument-for %a@}.@]@]"
-        (Style.as_inline_code Global_module.Name.print) value
-        (Style.as_inline_code Global_module.Parameter_name.print) param
-        (Style.as_inline_code Location.print_filename) filename
-        Global_module.Parameter_name.print param
+        (Style.as_inline_code Global_module.Name.print_doc) value
+        (Style.as_inline_code Global_module.Parameter_name.print_doc ) param
+        (Style.as_inline_code Location.Doc.filename) filename
+        Global_module.Parameter_name.print_doc param
   | Argument_type_mismatch { value; filename; expected; actual; } ->
       fprintf ppf
         "@[<hov>The module %a@ is used as an argument for the parameter %a@ \
@@ -1215,17 +1215,17 @@ let report_error ppf =
          @[<hov>@{<hint>Hint@}: \
            @[<hov>%a@ was compiled with \
              @{<inline_code>-as-argument-for %a@}.@]@]"
-        (Style.as_inline_code Global_module.Name.print) value
-        (Style.as_inline_code Global_module.Parameter_name.print) expected
-        (Style.as_inline_code Global_module.Name.print) value
-        (Style.as_inline_code Global_module.Parameter_name.print) actual
-        (Style.as_inline_code Location.print_filename) filename
-        Global_module.Parameter_name.print expected
+        (Style.as_inline_code Global_module.Name.print_doc) value
+        (Style.as_inline_code Global_module.Parameter_name.print_doc ) expected
+        (Style.as_inline_code Global_module.Name.print_doc) value
+        (Style.as_inline_code Global_module.Parameter_name.print_doc ) actual
+        (Style.as_inline_code Location.Doc.filename) filename
+        Global_module.Parameter_name.print_doc expected
   | Unbound_module_as_argument_value { instance; value } ->
       fprintf ppf
         "@[<hov>Unbound module %a@ in instance %a@]"
-        (Style.as_inline_code Global_module.Name.print) value
-        (Style.as_inline_code Global_module.Name.print) instance
+        (Style.as_inline_code Global_module.Name.print_doc) value
+        (Style.as_inline_code Global_module.Name.print_doc) instance
 
 let () =
   Location.register_error_of_exn
