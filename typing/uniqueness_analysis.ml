@@ -2796,17 +2796,17 @@ let report_tag_change (err : Overwrites.error) =
   match err with
   | Changed_tag { old_tag; new_tag } ->
     let new_tag_txt =
-      Format.dprintf "%a" Pprintast.longident new_tag.name_for_error.txt
+      Format_doc.dprintf "%a" Pprintast.Doc.longident new_tag.name_for_error.txt
     in
     let old_tag_txt =
       match old_tag with
-      | Old_tag_unknown -> Format.dprintf "is unknown."
+      | Old_tag_unknown -> Format_doc.dprintf "is unknown."
       | Old_tag_was l ->
-        Format.dprintf "is %a." Pprintast.longident l.name_for_error.txt
+        Format_doc.dprintf "is %a." Pprintast.Doc.longident l.name_for_error.txt
       | Old_tag_mutated access_order -> (
         match access_order with
-        | Par -> Format.dprintf "is being changed through mutation."
-        | Seq -> Format.dprintf "was changed through mutation.")
+        | Par -> Format_doc.dprintf "is being changed through mutation."
+        | Seq -> Format_doc.dprintf "was changed through mutation.")
     in
     Location.errorf ~loc:new_tag.name_for_error.loc
       "@[Overwrite may not change the tag to %t.\n\

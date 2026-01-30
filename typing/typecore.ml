@@ -132,11 +132,11 @@ type unsupported_stack_allocation =
   | Array_comprehension
 
 let print_unsupported_stack_allocation ppf = function
-  | Lazy -> Format.fprintf ppf "lazy expressions"
-  | Module -> Format.fprintf ppf "modules"
-  | Object -> Format.fprintf ppf "objects"
-  | List_comprehension -> Format.fprintf ppf "list comprehensions"
-  | Array_comprehension -> Format.fprintf ppf "array comprehensions"
+  | Lazy -> Format_doc.fprintf ppf "lazy expressions"
+  | Module -> Format_doc.fprintf ppf "modules"
+  | Object -> Format_doc.fprintf ppf "objects"
+  | List_comprehension -> Format_doc.fprintf ppf "list comprehensions"
+  | Array_comprehension -> Format_doc.fprintf ppf "array comprehensions"
 
 type mutable_restriction =
   | In_group
@@ -2255,7 +2255,7 @@ end) = struct
       Printtyp.Conflicts.reset ();
       let paths = ambiguous_types env lbl rest in
       let expansion =
-        Format_doc.(asprintf "%a" pp_doc) Printtyp.Conflicts.print_explanations in
+        Format_doc.asprintf "%t" Printtyp.Conflicts.print_explanations in
       if paths <> [] then
         warn lid.loc
           (Warnings.Ambiguous_name ([Longident.last lid.txt],

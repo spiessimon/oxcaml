@@ -51,6 +51,8 @@ module Name : sig
   val to_parameter_name : t -> Global_module.Parameter_name.t
 
   val check_as_path_component : t -> unit
+
+  val print_in_error : Format_doc.formatter -> t -> unit
 end = struct
   (* Be VERY careful changing this. Anything not equivalent to [string] will
      require bumping magic numbers due to changes in file formats, in addition
@@ -104,6 +106,9 @@ end = struct
   let predef_exn = "*predef*"
 
   let to_string t = t
+
+  let print_in_error ppf t =
+    Misc.Style.inline_code ppf (to_string t)
 end
 
 module Prefix : sig
@@ -676,6 +681,12 @@ let print_debug ppf t =
     Format.fprintf ppf
       "@[<hov 1>(@[<hov 1>(for_pack_prefix@ %a)@]@;@[<hov 1>(name@ %a)@]"
       Prefix.print for_pack_prefix Name.print name
+
+let print_in_error =
+  let print_doc ppf t =
+    Format_doc.deprecated_printer (fun fmt -> print fmt t) ppf
+  in
+  Misc.Style.as_inline_code print_doc
 
 let fwd_get_current : (unit -> t option) ref = ref (fun () -> assert false)
 

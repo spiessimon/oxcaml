@@ -54,6 +54,10 @@ module Name : sig
   (** The name of the distinguished compilation unit for predefined exceptions.
   *)
   val predef_exn : t
+
+  (** Print the name for use in error messages. Uses [Format_doc.formatter] and
+    applies inline code styling. *)
+  val print_in_error : Format_doc.formatter -> t -> unit
 end
 
 module Prefix : sig
@@ -96,6 +100,10 @@ include Identifiable.S with type t := t
 val print_name : Format.formatter -> t -> unit
 
 val print_debug : Format.formatter -> t -> unit
+
+(** Print the compilation unit for use in error messages. Uses
+    [Format_doc.formatter] and applies inline code styling. *)
+val print_in_error : Format_doc.formatter -> t -> unit
 
 (** Create a compilation unit with the given [name] (which is not encoded or
     mangled in any way). *)

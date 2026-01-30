@@ -37,7 +37,8 @@ exception Vicuna_unsupported of unsupported_feature
 (* Helper utility for debugging. *)
 let _pp_type fmt ty =
   match get_desc ty with
-  | Tconstr (p, _, _) -> Format.fprintf fmt "constr(%a)" Path.print p
+  | Tconstr (p, _, _) ->
+    Format.fprintf fmt "constr(%a)" (Format_doc.compat Path.print) p
   | Tvariant _ -> Format.fprintf fmt "variant"
   | Tvar { name = None; _ } -> Format.fprintf fmt "var(_)"
   | Tvar { name = Some v; _ } -> Format.fprintf fmt "var(%s)" v
