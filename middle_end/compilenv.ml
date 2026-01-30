@@ -334,8 +334,8 @@ let report_error ppf = function
       fprintf ppf "%a@ contains the description for unit\
                    @ %a when %a was expected"
         Location.Doc.quoted_filename filename
-        CU.print name
-        CU.print modname
+        CU.print_in_error name
+        CU.print_in_error modname
 
 let () =
   Location.register_error_of_exn

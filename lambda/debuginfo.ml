@@ -391,6 +391,9 @@ let rec print_compact ppf t =
 
 let print_compact ppf { dbg; } = print_compact ppf dbg
 
+let print_compact_doc ppf t =
+  Format_doc.deprecated_printer (fun fmt -> print_compact fmt t) ppf
+
 let rec print_compact_extended ppf t =
   let print_item item =
     print_item ppf item;
