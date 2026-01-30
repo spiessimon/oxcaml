@@ -42,19 +42,13 @@ val link_shared :
 
 val call_linker_shared : ?native_toplevel:bool -> string list -> string -> unit
 
-val reset : unit -> unit
-val check_consistency: filepath -> Cmx_format.unit_infos -> Digest.t -> unit
-
 type error =
-  | File_not_found of filepath
-  | Not_an_object_file of filepath
-  | Inconsistent_interface of Compilation_unit.Name.t * filepath * filepath
-  | Inconsistent_implementation of Compilation_unit.Name.t * filepath * filepath
-  | Assembler_error of filepath
-  | Linking_error of int
-  | Missing_cmx of filepath * Compilation_unit.Name.t
-  | Link_error of Linkdeps.error
+  | Dwarf_fission_objcopy_on_macos
+  | Dwarf_fission_dsymutil_not_macos
+  | Dsymutil_error of int
+  | Objcopy_error of int
+  | Cm_bundle_error of Cm_bundle.error
 
 exception Error of error
 
-val report_error: error Format_doc.printer
+val report_error: Format_doc.formatter -> error -> unit

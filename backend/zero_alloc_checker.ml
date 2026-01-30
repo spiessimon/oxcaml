@@ -80,16 +80,16 @@ module Witness = struct
     match hint with
     | No_hint -> ()
     | Missing_summary ->
-      Format.fprintf ppf
+      Format_doc.fprintf ppf
         "@.Hint: Build artifacts for the library containing the callee are not \
          available.@.Try adding the library as an explicit dependency.@."
     | Conservative ->
-      Format.fprintf ppf
+      Format_doc.fprintf ppf
         "@.Hint: Recompile without -disable-precise-zero-alloc-checker for \
          more precise results.@."
 
   let print_kind ppf kind =
-    let open Format in
+    let open Format_doc in
     match kind with
     | Alloc { bytes; dbginfo = _ } -> fprintf ppf "allocation of %d bytes" bytes
     | Indirect_call { callee = None } -> fprintf ppf "indirect call"
@@ -110,8 +110,9 @@ module Witness = struct
     | Widen -> fprintf ppf "widen"
 
   let print ppf { kind; dbg; hint } =
-    Format.fprintf ppf "%a {%a}%a@," print_kind kind Debuginfo.print_compact dbg
-      print_hint hint
+    Format.fprintf ppf "%a {%a}%a@,"
+      (Format_doc.compat print_kind) kind Debuginfo.print_compact dbg
+      (Format_doc.compat print_hint) hint
 end
 
 let take_first_n t n ~to_seq ~of_seq ~cardinal =
@@ -1648,21 +1649,22 @@ end = struct
     let print_item (item : Debuginfo.item) =
       (match item.dinfo_dir with
       | None -> ()
-      | Some dir -> Format.fprintf ppf "%a/" Location.print_filename dir);
-      Format.fprintf ppf "%a:%i" Location.print_filename item.dinfo_file
+      | Some dir -> Format_doc.fprintf ppf "%a/" Location.Doc.filename dir);
+      Format_doc.fprintf ppf "%a:%i" Location.Doc.filename item.dinfo_file
         item.dinfo_line;
       if item.dinfo_char_start >= 0
       then
-        Format.fprintf ppf ",%i--%i" item.dinfo_char_start item.dinfo_char_end;
+        Format_doc.fprintf ppf ",%i--%i" item.dinfo_char_start
+          item.dinfo_char_end;
       if include_scope
       then
-        Format.fprintf ppf "[%s]"
+        Format_doc.fprintf ppf "[%s]"
           (Debuginfo.Scoped_location.string_of_scopes ~include_zero_alloc:false
              item.dinfo_scopes);
       match item.dinfo_function_symbol with
       | None -> ()
       | Some function_symbol ->
-        if include_fs then Format.fprintf ppf "[%s]" function_symbol
+        if include_fs then Format_doc.fprintf ppf "[%s]" function_symbol
     in
     let rec loop items =
       match items with
@@ -1670,7 +1672,7 @@ end = struct
       | [item] -> print_item item
       | item :: tl ->
         print_item item;
-        Format.fprintf ppf "%s" sep;
+        Format_doc.fprintf ppf "%s" sep;
         loop tl
     in
     loop items
@@ -1712,13 +1714,11 @@ end = struct
         if !Oxcaml_flags.zero_alloc_checker_details_extra
         then
           Format_doc.fprintf ppf "\ninlined from\n%a"
-            (Format_doc.compat
-               (print_debuginfo ~sep:"\n" ~include_fs:true ~include_scope:true))
+            (print_debuginfo ~sep:"\n" ~include_fs:true ~include_scope:true)
             items
         else
           Format_doc.fprintf ppf " (%a)"
-            (Format_doc.compat
-               (print_debuginfo ~sep:";" ~include_fs:false ~include_scope:false))
+            (print_debuginfo ~sep:";" ~include_fs:false ~include_scope:false)
             items
     in
     let pp_alloc_block_kind ppf k =
@@ -1749,13 +1749,10 @@ end = struct
       | Alloc_block_kind_vec512_u_array -> pp "unboxed_vec512_array"
     in
     let pp_alloc_dbginfo_item (item : Cmm.alloc_dbginfo_item) =
-      let pp_alloc ppf =
-        Format_doc.fprintf ppf "allocate %d words%a%a" item.alloc_words
-          pp_alloc_block_kind item.alloc_block_kind pp_inlined_dbg
-          item.alloc_dbg
-      in
       let aloc = Debuginfo.to_location item.alloc_dbg in
-      Location.mkloc pp_alloc aloc
+      Location.msg ~loc:aloc "allocate %d words%a%a" item.alloc_words
+        pp_alloc_block_kind item.alloc_block_kind pp_inlined_dbg
+        item.alloc_dbg
     in
     let print_comballoc dbg =
       match dbg with
@@ -1785,11 +1782,11 @@ end = struct
         match w.kind with
         | Alloc { bytes = _; dbginfo } ->
           let comballoc_msg, sub = print_comballoc dbginfo in
-          ( Format.dprintf "%a%s%s" Witness.print_kind w.kind component_msg
+          ( Format_doc.dprintf "%a%s%s" Witness.print_kind w.kind component_msg
               comballoc_msg,
             sub )
         | Widen ->
-          ( Format.dprintf
+          ( Format_doc.dprintf
               "details are not available. This may be a false alarm due to \
                conservative analysis.\n\
                Hint: for more precise results, recompile this function with\n\
@@ -1802,20 +1799,21 @@ end = struct
             [] )
         | Indirect_call _ | Indirect_tailcall _ | Direct_call _
         | Direct_tailcall _ | Extcall _ ->
-          ( Format.dprintf "called function may allocate%s (%a)" component_msg
-              Witness.print_kind w.kind,
+          ( Format_doc.dprintf "called function may allocate%s (%a)"
+              component_msg Witness.print_kind w.kind,
             [] )
         | Arch_specific _ | Probe _ ->
-          ( Format.dprintf "expression may allocate%s@ (%a)" component_msg
+          ( Format_doc.dprintf "expression may allocate%s@ (%a)" component_msg
               Witness.print_kind w.kind,
             [] )
       in
       let dbg = if Debuginfo.is_none w.dbg then t.fun_dbg else w.dbg in
       let loc = Debuginfo.to_location dbg in
       let pp ppf () =
-        print_main_msg ppf;
-        pp_inlined_dbg ppf dbg;
-        Witness.print_hint ppf w.hint
+        Format_doc.fprintf ppf "%t%a%a"
+          print_main_msg
+          pp_inlined_dbg dbg
+          Witness.print_hint w.hint
       in
       Location.error_of_printer ~loc ~sub pp ()
     in
