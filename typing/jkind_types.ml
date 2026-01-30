@@ -86,17 +86,17 @@ module Sort = struct
       | Product cs1, Product cs2 -> List.equal equal cs1 cs2
       | (Base _ | Product _), _ -> false
 
-    let format ppf c =
+    let format_doc ppf c =
+      let module Fmt = Format_doc in
       let rec pp_element ~nested ppf = function
-        | Base b -> Format.fprintf ppf "%s" (to_string_base b)
+        | Base b -> Fmt.fprintf ppf "%s" (to_string_base b)
         | Product cs ->
-          let pp_sep ppf () = Format.fprintf ppf "@ & " in
-          Misc.pp_nested_list ~nested ~pp_element ~pp_sep ppf cs
+          let pp_sep ppf () = Fmt.fprintf ppf "@ & " in
+          Fmt.pp_nested_list ~nested ~pp_element ~pp_sep ppf cs
       in
       pp_element ~nested:false ppf c
 
-    let format_doc ppf c =
-      Format_doc.deprecated_printer (fun fmt -> format fmt c) ppf
+    let format ppf c = Format_doc.compat format_doc ppf c
 
     let rec all_void = function
       | Base Void -> true
@@ -628,19 +628,19 @@ module Sort = struct
 
   (*** pretty printing ***)
 
-  let format ppf t =
+  let format_doc ppf t =
+    let module Fmt = Format_doc in
     let rec pp_element ~nested ppf t =
       match get t with
-      | Base b -> Format.fprintf ppf "%s" (to_string_base b)
-      | Var v -> Format.fprintf ppf "%s" (Var.name v)
+      | Base b -> Fmt.fprintf ppf "%s" (to_string_base b)
+      | Var v -> Fmt.fprintf ppf "%s" (Var.name v)
       | Product ts ->
-        let pp_sep ppf () = Format.fprintf ppf " & " in
-        Misc.pp_nested_list ~nested ~pp_element ~pp_sep ppf ts
+        let pp_sep ppf () = Fmt.fprintf ppf " & " in
+        Fmt.pp_nested_list ~nested ~pp_element ~pp_sep ppf ts
     in
     pp_element ~nested:false ppf t
 
-  let format_doc ppf t =
-    Format_doc.deprecated_printer (fun fmt -> format fmt t) ppf
+  let format ppf t = Format_doc.compat format_doc ppf t
 
   include Static.T
 

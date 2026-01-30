@@ -1689,7 +1689,7 @@ let report_error env ppf =
       fprintf ppf ".@]";
   | Bad_univar_jkind { name; jkind_info; inferred_jkind } ->
       fprintf ppf
-        "@[<hov>The universal type variable %a was %s to have kind %a.@;%t@]"
+        "@[<hov>The universal type variable %a was %s to have kind %a.@;%a@]"
         Pprintast.Doc.tyvar name
         (if jkind_info.defaulted then "defaulted" else "declared")
         Jkind.format jkind_info.original_jkind
@@ -1699,8 +1699,7 @@ let report_error env ppf =
               match desc.layout with
               | Sort (Var _) -> fprintf ppf "a representable kind"
               | Sort (Base _) | Any | Product _ ->
-                fprintf ppf "kind %a" Jkind.format
-                  inferred_jkind)))
+                fprintf ppf "kind %a" Jkind.format inferred_jkind)))
         inferred_jkind
   | Mismatched_jkind_annotation { name; explicit_jkind; implicit_jkind } ->
       fprintf ppf
