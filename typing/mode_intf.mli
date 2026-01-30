@@ -77,7 +77,7 @@ type print_error_result =
   | Mode  (** A mode constant is printed *)
   | Mode_with_hint  (** A mode constant with hints is printed *)
 
-type print_error = (Format.formatter -> print_error_result) simple_error
+type print_error = (Format_doc.formatter -> print_error_result) simple_error
 
 module type Common = sig
   module Const : Const
@@ -247,7 +247,7 @@ type 'd neg_hint_morph = 'd neg Mode_hint.morph constraint 'd = _ * _
 type 'd pos_hint_morph = 'd pos Mode_hint.morph constraint 'd = _ * _
 
 module type S = sig
-  val print_longident : (Format.formatter -> Longident.t -> unit) ref
+  val print_longident : Longident.t Format_doc.printer ref
 
   (* CR-someday zqian: find a better stroy to erase bounds (and hints) that incorporates
      into [disallow_*]. *)
@@ -262,7 +262,7 @@ module type S = sig
       otherwise. Defaults to the latter. *)
   val print_pinpoint :
     Hint.pinpoint ->
-    (definite:bool -> capitalize:bool -> Format.formatter -> unit) option
+    (definite:bool -> capitalize:bool -> Format_doc.formatter -> unit) option
 
   type nonrec 'a simple_error = 'a simple_error
 

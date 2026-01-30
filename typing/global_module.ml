@@ -5,6 +5,8 @@ module Parameter_name = struct
 
   let to_string t = t
 
+  let print_doc = Format_doc.pp_print_string
+
   include Identifiable.Make (struct
     type nonrec t = t
 

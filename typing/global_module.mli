@@ -5,6 +5,8 @@ module Parameter_name : sig
 
   val to_string : t -> string
 
+  val print_doc : Format_doc.formatter -> t -> unit
+
   include Identifiable.S with type t := t
 end
 
@@ -26,6 +28,8 @@ module Name : sig
   and argument = t Argument.t
 
   include Identifiable.S with type t := t
+
+  val print_doc : Format_doc.formatter -> t -> unit
 
   val create : string -> argument list -> (t, t duplicate) Result.t
 

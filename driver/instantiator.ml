@@ -188,13 +188,13 @@ let instantiate
 
 (* Error report *)
 
-open Format
+open Format_doc
 module Style = Misc.Style
 
 let pp_parameters ppf params =
   fprintf ppf "@[<hov>%a@]"
     (pp_print_list ~pp_sep:pp_print_space
-       (Style.as_inline_code Global_module.Parameter_name.print))
+       (Style.as_inline_code Global_module.Parameter_name.print_doc))
     params
 
 let report_error ppf = function
@@ -210,9 +210,9 @@ let report_error ppf = function
        @[<hov>@{<hint>Hint@}: \
          @[<hov>Compile %a@ with @{<inline_code>-as-argument-for Foo@}@ where \
            @{<inline_code>Foo@} is a parameter of %a.@]@]"
-      (Style.as_inline_code CU.print) compilation_unit
-      (Style.as_inline_code Location.print_filename) filename
-      (Style.as_inline_code CU.print) base_unit
+      CU.print_in_error compilation_unit
+      (Style.as_inline_code Location.Doc.filename) filename
+      CU.print_in_error base_unit
   | Incorrect_target_filename
       { expected_basename; expected_extension; actual_basename;
         compilation_unit } ->
@@ -222,31 +222,30 @@ let report_error ppf = function
        @[<hov>@{<hint>Hint@}: @[<hov>Compile with %a@ or omit \
          @{<inline_code>-o@} entirely.@]@]"
       Style.inline_code actual_basename
-      (Style.as_inline_code CU.print) compilation_unit
+      CU.print_in_error compilation_unit
       (Style.as_clflag "-o" pp_print_string) expected_filename
   | Not_parameterised { compilation_unit; filename } ->
     fprintf ppf
       "@[<hov>Cannot instantiate %a@ because it has no parameters.@]@.\
        @[<hov>@{<hint>Hint@}: \
          @[<hov>Compile %a@ with @{<inline_code>-parameter@}.@]@]"
-      (Style.as_inline_code CU.print) compilation_unit
-      (Style.as_inline_code Location.print_filename) filename
+      CU.print_in_error compilation_unit
+      (Style.as_inline_code Location.Doc.filename) filename
   | Missing_argument { param } ->
     fprintf ppf "No argument given for parameter %a"
-      (Style.as_inline_code Global_module.Parameter_name.print) param
+      (Style.as_inline_code Global_module.Parameter_name.print_doc) param
   | No_such_parameter { base_unit; available_params; param; arg } ->
     fprintf ppf
       "@[<hov>Module %a@ is an argument for parameter %a,@ \
          which is not a parameter of %a.@]@.\
        @[<hov>@{<hint>Hint@}: @[<hov>%a@ was compiled with %a.@]@]@.\
        @[<hov>@{<hint>Hint@}: @[<hov>Parameters of %a:@ %a@]@]"
-      (Style.as_inline_code Global_module.Name.print) arg
-      (Style.as_inline_code Global_module.Parameter_name.print) param
-      (Style.as_inline_code CU.print) base_unit
-      (Style.as_inline_code Global_module.Name.print) arg
-      (Style.as_clflag "-as-argument-for" Global_module.Parameter_name.print)
-        param
-      (Style.as_inline_code CU.print) base_unit
+      (Style.as_inline_code Global_module.Name.print_doc) arg
+      (Style.as_inline_code Global_module.Parameter_name.print_doc) param
+      CU.print_in_error base_unit
+      (Style.as_inline_code Global_module.Name.print_doc) arg
+      (Style.as_clflag "-as-argument-for" Global_module.Parameter_name.print_doc) param
+      CU.print_in_error base_unit
       pp_parameters available_params
   | Repeated_parameter { param; arg1; arg2 } ->
     fprintf ppf
@@ -255,13 +254,12 @@ let report_error ppf = function
          parameter.@]@.\
        @[<hov>@{<hint>Hint@}: @[<hov>Both %a@ and %a@ were compiled \
          with %a.@]@]"
-      (Style.as_inline_code CU.print) arg1
-      (Style.as_inline_code CU.print) arg2
-      (Style.as_inline_code Global_module.Parameter_name.print) param
-      (Style.as_inline_code CU.print) arg1
-      (Style.as_inline_code CU.print) arg2
-      (Style.as_clflag "-as-argument-for" Global_module.Parameter_name.print)
-        param
+      CU.print_in_error arg1
+      CU.print_in_error arg2
+      (Style.as_inline_code Global_module.Parameter_name.print_doc) param
+      CU.print_in_error arg1
+      CU.print_in_error arg2
+      (Style.as_clflag "-as-argument-for" Global_module.Parameter_name.print_doc) param
 let () =
   Location.register_error_of_exn
     (function

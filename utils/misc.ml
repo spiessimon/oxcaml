@@ -1192,7 +1192,7 @@ module Style = struct
   let inline_code ppf s = as_inline_code Format_doc.pp_print_string ppf s
 
   let as_clflag flag printer ppf x =
-    Format.fprintf ppf "@{<inline_code>%s %a@}" flag printer x
+    Format_doc.fprintf ppf "@{<inline_code>%s %a@}" flag printer x
 
   (* either prints the tag of [s] or delegates to [or_else] *)
   let mark_open_tag ~or_else s =

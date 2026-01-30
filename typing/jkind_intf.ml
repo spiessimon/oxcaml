@@ -50,6 +50,8 @@ module type Sort = sig
 
     val format : Format.formatter -> t -> unit
 
+    val format_doc : Format_doc.formatter -> t -> unit
+
     val all_void : t -> bool
 
     val value : t
@@ -191,6 +193,8 @@ module type Sort = sig
   val equate : t -> t -> bool
 
   val format : Format.formatter -> t -> unit
+
+  val format_doc : Format_doc.formatter -> t -> unit
 
   (** Checks whether this sort is [void], defaulting to [value] if a sort
       variable is unfilled. *)

@@ -56,8 +56,8 @@ type legacy_module =
   | Toplevel
 
 let print_legacy_module ppf = function
-  | Compilation_unit -> Format.fprintf ppf "compilation unit"
-  | Toplevel -> Format.fprintf ppf "toplevel"
+  | Compilation_unit -> Format_doc.fprintf ppf "compilation unit"
+  | Toplevel -> Format_doc.fprintf ppf "toplevel"
 
 type error =
     Cannot_apply of module_type
@@ -4849,11 +4849,11 @@ let report_error ~loc _env = function
   | Cannot_find_argument_type arg_type ->
       Location.errorf ~loc
         "Parameter module %a@ specified by -as-argument-for cannot be found."
-        (Style.as_inline_code Global_module.Parameter_name.print) arg_type
+        (Style.as_inline_code Global_module.Parameter_name.print_doc) arg_type
   | Duplicate_parameter_name name ->
       Location.errorf ~loc
         "This instance has multiple arguments with the name %a."
-        (Style.as_inline_code Global_module.Parameter_name.print) name
+        (Style.as_inline_code Global_module.Parameter_name.print_doc) name
   | Item_weaker_than_structure e ->
       let Mode.Value.Error (ax, {left; right}) = Mode.Value.to_simple_error e in
       let d =

@@ -343,9 +343,9 @@ type type_mismatch =
 let report_modality_sub_error first second ppf e =
   let Modality.Error (ax, {left; right}) = e in
   let print_modality id ppf m =
-    Printtyp.modality ~id:(fun ppf -> Format.pp_print_string ppf id) ax ppf m
+    Printtyp.modality ~id:(fun ppf -> Format_doc.pp_print_string ppf id) ax ppf m
   in
-  Format.fprintf ppf "%s is %a and %s is %a."
+  Format_doc.fprintf ppf "%s is %a and %s is %a."
     (String.capitalize_ascii second)
     (print_modality "empty") right
     first
@@ -355,7 +355,7 @@ let report_mode_sub_error got expected ppf e =
   let {left; right} : _ Mode.simple_error =
     Mode.Value.print_error (Location.none, Unknown) e
   in
-  let open Format in
+  let open Format_doc in
   let open_box = dprintf "@[<hov 2>" in
   let reopen_box = dprintf "@]@ %t" open_box in
   fprintf ppf "%t%s " open_box (String.capitalize_ascii got);
@@ -452,7 +452,7 @@ let report_label_mismatch first second env ppf err =
         (String.capitalize_ascii (choose ord first second))
         (choose_other ord first second)
   | Atomicity ord ->
-      Format.fprintf ppf "%s is atomic and %s is not."
+      Format_doc.fprintf ppf "%s is atomic and %s is not."
         (String.capitalize_ascii (choose ord first second))
         (choose_other ord first second)
   | Modality err_ -> report_modality_equate_error first second ppf err_
@@ -548,8 +548,9 @@ let report_constructor_mismatch first second decl env ppf err =
         (String.capitalize_ascii (choose ord first second))
         (choose_other ord first second)
   | Modality (i, err) ->
-      pr "Modality mismatch at argument position %i:@ %a"
-        (i + 1) (report_modality_equate_error first second) err
+      pr "Modality mismatch at argument position %i:@ %t"
+        (i + 1)
+        (fun ppf -> report_modality_equate_error first second ppf err)
         (* argument position is one-based; more intuitive *)
 
 let pp_variant_diff first second prefix decl env ppf (x : variant_change) =
@@ -1506,7 +1507,7 @@ let type_declarations ?(equality = false) ~loc env ~mark name
          "Unification failure in type inclusion rigidity check:@;\
           %s unified with %a."
          (match name with None -> "_" | Some n -> "'" ^ n)
-         Printtyp.type_expr ty
+         (Fmt.compat Printtyp.type_expr) ty
   | Jkind_mismatch { original_jkind; inferred_jkind; ty } ->
      let context = Ctype.mk_jkind_context_always_principal env in
      Some (Parameter_jkind
