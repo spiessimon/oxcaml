@@ -181,6 +181,9 @@ module type Common = sig
 
   val print : ?verbose:bool -> unit -> Format.formatter -> ('l * 'r) t -> unit
 
+  val print_doc :
+    ?verbose:bool -> unit -> Format_doc.formatter -> ('l * 'r) t -> unit
+
   val zap_to_ceil : ('l * allowed) t -> Const.t
 
   val zap_to_floor : (allowed * 'r) t -> Const.t
@@ -210,6 +213,8 @@ module type Axis = sig
   type packed = P : 'a t -> packed
 
   val print : Format.formatter -> 'a t -> unit
+
+  val print_doc : Format_doc.formatter -> 'a t -> unit
 
   (** List of all axes, ordered by [compare]. *)
   val all : packed list
@@ -661,6 +666,9 @@ module type S = sig
 
       (** Prints a constant on any axis. *)
       val print_axis : 'a Axis.t -> Format.formatter -> 'a -> unit
+
+      (** Prints a constant on any axis using Format_doc. *)
+      val print_axis_doc : 'a Axis.t -> Format_doc.formatter -> 'a -> unit
     end
 
     (** Existentially holds a mode together with its axis. *)
@@ -1141,6 +1149,6 @@ module type S = sig
       (Alloc.Monadic.r, Alloc.Comonadic.l) monadic_comonadic
 
     (** Print the mode crossing by axis. Omit axes that do not cross. *)
-    val print : Format.formatter -> t -> unit
+    val print : Format_doc.formatter -> t -> unit
   end
 end

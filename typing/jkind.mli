@@ -124,7 +124,7 @@ module With_bounds : sig
     ('l * 'r) Types.with_bounds ->
     ('l * 'r) Types.with_bounds
 
-  val format : Format.formatter -> ('l * 'r) Types.with_bounds -> unit
+  val format : Format_doc.formatter -> ('l * 'r) Types.with_bounds -> unit
 end
 
 (** A [jkind] is a full description of the runtime representation of values of a

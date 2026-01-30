@@ -95,6 +95,9 @@ module Sort = struct
       in
       pp_element ~nested:false ppf c
 
+    let format_doc ppf c =
+      Format_doc.deprecated_printer (fun fmt -> format fmt c) ppf
+
     let rec all_void = function
       | Base Void -> true
       | Base
@@ -635,6 +638,9 @@ module Sort = struct
         Misc.pp_nested_list ~nested ~pp_element ~pp_sep ppf ts
     in
     pp_element ~nested:false ppf t
+
+  let format_doc ppf t =
+    Format_doc.deprecated_printer (fun fmt -> format fmt t) ppf
 
   include Static.T
 

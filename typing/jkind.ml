@@ -228,14 +228,14 @@ module Layout = struct
     | Sort s -> Const.of_sort_const (Sort.default_to_value_and_get s)
     | Product p -> Product (List.map default_to_value_and_get p)
 
-  let format ppf layout =
-    let open Format in
+  let format_doc ppf layout =
+    let module Fmt = Format_doc in
     let rec pp_element ~nested ppf : _ Layout.t -> unit = function
-      | Any -> fprintf ppf "any"
-      | Sort s -> Sort.format ppf s
+      | Any -> Fmt.fprintf ppf "any"
+      | Sort s -> Sort.format_doc ppf s
       | Product ts ->
-        let pp_sep ppf () = Format.fprintf ppf "@ & " in
-        Misc.pp_nested_list ~nested ~pp_element ~pp_sep ppf ts
+        let pp_sep ppf () = Fmt.fprintf ppf "@ & " in
+        Fmt.pp_nested_list ~nested ~pp_element ~pp_sep ppf ts
     in
     pp_element ~nested:false ppf layout
 end
@@ -1447,8 +1447,8 @@ module Desc = struct
       (* Analyze a product before calling [get_const]: the machinery in
          [Const.format] works better for atomic layouts, not products. *)
       | Product lays ->
-        let pp_sep ppf () = fprintf ppf "@ & " in
-        Misc.pp_nested_list ~nested ~pp_element:format_desc ~pp_sep ppf
+        let pp_sep ppf () = Fmt.fprintf ppf "@ & " in
+        Fmt.pp_nested_list ~nested ~pp_element:format_desc ~pp_sep ppf
           (List.map (fun layout -> { desc with layout }) lays)
       | _ -> (
         match get_const desc with
@@ -3125,7 +3125,7 @@ let report_error ~loc : Error.t -> _ = function
       (Builtin_attributes.jkind_attribute_to_string from_attribute.txt)
   | Insufficient_level { jkind; required_layouts_level } -> (
     let hint ppf =
-      Format.fprintf ppf "You must enable -extension %s to use this feature."
+      Format_doc.fprintf ppf "You must enable -extension %s to use this feature."
         (Language_extension.to_command_line_string Layouts
            required_layouts_level)
     in

@@ -4830,15 +4830,15 @@ let report_error ~loc _env = function
         "Interface %a@ found for module@ %a@ is not flagged as a parameter.@ \
          It cannot be the parameter type for this argument module."
         Style.inline_code path
-        (Style.as_inline_code Global_module.Name.print) param
+        (Style.as_inline_code Global_module.Name.print_doc) param
   | Inconsistent_argument_types
         { new_arg_type; old_source_file; old_arg_type } ->
       let pp_arg_type ppf arg_type =
         match arg_type with
-        | None -> Format.fprintf ppf "without -as-argument-for"
+        | None -> Format_doc.fprintf ppf "without -as-argument-for"
         | Some arg_type ->
-            Format.fprintf ppf "with -as-argument-for %a"
-              Global_module.Parameter_name.print arg_type
+            Format_doc.fprintf ppf "with -as-argument-for %a"
+              Global_module.Parameter_name.print_doc arg_type
       in
       Location.errorf ~loc
         "Inconsistent usage of -as-argument-for. Interface@ %s@ was compiled \
@@ -4858,28 +4858,28 @@ let report_error ~loc _env = function
       let Mode.Value.Error (ax, {left; right}) = Mode.Value.to_simple_error e in
       let d =
         match ax with
-        | Comonadic Areality -> Format.dprintf "a structure"
+        | Comonadic Areality -> Format_doc.dprintf "a structure"
         | _ ->
-            Format.dprintf "a %a structure"
-              (Style.as_inline_code (Mode.Value.Const.print_axis ax)) right
+            Format_doc.dprintf "a %a structure"
+              (Style.as_inline_code (Mode.Value.Const.print_axis_doc ax)) right
       in
       Location.errorf ~loc
         "This is %a, but expected to be %a because it is inside %t."
-        (Style.as_inline_code (Mode.Value.Const.print_axis ax)) left
-        (Style.as_inline_code (Mode.Value.Const.print_axis ax)) right
+        (Style.as_inline_code (Mode.Value.Const.print_axis_doc ax)) left
+        (Style.as_inline_code (Mode.Value.Const.print_axis_doc ax)) right
         d
   | Submode_failed e ->
       let Mode.Value.Error (ax, {left; right}) = Mode.Value.to_simple_error e in
       Location.errorf ~loc
         "This is %a, but expected to be %a."
-        (Style.as_inline_code (Mode.Value.Const.print_axis ax)) left
-        (Style.as_inline_code (Mode.Value.Const.print_axis ax)) right
+        (Style.as_inline_code (Mode.Value.Const.print_axis_doc ax)) left
+        (Style.as_inline_code (Mode.Value.Const.print_axis_doc ax)) right
   | Legacy_module (reason, e) ->
       let Mode.Value.Error (ax, {left; right}) = Mode.Value.to_simple_error e in
       Location.errorf ~loc
         "This is %a, but expected to be %a because it is a %a."
-        (Style.as_inline_code (Mode.Value.Const.print_axis ax)) left
-        (Style.as_inline_code (Mode.Value.Const.print_axis ax)) right
+        (Style.as_inline_code (Mode.Value.Const.print_axis_doc ax)) left
+        (Style.as_inline_code (Mode.Value.Const.print_axis_doc ax)) right
         print_legacy_module reason
 
 let report_error env ~loc err =

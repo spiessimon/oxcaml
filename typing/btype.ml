@@ -1016,7 +1016,7 @@ module Jkind0 = struct
             separability } =
       Format.fprintf ppf "@[{ crossing = %a;@ externality = %a;@ \
         nullability = %a;@ separability = %a }@]"
-        Crossing.print crossing
+        (Format_doc.compat Crossing.print) crossing
         Externality.print externality
         Nullability.print nullability
         Separability.print separability
