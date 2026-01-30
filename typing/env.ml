@@ -4743,14 +4743,13 @@ let print_longident : Longident.t printer ref = ref (fun _ _ -> assert false)
 let pp_longident ppf l = !print_longident ppf l
 
 let print_path: Path.t printer ref = ref (fun _ _ -> assert false)
-let pp_path ppf l = !print_path ppf l
 
 let print_type_expr =
-  ref ((fun _ _ -> assert false) : formatter -> Types.type_expr -> unit)
+  ref ((fun _ _ -> assert false) : Format.formatter -> Types.type_expr -> unit)
 
 let report_jkind_violation_with_offender =
   ref ((fun ~offender:_ ~level:_ _ _ -> assert false)
-       : offender:(Format.formatter -> unit) -> level:int -> Format.formatter ->
+       : offender:(Format_doc.formatter -> unit) -> level:int -> Format_doc.formatter ->
          Jkind.Violation.t -> unit)
 
 let spellcheck ppf extract env lid =
@@ -4816,14 +4815,14 @@ let print_stage ppf stage =
 let print_with_quote_promote ppf (name, intro_stage, usage_stage) =
   let stage_diff = intro_stage - usage_stage in
   let rec loop fmt stage_diff =
-    if stage_diff = 1 then fprintf fmt "<[%s]>" name
-    else if stage_diff = -1 then fprintf fmt "$%s" name
-    else if stage_diff > 1 then fprintf fmt "<[%a]>" loop (stage_diff - 1)
-    else if stage_diff < -1 then fprintf fmt "$(%a)" loop (stage_diff + 1)
+    if stage_diff = 1 then Format.fprintf fmt "<[%s]>" name
+    else if stage_diff = -1 then Format.fprintf fmt "$%s" name
+    else if stage_diff > 1 then Format.fprintf fmt "<[%a]>" loop (stage_diff - 1)
+    else if stage_diff < -1 then Format.fprintf fmt "$(%a)" loop (stage_diff + 1)
     else assert false
   in
-  loop str_formatter stage_diff;
-  fprintf ppf "%a" Style.inline_code (flush_str_formatter ())
+  loop Format.str_formatter stage_diff;
+  fprintf ppf "%a" Style.inline_code (Format.flush_str_formatter ())
 
 let print_unsupported_quotation ppf =
   function
@@ -5051,7 +5050,8 @@ let report_lookup_error ~level _loc env ppf = function
                    captured by an object.@ %a@]"
         quoted_longident lid
         (fun v -> !report_jkind_violation_with_offender
-           ~offender:(fun ppf -> !print_type_expr ppf typ)
+           ~offender:(fun ppf ->
+              Format_doc.deprecated_printer (fun fmt -> !print_type_expr fmt typ) ppf)
            ~level v)
         err
   | No_unboxed_version (lid, decl) ->
@@ -5083,9 +5083,9 @@ let report_lookup_error ~level _loc env ppf = function
          it is introduced at %a,@ \
          %a.@]"
         quoted_longident lid
-        Location.print_loc usage_loc
+        (Location.Doc.loc ~capitalize_first:false) usage_loc
         print_stage usage_stage
-        Location.print_loc intro_loc
+        (Location.Doc.loc ~capitalize_first:false) intro_loc
         print_stage intro_stage
   | Unbound_in_stage (context, lid, usage_loc, usage_stage, avail_stage) ->
       fprintf ppf
@@ -5095,7 +5095,7 @@ let report_lookup_error ~level _loc env ppf = function
          @.@[@{<hint>Hint@}: %a %a is defined %a.@]"
         print_unbound_in_quotation context
         quoted_longident lid
-        Location.print_loc usage_loc
+        (Location.Doc.loc ~capitalize_first:false) usage_loc
         quoted_longident lid
         print_stage usage_stage
         print_unbound_in_quotation context
@@ -5123,24 +5123,24 @@ let report_error ~level ppf = function
       fprintf ppf
         "@[<hov>The implicit kind for %a is already defined at %a.@]"
         Style.inline_code name
-        Location.print_loc defined_at
+        (Location.Doc.loc ~capitalize_first:false) defined_at
   | Lookup_error(loc, t, err) -> report_lookup_error ~level loc t ppf err
   | Incomplete_instantiation { unset_param } ->
       fprintf ppf "@[<hov>Not enough instance arguments: the parameter@ %a@ is \
                    required.@]"
-        Global_module.Parameter_name.print unset_param
+        Global_module.Parameter_name.print_doc unset_param
   | Toplevel_splice loc ->
       fprintf ppf
         "@[<hov>Splices ($) are not allowed in the initial stage,@ \
          as encountered at %a.@,\
          Did you forget to insert a quotation?@]"
-        Location.print_loc loc
+        (Location.Doc.loc ~capitalize_first:false) loc
   | Unsupported_inside_quotation (loc, context) ->
       fprintf ppf
         "@[<hov>%a@ is not supported inside quoted expressions,@ \
          as seen at %a.@]"
         print_unsupported_quotation context
-        Location.print_loc loc
+        (Location.Doc.loc ~capitalize_first:false) loc
 
 let () =
   Location.register_error_of_exn

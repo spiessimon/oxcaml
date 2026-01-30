@@ -22,6 +22,7 @@ open Cmi_format
 module CU = Compilation_unit
 module Consistbl_data = Import_info.Intf.Nonalias.Kind
 module Consistbl = Consistbl.Make (CU.Name) (Consistbl_data)
+module Style = Misc.Style
 
 let add_delayed_check_forward = ref (fun _ -> assert false)
 
@@ -449,15 +450,17 @@ let remember_global { globals; _ } global ~precision ~mentioned_by =
             | Current ->
                 Format.fprintf ppf "this compilation unit"
             | Other modname ->
-                Style.as_inline_code Global_module.Name.print ppf modname
+                Style.as_inline_code_format Global_module.Name.print ppf modname
           in
           Misc.fatal_errorf
             "@[<hov>The name %a@ was bound to %a@ by %a@ \
              but it is instead bound to %a@ by %a.@]"
-            (Style.as_inline_code Global_module.Name.print) global_name
-            (Style.as_inline_code Global_module.With_precision.print) old_global
+            (Style.as_inline_code_format Global_module.Name.print) global_name
+            (Style.as_inline_code_format Global_module.With_precision.print)
+              old_global
             pp_mentioned_by first_mentioned_by
-            (Style.as_inline_code Global_module.With_precision.print) new_global
+            (Style.as_inline_code_format Global_module.With_precision.print)
+              new_global
             pp_mentioned_by mentioned_by
 
 let rec approximate_global_by_name penv global_name =
@@ -871,11 +874,10 @@ let find_pers_struct
 
 let describe_prefix ppf prefix =
   if CU.Prefix.is_empty prefix then
-    Format.fprintf ppf "outside of any package"
+    Format_doc.fprintf ppf "outside of any package"
   else
-    Format.fprintf ppf "package %a" CU.Prefix.print prefix
+    Format_doc.fprintf ppf "package %s" (CU.Prefix.to_string prefix)
 
-module Style = Misc.Style
 (* Emits a warning if there is no valid cmi for name *)
 let check_pers_struct ~allow_hidden penv f ~loc name =
   let name_as_string = CU.Name.to_string (CU.Name.of_head_of_global_name name) in
@@ -912,36 +914,36 @@ let check_pers_struct ~allow_hidden penv f ~loc name =
             (* Can't be raised by [find_pers_struct ~check:false] *)
             assert false
         | Direct_reference_from_wrong_package (unit, _filename, prefix) ->
-            Format.asprintf "%a is inaccessible from %a"
-              CU.print unit
+            Format_doc.doc_printf "%a is inaccessible from %a"
+              CU.print_in_error unit
               describe_prefix prefix
         | Illegal_import_of_parameter (name, _) ->
-            Format.asprintf "%a is a parameter"
-              (Style.as_inline_code Global_module.Name.print) name
+            Format_doc.doc_printf "%a is a parameter"
+              (Style.as_inline_code Global_module.Name.print_doc) name
         | Not_compiled_as_parameter name ->
-            Format.asprintf "%a should be a parameter but isn't"
-              (Style.as_inline_code Global_module.Name.print) name
+            Format_doc.doc_printf "%a should be a parameter but isn't"
+              (Style.as_inline_code Global_module.Name.print_doc) name
         | Imported_module_has_unset_parameter { imported; parameter } ->
-            Format.asprintf "%a requires argument for %a"
-              (Style.as_inline_code Global_module.Name.print) imported
-              (Style.as_inline_code Global_module.Parameter_name.print)
+            Format_doc.doc_printf "%a requires argument for %a"
+              (Style.as_inline_code Global_module.Name.print_doc) imported
+              (Style.as_inline_code Global_module.Parameter_name.print_doc)
               parameter
         | Imported_module_has_no_such_parameter { imported; parameter; _ } ->
-            Format.asprintf "%a has no parameter %a"
-              (Style.as_inline_code CU.Name.print) imported
-              (Style.as_inline_code Global_module.Parameter_name.print)
+            Format_doc.doc_printf "%a has no parameter %a"
+              CU.Name.print_in_error imported
+              (Style.as_inline_code Global_module.Parameter_name.print_doc)
               parameter
         | Not_compiled_as_argument { value; _ } ->
-            Format.asprintf "%a is not compiled as an argument"
-              (Style.as_inline_code Global_module.Name.print) value
+            Format_doc.doc_printf "%a is not compiled as an argument"
+              (Style.as_inline_code Global_module.Name.print_doc) value
         | Argument_type_mismatch { value; expected; actual; _ } ->
-            Format.asprintf "%a implements %a, not %a"
-              (Style.as_inline_code Global_module.Name.print) value
-              (Style.as_inline_code Global_module.Parameter_name.print) actual
-              (Style.as_inline_code Global_module.Parameter_name.print) expected
+            Format_doc.doc_printf "%a implements %a, not %a"
+              (Style.as_inline_code Global_module.Name.print_doc) value
+              (Style.as_inline_code Global_module.Parameter_name.print_doc) actual
+              (Style.as_inline_code Global_module.Parameter_name.print_doc) expected
         | Unbound_module_as_argument_value { value; _ } ->
-            Format.asprintf "Can't find argument %a"
-              (Style.as_inline_code Global_module.Name.print) value
+            Format_doc.doc_printf "Can't find argument %a"
+              (Style.as_inline_code Global_module.Name.print_doc) value
       in
       let msg = Format_doc.(asprintf "%a" pp_doc) msg in
       let warn = Warnings.No_cmi_file(name_as_string, Some msg) in
