@@ -1110,6 +1110,9 @@ module Lattices_mono = struct
       | Visibility -> Format.fprintf ppf "visibility"
       | Staticity -> Format.fprintf ppf "staticity"
 
+    let print_doc : type p r. _ -> (p, r) t -> unit =
+     fun ppf t -> Format_doc.deprecated_printer (fun ppf -> print ppf t) ppf
+
     let eq : type p r0 r1. (p, r0) t -> (p, r1) t -> (r0, r1) Misc.eq option =
      fun ax0 ax1 ->
       match ax0, ax1 with
@@ -2026,7 +2029,14 @@ module Report = struct
 
   [@@@warning "-4"]
 
-  open Format
+  (* Preserve access to Report.t before shadowing with open *)
+  type 'a report = 'a t
+
+  open Format_doc
+
+  (* Convert a Format.formatter printer to a Format_doc.formatter printer *)
+  let format_printer pr ppf x =
+    deprecated_printer (fun fmt -> pr fmt x) ppf
 
   type sound =
     | Consonant
@@ -2057,10 +2067,10 @@ module Report = struct
         (fun ~definite ~capitalize ->
           dprintf "%t %a"
             (print_lock_item ~definite ~capitalize category)
-            (Format_doc.compat (Misc.Style.as_inline_code (fun ppf lid ->
-                 Format_doc.deprecated_printer
-                   (fun fmt -> !print_longident fmt lid)
-                   ppf)))
+            (Misc.Style.as_inline_code (fun ppf lid ->
+               Format_doc.deprecated_printer
+                 (fun fmt -> !print_longident fmt lid)
+                 ppf))
             lid)
     | Function -> Some (print_article_noun Consonant "function")
     | Functor -> Some (print_article_noun Consonant "functor")
@@ -2087,18 +2097,18 @@ module Report = struct
         | false, true ->
           fprintf ppf "%t at %a"
             (print_desc ~definite ~capitalize)
-            Location.print_loc loc
+            (format_printer Location.print_loc) loc
         | false, false ->
           fprintf ppf "%t (at %a)"
             (print_desc ~definite ~capitalize)
-            Location.print_loc loc)
+            (format_printer Location.print_loc) loc)
 
   let is_known_pinpoint : pinpoint -> bool = function
     | _, Unknown -> false
     | _ -> true
 
   let print_mutable_part ppf = function
-    | Record_field s -> fprintf ppf "mutable field %a" (Format_doc.compat Misc.Style.inline_code) s
+    | Record_field s -> fprintf ppf "mutable field %a" Misc.Style.inline_code s
     | Array_elements -> fprintf ppf "array elements"
 
   let print_always_dynamic = function
@@ -2141,7 +2151,7 @@ module Report = struct
         "it is a function return value.@ Hint: Use exclave_ to return a local \
          value"
     | Stack_expression ->
-      fprintf ppf "it is %a-allocated" (Format_doc.compat Misc.Style.inline_code) "stack_"
+      fprintf ppf "it is %a-allocated" Misc.Style.inline_code "stack_"
     | Module_allocated_on_heap ->
       (match pp_desc with
       | Ident { category = Module; _ } | Functor ->
@@ -2161,19 +2171,19 @@ module Report = struct
    fun { txt; loc } ->
     match txt with
     | Unknown ->
-      dprintf "is allocated at %a containing data" Location.print_loc loc
+      dprintf "is allocated at %a containing data" (format_printer Location.print_loc) loc
     | Optional_argument ->
       dprintf
         "is an optional argument wrapper (and thus allocated) of the value at \
          %a"
-        Location.print_loc loc
+        (format_printer Location.print_loc) loc
     | Function_coercion ->
       dprintf
         "is a partial application of the function at %a on omittable parameters"
-        Location.print_loc loc
+        (format_printer Location.print_loc) loc
     | Float_projection ->
       dprintf "is projected (at %a) from a float record (and thus allocated)"
-        Location.print_loc loc
+        (format_printer Location.print_loc) loc
 
   let print_allocation_r : allocation -> formatter -> unit =
    fun { txt; _ } ->
@@ -2216,13 +2226,13 @@ module Report = struct
           match containing with
           | Tuple -> dprintf "is a tuple that contains %t" print_pp
           | Record (s, moda) ->
-            dprintf "is a record whose field %a%a is %t" (Format_doc.compat Misc.Style.inline_code)
+            dprintf "is a record whose field %a%a is %t" Misc.Style.inline_code
               s maybe_modality moda print_pp
           | Array moda ->
             dprintf "is an array that contains%a %t" maybe_modality moda
               print_pp
           | Constructor (s, moda) ->
-            dprintf "contains (via constructor %a)%a %t" (Format_doc.compat Misc.Style.inline_code)
+            dprintf "contains (via constructor %a)%a %t" Misc.Style.inline_code
               s maybe_modality moda print_pp
         in
         pr, contained)
@@ -2236,17 +2246,17 @@ module Report = struct
     let pr =
       match containing with
       | Tuple ->
-        dprintf "is an element of the tuple at %a" Location.print_loc container
+        dprintf "is an element of the tuple at %a" (format_printer Location.print_loc) container
       | Record (s, moda) ->
-        dprintf "is the field %a%a of the record at %a" (Format_doc.compat Misc.Style.inline_code) s
-          maybe_modality moda Location.print_loc container
+        dprintf "is the field %a%a of the record at %a" Misc.Style.inline_code s
+          maybe_modality moda (format_printer Location.print_loc) container
       | Array moda ->
         dprintf "is an element%a of the array at %a" maybe_modality moda
-          Location.print_loc container
+          (format_printer Location.print_loc) container
       | Constructor (s, moda) ->
         dprintf "is contained (via constructor %a)%a in the value at %a"
-          (Format_doc.compat Misc.Style.inline_code) s maybe_modality moda Location.print_loc
-          container
+          Misc.Style.inline_code s maybe_modality moda
+          (format_printer Location.print_loc) container
     in
     pr, pp
 
@@ -2296,27 +2306,27 @@ module Report = struct
       Some (print_is_contained_by ~fixpoint is_contained_by)
 
   let print_mode : type a.
-      [`Actual | `Expected] -> a C.obj -> formatter -> a -> unit =
+      [`Actual | `Expected] -> a C.obj -> Format_doc.formatter -> a -> unit =
    fun side obj ppf x ->
     let mode_printer =
-      Format_doc.compat
-        (Misc.Style.as_inline_code (fun ppf x ->
-             Format_doc.deprecated_printer (fun fmt -> C.print obj fmt x) ppf))
+      Misc.Style.as_inline_code (fun ppf x ->
+        Format_doc.deprecated_printer (fun fmt -> C.print obj fmt x) ppf)
     in
     match side, obj, x with
     | `Actual, Regionality, Regional ->
-      fprintf ppf "%a to the parent region" mode_printer C.Regionality.Local
+      Format_doc.fprintf ppf "%a to the parent region" mode_printer
+        C.Regionality.Local
       (* CR-someday zqian: treat the following cases generally. *)
     | `Expected, Contention_op, Shared ->
       (* When "shared" is expected, we tell the user that either shared or
          uncontended is expected. *)
-      fprintf ppf "%a or %a" mode_printer C.Contention.Shared mode_printer
-        C.Contention.Uncontended
+      Format_doc.fprintf ppf "%a or %a" mode_printer C.Contention.Shared
+        mode_printer C.Contention.Uncontended
     | `Expected, Visibility_op, Read ->
-      fprintf ppf "%a or %a" mode_printer C.Visibility.Read mode_printer
-        C.Visibility.Read_write
+      Format_doc.fprintf ppf "%a or %a" mode_printer C.Visibility.Read
+        mode_printer C.Visibility.Read_write
     | `Expected, Regionality, Regional ->
-      fprintf ppf "%a to the parent region or %a" mode_printer
+      Format_doc.fprintf ppf "%a to the parent region or %a" mode_printer
         C.Regionality.Local mode_printer C.Regionality.Global
     | _ -> mode_printer ppf x
   [@@ocaml.warning "-4"]
@@ -2331,15 +2341,15 @@ module Report = struct
     | false, `Right -> `Expected
 
   let print_mode_with_side : type a.
-      sub:bool -> [`Left | `Right] -> a C.obj -> Format.formatter -> a -> unit =
+      sub:bool -> [`Left | `Right] -> a C.obj -> Format_doc.formatter -> a -> unit =
    fun ~sub side obj ppf a ->
     let side = adjust_side obj side in
     if sub
     then (
-      fprintf ppf "@ which ";
+      Format_doc.fprintf ppf "@ which ";
       match side with
-      | `Actual -> pp_print_string ppf "is "
-      | `Expected -> pp_print_string ppf "is expected to be ");
+      | `Actual -> Format_doc.pp_print_string ppf "is "
+      | `Expected -> Format_doc.pp_print_string ppf "is expected to be ");
     print_mode side obj ppf a
 
   (** Some morph hints are said to be "non-rigid", because they should be
@@ -2378,7 +2388,7 @@ module Report = struct
         match print_morph ~fixpoint pp morph_hint with
         | None -> Some Mode
         | Some (t, pp) ->
-          fprintf ppf "@ because it %t" t;
+          Format_doc.fprintf ppf "@ because it %t" t;
           if is_known_pinpoint pp
           then ignore (print_ahint ~sub:true side pp src ppf ahint);
           Some Mode_with_hint)
@@ -2393,7 +2403,7 @@ module Report = struct
            inside a responsible morphism";
       None
     | Const c ->
-      fprintf ppf "%a@ because %a"
+      Format_doc.fprintf ppf "%a@ because %a"
         (print_mode_with_side ~sub side obj)
         a (print_const pp) c;
       Some Mode_with_hint
@@ -2414,7 +2424,7 @@ module Report = struct
     | Left ahint -> print_ahint `Left pp obj ppf ahint
     | Right ahint -> print_ahint `Right pp obj ppf ahint
 
-  let print : type a. pinpoint -> a C.obj -> a t -> print_error =
+  let print : type a. pinpoint -> a C.obj -> a report -> print_error =
    fun pp obj { left; right } ->
     let actual, expected =
       if C.is_opposite obj
@@ -2467,7 +2477,7 @@ module Error = struct
 
   let print_packed_simple_context : Hint.pinpoint -> packed -> Location.error =
    fun pp packed ->
-    let open Format in
+    let open Format_doc in
     let loc, desc = pp in
     let print ppf () =
       let open_box = dprintf "@[<hov 2>" in
@@ -2634,6 +2644,9 @@ module Comonadic_gen (Obj : Obj) = struct
 
   let print ?verbose () ppf m = Solver.print ?verbose obj ppf m
 
+  let print_doc ?verbose () ppf m =
+    Format_doc.deprecated_printer (fun ppf -> print ?verbose () ppf m) ppf
+
   let zap_to_ceil m = with_log (Solver.zap_to_ceil obj m)
 
   let zap_to_floor m = with_log (Solver.zap_to_floor obj m)
@@ -2735,6 +2748,9 @@ module Monadic_gen (Obj : Obj) = struct
   let equate_exn m0 m1 = equate m0 m1 |> Result.get_ok
 
   let print ?verbose () ppf m = Solver.print ?verbose obj ppf m
+
+  let print_doc ?verbose () ppf m =
+    Format_doc.deprecated_printer (fun ppf -> print ?verbose () ppf m) ppf
 
   let zap_to_ceil m = with_log (Solver.zap_to_floor obj m)
 
@@ -3050,6 +3066,8 @@ module Comonadic_with (Areality : Areality) = struct
 
     let print = Axis.print
 
+    let print_doc = Axis.print_doc
+
     let compare = Axis.compare
 
     let proj = Axis.proj
@@ -3190,6 +3208,8 @@ module Monadic = struct
     let compare = Axis.compare
 
     let print = Axis.print
+
+    let print_doc = Axis.print_doc
 
     let proj = Axis.proj
 
@@ -3341,6 +3361,9 @@ module Value_with (Areality : Areality) = struct
       | Monadic ax -> Axis.print ppf ax
       | Comonadic ax -> Axis.print ppf ax
 
+    let print_doc (type a) ppf (t : a t) =
+      Format_doc.deprecated_printer (fun ppf -> print ppf t) ppf
+
     let all =
       List.map (fun (Monadic.Axis.P ax) -> P (Monadic ax)) Monadic.Axis.all
       @ List.map
@@ -3414,6 +3437,9 @@ module Value_with (Areality : Areality) = struct
       comonadic
       (Monadic.print ?verbose ())
       monadic
+
+  let print_doc ?verbose () ppf m =
+    Format_doc.deprecated_printer (fun ppf -> print ?verbose () ppf m) ppf
 
   let of_const ?hint_monadic ?hint_comonadic c =
     let { monadic; comonadic } = split c in
@@ -3677,6 +3703,10 @@ module Value_with (Areality : Areality) = struct
      fun ax ppf a ->
       let obj = proj_obj ax in
       C.print obj ppf a
+
+    let print_axis_doc : type a. a Axis.t -> Format_doc.formatter -> a -> unit =
+     fun ax ppf a ->
+      Format_doc.deprecated_printer (fun ppf -> print_axis ax ppf a) ppf
 
     let le_axis : type a. a Axis.t -> a -> a -> bool =
      fun ax m0 m1 ->
@@ -4994,7 +5024,7 @@ module Crossing = struct
           else Some (Format.asprintf "%a" (Per_axis.print ax) a))
         Value.Axis.all
     in
-    Format.(pp_print_list ~pp_sep:pp_print_space pp_print_string ppf l)
+    Format_doc.(pp_print_list ~pp_sep:pp_print_space pp_print_string ppf l)
 
   let to_modality
       { monadic = Monadic.Modality monadic;
