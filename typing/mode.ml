@@ -2057,7 +2057,10 @@ module Report = struct
         (fun ~definite ~capitalize ->
           dprintf "%t %a"
             (print_lock_item ~definite ~capitalize category)
-            (Misc.Style.as_inline_code !print_longident)
+            (Format_doc.compat (Misc.Style.as_inline_code (fun ppf lid ->
+                 Format_doc.deprecated_printer
+                   (fun fmt -> !print_longident fmt lid)
+                   ppf)))
             lid)
     | Function -> Some (print_article_noun Consonant "function")
     | Functor -> Some (print_article_noun Consonant "functor")
@@ -2095,7 +2098,7 @@ module Report = struct
     | _ -> true
 
   let print_mutable_part ppf = function
-    | Record_field s -> fprintf ppf "mutable field %a" Misc.Style.inline_code s
+    | Record_field s -> fprintf ppf "mutable field %a" (Format_doc.compat Misc.Style.inline_code) s
     | Array_elements -> fprintf ppf "array elements"
 
   let print_always_dynamic = function
@@ -2138,7 +2141,7 @@ module Report = struct
         "it is a function return value.@ Hint: Use exclave_ to return a local \
          value"
     | Stack_expression ->
-      fprintf ppf "it is %a-allocated" Misc.Style.inline_code "stack_"
+      fprintf ppf "it is %a-allocated" (Format_doc.compat Misc.Style.inline_code) "stack_"
     | Module_allocated_on_heap ->
       (match pp_desc with
       | Ident { category = Module; _ } | Functor ->
@@ -2213,13 +2216,13 @@ module Report = struct
           match containing with
           | Tuple -> dprintf "is a tuple that contains %t" print_pp
           | Record (s, moda) ->
-            dprintf "is a record whose field %a%a is %t" Misc.Style.inline_code
+            dprintf "is a record whose field %a%a is %t" (Format_doc.compat Misc.Style.inline_code)
               s maybe_modality moda print_pp
           | Array moda ->
             dprintf "is an array that contains%a %t" maybe_modality moda
               print_pp
           | Constructor (s, moda) ->
-            dprintf "contains (via constructor %a)%a %t" Misc.Style.inline_code
+            dprintf "contains (via constructor %a)%a %t" (Format_doc.compat Misc.Style.inline_code)
               s maybe_modality moda print_pp
         in
         pr, contained)
@@ -2235,14 +2238,14 @@ module Report = struct
       | Tuple ->
         dprintf "is an element of the tuple at %a" Location.print_loc container
       | Record (s, moda) ->
-        dprintf "is the field %a%a of the record at %a" Misc.Style.inline_code s
+        dprintf "is the field %a%a of the record at %a" (Format_doc.compat Misc.Style.inline_code) s
           maybe_modality moda Location.print_loc container
       | Array moda ->
         dprintf "is an element%a of the array at %a" maybe_modality moda
           Location.print_loc container
       | Constructor (s, moda) ->
         dprintf "is contained (via constructor %a)%a in the value at %a"
-          Misc.Style.inline_code s maybe_modality moda Location.print_loc
+          (Format_doc.compat Misc.Style.inline_code) s maybe_modality moda Location.print_loc
           container
     in
     pr, pp
@@ -2295,7 +2298,11 @@ module Report = struct
   let print_mode : type a.
       [`Actual | `Expected] -> a C.obj -> formatter -> a -> unit =
    fun side obj ppf x ->
-    let mode_printer = Misc.Style.as_inline_code (C.print obj) in
+    let mode_printer =
+      Format_doc.compat
+        (Misc.Style.as_inline_code (fun ppf x ->
+             Format_doc.deprecated_printer (fun fmt -> C.print obj fmt x) ppf))
+    in
     match side, obj, x with
     | `Actual, Regionality, Regional ->
       fprintf ppf "%a to the parent region" mode_printer C.Regionality.Local
@@ -2357,7 +2364,7 @@ module Report = struct
       [`Left | `Right] ->
       pinpoint ->
       a C.obj ->
-      Format.formatter ->
+      Format_doc.formatter ->
       (a, l * r) ahint ->
       print_error_result option =
    fun ?(sub = false) side pp (obj : a C.obj) ppf (a, hint) ->
@@ -2399,7 +2406,7 @@ module Report = struct
   let print_ahint_sided : type a.
       pinpoint ->
       a C.obj ->
-      Format.formatter ->
+      Format_doc.formatter ->
       a ahint_sided ->
       print_error_result option =
    fun pp obj ppf ahint_sided ->

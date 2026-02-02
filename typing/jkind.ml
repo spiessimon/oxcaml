@@ -2546,7 +2546,7 @@ module Violation = struct
           None )
     in
     if display_histories
-    then
+    then begin
       let connective =
         match t.violation, has_sort_var (get k2).layout with
         | Not_a_subjkind _, false ->
@@ -2555,19 +2555,20 @@ module Violation = struct
           dprintf "overlap with@ %a" format_layout_or_kind k2
         | _, true -> dprintf "be representable"
       in
-      fprintf ppf "@[<v>%a@;%a@]"
-        (Format_history.format_history
-           ~intro:
-             (dprintf "@[<hov 2>The %s of %a is@ %a@]" layout_or_kind pp_former
-                former format_layout_or_kind k1)
-           ~layout_or_kind)
-        k1
-        (Format_history.format_history
-           ~intro:
-             (dprintf "@[<hov 2>But the %s of %a must %t@]" layout_or_kind
-                pp_former former connective)
-           ~layout_or_kind)
-        k2
+      fprintf ppf "@[<v>%t@;%t@]"
+        (fun ppf ->
+           Format_history.format_history
+             ~intro:
+               (dprintf "@[<hov 2>The %s of %a is@ %a@]" layout_or_kind
+                  pp_former former format_layout_or_kind k1)
+             ~layout_or_kind ppf k1)
+        (fun ppf ->
+           Format_history.format_history
+             ~intro:
+               (dprintf "@[<hov 2>But the %s of %a must %t@]" layout_or_kind
+                  pp_former former connective)
+             ~layout_or_kind ppf k2)
+    end
     else
       fprintf ppf "@[<hov 2>%s%a has %t,@ which %t.@]" preamble pp_former former
         fmt_k1 fmt_k2;
@@ -3108,20 +3109,25 @@ module Debug_printers = struct
 end
 
 (*** formatting user errors ***)
-let report_error ~loc : Error.t -> _ = function
+let report_error ~loc : Error.t -> _ =
+  let print_jkind_annotation ppf jkind =
+    Format_doc.deprecated_printer
+      (fun fmt -> Pprintast.jkind_annotation fmt jkind) ppf
+  in
+  function
   | Unknown_jkind jkind ->
     Location.errorf ~loc
       (* CR layouts v2.9: use the context to produce a better error message.
          When RAE tried this, some types got printed like [t/2], but the
          [/2] shouldn't be there. Investigate and fix. *)
       "@[<v>Unknown layout %a@]"
-      Pprintast.jkind_annotation jkind
+      print_jkind_annotation jkind
   | Multiple_jkinds { from_annotation; from_attribute } ->
     Location.errorf ~loc
       "@[<v>A type declaration's layout can be given at most once.@;\
        This declaration has an layout annotation (%a) and a layout attribute \
        ([@@@@%s]).@]"
-      Pprintast.jkind_annotation from_annotation
+      print_jkind_annotation from_annotation
       (Builtin_attributes.jkind_attribute_to_string from_attribute.txt)
   | Insufficient_level { jkind; required_layouts_level } -> (
     let hint ppf =
@@ -3141,7 +3147,7 @@ let report_error ~loc : Error.t -> _ = function
         "@[<v>Layout %a is more experimental than allowed by the enabled \
          layouts extension.@;\
          %t@]"
-        Pprintast.jkind_annotation jkind hint)
+        print_jkind_annotation jkind hint)
   | Unimplemented_syntax ->
     Location.errorf ~loc "@[<v>Unimplemented kind syntax@]"
   | With_on_right ->

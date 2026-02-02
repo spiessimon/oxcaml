@@ -252,7 +252,7 @@ type 'd neg_hint_morph = 'd neg Mode_hint.morph constraint 'd = _ * _
 type 'd pos_hint_morph = 'd pos Mode_hint.morph constraint 'd = _ * _
 
 module type S = sig
-  val print_longident : Longident.t Format_doc.printer ref
+  val print_longident : (Format.formatter -> Longident.t -> unit) ref
 
   (* CR-someday zqian: find a better stroy to erase bounds (and hints) that incorporates
      into [disallow_*]. *)

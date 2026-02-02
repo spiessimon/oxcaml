@@ -113,7 +113,7 @@ open Format_doc
 
 let longident = Pprintast.Doc.longident
 
-let () = Env.print_longident := longident; Mode.print_longident := longident
+let () = Env.print_longident := longident; Mode.print_longident := (Format_doc.compat longident)
 
 (* Print an identifier avoiding name collisions *)
 
