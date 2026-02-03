@@ -29,11 +29,17 @@ val transl_apply: scopes:scopes
                   -> ?tailcall:tailcall_attribute
                   -> ?inlined:inlined_attribute
                   -> ?specialised:specialise_attribute
+<<<<<<< HEAD
                   -> ?position:region_close
                   -> ?mode:locality_mode
                   -> result_layout:Lambda.layout
                   -> lambda
                   -> (arg_label * apply_arg) list
+||||||| 23e84b8c4d
+                  -> lambda -> (arg_label * expression option) list
+=======
+                  -> lambda -> (arg_label * apply_arg) list
+>>>>>>> d505d53be15ca18a648496b70604a7b4db15db2a
                   -> scoped_location -> lambda
 val transl_let: scopes:scopes -> return_layout:layout -> ?in_structure:bool
                   -> rec_flag -> value_binding list -> lambda -> lambda
@@ -60,7 +66,16 @@ type error =
 
 exception Error of Location.t * error
 
+<<<<<<< HEAD
 val report_error: error Format_doc.printer
+||||||| 23e84b8c4d
+open Format
+
+val report_error: formatter -> error -> unit
+=======
+val report_error: error Format_doc.format_printer
+val report_error_doc: error Format_doc.printer
+>>>>>>> d505d53be15ca18a648496b70604a7b4db15db2a
 
 (* Forward declaration -- to be filled in by Translmod.transl_module *)
 val transl_module :

@@ -80,7 +80,13 @@ open Format_doc
 let report_error ppf = function
   | Wrong_format filename ->
       fprintf ppf "Expected Linear format. Incompatible file %a"
+<<<<<<< HEAD
         Location.Doc.quoted_filename filename
+||||||| 23e84b8c4d
+        (Style.as_inline_code Location.print_filename) filename
+=======
+         Location.Doc.quoted_filename filename
+>>>>>>> d505d53be15ca18a648496b70604a7b4db15db2a
   | Wrong_version filename ->
       fprintf ppf
         "%a@ is not compatible with this version of OCaml"
@@ -90,7 +96,13 @@ let report_error ppf = function
         Location.Doc.quoted_filename filename
   | Marshal_failed filename ->
       fprintf ppf "Failed to marshal Linear to file@ %a"
+<<<<<<< HEAD
         Location.Doc.quoted_filename filename
+||||||| 23e84b8c4d
+        (Style.as_inline_code Location.print_filename) filename
+=======
+         Location.Doc.quoted_filename filename
+>>>>>>> d505d53be15ca18a648496b70604a7b4db15db2a
 
 let () =
   Location.register_error_of_exn

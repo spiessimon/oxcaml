@@ -29,7 +29,12 @@ module Global : sig
     | Glob_predef of predef
   val name: t -> string
   val description: t Format_doc.printer
+<<<<<<< HEAD
   val of_compilation_unit: Compilation_unit.t -> t
+||||||| 23e84b8c4d
+  val description: Format.formatter -> t -> unit
+=======
+>>>>>>> d505d53be15ca18a648496b70604a7b4db15db2a
   val of_ident: Ident.t -> t option
   module Set : Set.S with type elt = t
   module Map : Map.S with type key = t
@@ -89,6 +94,15 @@ type error =
 
 exception Error of error
 
+<<<<<<< HEAD
 val report_error: error Format_doc.printer
+||||||| 23e84b8c4d
+open Format
+
+val report_error: formatter -> error -> unit
+=======
+val report_error: error Format_doc.format_printer
+val report_error_doc: error Format_doc.printer
+>>>>>>> d505d53be15ca18a648496b70604a7b4db15db2a
 
 val reset: unit -> unit

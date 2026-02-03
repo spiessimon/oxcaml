@@ -27,8 +27,19 @@ val create_archive: string list -> string -> unit
 type error =
     File_not_found of string
   | Not_an_object_file of string
+  | Link_error of Linkdeps.error
 
 exception Error of error
 
+<<<<<<< HEAD
 val report_error: error Format_doc.printer
+||||||| 23e84b8c4d
+open Format
+
+val report_error: formatter -> error -> unit
+
+=======
+val report_error: error Format_doc.format_printer
+val report_error_doc: error Format_doc.printer
+>>>>>>> d505d53be15ca18a648496b70604a7b4db15db2a
 val reset: unit -> unit

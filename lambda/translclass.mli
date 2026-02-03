@@ -26,4 +26,13 @@ type error = Tags of string * string
 
 exception Error of Location.t * error
 
+<<<<<<< HEAD
 val report_error: error Format_doc.printer
+||||||| 23e84b8c4d
+open Format
+
+val report_error: formatter -> error -> unit
+=======
+val report_error: error Format_doc.format_printer
+val report_error_doc: error Format_doc.printer
+>>>>>>> d505d53be15ca18a648496b70604a7b4db15db2a

@@ -1000,7 +1000,13 @@ module Style = Misc.Style
 let report_error ppf err =
   match err with
   | Old_style_float_with_native_repr_attribute ->
+<<<<<<< HEAD
     Fmt.fprintf ppf "Cannot use %a in conjunction with %a/%a."
+||||||| 23e84b8c4d
+    Format.fprintf ppf "Cannot use %a in conjunction with %a/%a."
+=======
+    Format_doc.fprintf ppf "Cannot use %a in conjunction with %a/%a."
+>>>>>>> d505d53be15ca18a648496b70604a7b4db15db2a
       Style.inline_code "float"
       Style.inline_code "[@unboxed]"
       Style.inline_code  "[@untagged]"
@@ -1009,11 +1015,23 @@ let report_error ppf err =
                         types of non-value layouts."
       Style.inline_code "float"
   | Old_style_noalloc_with_noalloc_attribute ->
+<<<<<<< HEAD
     Fmt.fprintf ppf "Cannot use %a in conjunction with %a."
+||||||| 23e84b8c4d
+    Format.fprintf ppf "Cannot use %a in conjunction with %a."
+=======
+    Format_doc.fprintf ppf "Cannot use %a in conjunction with %a."
+>>>>>>> d505d53be15ca18a648496b70604a7b4db15db2a
       Style.inline_code "noalloc"
       Style.inline_code "[@@noalloc]"
   | No_native_primitive_with_repr_attribute ->
+<<<<<<< HEAD
     Fmt.fprintf ppf
+||||||| 23e84b8c4d
+    Format.fprintf ppf
+=======
+    Format_doc.fprintf ppf
+>>>>>>> d505d53be15ca18a648496b70604a7b4db15db2a
       "@[The native code version of the primitive is mandatory@ \
       when attributes %a or %a are present.@]"
       Style.inline_code "[@untagged]"

@@ -131,7 +131,14 @@ type error =
 exception Error of Location.t * Env.t * error
 exception Error_forward of Location.error
 
+<<<<<<< HEAD
 val report_error : Env.t -> error Format_doc.printer
+||||||| 23e84b8c4d
+val report_error : Env.t -> formatter -> error -> unit
+=======
+val report_error : Env.t -> Format.formatter -> error -> unit
+val report_error_doc : Env.t -> error Format_doc.printer
+>>>>>>> d505d53be15ca18a648496b70604a7b4db15db2a
 
 (* Forward decl filled in by Typemod.type_open_descr *)
 val type_open_descr :
