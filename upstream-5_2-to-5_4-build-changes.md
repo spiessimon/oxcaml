@@ -264,6 +264,47 @@ endif
 - `subdirs` variable simplified to explicit list instead of using `$(ALL_OTHERLIBS)`
 - Added `yacc/wstr.o yacc/wstr.obj` to clean target
 
+## GitHub Actions CI Changes
+
+OxCaml has its own CI configuration, but upstream made some changes that may be relevant:
+
+### Actions Version Updates
+- `actions/checkout@v3` → `v5`
+- `actions/upload-artifact@v3` → `v4`
+- `actions/download-artifact@v3` → `v4`
+
+**Status**: OxCaml CI should update these versions when convenient.
+
+### New `config` Job
+Upstream added a `config` job that:
+- Computes the test matrix dynamically using `actions/github-script@v7`
+- Supports a `CI: Skip testsuite` label on PRs to skip tests
+- Supports a `CI: Full matrix` label to add extra jobs (static, minimal builds)
+
+**Status**: Could be useful for OxCaml CI if similar flexibility is desired.
+
+### New Test Dependencies
+Added to ubuntu dependencies: `texlive-luatex`, `gdb`, `lldb`
+
+**Status**: OxCaml may want `gdb`/`lldb` for debugging tests.
+
+### Configure Flag
+Added `--enable-codegen-invariants` to the default configure arguments.
+
+**Status**: OxCaml already has `--enable-cmm-invariants`; check if codegen-invariants is different/additional.
+
+### macOS Debugger Setup
+New macOS setup for lldb support in CI:
+```bash
+# Allows starting up lldb from a remote terminal
+sudo DevToolsSecurity --enable
+spctl developer-mode enable-terminal
+sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
+lldb --version
+```
+
+**Status**: Useful for running OxCaml DWARF tests on macOS in the future.
+
 ## Summary of Action Items
 
 ### OCaml Source Files
