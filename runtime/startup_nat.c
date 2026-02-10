@@ -21,6 +21,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "caml/alloc.h"
+#include "caml/camlatomic.h"
 #include "caml/callback.h"
 #include "caml/custom.h"
 #include "caml/codefrag.h"
@@ -203,7 +204,7 @@ struct caml_unit_deps_entry {
   intnat *frametable;          /* pointer to frametable */
   intnat num_deps;             /* number of dependencies */
   const intnat *dep_indices;   /* array of indices into caml_unit_deps_table */
-  enum init_state init_state;  /* one of INIT_STATE_* */
+  atomic_intnat init_state;    /* one of INIT_STATE_* */
   value raised_exn;            /* stored exception if INIT_STATE_FAILED */
 };
 
@@ -251,22 +252,22 @@ static value caml_init_module_rec_exn(struct caml_unit_deps_entry *entry)
   CAMLparam0();
   CAMLlocal1(closure);
 
-  /* Check current state */
-  if (entry->init_state == INIT_STATE_DONE) {
-    CAMLreturn(Val_unit);
-  }
-
-  if (entry->init_state == INIT_STATE_FAILED) {
-    CAMLreturn(Make_exception_result(entry->raised_exn));
-  }
-
-  if (entry->init_state == INIT_STATE_INITIALIZING) {
+  /* Atomically transition NOT_INITIALIZED -> INITIALIZING.
+     If the CAS fails, another domain or a recursive call already
+     changed the state. */
+  intnat expected = INIT_STATE_NOT_INITIALIZED;
+  if (!atomic_compare_exchange_strong(
+        &entry->init_state, &expected, INIT_STATE_INITIALIZING)) {
+    if (expected == INIT_STATE_DONE) {
+      CAMLreturn(Val_unit);
+    }
+    if (expected == INIT_STATE_FAILED) {
+      CAMLreturn(Make_exception_result(entry->raised_exn));
+    }
+    /* INIT_STATE_INITIALIZING: cycle or concurrent init attempt */
     CAMLreturn(init_module_failure_exn(
       "cycle detected at module %s", entry->unit_name));
   }
-
-  /* Mark as initializing before processing dependencies */
-  entry->init_state = INIT_STATE_INITIALIZING;
 
   /* Initialize all dependencies first */
   for (intnat i = 0; i < entry->num_deps; i++) {
@@ -275,7 +276,7 @@ static value caml_init_module_rec_exn(struct caml_unit_deps_entry *entry)
       value result = init_module_failure_exn(
         "dependency index %ld out of range for module %s",
         (long)dep_idx, entry->unit_name);
-      entry->init_state = INIT_STATE_FAILED;
+      atomic_store(&entry->init_state, INIT_STATE_FAILED);
       entry->raised_exn = Extract_exception(result);
       caml_register_generational_global_root(&entry->raised_exn);
       CAMLreturn(result);
@@ -284,7 +285,7 @@ static value caml_init_module_rec_exn(struct caml_unit_deps_entry *entry)
       &caml_unit_deps_table.entries[dep_idx];
     value result = caml_init_module_rec_exn(dep);
     if (Is_exception_result(result)) {
-      entry->init_state = INIT_STATE_FAILED;
+      atomic_store(&entry->init_state, INIT_STATE_FAILED);
       entry->raised_exn = Extract_exception(result);
       caml_register_generational_global_root(&entry->raised_exn);
       CAMLreturn(result);
@@ -321,14 +322,14 @@ static value caml_init_module_rec_exn(struct caml_unit_deps_entry *entry)
   /* Call the entry function (takes no arguments, but pass Val_unit) */
   value result = caml_callback_exn(closure, Val_unit);
   if (Is_exception_result(result)) {
-    entry->init_state = INIT_STATE_FAILED;
+    atomic_store(&entry->init_state, INIT_STATE_FAILED);
     entry->raised_exn = Extract_exception(result);
     caml_register_generational_global_root(&entry->raised_exn);
     CAMLreturn(result);
   }
 
   /* Mark as done */
-  entry->init_state = INIT_STATE_DONE;
+  atomic_store(&entry->init_state, INIT_STATE_DONE);
 
   CAMLreturn(Val_unit);
 }
