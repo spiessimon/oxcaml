@@ -2332,3 +2332,16 @@ module Maybe_bounded = struct
     | None -> Unbounded
     | Some n -> of_int n
 end
+
+module Once = struct
+  type 'a t = 'a option ref
+  let create () = ref None
+  let resolve t v =
+    match !t with
+    | Some _ -> fatal_error "Once.resolve: already resolved"
+    | None -> t := Some v
+  let get t =
+    match !t with
+    | Some v -> v
+    | None -> fatal_error "Once.get: not yet resolved"
+end

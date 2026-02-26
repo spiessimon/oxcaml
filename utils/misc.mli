@@ -1315,3 +1315,11 @@ module Maybe_bounded : sig
   (** [of_int n] creates a bounded integer with bound [n] (not inclusive). *)
   val of_int : int -> t
 end
+
+(** A mutable cell that can be resolved exactly once. *)
+module Once : sig
+  type 'a t
+  val create : unit -> 'a t
+  val resolve : 'a t -> 'a -> unit
+  val get : 'a t -> 'a
+end
