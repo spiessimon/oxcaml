@@ -9111,30 +9111,31 @@ and type_argument ?explanation ?recarg ~overwrite env (mode : expected_mode) sar
       submode ~loc:sarg.pexp_loc ~env ~reason:Other
         exp_mode mode_subcomponent;
       (* eta-expand to avoid side effects *)
-      let var_pair ~(mode : Value.lr) name ty sort =
+      let var_pair ~loc ~(mode : Value.lr) name ty sort =
+        let ghost_loc = Location.ghostify loc in
         let id = Ident.create_local name in
         let desc =
           { val_type = ty; val_kind = Val_reg sort;
             val_attributes = [];
             val_zero_alloc = Zero_alloc.default;
             val_modalities = Modality.undefined;
-            val_loc = Location.none;
+            val_loc = loc;
             val_uid = Uid.mk ~current_unit:(Env.get_unit_name ());
           }
         in
         let exp_env = Env.add_value ~mode id desc env in
-        let uu = unique_use ~loc:sarg.pexp_loc ~env mode mode in
-        {pat_desc = Tpat_var (id, mknoloc name, desc.val_uid, sort,
-          Value.disallow_right mode);
+        let uu = unique_use ~loc ~env mode mode in
+        {pat_desc = Tpat_var (id, mkloc name ghost_loc, desc.val_uid,
+          sort, Value.disallow_right mode);
          pat_type = ty;
          pat_extra=[];
          pat_attributes = [];
-         pat_loc = Location.none; pat_env = env;
+         pat_loc = ghost_loc; pat_env = env;
          pat_unique_barrier = Unique_barrier.not_computed () },
-        {exp_type = ty; exp_loc = Location.none; exp_env = exp_env;
+        {exp_type = ty; exp_loc = ghost_loc; exp_env = exp_env;
          exp_extra = []; exp_attributes = [];
          exp_desc =
-         Texp_ident(Path.Pident id, mknoloc (Longident.Lident name),
+         Texp_ident(Path.Pident id, mkloc (Longident.Lident name) ghost_loc,
                     desc, Id_value, uu, Value.disallow_right mode)}
       in
       let eta_mode, _ = Value.newvar_below (alloc_as_value marg) in
@@ -9148,7 +9149,9 @@ and type_argument ?explanation ?recarg ~overwrite env (mode : expected_mode) sar
       in
       let arg_sort = type_sort ~why:Function_argument ty_arg in
       let ret_sort = type_sort ~why:Function_result ty_res in
-      let eta_pat, eta_var = var_pair ~mode:eta_mode "eta" ty_arg arg_sort in
+      let eta_pat, eta_var =
+        var_pair ~loc:sarg.pexp_loc ~mode:eta_mode "eta" ty_arg arg_sort
+      in
       (* CR layouts v10: When we add abstract jkinds, the eta expansion here
          becomes impossible in some cases - we'll need better errors.  For test
          cases, look toward the end of
@@ -9197,7 +9200,7 @@ and type_argument ?explanation ?recarg ~overwrite env (mode : expected_mode) sar
           (Warnings.Non_principal_labels "eliminated omittable argument");
       (* let-expand to have side effects *)
       let let_pat, let_var =
-        var_pair ~mode:exp_mode "arg" texp.exp_type arg_sort
+        var_pair ~loc:sarg.pexp_loc ~mode:exp_mode "arg" texp.exp_type arg_sort
       in
       let let_pat_sort =
         (* The sort of the let-bound variable, which here is always a function
