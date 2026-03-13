@@ -35,6 +35,12 @@ let skip_with_reason reason =
     ~does_something:true
     code
 
+let pass_or_skip test pass_reason skip_reason _log env =
+  let open Result in
+  if test
+  then (pass_with_reason pass_reason, env)
+  else (skip_with_reason skip_reason, env)
+
 let predicate test pass_reason _skip_reason _log env =
   let open Result in
   let result =

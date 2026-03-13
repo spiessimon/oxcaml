@@ -19,6 +19,10 @@ val fail_with_reason : string -> Actions.t
 
 val skip_with_reason : string -> Actions.t
 
+val pass_or_skip
+  : bool -> string -> string -> out_channel -> Environments.t
+         -> Result.t * Environments.t
+
 val predicate
   : bool -> string -> string -> out_channel -> Environments.t
          -> Result.t * Environments.t
