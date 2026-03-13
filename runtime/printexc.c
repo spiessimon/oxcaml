@@ -53,7 +53,7 @@ static void add_string(struct stringbuf *buf, const char *s)
 CAMLexport char * caml_format_exception(value exn)
 {
   Caml_check_caml_state();
-  mlsize_t start, len;
+  mlsize_t start, i;
   value bucket, v;
   struct stringbuf buf;
   char intbuf[64];
@@ -75,10 +75,59 @@ CAMLexport char * caml_format_exception(value exn)
       start = 1;
     }
     add_char(&buf, '(');
-    for (mlsize_t i = start; i < Wosize_val(bucket); i++) {
+    mlsize_t bucket_size = Wosize_val(bucket);
+    for (i = start; i < bucket_size; i++) {
+      if (i > start) add_string(&buf, ", ");
+      v = Field(bucket, i);
+      if (Is_long(v)) {
+        snprintf(intbuf, sizeof(intbuf),
+                 "%" ARCH_INTNAT_PRINTF_FORMAT "d", Long_val(v));
+        add_string(&buf, intbuf);
+      } else if (Tag_val(v) == String_tag) {
+        add_char(&buf, '"');
+        add_string(&buf, String_val(v));
+        add_char(&buf, '"');
+      } else {
+        add_char(&buf, '_');
+      }
+    }
+    add_char(&buf, ')');
+  } else
+    add_string(&buf, String_val(Field(exn, 0)));
+
+  *buf.ptr = 0;              /* Terminate string */
+  i = buf.ptr - buf.data + 1;
+  res = caml_stat_alloc_noexc(i);
+  if (res == NULL) return NULL;
+  memmove(res, buf.data, i);
+  return res;
+}
+
+
+#ifdef NATIVE_CODE
+#  define DEBUGGER_IN_USE 0
+#else
+#  define DEBUGGER_IN_USE caml_debugger_in_use
+#endif
+
+/* Default C implementation in case the OCaml one is not registered. */
+static void default_fatal_uncaught_exception(value exn, const char *msg2)
+{
+  char * msg;
+  const value * at_exit;
+  int saved_backtrace_active, saved_backtrace_pos;
+
+  /* Build a string representation of the exception */
+  msg = caml_format_exception(exn);
+  /* Perform "at_exit" processing, ignoring all exceptions that may
+     be triggered by this */
+  saved_backtrace_active = Caml_state->backtrace_active;
+  saved_backtrace_pos = Caml_state->backtrace_pos;
+  Caml_state->backtrace_active = 0;
+  at_exit = caml_named_value("Pervasives.do_at_exit");
   /* In the event of an asynchronous exception occurring, it will still get
      caught here, because of the semantics of [caml_callback_exn]. */
-  if (at_exit != NULL) caml_callback_res(*at_exit, Val_unit);
+  if (at_exit != NULL) caml_callback_exn(*at_exit, Val_unit);
   Caml_state->backtrace_active = saved_backtrace_active;
   Caml_state->backtrace_pos = saved_backtrace_pos;
   /* Display the uncaught exception */

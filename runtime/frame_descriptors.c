@@ -145,7 +145,7 @@ static void remove_entry(caml_frame_descrs *table, frame_descr * d) {
   uintnat r;
   uintnat j;
 
-  i = Hash_retaddr(d->retaddr, table->mask);
+  i = Hash_retaddr(Retaddr_frame(d), table->mask);
   while (table->descriptors[i] != d) {
     i = (i+1) & table->mask;
   }
@@ -157,7 +157,7 @@ static void remove_entry(caml_frame_descrs *table, frame_descr * d) {
   i = (i+1) & table->mask;
   // r3
   if(table->descriptors[i] == NULL) return;
-  r = Hash_retaddr(table->descriptors[i]->retaddr, table->mask);
+  r = Hash_retaddr(Retaddr_frame(table->descriptors[i]), table->mask);
   /* If r is between i and j (cyclically), i.e. if
      table->descriptors[i]->retaddr don't need to be moved */
   if(( ( j < r )  && ( r <= i ) ) ||

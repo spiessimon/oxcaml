@@ -227,7 +227,7 @@ value caml_exception_sys_blocked_io(void)
    for the ccall).  */
 value caml_exception_array_bound_error(void)
 {
-  static atomic_uintnat exn_cache = ATOMIC_UINTNAT_INIT(0);
+  static atomic_uintnat exn_cache = 0;
   const value* exn = (const value*)atomic_load_acquire(&exn_cache);
   if (!exn) {
     exn = caml_named_value("Pervasives.array_bound_error");
@@ -243,7 +243,7 @@ value caml_exception_array_bound_error(void)
 
 value caml_exception_array_align_error(void)
 {
-  static atomic_uintnat exn_cache = ATOMIC_UINTNAT_INIT(0);
+  static atomic_uintnat exn_cache = 0;
   const value* exn = (const value*)atomic_load_acquire(&exn_cache);
   if (!exn) {
     exn = caml_named_value("Pervasives.array_align_error");

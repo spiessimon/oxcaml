@@ -219,8 +219,9 @@ CAMLprim value caml_gc_set(value v)
     CAML_GC_MESSAGE(PARAMS,
                     "New space overhead: %" ARCH_INTNAT_PRINTF_FORMAT "u%%\n",
                     newpf);
+  }
   if (newpm != atomic_load_relaxed(&caml_max_percent_free)) {
-    atomic_store_relaxed(&caml_max_percent_free, newpm;)
+    atomic_store_relaxed(&caml_max_percent_free, newpm);
     CAML_GC_MESSAGE(PARAMS, "New max space overhead: %"
                     ARCH_INTNAT_PRINTF_FORMAT "u%%\n", newpm);
   }
@@ -310,11 +311,12 @@ static caml_result gc_full_major_res(void)
   CAML_GC_MESSAGE(MAJOR, "Full Major GC requested\n");
   /* In general, it can require up to 3 GC cycles for a
      currently-unreachable object to be collected. */
-  for (int i = 0; i < 3; i++) {
+  int i;
+  for (i = 0; i < 3; i++) {
     caml_finish_major_cycle(i == 2 ? Compaction_auto : Compaction_none);
     caml_reset_major_pacing();
     res = caml_process_pending_actions_res();
-    if (caml_result_is_exception(res)) {
+    if (caml_result_is_exception(res))
       break;
   }
   if (i == 3) {
@@ -346,20 +348,12 @@ CAMLprim value caml_gc_compaction(value v)
   Caml_check_caml_state();
   CAML_EV_BEGIN(EV_EXPLICIT_GC_COMPACT);
   CAMLassert (v == Val_unit);
-  value res = Result_unit;
-  /* We do a full major before this compaction. See [caml_full_major_exn] for
-     why this needs three iterations. */
-  for (int i = 0; i < 3; i++) {
-    caml_finish_major_cycle(i == 2 ? Compaction_forced : Compaction_none);
-    caml_reset_major_pacing();
-    res = caml_process_pending_actions_res();
-    if (caml_result_is_exception(res))
-      break;
   caml_result result = Result_unit;
+  int i;
   /* We do a full major before this compaction. See [caml_full_major_res] for
      why this needs three iterations. */
-  for (int i = 0; i < 3; i++) {
-    caml_finish_major_cycle(i == 2);
+  for (i = 0; i < 3; i++) {
+    caml_finish_major_cycle(i == 2 ? Compaction_forced : Compaction_none);
     caml_reset_major_pacing();
     result = caml_process_pending_actions_res();
     if (caml_result_is_exception(result)) break;
@@ -626,6 +620,7 @@ CAMLprim value caml_runtime_parameters (value unit)
     free(tweaks);
   }
   return res;
+}
 
 /* Ramp-up phase. */
 

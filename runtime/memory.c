@@ -339,7 +339,6 @@ CAMLprim value caml_atomic_exchange_field (value obj, value vfield, value v)
 {
   intnat field = Long_val(vfield);
   value ret;
-  intnat field = Long_val(vfield);
   if (caml_domain_alone()) {
     ret = Field(obj, field);
     Field(obj, field) = v;
@@ -431,11 +430,6 @@ CAMLprim value caml_atomic_fetch_add_field (value obj, value vfield, value incr)
   }
   return ret;
 }
-CAMLprim value caml_atomic_fetch_add (value ref, value incr)
-{
-  return caml_atomic_fetch_add_field(ref, Val_long(0), incr);
-}
-
 CAMLprim value caml_atomic_fetch_add (value ref, value incr)
 {
   return caml_atomic_fetch_add_field(ref, Val_long(0), incr);
@@ -847,9 +841,6 @@ CAMLexport void caml_stat_create_pool(void)
     pool = malloc(sizeof(struct pool_block));
     if (pool == NULL)
       caml_fatal_out_of_memory ();
-#ifdef DEBUG
-    pool->magic = Debug_pool_magic;
-#endif
     pool->next = pool;
     pool->prev = pool;
   }

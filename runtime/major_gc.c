@@ -1,4 +1,4 @@
-**************************************************************************/
+/**************************************************************************/
 /*                                                                        */
 /*                                 OCaml                                  */
 /*                                                                        */
@@ -319,13 +319,13 @@ static caml_plat_mutex ephe_lock = CAML_PLAT_MUTEX_INITIALIZER;
 /* Move to the next global ephemeron round. Called whenever any domain
  * finishes marking. */
 
-static void ephe_next_round (void)
+static void ephe_next_cycle (void)
 {
   caml_plat_lock_blocking(&ephe_lock);
 
-  (void)caml_atomic_counter_incr(&ephe_cycle_info.round);
+  (void)caml_atomic_counter_incr(&ephe_round_info.round);
   CAMLassert(caml_atomic_counter_value(&ephe_round_info.num_domains_done) <=
-             caml-atomic_counter_value(&ephe_round_info.num_domains_todo));
+             caml_atomic_counter_value(&ephe_round_info.num_domains_todo));
   (void)caml_atomic_counter_init(&ephe_round_info.num_domains_done, 0);
 
   caml_plat_unlock(&ephe_lock);
@@ -346,7 +346,7 @@ static void ephe_todo_list_emptied (void)
    * whether the domain has already incremented
    * [ephe_round_info.num_domains_done] counter. */
   caml_atomic_counter_init(&ephe_round_info.num_domains_done, 0);
-  (void)caml_atomic_counter_incr(&ephe_round_info.ephe_cycle);
+  (void)caml_atomic_counter_incr(&ephe_round_info.round);
 
   /* Since the todo list is empty, this domain does not need to participate in
    * further ephemeron cycles. */
@@ -365,9 +365,9 @@ static void begin_ephe_marking(void)
   domain->ephe_info->todo = domain->ephe_info->live;
   domain->ephe_info->live = (value) NULL;
   domain->ephe_info->must_sweep_ephe = 0;
-  domain->ephe_info->round = 0;
+  domain->ephe_info->cycle = 0;
   domain->ephe_info->cursor.todop = NULL;
-  domain->ephe_info->cursor.round = 0;
+  domain->ephe_info->cursor.cycle = 0;
 }
 
 /* Record that a domain finished ephemeron marking for the given
@@ -388,7 +388,7 @@ static void record_ephe_marking_done (uintnat round)
   caml_plat_lock_blocking(&ephe_lock);
   if (round == caml_atomic_counter_value(&ephe_round_info.round)) {
     /* Round hasn't just advanced */
-    Caml_state->ephe_info->round = round;
+    Caml_state->ephe_info->cycle = round;
     (void)caml_atomic_counter_incr(&ephe_round_info.num_domains_done);
     CAMLassert(caml_atomic_counter_value(&ephe_round_info.num_domains_done) <=
                caml_atomic_counter_value(&ephe_round_info.num_domains_todo));
@@ -423,7 +423,7 @@ static intnat ephe_mark (intnat budget, uintnat round,
   size_t scanned = 0, preserved = 0, trivial = 0;
 
   CAMLassert(caml_marking_started());
-  if (domain_state->ephe_info->cursor.round == round &&
+  if (domain_state->ephe_info->cursor.cycle == round &&
       !force_alive) {
     prev_linkp = domain_state->ephe_info->cursor.todop;
   } else {
@@ -438,7 +438,7 @@ static intnat ephe_mark (intnat budget, uintnat round,
     next = Ephe_link(ephe);
     CAMLassert (Tag_val(ephe) == Abstract_tag);
     header_t hd = Hd_val(ephe);
-    bool preseve_data = true;
+    bool preserve_data = true;
 
     /* TODO: move to the 'live' list if the data value is already
      * marked? */
@@ -447,7 +447,7 @@ static intnat ephe_mark (intnat budget, uintnat round,
       caml_darken (domain_state, ephe, 0);
 
     /* If ephemeron is unmarked, data is dead */
-    if (is_unmarked(ephe)) preseve_data = false;
+    if (is_unmarked(ephe)) preserve_data = false;
 
     mlsize_t i, size = Wosize_hd(hd);
     for (i = CAML_EPHE_FIRST_KEY; i < size; i++) {
@@ -456,7 +456,7 @@ static intnat ephe_mark (intnat budget, uintnat round,
     ephemeron_again:
       if (key != caml_ephe_none && Is_block(key)) {
         if (Tag_val(key) == Forward_tag) {
-          f = Forward_val(key);
+          value f = Forward_val(key);
           if (Is_block(f)) {
             if (Tag_val(f) == Forward_tag || Tag_val(f) == Lazy_tag ||
                 Tag_val(f) == Forcing_tag || Tag_val(f) == Double_tag) {
@@ -514,11 +514,11 @@ static intnat ephe_mark (intnat budget, uintnat round,
 #define F_D "%"ARCH_INTNAT_PRINTF_FORMAT"d"
   CAML_GC_MESSAGE(SLICE, "Marked ephemerons: %s. Ephemeron cycle "F_U
                   " scanned "F_U" trivial data "F_U" preserved "F_U"\n",
-                  domain_state->ephe_info->cursor.round == round ?
+                  domain_state->ephe_info->cursor.cycle == round ?
                   "Continued from cursor" : "Discarded cursor",
                   round, scanned, trivial, preserved);
 
-  domain_state->ephe_info->cursor.round = round;
+  domain_state->ephe_info->cursor.cycle = round;
   domain_state->ephe_info->cursor.todop = prev_linkp;
 
   return budget;
@@ -1966,7 +1966,7 @@ static void cycle_major_heap_from_stw_single(
   atomic_store(&caml_gc_mark_phase_requested, 0);
   caml_atomic_counter_init(&ephe_round_info.num_domains_todo,
                            num_domains_in_stw);
-  caml_atomic_counter_init(&ephe_round_info.ephe_cycle, 1);
+  caml_atomic_counter_init(&ephe_round_info.round, 1);
   caml_atomic_counter_init(&ephe_round_info.num_domains_done, 0);
 
   caml_atomic_counter_init(&num_domains_to_ephe_sweep, 0);
@@ -2316,15 +2316,15 @@ mark_again:
     if (caml_gc_phase != Phase_sweep_ephe) {
       /* Ephemeron Marking
          This work is accounted as marking work */
-      saved_ephe_cycle = caml_atomic_counter_value(&ephe_round_info.ephe_cycle);
+      saved_ephe_cycle = caml_atomic_counter_value(&ephe_round_info.round);
       if (domain_state->ephe_info->todo != (value) NULL &&
-          saved_ephe_cycle > domain_state->ephe_info->round &&
+          saved_ephe_cycle > domain_state->ephe_info->cycle &&
           get_major_slice_markwork(mode) > 0) {
         CAML_EV_BEGIN(EV_MAJOR_EPHE_MARK);
 
         int ephe_completed_marking = 0;
         while (domain_state->ephe_info->todo != (value) NULL &&
-               saved_ephe_cycle > domain_state->ephe_info->round &&
+               saved_ephe_cycle > domain_state->ephe_info->cycle &&
                (budget = get_major_slice_markwork(mode)) > 0) {
           intnat left = ephe_mark(budget, saved_ephe_cycle, EPHE_MARK_DEFAULT);
           intnat work_done = budget - left;

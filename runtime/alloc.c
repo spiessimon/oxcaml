@@ -35,6 +35,7 @@ CAMLexport value caml_alloc_with_reserved (mlsize_t wosize, tag_t tag,
                                            reserved_t reserved)
 {
   value result;
+  mlsize_t i;
 
   // Optimization: for mixed blocks, don't fill in non-scannable fields
   mlsize_t scannable_wosize = Scannable_wosize_reserved(reserved, wosize);

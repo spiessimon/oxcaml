@@ -451,7 +451,7 @@ CAMLprim value caml_alloc_dummy_mixed (value size, value scannable_size)
      always boxed), and for 64-bit native code (as the double record field is
      stored flat, taking up 1 word).
   */
-  static_assert(Double_wosize == 1, "");
+  _Static_assert(Double_wosize == 1, "");
   reserved_t reserved =
     Reserved_mixed_block_scannable_wosize_native(scannable_wosize);
 #else

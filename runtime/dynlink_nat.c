@@ -126,7 +126,7 @@ CAMLprim value caml_natdynlink_register(value handle_v, value symbols) {
   /* [caml_register_dyn_global] can raise, so do it prior to registering
      frametables etc. */
 
-  for (i = 0; i < nsymbols; i++) {
+  for (int i = 0; i < nsymbols; i++) {
     const char* unit = String_val(Field(symbols, i));
     table[i] = getsym(handle, unit, "frametable");
     if (table[i] == NULL) {

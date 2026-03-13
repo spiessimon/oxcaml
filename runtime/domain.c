@@ -176,9 +176,14 @@ struct dom_internal {
 
   /* backup thread */
   pthread_t backup_thread;
+  int backup_thread_running;
   atomic_uintnat backup_thread_msg;
   caml_plat_mutex backup_thread_lock;
   caml_plat_cond backup_thread_cond;
+
+  /* domain lifecycle lock */
+  caml_plat_mutex domain_lock;
+  caml_plat_cond domain_cond;
 
   /* default domain lock (only used if systhreads is not loaded) */
   caml_plat_mutex default_domain_lock;
@@ -190,6 +195,9 @@ struct dom_internal {
 };
 
 typedef struct dom_internal dom_internal;
+
+Caml_inline int backup_thread_running(dom_internal *d)
+{ return d->backup_thread_running; }
 
 Caml_inline int domain_has_pending(dom_internal *d)
 { return atomic_load_acquire(&d->pending) != 0; }
@@ -861,6 +869,8 @@ CAMLexport void caml_reset_domain_lock(void)
        and child. */
   caml_plat_mutex_init(&self->backup_thread_lock);
   caml_plat_cond_init(&self->backup_thread_cond);
+  caml_plat_mutex_init(&self->domain_lock);
+  caml_plat_cond_init(&self->domain_cond);
   caml_plat_mutex_init(&self->default_domain_lock);
 
   return;
@@ -1042,6 +1052,8 @@ void caml_init_domains(uintnat max_domains, uintnat minor_heap_wsz)
     dom->pending = 0;
 
     caml_plat_mutex_init(&dom->default_domain_lock);
+    caml_plat_mutex_init(&dom->domain_lock);
+    caml_plat_cond_init(&dom->domain_cond);
     caml_plat_mutex_init(&dom->backup_thread_lock);
     caml_plat_cond_init(&dom->backup_thread_cond);
     dom->backup_thread_running = 0;
@@ -1174,20 +1186,22 @@ static void install_backup_thread (dom_internal* di)
     }
 
 #ifndef _WIN32
-  /* No signals on the backup thread */
-  sigfillset(&mask);
-  pthread_sigmask(SIG_BLOCK, &mask, &old_mask);
+    /* No signals on the backup thread */
+    sigfillset(&mask);
+    pthread_sigmask(SIG_BLOCK, &mask, &old_mask);
 #endif
 
-  atomic_store_release(&di->backup_thread_msg, BT_ENTERING_OCAML);
-  err = pthread_create(&di->backup_thread, 0, backup_thread_func, (void*)di);
-  caml_check_error(err, "failed to create domain backup thread");
+    atomic_store_release(&di->backup_thread_msg, BT_ENTERING_OCAML);
+    err = pthread_create(&di->backup_thread, 0, backup_thread_func, (void*)di);
+    caml_check_error(err, "failed to create domain backup thread");
 
 #ifndef _WIN32
-  pthread_sigmask(SIG_SETMASK, &old_mask, NULL);
+    pthread_sigmask(SIG_SETMASK, &old_mask, NULL);
 #endif
 
-  pthread_detach(di->backup_thread);
+    di->backup_thread_running = 1;
+    pthread_detach(di->backup_thread);
+  }
 }
 
 
@@ -2304,7 +2318,7 @@ void caml_domain_terminate(bool last)
      on caml_domain_alone (which uses caml_num_domains_running) in at least
      the shared_heap lockfree fast paths. Also, we don't want to decrement
      it back to zero when the last domain exits, for caml_domain_alone()
-     to remain accurate. */ */
+     to remain accurate. */
   if (!last)
     caml_atomic_counter_decr(&caml_num_domains_running);
 }
@@ -2462,18 +2476,6 @@ CAMLprim value caml_domain_tls_set(value t)
 CAMLprim value caml_domain_tls_get(value unused)
 {
   return domain_root_get(&Caml_state->tls_state);
-}
-
-CAMLprim value caml_domain_dls_compare_and_set(value old, value new)
-{
-  CAMLnoalloc;
-  value current = Caml_state->dls_root;
-  if (current == old) {
-    caml_modify_generational_global_root(&Caml_state->dls_root, new);
-    return Val_true;
-  } else {
-    return Val_false;
-  }
 }
 
 CAMLprim value caml_recommended_domain_count(value unused)

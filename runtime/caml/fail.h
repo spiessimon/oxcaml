@@ -151,7 +151,6 @@ CAMLextern value caml_exception_sys_blocked_io (void);
 Caml_inline value caml_get_value_or_raise (struct caml_result_private result)
 {
   if (result.is_exception)
-    check_async(
     caml_raise(result.data);
   else
     return result.data;

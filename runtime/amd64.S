@@ -85,6 +85,7 @@ G(name):
 
 #define END_FUNCTION(name) \
         SIZE_DIRECTIVE(G(name))
+#define ENDFUNCTION(name) END_FUNCTION(name)
 #define END_OBJECT(name) \
         TYPE_DIRECTIVE(G(name),@object) \
         SIZE_DIRECTIVE(G(name))

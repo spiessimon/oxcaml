@@ -75,6 +75,19 @@ Caml_inline void restore_stack_parent(caml_domain_state* domain_state,
   }
 }
 
+static value raise_if_exception(value res)
+{
+  if (Is_exception_result(res)) {
+    if (Caml_state->raising_async_exn) {
+      Caml_state->raising_async_exn = 0;
+      caml_raise_async(Extract_exception(res));
+    } else {
+      caml_raise(Extract_exception(res));
+    }
+  }
+  return res;
+}
+
 #ifndef NATIVE_CODE
 
 /* Bytecode callbacks */
@@ -175,19 +188,6 @@ CAMLexport value caml_callback3_exn(value closure,
   arg[2] = arg3;
   res = caml_callbackN_exn0(closure, 3, arg);
   Caml_state->raising_async_exn = 0;
-  return res;
-}
-
-static value raise_if_exception(value res)
-{
-  if (Is_exception_result(res)) {
-    if (Caml_state->raising_async_exn) {
-      Caml_state->raising_async_exn = 0;
-      caml_raise_async(Extract_exception(res));
-    } else {
-      caml_raise(Extract_exception(res));
-    }
-  }
   return res;
 }
 
@@ -582,7 +582,8 @@ CAMLprim value caml_with_async_exns(value body_callback)
        this several times if some raise */
     do {
       res = Extract_exception(res);
-      res = caml_process_pending_actions_with_root_exn(res);
+      res = caml_result_get_encoded_exception(
+        caml_process_pending_actions_with_root_res(res));
     } while (Is_exception_result(res));
     caml_raise(res);
   }

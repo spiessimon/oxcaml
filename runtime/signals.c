@@ -216,7 +216,7 @@ CAMLexport void caml_enter_blocking_section(void)
        are further async callbacks pending beyond OCaml signal
        handlers. */
     caml_handle_gc_interrupt();
-    caml_raise_async_if_exception(caml_process_pending_signals_exn(), "");
+    caml_raise_async_if_exception(caml_process_pending_signals_res(), "");
   }
 
   /* Drop the systhreads lock */
@@ -291,7 +291,7 @@ value caml_raise_async_if_exception(caml_result res, const char* where)
     check_async_result(res, where);
     caml_raise_async(res.data);
   }
-  return res;
+  return res.data;
 }
 
 /* Execute a signal handler immediately */
@@ -430,9 +430,9 @@ caml_result caml_do_pending_actions_res(void)
   if (caml_result_is_exception(res)) goto exception;
 
   /* Call finalisers */
-  res = caml_final_do_calls_exn();
+  res = caml_final_do_calls_res();
   check_async_result(res, "finaliser");
-  if (caml_result_is_exception(exn)) goto exception;
+  if (caml_result_is_exception(res)) goto exception;
 
   /* Process external interrupts (e.g. preemptive systhread switching).
      By doing this last, we do not need to set the action pending flag
@@ -448,7 +448,7 @@ exception:
      needed. Therefore, we set [Caml_state->action_pending] again in
      order to force reexamination of callbacks. */
   caml_set_action_pending(Caml_state);
-  return result;
+  return res;
 }
 
 caml_result caml_process_pending_actions_with_root_res(value root)
