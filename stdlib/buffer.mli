@@ -155,14 +155,14 @@ val add_bytes : t @ local -> bytes @ local -> unit
 (** [add_bytes b s] appends the byte sequence [s] at the end of buffer [b].
     @since 4.02 *)
 
-val add_substring : t -> string -> int -> int -> unit
+val add_substring : t @ local -> string @ local -> int -> int -> unit
 (** [add_substring b s ofs len] takes [len] characters from offset
    [ofs] in string [s] and appends them at the end of buffer [b].
 
     @raise Invalid_argument if [ofs] and [len] do not designate a valid
     range of [s]. *)
 
-val add_subbytes : t -> bytes -> int -> int -> unit
+val add_subbytes : t @ local -> bytes @ local -> int -> int -> unit
 (** [add_subbytes b s ofs len] takes [len] characters from offset
     [ofs] in byte sequence [s] and appends them at the end of buffer [b].
 

@@ -190,12 +190,15 @@ module Array = struct
   external unsafe_get : t -> int -> float @@ portable = "%floatarray_unsafe_get"
   external unsafe_set : t -> int -> float -> unit @@ portable = "%floatarray_unsafe_set"
 
-  external make : (int[@untagged]) -> (float[@unboxed]) -> t =
-    "caml_floatarray_make" "caml_floatarray_make_unboxed"
-
   external unsafe_fill
     : t -> (int[@untagged]) -> (int[@untagged]) -> (float[@unboxed]) -> unit
+    @@ portable
     = "caml_floatarray_fill" "caml_floatarray_fill_unboxed" [@@noalloc]
+
+  let make n v =
+    let result = create n in
+    unsafe_fill result 0 n v;
+    result
 
   external unsafe_blit: t -> int -> t -> int -> int -> unit @@ portable =
     "caml_floatarray_blit" [@@noalloc]

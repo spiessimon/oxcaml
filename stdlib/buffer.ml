@@ -179,19 +179,11 @@ let add_subbytes b bytes offset len =
     Bytes.unsafe_blit bytes offset buffer position len;
   b.position <- new_position
 
-<<<<<<< oxcaml
-let add_bytes b s =
-  add_string b (Bytes.unsafe_to_string s)
-  [@nontail]
-||||||| upstream-base
-let add_bytes b s = add_string b (Bytes.unsafe_to_string s)
-=======
 let add_string b s =
   add_substring b s 0 (String.length s)
 
 let add_bytes b bytes =
   add_subbytes b bytes 0 (Bytes.length bytes)
->>>>>>> upstream-incoming
 
 let add_buffer b bs =
   add_subbytes b bs.inner.buffer 0 bs.position

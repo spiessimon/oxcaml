@@ -599,7 +599,7 @@ let array3_of_genarray a =
 
 external reshape
   : ('a : any) ('b : any) ('c : any).
-    ('a, 'b, 'c) Genarray.t -> (int array[@local_opt])
+    ('a, 'b, 'c) Genarray.t -> int array @ local
     -> ('a, 'b, 'c) Genarray.t
   @@ portable
    = "caml_ba_reshape"
