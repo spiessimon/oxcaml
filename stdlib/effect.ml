@@ -47,8 +47,6 @@ type (-'a, 'x, +'b) cont : value mod non_float
    the final fiber in the linked list formed by [cont.fiber->parent]. *)
 type last_fiber [@@immediate]
 
-external cont_set_last_fiber :
-  _ cont -> last_fiber -> unit = "%setfield1"
 
 external resume : ('a, _, 'b) cont -> ('c -> 'a) -> 'c -> 'b = "%resume"
 
@@ -81,7 +79,7 @@ let with_handler cont valuec exnc (effc : 'a. ('a, _, _) effc) f x =
 
 module Deep = struct
 
-  type nonrec ('a,'b) continuation =
+  type ('a,'b) continuation =
     | Cont : ('a,'x,'b) cont -> ('a, 'b) continuation [@@unboxed]
 
   let continue (Cont k) v = resume k (fun x-> x) v

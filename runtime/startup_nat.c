@@ -51,6 +51,7 @@ struct segment { char * begin; char * end; };
 static void init_segments(void)
 {
   extern struct segment caml_code_segments[];
+  extern uintnat caml_prelinking_in_use;
   char * caml_code_area_start, * caml_code_area_end;
 
   if (caml_prelinking_in_use) {
