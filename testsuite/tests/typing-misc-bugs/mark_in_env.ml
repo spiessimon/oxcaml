@@ -56,36 +56,6 @@ module Bug : T = struct
 end
 
 [%%expect{|
-module type Row =
-  sig
-    module Row_id_part :
-      sig
-        type t
-        module Map : sig type nonrec 'a t : immutable_data with t end
-      end
-  end
-module type S =
-  sig
-    module Row : Row
-    module Types : sig module Node_or_leaf0 : sig type t end end
-    module Node_or_leaf :
-      sig
-        val contained_leaves :
-          Types.Node_or_leaf0.t -> int Row.Row_id_part.Map.t
-      end
-  end
-module type T =
-  sig
-    module Make :
-      functor (Row : Row) ->
-        sig
-          module Types : sig module Node_or_leaf0 : sig type t end end
-          module Node_or_leaf :
-            sig
-              val contained_leaves :
-                Types.Node_or_leaf0.t -> int Row.Row_id_part.Map.t
-            end
-        end
-  end
-module Bug : T
+Uncaught exception: File "typing/jkind.ml", line 1056, characters 42-48: Assertion failed
+
 |}]

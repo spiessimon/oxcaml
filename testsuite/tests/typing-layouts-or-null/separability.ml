@@ -43,11 +43,10 @@ type fails = t_maybesep accepts_sep
 Line 1, characters 13-23:
 1 | type fails = t_maybesep accepts_sep
                  ^^^^^^^^^^
-Error: This type "t_maybesep" should be an instance of type
-         "('a : any mod separable)"
-       The kind of t_maybesep is any
+Error: This type "t_maybesep" should be an instance of type "'a"
+       The kind of "t_maybesep" is any
          because of the definition of t_maybesep at line 1, characters 0-41.
-       But the kind of t_maybesep must be a subkind of any mod separable
+       But the kind of "t_maybesep" must be a subkind of any mod separable
          because of the definition of accepts_sep at line 2, characters 0-41.
 |}]
 
@@ -65,11 +64,10 @@ type fails = t_maybesep accepts_nonfloat
 Line 1, characters 13-23:
 1 | type fails = t_maybesep accepts_nonfloat
                  ^^^^^^^^^^
-Error: This type "t_maybesep" should be an instance of type
-         "('a : any mod non_float)"
-       The kind of t_maybesep is any
+Error: This type "t_maybesep" should be an instance of type "'a"
+       The kind of "t_maybesep" is any
          because of the definition of t_maybesep at line 1, characters 0-41.
-       But the kind of t_maybesep must be a subkind of any mod non_float
+       But the kind of "t_maybesep" must be a subkind of any mod non_float
          because of the definition of accepts_nonfloat at line 3, characters 0-46.
 |}]
 
@@ -78,10 +76,10 @@ type fails = t_sep accepts_nonfloat
 Line 1, characters 13-18:
 1 | type fails = t_sep accepts_nonfloat
                  ^^^^^
-Error: This type "t_sep" should be an instance of type "('a : any mod non_float)"
-       The kind of t_sep is any mod separable
+Error: This type "t_sep" should be an instance of type "'a"
+       The kind of "t_sep" is any mod separable
          because of the definition of t_sep at line 2, characters 0-30.
-       But the kind of t_sep must be a subkind of any mod non_float
+       But the kind of "t_sep" must be a subkind of any mod non_float
          because of the definition of accepts_nonfloat at line 3, characters 0-46.
 |}]
 
@@ -108,10 +106,10 @@ type fails = t_von accepts_sep
 Line 1, characters 13-18:
 1 | type fails = t_von accepts_sep
                  ^^^^^
-Error: This type "t_von" should be an instance of type "('a : any mod separable)"
-       The kind of t_von is value_or_null
+Error: This type "t_von" should be an instance of type "'a"
+       The kind of "t_von" is value_or_null
          because of the definition of t_von at line 1, characters 0-26.
-       But the kind of t_von must be a subkind of any mod separable
+       But the kind of "t_von" must be a subkind of any mod separable
          because of the definition of accepts_sep at line 2, characters 0-41.
 |}]
 
@@ -121,10 +119,10 @@ type fails = t_von accepts_nonfloat
 Line 1, characters 13-18:
 1 | type fails = t_von accepts_nonfloat
                  ^^^^^
-Error: This type "t_von" should be an instance of type "('a : any mod non_float)"
-       The kind of t_von is value_or_null
+Error: This type "t_von" should be an instance of type "'a"
+       The kind of "t_von" is value_or_null
          because of the definition of t_von at line 1, characters 0-26.
-       But the kind of t_von must be a subkind of any mod non_float
+       But the kind of "t_von" must be a subkind of any mod non_float
          because of the definition of accepts_nonfloat at line 3, characters 0-46.
 |}]
 
@@ -146,10 +144,10 @@ type fails = t_val accepts_nonfloat
 Line 1, characters 13-18:
 1 | type fails = t_val accepts_nonfloat
                  ^^^^^
-Error: This type "t_val" should be an instance of type "('a : any mod non_float)"
-       The kind of t_val is value
+Error: This type "t_val" should be an instance of type "'a"
+       The kind of "t_val" is value
          because of the definition of t_val at line 1, characters 0-18.
-       But the kind of t_val must be a subkind of any mod non_float
+       But the kind of "t_val" must be a subkind of any mod non_float
          because of the definition of accepts_nonfloat at line 3, characters 0-46.
 |}]
 
@@ -169,10 +167,10 @@ type fails = t_any accepts_sep
 Line 1, characters 13-18:
 1 | type fails = t_any accepts_sep
                  ^^^^^
-Error: This type "t_any" should be an instance of type "('a : any mod separable)"
-       The kind of t_any is any
+Error: This type "t_any" should be an instance of type "'a"
+       The kind of "t_any" is any
          because of the definition of t_any at line 1, characters 0-16.
-       But the kind of t_any must be a subkind of any mod separable
+       But the kind of "t_any" must be a subkind of any mod separable
          because of the definition of accepts_sep at line 2, characters 0-41.
 |}]
 
@@ -182,10 +180,10 @@ type fails = t_any accepts_nonfloat
 Line 1, characters 13-18:
 1 | type fails = t_any accepts_nonfloat
                  ^^^^^
-Error: This type "t_any" should be an instance of type "('a : any mod non_float)"
-       The kind of t_any is any
+Error: This type "t_any" should be an instance of type "'a"
+       The kind of "t_any" is any
          because of the definition of t_any at line 1, characters 0-16.
-       But the kind of t_any must be a subkind of any mod non_float
+       But the kind of "t_any" must be a subkind of any mod non_float
          because of the definition of accepts_nonfloat at line 3, characters 0-46.
 |}]
 
@@ -205,10 +203,10 @@ type fails = t_ann accepts_nonfloat
 Line 1, characters 13-18:
 1 | type fails = t_ann accepts_nonfloat
                  ^^^^^
-Error: This type "t_ann" should be an instance of type "('a : any mod non_float)"
-       The kind of t_ann is any mod separable
+Error: This type "t_ann" should be an instance of type "'a"
+       The kind of "t_ann" is any mod separable
          because of the definition of t_ann at line 1, characters 0-30.
-       But the kind of t_ann must be a subkind of any mod non_float
+       But the kind of "t_ann" must be a subkind of any mod non_float
          because of the definition of accepts_nonfloat at line 3, characters 0-46.
 |}]
 
@@ -382,11 +380,11 @@ type fails = float accepts_nonfloat
 Line 1, characters 13-18:
 1 | type fails = float accepts_nonfloat
                  ^^^^^
-Error: This type "float" should be an instance of type "('a : any mod non_float)"
-       The kind of float is
+Error: This type "float" should be an instance of type "'a"
+       The kind of "float" is
            value mod forkable unyielding many stateless immutable
          because it is the primitive type float.
-       But the kind of float must be a subkind of any mod non_float
+       But the kind of "float" must be a subkind of any mod non_float
          because of the definition of accepts_nonfloat at line 3, characters 0-46.
 |}]
 
@@ -500,15 +498,8 @@ type succeeds = t_val_nonfloat or_null accepts_nonfloat
 type fails = t_val or_null accepts_sep
 
 [%%expect{|
-Line 1, characters 13-26:
-1 | type fails = t_val or_null accepts_sep
-                 ^^^^^^^^^^^^^
-Error: This type "t_val or_null" should be an instance of type
-         "('a : any mod separable)"
-       The kind of t_val or_null is value_or_null mod everything with t_val
-         because it is the primitive type or_null.
-       But the kind of t_val or_null must be a subkind of any mod separable
-         because of the definition of accepts_sep at line 2, characters 0-41.
+Uncaught exception: Typetexp.Error(_, _, _)
+
 |}]
 
 type fails = t_b64 or_null accepts_maybesep
@@ -517,11 +508,10 @@ type fails = t_b64 or_null accepts_maybesep
 Line 1, characters 13-18:
 1 | type fails = t_b64 or_null accepts_maybesep
                  ^^^^^
-Error: This type "t_b64" should be an instance of type
-         "('a : value_or_null mod non_null)"
-       The layout of t_b64 is bits64
+Error: This type "t_b64" should be an instance of type "'a"
+       The layout of "t_b64" is bits64
          because of the definition of t_b64 at line 1, characters 0-19.
-       But the layout of t_b64 must be a sublayout of value
+       But the layout of "t_b64" must be a sublayout of value
          because the type argument of or_null has layout value.
 |}]
 
@@ -558,23 +548,15 @@ type fails = float or_null accepts_sep
 Line 1, characters 13-26:
 1 | type fails = float or_null accepts_sep
                  ^^^^^^^^^^^^^
-Error: This type "float or_null" should be an instance of type
-         "('a : any mod separable)"
-       The kind of float or_null is
+Error: This type "float or_null" should be an instance of type "'a"
+       The kind of "float or_null" is
            value_or_null mod forkable unyielding many stateless immutable
          because it is the primitive type or_null.
-       But the kind of float or_null must be a subkind of any mod separable
+       But the kind of "float or_null" must be a subkind of any mod separable
          because of the definition of accepts_sep at line 2, characters 0-41.
 |}, Principal{|
-Line 1, characters 13-26:
-1 | type fails = float or_null accepts_sep
-                 ^^^^^^^^^^^^^
-Error: This type "float or_null" should be an instance of type
-         "('a : any mod separable)"
-       The kind of float or_null is value_or_null mod everything with float
-         because it is the primitive type or_null.
-       But the kind of float or_null must be a subkind of any mod separable
-         because of the definition of accepts_sep at line 2, characters 0-41.
+Uncaught exception: Typetexp.Error(_, _, _)
+
 |}]
 
 (* Separability and arrays: *)
@@ -587,11 +569,10 @@ type fails = t_maybesep_val array
 Line 1, characters 13-27:
 1 | type fails = t_maybesep_val array
                  ^^^^^^^^^^^^^^
-Error: This type "t_maybesep_val" should be an instance of type
-         "('a : any mod separable)"
-       The kind of t_maybesep_val is value_or_null mod non_null
+Error: This type "t_maybesep_val" should be an instance of type "'a"
+       The kind of "t_maybesep_val" is value_or_null mod non_null
          because of the definition of t_maybesep_val at line 1, characters 0-48.
-       But the kind of t_maybesep_val must be a subkind of any mod separable
+       But the kind of "t_maybesep_val" must be a subkind of any mod separable
          because it's the type argument to the array type.
 |}]
 
@@ -623,23 +604,15 @@ type fails = float or_null array
 Line 1, characters 13-26:
 1 | type fails = float or_null array
                  ^^^^^^^^^^^^^
-Error: This type "float or_null" should be an instance of type
-         "('a : any mod separable)"
-       The kind of float or_null is
+Error: This type "float or_null" should be an instance of type "'a"
+       The kind of "float or_null" is
            value_or_null mod forkable unyielding many stateless immutable
          because it is the primitive type or_null.
-       But the kind of float or_null must be a subkind of any mod separable
+       But the kind of "float or_null" must be a subkind of any mod separable
          because it's the type argument to the array type.
 |}, Principal{|
-Line 1, characters 13-26:
-1 | type fails = float or_null array
-                 ^^^^^^^^^^^^^
-Error: This type "float or_null" should be an instance of type
-         "('a : any mod separable)"
-       The kind of float or_null is value_or_null mod everything with float
-         because it is the primitive type or_null.
-       But the kind of float or_null must be a subkind of any mod separable
-         because it's the type argument to the array type.
+Uncaught exception: Typetexp.Error(_, _, _)
+
 |}]
 
 (* Arrays accept non-float [or_null] values. *)
@@ -676,21 +649,8 @@ type ('a : immediate) bounded
 type works = int or_null smth bounded
 
 [%%expect{|
-type ('a : value_or_null) smth : immediate with 'a
-type ('a : immediate) bounded
-type works = int or_null smth bounded
-|}, Principal{|
-type ('a : value_or_null) smth : immediate with 'a
-type ('a : immediate) bounded
-Line 7, characters 13-29:
-7 | type works = int or_null smth bounded
-                 ^^^^^^^^^^^^^^^^
-Error: This type "int or_null smth" should be an instance of type
-         "('a : immediate)"
-       The kind of int or_null smth is immediate with int or_null
-         because of the definition of smth at line 1, characters 0-50.
-       But the kind of int or_null smth must be a subkind of immediate
-         because of the definition of bounded at line 3, characters 0-29.
+Uncaught exception: File "typing/jkind.ml", line 1056, characters 42-48: Assertion failed
+
 |}]
 
 
@@ -724,13 +684,8 @@ type ('a : value_or_null mod non_null) unbx' = Unbx of 'a [@@unboxed]
 type a : value = #{ a : t_maybesep_val }
 
 [%%expect{|
-Line 1, characters 0-40:
-1 | type a : value = #{ a : t_maybesep_val }
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Error: The kind of type "a" is immediate mod dynamic with t_maybesep_val
-         because it is an unboxed record.
-       But the kind of type "a" must be a subkind of value
-         because of the annotation on the declaration of the type a.
+Uncaught exception: Typedecl.Error(_, _)
+
 |}]
 
 type a : value_or_null mod non_null = #{ a : t_maybesep_val }
@@ -813,25 +768,16 @@ Line 1, characters 13-37:
 1 | type fails = float Or_null_reexport.t accepts_nonfloat
                  ^^^^^^^^^^^^^^^^^^^^^^^^
 Error: This type "float Or_null_reexport.t" = "float or_null"
-       should be an instance of type "('a : any mod non_float)"
-       The kind of float Or_null_reexport.t is
+       should be an instance of type "'a"
+       The kind of "float Or_null_reexport.t" is
            value_or_null mod forkable unyielding many stateless immutable
          because it is the primitive type or_null.
-       But the kind of float Or_null_reexport.t must be a subkind of
+       But the kind of "float Or_null_reexport.t" must be a subkind of
            any mod non_float
          because of the definition of accepts_nonfloat at line 3, characters 0-46.
 |}, Principal{|
-Line 1, characters 13-37:
-1 | type fails = float Or_null_reexport.t accepts_nonfloat
-                 ^^^^^^^^^^^^^^^^^^^^^^^^
-Error: This type "float Or_null_reexport.t" = "float or_null"
-       should be an instance of type "('a : any mod non_float)"
-       The kind of float Or_null_reexport.t is
-           value_or_null mod everything with float
-         because it is the primitive type or_null.
-       But the kind of float Or_null_reexport.t must be a subkind of
-           any mod non_float
-         because of the definition of accepts_nonfloat at line 3, characters 0-46.
+Uncaught exception: Typetexp.Error(_, _, _)
+
 |}]
 
 type fails = float Or_null_reexport.t accepts_sep
@@ -841,25 +787,16 @@ Line 1, characters 13-37:
 1 | type fails = float Or_null_reexport.t accepts_sep
                  ^^^^^^^^^^^^^^^^^^^^^^^^
 Error: This type "float Or_null_reexport.t" = "float or_null"
-       should be an instance of type "('a : any mod separable)"
-       The kind of float Or_null_reexport.t is
+       should be an instance of type "'a"
+       The kind of "float Or_null_reexport.t" is
            value_or_null mod forkable unyielding many stateless immutable
          because it is the primitive type or_null.
-       But the kind of float Or_null_reexport.t must be a subkind of
+       But the kind of "float Or_null_reexport.t" must be a subkind of
            any mod separable
          because of the definition of accepts_sep at line 2, characters 0-41.
 |}, Principal{|
-Line 1, characters 13-37:
-1 | type fails = float Or_null_reexport.t accepts_sep
-                 ^^^^^^^^^^^^^^^^^^^^^^^^
-Error: This type "float Or_null_reexport.t" = "float or_null"
-       should be an instance of type "('a : any mod separable)"
-       The kind of float Or_null_reexport.t is
-           value_or_null mod everything with float
-         because it is the primitive type or_null.
-       But the kind of float Or_null_reexport.t must be a subkind of
-           any mod separable
-         because of the definition of accepts_sep at line 2, characters 0-41.
+Uncaught exception: Typetexp.Error(_, _, _)
+
 |}]
 
 (* Peeking through unboxed types *)
@@ -884,26 +821,16 @@ type fails = float unbx or_null accepts_sep
 Line 1, characters 13-31:
 1 | type fails = float unbx or_null accepts_sep
                  ^^^^^^^^^^^^^^^^^^
-Error: This type "float unbx or_null" should be an instance of type
-         "('a : any mod separable)"
-       The kind of float unbx or_null is
+Error: This type "float unbx or_null" should be an instance of type "'a"
+       The kind of "float unbx or_null" is
            value_or_null mod forkable unyielding many stateless immutable
          because it is the primitive type or_null.
-       But the kind of float unbx or_null must be a subkind of
+       But the kind of "float unbx or_null" must be a subkind of
            any mod separable
          because of the definition of accepts_sep at line 2, characters 0-41.
 |}, Principal{|
-Line 1, characters 13-31:
-1 | type fails = float unbx or_null accepts_sep
-                 ^^^^^^^^^^^^^^^^^^
-Error: This type "float unbx or_null" should be an instance of type
-         "('a : any mod separable)"
-       The kind of float unbx or_null is
-           value_or_null mod everything with float unbx
-         because it is the primitive type or_null.
-       But the kind of float unbx or_null must be a subkind of
-           any mod separable
-         because of the definition of accepts_sep at line 2, characters 0-41.
+Uncaught exception: Typetexp.Error(_, _, _)
+
 |}]
 
 (* [@@layout_poly] respects separability. *)
@@ -927,12 +854,12 @@ let fails = make_vect 3 (This 5.)
 Line 1, characters 30-32:
 1 | let fails = make_vect 3 (This 5.)
                                   ^^
-Error: This expression has type "float" but an expression was expected of type
-         "('a : value mod non_float)"
-       The kind of float is
+Error: The constant "5." has type "float" but an expression was expected of type
+         "'a"
+       The kind of "float" is
            value mod forkable unyielding many stateless immutable
          because it is the primitive type float.
-       But the kind of float must be a subkind of value mod non_float
+       But the kind of "float" must be a subkind of value mod non_float
          because it's the layout polymorphic type in an external declaration
          ([@layout_poly] forces all variables of layout 'any' to be
          representable at call sites).

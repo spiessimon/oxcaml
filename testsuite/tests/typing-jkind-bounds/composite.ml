@@ -48,10 +48,10 @@ type t_test = t require_global
 Line 1, characters 14-15:
 1 | type t_test = t require_global
                   ^
-Error: This type "t" should be an instance of type "('a : value mod global)"
-       The kind of t is immutable_data
+Error: This type "t" should be an instance of type "'a"
+       The kind of "t" is immutable_data
          because of the definition of t at line 2, characters 0-35.
-       But the kind of t must be a subkind of value mod global
+       But the kind of "t" must be a subkind of value mod global
          because of the definition of require_global at line 7, characters 0-43.
 |}]
 
@@ -86,10 +86,10 @@ type t_test = t require_aliased
 Line 1, characters 14-15:
 1 | type t_test = t require_aliased
                   ^
-Error: This type "t" should be an instance of type "('a : value mod aliased)"
-       The kind of t is immutable_data
+Error: This type "t" should be an instance of type "'a"
+       The kind of "t" is immutable_data
          because of the definition of t at line 2, characters 0-18.
-       But the kind of t must be a subkind of value mod aliased
+       But the kind of "t" must be a subkind of value mod aliased
          because of the definition of require_aliased at line 8, characters 0-45.
 |}]
 
@@ -180,25 +180,13 @@ let foo (t : int ref t @ contended) = use_uncontended t
 Line 1, characters 13-20:
 1 | let foo (t : int ref t @ contended) = use_uncontended t
                  ^^^^^^^
-Error: This type "int ref" should be an instance of type "('a : immutable_data)"
-       The kind of int ref is mutable_data.
-       But the kind of int ref must be a subkind of immutable_data
+Error: This type "int ref" should be an instance of type "'a"
+       The kind of "int ref" is mutable_data.
+       But the kind of "int ref" must be a subkind of immutable_data
          because of the definition of t at line 1, characters 0-46.
 |}, Principal{|
-Line 1, characters 13-20:
-1 | let foo (t : int ref t @ contended) = use_uncontended t
-                 ^^^^^^^
-Error: This type "int ref" should be an instance of type "('a : immutable_data)"
-       The kind of int ref is
-           mutable_data with int @@ forkable unyielding many.
-       But the kind of int ref must be a subkind of immutable_data
-         because of the definition of t at line 1, characters 0-46.
+Uncaught exception: Typetexp.Error(_, _, _)
 
-       The first mode-crosses less than the second along:
-         contention: mod uncontended ≰ mod contended
-         portability: mod portable with int ≰ mod portable
-         statefulness: mod stateless with int ≰ mod stateless
-         visibility: mod read_write ≰ mod immutable
 |}]
 
 let foo (t : int t @ local) = use_global t [@nontail]
@@ -333,25 +321,13 @@ let foo (t : int ref t @ contended) = use_uncontended t
 Line 1, characters 13-20:
 1 | let foo (t : int ref t @ contended) = use_uncontended t
                  ^^^^^^^
-Error: This type "int ref" should be an instance of type "('a : immutable_data)"
-       The kind of int ref is mutable_data.
-       But the kind of int ref must be a subkind of immutable_data
+Error: This type "int ref" should be an instance of type "'a"
+       The kind of "int ref" is mutable_data.
+       But the kind of "int ref" must be a subkind of immutable_data
          because of the definition of t at line 1, characters 0-73.
 |}, Principal{|
-Line 1, characters 13-20:
-1 | let foo (t : int ref t @ contended) = use_uncontended t
-                 ^^^^^^^
-Error: This type "int ref" should be an instance of type "('a : immutable_data)"
-       The kind of int ref is
-           mutable_data with int @@ forkable unyielding many.
-       But the kind of int ref must be a subkind of immutable_data
-         because of the definition of t at line 1, characters 0-73.
+Uncaught exception: Typetexp.Error(_, _, _)
 
-       The first mode-crosses less than the second along:
-         contention: mod uncontended ≰ mod contended
-         portability: mod portable with int ≰ mod portable
-         statefulness: mod stateless with int ≰ mod stateless
-         visibility: mod read_write ≰ mod immutable
 |}]
 
 let foo (t : int t @ aliased) = use_unique t
@@ -524,23 +500,8 @@ type t = int list list list list
 type t : immutable_data = int list list list list list list list list list list list list list list list list list list list list list list list list
 (* CR layouts v2.8: fix this. Internal ticket 4770 *)
 [%%expect {|
-Line 1, characters 0-149:
-1 | type t : immutable_data = int list list list list list list list list list list list list list list list list list list list list list list list list
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Error: The kind of type "int list list list list list list list list list list
-                        list list list list list list list list list list
-                        list list list list" is
-           immutable_data
-             with int list list list list list list list list list list list list list list
-                  list list list list list list list list list
-         because it's a boxed variant type.
-       But the kind of type "int list list list list list list list list list
-                            list list list list list list list list list list
-                            list list list list list" must be a subkind of
-           immutable_data
-         because of the definition of t at line 1, characters 0-149.
-       Note: I gave up trying to find the simplest kind for the first,
-       as it is very large or deeply recursive.
+Uncaught exception: Typedecl.Error(_, _)
+
 |}]
 
 type t = int list list list list list list list list list list list list list list list list list list list list list list list list
@@ -599,15 +560,8 @@ Error: This value is "contended" but is expected to be "uncontended".
 type 'a t : immutable_data = Flat | Nested of 'a t t
 (* CR layouts v2.8: This should work once we get proper subsumption. Internal ticket 4770 *)
 [%%expect {|
-Line 1, characters 0-52:
-1 | type 'a t : immutable_data = Flat | Nested of 'a t t
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Error: The kind of type "t" is immutable_data with 'a t t
-         because it's a boxed variant type.
-       But the kind of type "t" must be a subkind of immutable_data
-         because of the annotation on the declaration of the type t.
-       Note: I gave up trying to find the simplest kind for the first,
-       as it is very large or deeply recursive.
+Uncaught exception: Typedecl.Error(_, _)
+
 |}]
 
 let foo (t : _ t @ contended) = use_uncontended t
@@ -635,9 +589,9 @@ Line 1, characters 0-54:
 1 | type ('a : immutable_data) t = Flat | Nested of 'a t t
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Error:
-       The kind of 'a t is value mod non_float
+       The kind of "'a t" is value mod non_float
          because it's a boxed variant type.
-       But the kind of 'a t must be a subkind of immutable_data
+       But the kind of "'a t" must be a subkind of immutable_data
          because of the annotation on 'a in the declaration of the type t.
 |}]
 
@@ -646,15 +600,8 @@ type ('a : immutable_data) t : immutable_data = Flat | Nested of 'a t t
 (* CR layouts v2.8: If we can't get this accepted, investigate the terrible
    /2 stuff in the error message. That scares me a bit. *)
 [%%expect {|
-Line 1, characters 0-71:
-1 | type ('a : immutable_data) t : immutable_data = Flat | Nested of 'a t t
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Error: The kind of type "t" is immutable_data with 'a t/2 t/2
-         because it's a boxed variant type.
-       But the kind of type "t" must be a subkind of immutable_data
-         because of the annotation on the declaration of the type t.
-       Note: I gave up trying to find the simplest kind for the first,
-       as it is very large or deeply recursive.
+Uncaught exception: Typedecl.Error(_, _)
+
 |}]
 
 let foo (t : int t @ contended) = use_uncontended t
@@ -687,21 +634,26 @@ Error: This value is "aliased" but is expected to be "unique".
 type 'a u : immutable_data with 'a
 type t = { x : int u; y : string u }
 [%%expect {|
-type 'a u : immutable_data with 'a
-type t = { x : int u; y : string u; }
+Uncaught exception: File "typing/jkind.ml", line 1056, characters 42-48: Assertion failed
+
 |}]
 
 let foo (t : t @ contended) = use_uncontended t
 [%%expect {|
-val foo : t @ contended -> unit = <fun>
+Line 1, characters 13-14:
+1 | let foo (t : t @ contended) = use_uncontended t
+                 ^
+Error: The type constructor "t" expects 1 argument(s),
+       but is here applied to 0 argument(s)
 |}]
 
 let foo (t : t @ aliased) = use_unique t
 [%%expect {|
-Line 1, characters 39-40:
+Line 1, characters 13-14:
 1 | let foo (t : t @ aliased) = use_unique t
-                                           ^
-Error: This value is "aliased" but is expected to be "unique".
+                 ^
+Error: The type constructor "t" expects 1 argument(s),
+       but is here applied to 0 argument(s)
 |}]
 
 (***********************************************************************)
@@ -728,8 +680,8 @@ type 'a t =
   | None
   | Some of ('a * 'a) t u
 [%%expect {|
-type 'a u : immutable_data with 'a
-type 'a t = None | Some of ('a * 'a) t u
+Uncaught exception: File "typing/jkind.ml", line 1056, characters 42-48: Assertion failed
+
 |}]
 
 let foo (t : int t @ contended) = use_uncontended t

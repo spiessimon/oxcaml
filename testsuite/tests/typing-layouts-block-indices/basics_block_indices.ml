@@ -427,7 +427,7 @@ let bad_index_type = (.("test"))
 Line 1, characters 24-30:
 1 | let bad_index_type = (.("test"))
                             ^^^^^^
-Error: This expression has type "string" but an expression was expected of type
+Error: This constant has type "string" but an expression was expected of type
          "int"
 |}]
 
@@ -725,10 +725,10 @@ Line 1, characters 40-46:
                                             ^^^^^^
 Error: This expression has type "('a array, 'a) idx_mut"
        but an expression was expected of type "(float array, 'b) idx_mut"
-       The kind of float is
+       The kind of "float" is
            value mod forkable unyielding many stateless immutable
          because it is the primitive type float.
-       But the kind of float must be a subkind of value_or_null mod non_float
+       But the kind of "float" must be a subkind of value_or_null mod non_float
          because it's the element type (the second type parameter) for a
          block index (idx or mut_idx).
 |}]
@@ -749,9 +749,9 @@ Line 2, characters 43-49:
                                                ^^^^^^
 Error: This expression has type "('a array, 'a) idx_mut"
        but an expression was expected of type "(abstract array, 'b) idx_mut"
-       The kind of abstract is value
+       The kind of "abstract" is value
          because of the definition of abstract at line 1, characters 0-13.
-       But the kind of abstract must be a subkind of
+       But the kind of "abstract" must be a subkind of
            value_or_null mod non_float
          because it's the element type (the second type parameter) for a
          block index (idx or mut_idx).
@@ -764,10 +764,10 @@ Line 1, characters 41-48:
                                              ^^^^^^^
 Error: This expression has type "('a iarray, 'a) idx_imm"
        but an expression was expected of type "(float iarray, 'b) idx_imm"
-       The kind of float is
+       The kind of "float" is
            value mod forkable unyielding many stateless immutable
          because it is the primitive type float.
-       But the kind of float must be a subkind of value_or_null mod non_float
+       But the kind of "float" must be a subkind of value_or_null mod non_float
          because it's the element type (the second type parameter) for a
          block index (idx or mut_idx).
 |}]
@@ -780,12 +780,12 @@ let bad (x : float array) =
 Line 3, characters 23-24:
 3 |   Idx_mut.unsafe_get x y
                            ^
-Error: This expression has type "('a array, 'a) idx_mut"
+Error: The value "y" has type "('a array, 'a) idx_mut"
        but an expression was expected of type "(float array, 'b) idx_mut"
-       The kind of float is
+       The kind of "float" is
            value mod forkable unyielding many stateless immutable
          because it is the primitive type float.
-       But the kind of float must be a subkind of value_or_null mod non_float
+       But the kind of "float" must be a subkind of value_or_null mod non_float
          because of the definition of y at line 2, characters 10-17.
 |}]
 
@@ -805,9 +805,9 @@ Line 2, characters 44-51:
                                                 ^^^^^^^
 Error: This expression has type "('a iarray, 'a) idx_imm"
        but an expression was expected of type "(abstract iarray, 'b) idx_imm"
-       The kind of abstract is value
+       The kind of "abstract" is value
          because of the definition of abstract at line 1, characters 0-13.
-       But the kind of abstract must be a subkind of
+       But the kind of "abstract" must be a subkind of
            value_or_null mod non_float
          because it's the element type (the second type parameter) for a
          block index (idx or mut_idx).
@@ -855,7 +855,8 @@ val f : bool -> ('a r, int) idx_imm = <fun>
 Line 5, characters 6-7:
 5 |     (.u.#x)
           ^
-Warning 18 [not-principal]: this type-based field disambiguation is not principal.
+Warning 18 [not-principal]: this type-based field disambiguation is not
+  principal.
 
 val f : bool -> ('a r, int) idx_imm = <fun>
 |}]
@@ -872,7 +873,8 @@ val f : bool -> (u t, int) idx_imm = <fun>
 Line 5, characters 9-10:
 5 |     (.a.#x)
              ^
-Warning 18 [not-principal]: this type-based unboxed record field disambiguation is not principal.
+Warning 18 [not-principal]: this type-based unboxed record field disambiguation
+  is not principal.
 
 val f : bool -> (u t, int) idx_imm = <fun>
 |}]
@@ -889,7 +891,8 @@ val f : bool -> (u t# t, int) idx_imm = <fun>
 Line 5, characters 12-13:
 5 |     (.a.#a.#x)
                 ^
-Warning 18 [not-principal]: this type-based unboxed record field disambiguation is not principal.
+Warning 18 [not-principal]: this type-based unboxed record field disambiguation
+  is not principal.
 
 val f : bool -> (u t# t, int) idx_imm = <fun>
 |}]
@@ -907,7 +910,8 @@ val f : bool -> (u array, int) idx_mut = <fun>
 Line 5, characters 11-12:
 5 |     (.(1).#x)
                ^
-Warning 18 [not-principal]: this type-based unboxed record field disambiguation is not principal.
+Warning 18 [not-principal]: this type-based unboxed record field disambiguation
+  is not principal.
 
 val f : bool -> (u array, int) idx_mut = <fun>
 |}]
@@ -925,7 +929,8 @@ val f : bool -> (u t# array, int) idx_mut = <fun>
 Line 5, characters 14-15:
 5 |     (.(1).#a.#x)
                   ^
-Warning 18 [not-principal]: this type-based unboxed record field disambiguation is not principal.
+Warning 18 [not-principal]: this type-based unboxed record field disambiguation
+  is not principal.
 
 val f : bool -> (u t# array, int) idx_mut = <fun>
 |}]

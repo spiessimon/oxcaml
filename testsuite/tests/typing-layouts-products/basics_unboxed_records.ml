@@ -243,10 +243,10 @@ Line 2, characters 0-37:
 2 | and r_bad = #{ y : float#; z : s t2 }
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Error:
-       The layout of r_bad is
+       The layout of "r_bad" is
            '_representable_layout_1 & '_representable_layout_2
          because it is an unboxed record.
-       But the layout of r_bad must be a sublayout of value & float64 & value
+       But the layout of "r_bad" must be a sublayout of value & float64 & value
          because of the definition of t1 at line 1, characters 0-38.
 |}]
 
@@ -624,7 +624,7 @@ Line 1, characters 11-12:
                ^
 Error: Unbound unboxed record field "b"
 Hint: There is a boxed record field with this name.
-      Note that float- and [@@unboxed]- records don't get unboxed versions.
+Note that float- and [@unboxed]- records don't get unboxed versions.
 |}]
 
 let _ = { u = #5.0 }
@@ -643,7 +643,7 @@ Line 1, characters 22-23:
                           ^
 Error: Unbound record field "u"
 Hint: There is an unboxed record field with this name.
-      To project an unboxed record field, use ".#u" instead of ".u".
+To project an unboxed record field, use .#u instead of .u.
 |}]
 
 let bad_get t = t.#b
@@ -653,7 +653,7 @@ Line 1, characters 19-20:
                        ^
 Error: Unbound unboxed record field "b"
 Hint: There is a boxed record field with this name.
-      Note that float- and [@@unboxed]- records don't get unboxed versions.
+Note that float- and [@unboxed]- records don't get unboxed versions.
 |}]
 
 (*****************************************************************************)
@@ -753,9 +753,9 @@ Line 2, characters 0-48:
 2 | and b : any & any & any = #{ i : int ; j : int }
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Error:
-       The layout of b is any & any & any
+       The layout of "b" is any & any & any
          because of the annotation on the declaration of the type b.
-       But the layout of b must be representable
+       But the layout of "b" must be representable
          because it's the type of a constructor field.
 |}]
 

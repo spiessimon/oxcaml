@@ -33,10 +33,10 @@ type t = int# list;;
 Line 1, characters 9-13:
 1 | type t = int# list;;
              ^^^^
-Error: This type "int#" should be an instance of type "('a : value_or_null)"
-       The layout of int# is untagged_immediate
+Error: This type "int#" should be an instance of type "'a"
+       The layout of "int#" is untagged_immediate
          because it is the unboxed version of the primitive type int.
-       But the layout of int# must be a sublayout of value
+       But the layout of "int#" must be a sublayout of value
          because the type argument of list has layout value_or_null.
 |}];;
 
@@ -45,10 +45,10 @@ let f (_ : int# list) = ();;
 Line 1, characters 11-15:
 1 | let f (_ : int# list) = ();;
                ^^^^
-Error: This type "int#" should be an instance of type "('a : value_or_null)"
-       The layout of int# is untagged_immediate
+Error: This type "int#" should be an instance of type "'a"
+       The layout of "int#" is untagged_immediate
          because it is the unboxed version of the primitive type int.
-       But the layout of int# must be a sublayout of value
+       But the layout of "int#" must be a sublayout of value
          because the type argument of list has layout value_or_null.
 |}];;
 
@@ -57,10 +57,10 @@ type t = C of int# list;;
 Line 1, characters 14-18:
 1 | type t = C of int# list;;
                   ^^^^
-Error: This type "int#" should be an instance of type "('a : value_or_null)"
-       The layout of int# is untagged_immediate
+Error: This type "int#" should be an instance of type "'a"
+       The layout of "int#" is untagged_immediate
          because it is the unboxed version of the primitive type int.
-       But the layout of int# must be a sublayout of value
+       But the layout of "int#" must be a sublayout of value
          because the type argument of list has layout value_or_null.
 |}];;
 
@@ -69,10 +69,10 @@ type t = C : int# list -> t;;
 Line 1, characters 13-17:
 1 | type t = C : int# list -> t;;
                  ^^^^
-Error: This type "int#" should be an instance of type "('a : value_or_null)"
-       The layout of int# is untagged_immediate
+Error: This type "int#" should be an instance of type "'a"
+       The layout of "int#" is untagged_immediate
          because it is the unboxed version of the primitive type int.
-       But the layout of int# must be a sublayout of value
+       But the layout of "int#" must be a sublayout of value
          because the type argument of list has layout value_or_null.
 |}];;
 
@@ -91,10 +91,10 @@ type t = int#c;;
 Line 1, characters 9-13:
 1 | type t = int#c;;
              ^^^^
-Error: This type "int#" should be an instance of type "('a : value)"
-       The layout of int# is untagged_immediate
+Error: This type "int#" should be an instance of type "'a"
+       The layout of "int#" is untagged_immediate
          because it is the unboxed version of the primitive type int.
-       But the layout of int# must be a sublayout of value
+       But the layout of "int#" must be a sublayout of value
          because it's a type argument to a class constructor.
 |}];;
 
@@ -103,10 +103,10 @@ let f (_ : int#c) = ();;
 Line 1, characters 11-15:
 1 | let f (_ : int#c) = ();;
                ^^^^
-Error: This type "int#" should be an instance of type "('a : value)"
-       The layout of int# is untagged_immediate
+Error: This type "int#" should be an instance of type "'a"
+       The layout of "int#" is untagged_immediate
          because it is the unboxed version of the primitive type int.
-       But the layout of int# must be a sublayout of value
+       But the layout of "int#" must be a sublayout of value
          because it's a type argument to a class constructor.
 |}];;
 
@@ -115,10 +115,10 @@ type t = C of int#c;;
 Line 1, characters 14-18:
 1 | type t = C of int#c;;
                   ^^^^
-Error: This type "int#" should be an instance of type "('a : value)"
-       The layout of int# is untagged_immediate
+Error: This type "int#" should be an instance of type "'a"
+       The layout of "int#" is untagged_immediate
          because it is the unboxed version of the primitive type int.
-       But the layout of int# must be a sublayout of value
+       But the layout of "int#" must be a sublayout of value
          because it's a type argument to a class constructor.
 |}];;
 
@@ -127,10 +127,10 @@ type t = C : int#c -> t;;
 Line 1, characters 13-17:
 1 | type t = C : int#c -> t;;
                  ^^^^
-Error: This type "int#" should be an instance of type "('a : value)"
-       The layout of int# is untagged_immediate
+Error: This type "int#" should be an instance of type "'a"
+       The layout of "int#" is untagged_immediate
          because it is the unboxed version of the primitive type int.
-       But the layout of int# must be a sublayout of value
+       But the layout of "int#" must be a sublayout of value
          because it's a type argument to a class constructor.
 |}];;
 
@@ -142,10 +142,10 @@ type t = int# c;;
 Line 1, characters 9-13:
 1 | type t = int# c;;
              ^^^^
-Error: This type "int#" should be an instance of type "('a : value)"
-       The layout of int# is untagged_immediate
+Error: This type "int#" should be an instance of type "'a"
+       The layout of "int#" is untagged_immediate
          because it is the unboxed version of the primitive type int.
-       But the layout of int# must be a sublayout of value
+       But the layout of "int#" must be a sublayout of value
          because it's a type argument to a class constructor.
 |}];;
 
@@ -154,10 +154,10 @@ let f (_ : int# c) = ();;
 Line 1, characters 11-15:
 1 | let f (_ : int# c) = ();;
                ^^^^
-Error: This type "int#" should be an instance of type "('a : value)"
-       The layout of int# is untagged_immediate
+Error: This type "int#" should be an instance of type "'a"
+       The layout of "int#" is untagged_immediate
          because it is the unboxed version of the primitive type int.
-       But the layout of int# must be a sublayout of value
+       But the layout of "int#" must be a sublayout of value
          because it's a type argument to a class constructor.
 |}];;
 
@@ -166,10 +166,10 @@ type t = C of int# c;;
 Line 1, characters 14-18:
 1 | type t = C of int# c;;
                   ^^^^
-Error: This type "int#" should be an instance of type "('a : value)"
-       The layout of int# is untagged_immediate
+Error: This type "int#" should be an instance of type "'a"
+       The layout of "int#" is untagged_immediate
          because it is the unboxed version of the primitive type int.
-       But the layout of int# must be a sublayout of value
+       But the layout of "int#" must be a sublayout of value
          because it's a type argument to a class constructor.
 |}];;
 
@@ -178,10 +178,10 @@ type t = C : int# c -> t;;
 Line 1, characters 13-17:
 1 | type t = C : int# c -> t;;
                  ^^^^
-Error: This type "int#" should be an instance of type "('a : value)"
-       The layout of int# is untagged_immediate
+Error: This type "int#" should be an instance of type "'a"
+       The layout of "int#" is untagged_immediate
          because it is the unboxed version of the primitive type int.
-       But the layout of int# must be a sublayout of value
+       But the layout of "int#" must be a sublayout of value
          because it's a type argument to a class constructor.
 |}];;
 

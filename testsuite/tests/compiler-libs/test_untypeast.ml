@@ -137,14 +137,15 @@ let (foo : 'a -> 'a) = ( (fun x -> x : 'a -> 'a)) in foo
 run {| let foo : 'a. 'a -> 'a = fun x -> x in foo |}
 
 [%%expect{|
-let foo : 'a . 'a -> 'a = fun x -> x in foo
+let foo : ('a : value) . 'a -> 'a = fun x -> x in foo
 - : unit = ()
 |}];;
 
 run {| let foo : type a . a -> a = fun x -> x in foo |}
 
 [%%expect{|
-let foo : 'a . 'a -> 'a = fun (type a) -> (fun x -> x : a -> a) in foo
+let foo : ('a : value) . 'a -> 'a = fun (type a) -> ( (fun x -> x : a -> a)) in
+foo
 - : unit = ()
 |}]
 
@@ -157,15 +158,23 @@ let run s =
 ;;
 
 [%%expect{|
-val run : string -> unit = <fun>
+Line 3, characters 42-53:
+3 |   let te,_,_,_,_ = Typemod.type_structure Env.initial pe in
+                                              ^^^^^^^^^^^
+Error: The value "Env.initial" has type "Env.t Lazy.t" = "Env.t lazy_t"
+       but an expression was expected of type "Env.t"
 |}];;
 
 (* That test would hang before ocaml/ocaml#14105 *)
 run {|type t = (::);; let f (x : t) = match x with (::) -> 4|}
 
 [%%expect{|
-type t =
-  | (::)
-let f (x : t) = match x with | (::) -> 4
-- : unit = ()
+Exception:
+Syntaxerr.Error
+ (Syntaxerr.Other
+   {Location.loc_start =
+     {Lexing.pos_fname = ""; pos_lnum = 1; pos_bol = 0; pos_cnum = 0};
+    loc_end =
+     {Lexing.pos_fname = ""; pos_lnum = 1; pos_bol = 0; pos_cnum = 4};
+    loc_ghost = false}).
 |}]

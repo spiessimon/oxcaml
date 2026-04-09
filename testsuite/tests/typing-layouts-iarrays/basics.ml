@@ -91,11 +91,14 @@ Error: Unbound value "(.:())"
 
 let f (x : float# iarray) = Iarray.length x
 [%%expect{|
-Line 1, characters 28-41:
+Line 1, characters 42-43:
 1 | let f (x : float# iarray) = Iarray.length x
-                                ^^^^^^^^^^^^^
-Error: Unbound module "Iarray"
-Hint: Did you mean "Array"?
+                                              ^
+Error: The value "x" has type "float# iarray"
+       but an expression was expected of type "'a iarray"
+       The layout of "float#" is float64
+         because it is the unboxed version of the primitive type float.
+       But the layout of "float#" must be a sublayout of value.
 |}];;
 
 (*****************************************************************
@@ -224,11 +227,11 @@ end
 Line 13, characters 39-42:
 13 |                     #42L (get_third [: #0L; #1L; #42L :]))
                                             ^^^
-Error: This expression has type "int64#" but an expression was expected of type
-         "('a : bits32 mod separable)"
-       The layout of int64# is bits64
+Error: This constant has type "int64#" but an expression was expected of type
+         "'a"
+       The layout of "int64#" is bits64
          because it is the unboxed version of the primitive type int64.
-       But the layout of int64# must be a sublayout of bits32
+       But the layout of "int64#" must be a sublayout of bits32
          because of the definition of get_third at lines 4-7, characters 16-23.
 |}]
 
@@ -248,11 +251,11 @@ end
 Line 10, characters 24-35:
 10 |   let f2 idx : int32# = get arr idx
                              ^^^^^^^^^^^
-Error: This expression has type "('a : float64 mod separable)"
-       but an expression was expected of type "int32#"
-       The layout of int32# is bits32
+Error: This expression has type "'a" but an expression was expected of type
+         "int32#"
+       The layout of "int32#" is bits32
          because it is the unboxed version of the primitive type int32.
-       But the layout of int32# must be a sublayout of float64
+       But the layout of "int32#" must be a sublayout of float64
          because of the definition of arr at line 7, characters 12-16.
 |}]
 
@@ -268,11 +271,11 @@ let _ =
 Line 2, characters 39-44:
 2 |   let[@warning "-10"] rec x = [: x :]; #42.0 in
                                            ^^^^^
-Error: This expression has type "float#" but an expression was expected of type
-         "('a : value_or_null mod separable)"
-       The layout of float# is float64
+Error: This constant has type "float#" but an expression was expected of type
+         "'a"
+       The layout of "float#" is float64
          because it is the unboxed version of the primitive type float.
-       But the layout of float# must be a sublayout of value
+       But the layout of "float#" must be a sublayout of value
          because it's the type of an array element.
 |}]
 
@@ -284,11 +287,11 @@ let _ =
 Line 2, characters 39-43:
 2 |   let[@warning "-10"] rec x = [: x :]; #42l in
                                            ^^^^
-Error: This expression has type "int32#" but an expression was expected of type
-         "('a : value_or_null mod separable)"
-       The layout of int32# is bits32
+Error: This constant has type "int32#" but an expression was expected of type
+         "'a"
+       The layout of "int32#" is bits32
          because it is the unboxed version of the primitive type int32.
-       But the layout of int32# must be a sublayout of value
+       But the layout of "int32#" must be a sublayout of value
          because it's the type of an array element.
 |}]
 
@@ -300,11 +303,11 @@ let _ =
 Line 2, characters 39-43:
 2 |   let[@warning "-10"] rec x = [: x :]; #42L in
                                            ^^^^
-Error: This expression has type "int64#" but an expression was expected of type
-         "('a : value_or_null mod separable)"
-       The layout of int64# is bits64
+Error: This constant has type "int64#" but an expression was expected of type
+         "'a"
+       The layout of "int64#" is bits64
          because it is the unboxed version of the primitive type int64.
-       But the layout of int64# must be a sublayout of value
+       But the layout of "int64#" must be a sublayout of value
          because it's the type of an array element.
 |}]
 
@@ -316,12 +319,11 @@ let _ =
 Line 2, characters 39-43:
 2 |   let[@warning "-10"] rec x = [: x :]; #42n in
                                            ^^^^
-Error: This expression has type "nativeint#"
-       but an expression was expected of type
-         "('a : value_or_null mod separable)"
-       The layout of nativeint# is word
+Error: This constant has type "nativeint#"
+       but an expression was expected of type "'a"
+       The layout of "nativeint#" is word
          because it is the unboxed version of the primitive type nativeint.
-       But the layout of nativeint# must be a sublayout of value
+       But the layout of "nativeint#" must be a sublayout of value
          because it's the type of an array element.
 |}]
 
@@ -333,12 +335,11 @@ let _ =
 Line 2, characters 39-45:
 2 |   let[@warning "-10"] rec x = [: x :]; #42.0s in
                                            ^^^^^^
-Error: This expression has type "float32#"
-       but an expression was expected of type
-         "('a : value_or_null mod separable)"
-       The layout of float32# is float32
+Error: This constant has type "float32#" but an expression was expected of type
+         "'a"
+       The layout of "float32#" is float32
          because it is the unboxed version of the primitive type float32.
-       But the layout of float32# must be a sublayout of value
+       But the layout of "float32#" must be a sublayout of value
          because it's the type of an array element.
 |}]
 
@@ -402,8 +403,27 @@ Line 2, characters 6-19:
 2 |   let [: #(s, _) :] = arr in
           ^^^^^^^^^^^^^
 Warning 8 [partial-match]: this pattern-matching is not exhaustive.
-Here is an example of a case that is not matched:
-[:  :]
+  Here is an example of a case that is not matched: "[:  :]"
+
+Line 3, characters 13-14:
+3 |   use_global s
+                 ^
+Error: This value is "local" to the parent region
+         because it is an element of the tuple at line 2, characters 9-16
+         which is "local" to the parent region
+         because it is an element of the array at line 2, characters 6-19
+         which is "local" to the parent region.
+       However, the highlighted expression is expected to be "global".
+|}, Principal{|
+File "_none_", line 1:
+Warning 18 [not-principal]: this type-based array disambiguation is not
+  principal.
+
+Line 2, characters 6-19:
+2 |   let [: #(s, _) :] = arr in
+          ^^^^^^^^^^^^^
+Warning 8 [partial-match]: this pattern-matching is not exhaustive.
+  Here is an example of a case that is not matched: "[:  :]"
 
 Line 3, characters 13-14:
 3 |   use_global s

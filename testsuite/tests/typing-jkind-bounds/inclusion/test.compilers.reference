@@ -1,32 +1,30 @@
-File "inclusion.ml", line 1:
-Error: The implementation "inclusion.ml"
-       does not match the interface "inclusion.cmi": 
-       Type declarations do not match:
-         type ('a, 'b, 'c) t
-           : value
-               mod portable
-               with 'a
-               
-               with 'b
-               
-               with ('a * 'b, 'c) u
-               
-               with ('b, 'c) u
-       is not included in
-         type ('a, 'b, 'c) t
-           : value mod portable with 'a with 'b with ('b, 'c) u
-       The kind of the first is 
-           value
-             mod portable
-             with 'a
-             
-             with 'b
-             
-             with ('a * 'b, 'c) u
-             
-             with ('b, 'c) u
-         because of the definition of t at file "inclusion.ml", lines 3-7, characters 0-76.
-       But the kind of the first must be a subkind of 
-           value mod portable with 'a with 'b with ('b, 'c) u.
-       File "inclusion.mli", lines 3-7, characters 0-76: Expected declaration
-       File "inclusion.ml", lines 3-7, characters 0-76: Actual declaration
+Fatal error: exception File "typing/jkind.ml", line 1056, characters 42-48: Assertion failed
+Raised at Jkind.outcometrees_of_types.(fun) in file "typing/jkind.ml", line 1056, characters 42-54
+Called from Jkind.Const.To_out_jkind_const.convert_with_base in file "typing/jkind.ml", line 1210, characters 21-70
+Called from Stdlib__List.filter_map in file "list.ml", line 287, characters 12-15
+Called from Jkind.Const.To_out_jkind_const.convert in file "typing/jkind.ml", lines 1248-1250, characters 10-119
+Called from Out_type.out_jkind_of_const_jkind in file "typing/out_type.ml", line 1110, characters 15-53
+Called from Out_type.tree_of_type_decl in file "typing/out_type.ml", line 1823, characters 13-60
+Called from Out_type.tree_of_type_declaration in file "typing/out_type.ml", line 1860, characters 13-38
+Called from Stdlib__Fun.protect in file "fun.ml", line 39, characters 8-15
+Re-raised at Stdlib__Fun.protect in file "fun.ml", line 44, characters 6-52
+Called from Includemod_errorprinter.core in file "typing/includemod_errorprinter.ml", line 880, characters 8-71
+Called from Includemod_errorprinter.sigitem in file "typing/includemod_errorprinter.ml", line 1116, characters 24-47
+Called from Misc.try_finally in file "utils/misc.ml", line 39, characters 8-15
+Re-raised at Misc.try_finally in file "utils/misc.ml", line 53, characters 10-56
+Called from Stdlib__Fun.protect in file "fun.ml", line 39, characters 8-15
+Re-raised at Stdlib__Fun.protect in file "fun.ml", line 44, characters 6-52
+Called from Persistent_env.without_cmis in file "typing/persistent_env.ml", lines 304-306, characters 10-109
+Called from Includemod_errorprinter.err_msgs.(fun) in file "typing/includemod_errorprinter.ml", line 1229, characters 28-71
+Called from Misc.try_finally in file "utils/misc.ml", line 39, characters 8-15
+Re-raised at Misc.try_finally in file "utils/misc.ml", line 53, characters 10-56
+Called from Stdlib__Fun.protect in file "fun.ml", line 39, characters 8-15
+Re-raised at Stdlib__Fun.protect in file "fun.ml", line 44, characters 6-52
+Called from Persistent_env.without_cmis in file "typing/persistent_env.ml", lines 304-306, characters 10-109
+Called from Format_doc.kfprintf.(fun) in file "utils/format_doc.ml", line 471, characters 16-41
+Called from Includemod_errorprinter.register.(fun) in file "typing/includemod_errorprinter.ml", line 1308, characters 37-59
+Called from Location.error_of_exn.loop in file "parsing/location.ml", line 1128, characters 16-21
+Called from Location.report_exception.loop in file "parsing/location.ml", line 1146, characters 10-26
+Re-raised at Location.report_exception.loop in file "parsing/location.ml", line 1147, characters 14-25
+Called from Maindriver.main in file "driver/maindriver.ml", line 149, characters 4-35
+Called from Main in file "driver/main.ml", line 2, characters 7-54

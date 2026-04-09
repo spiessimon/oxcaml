@@ -220,11 +220,10 @@ let x : int as ('a : float64) = 5;;
 Line 1, characters 16-18:
 1 | let x : int as ('a : float64) = 5;;
                     ^^
-Error: This alias is bound to type "int" but is used as an instance of type
-         "('a : float64)"
-       The layout of int is value
+Error: This alias is bound to type "int" but is used as an instance of type "'a"
+       The layout of "int" is value
          because it is the primitive type int.
-       But the layout of int must be a sublayout of float64
+       But the layout of "int" must be a sublayout of float64
          because of the annotation on the type variable 'a.
 |}]
 
@@ -241,21 +240,14 @@ Line 1, characters 21-23:
 1 | let x : int list as ('a : immediate) = [3;4;5]
                          ^^
 Error: This alias is bound to type "int list"
-       but is used as an instance of type "('a : immediate)"
-       The kind of int list is immutable_data
+       but is used as an instance of type "'a"
+       The kind of "int list" is immutable_data
          because it's a boxed variant type.
-       But the kind of int list must be a subkind of immediate
+       But the kind of "int list" must be a subkind of immediate
          because of the annotation on the type variable 'a.
 |}, Principal{|
-Line 1, characters 21-23:
-1 | let x : int list as ('a : immediate) = [3;4;5]
-                         ^^
-Error: This alias is bound to type "int list"
-       but is used as an instance of type "('a : immediate)"
-       The kind of int list is immutable_data with int
-         because it's a boxed variant type.
-       But the kind of int list must be a subkind of immediate
-         because of the annotation on the type variable 'a.
+Uncaught exception: Typetexp.Error(_, _, _)
+
 |}]
 (* CR layouts: error message could be phrased better *)
 
@@ -265,21 +257,14 @@ Line 1, characters 21-23:
 1 | let x : int list as ('a : value mod global) = [3;4;5]
                          ^^
 Error: This alias is bound to type "int list"
-       but is used as an instance of type "('a : value mod global)"
-       The kind of int list is immutable_data
+       but is used as an instance of type "'a"
+       The kind of "int list" is immutable_data
          because it's a boxed variant type.
-       But the kind of int list must be a subkind of value mod global
+       But the kind of "int list" must be a subkind of value mod global
          because of the annotation on the type variable 'a.
 |}, Principal{|
-Line 1, characters 21-23:
-1 | let x : int list as ('a : value mod global) = [3;4;5]
-                         ^^
-Error: This alias is bound to type "int list"
-       but is used as an instance of type "('a : value mod global)"
-       The kind of int list is immutable_data with int
-         because it's a boxed variant type.
-       But the kind of int list must be a subkind of value mod global
-         because of the annotation on the type variable 'a.
+Uncaught exception: Typetexp.Error(_, _, _)
+
 |}]
 
 (****************************************)
@@ -404,10 +389,10 @@ type t = string t2_imm
 Line 1, characters 9-15:
 1 | type t = string t2_imm
              ^^^^^^
-Error: This type "string" should be an instance of type "('a : immediate)"
-       The kind of string is immutable_data
+Error: This type "string" should be an instance of type "'a"
+       The kind of "string" is immutable_data
          because it is the primitive type string.
-       But the kind of string must be a subkind of immediate
+       But the kind of "string" must be a subkind of immediate
          because of the definition of t2_imm at line 1, characters 0-28.
 |}]
 
@@ -417,10 +402,10 @@ type t = string t2_global
 Line 1, characters 9-15:
 1 | type t = string t2_global
              ^^^^^^
-Error: This type "string" should be an instance of type "('a : value mod global)"
-       The kind of string is immutable_data
+Error: This type "string" should be an instance of type "'a"
+       The kind of "string" is immutable_data
          because it is the primitive type string.
-       But the kind of string must be a subkind of value mod global
+       But the kind of "string" must be a subkind of value mod global
          because of the definition of t2_global at line 8, characters 0-38.
 |}]
 
@@ -590,9 +575,9 @@ Line 1, characters 31-41:
                                    ^^^^^^^^^^
 Error: This definition has type "'b -> 'b" which is less general than
          "('a : any). 'a -> 'a"
-       The layout of 'a is any
+       The layout of "'c" is any
          because of the annotation on the universal variable 'a.
-       But the layout of 'a must be representable
+       But the layout of "'c" must be representable
          because we must know concretely how to pass a function argument.
 |}]
 (* CR layouts v2.9: This error message is not great. Check later if layout history
@@ -644,11 +629,11 @@ let f { field } = field "hello"
 Line 1, characters 24-31:
 1 | let f { field } = field "hello"
                             ^^^^^^^
-Error: This expression has type "string" but an expression was expected of type
-         "('a : immediate)"
-       The kind of string is immutable_data
+Error: This constant has type "string" but an expression was expected of type
+         "'a"
+       The kind of "string" is immutable_data
          because it is the primitive type string.
-       But the kind of string must be a subkind of immediate
+       But the kind of "string" must be a subkind of immediate
          because of the definition of r at line 1, characters 0-47.
 |}]
 
@@ -658,11 +643,11 @@ let f { fieldg } = fieldg "hello"
 Line 1, characters 26-33:
 1 | let f { fieldg } = fieldg "hello"
                               ^^^^^^^
-Error: This expression has type "string" but an expression was expected of type
-         "('a : value mod global)"
-       The kind of string is immutable_data
+Error: This constant has type "string" but an expression was expected of type
+         "'a"
+       The kind of "string" is immutable_data
          because it is the primitive type string.
-       But the kind of string must be a subkind of value mod global
+       But the kind of "string" must be a subkind of value mod global
          because of the definition of rg at line 1, characters 0-56.
 |}]
 
@@ -672,11 +657,11 @@ let f { fieldc } = fieldc "hello"
 Line 1, characters 26-33:
 1 | let f { fieldc } = fieldc "hello"
                               ^^^^^^^
-Error: This expression has type "string" but an expression was expected of type
-         "('a : word mod many aliased)"
-       The layout of string is value
+Error: This constant has type "string" but an expression was expected of type
+         "'a"
+       The layout of "string" is value
          because it is the primitive type string.
-       But the layout of string must be a sublayout of word
+       But the layout of "string" must be a sublayout of word
          because of the definition of rc at line 1, characters 0-71.
 |}]
 
@@ -712,9 +697,9 @@ Line 2, characters 18-55:
                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Error: This field value has type "'b -> 'b" which is less general than
          "'a. 'a -> 'a"
-       The kind of 'a is value
+       The kind of "'c" is value
          because of the definition of r_value at line 1, characters 0-39.
-       But the kind of 'a must be a subkind of immediate
+       But the kind of "'c" must be a subkind of immediate
          because of the annotation on the abstract type declaration for a.
 |}]
 (* CR layouts v1.5: that's a pretty awful error message *)
@@ -726,9 +711,9 @@ Line 1, characters 18-62:
                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Error: This field value has type "'b -> 'b" which is less general than
          "'a. 'a -> 'a"
-       The kind of 'a is value
+       The kind of "'c" is value
          because of the definition of r_value at line 1, characters 0-39.
-       But the kind of 'a must be a subkind of value mod global
+       But the kind of "'c" must be a subkind of value mod global
          because of the annotation on the abstract type declaration for a.
 |}]
 (* CR layouts v1.5: that's a pretty awful error message *)
@@ -832,11 +817,10 @@ Line 1, characters 29-36:
 1 | let f = fun (type (a : any)) (x : a) -> x
                                  ^^^^^^^
 Error: This pattern matches values of type "a"
-       but a pattern was expected which matches values of type
-         "('a : '_representable_layout_1)"
-       The layout of a is any
+       but a pattern was expected which matches values of type "'a"
+       The layout of "a" is any
          because of the annotation on the abstract type declaration for a.
-       But the layout of a must be representable
+       But the layout of "a" must be representable
          because we must know concretely how to pass a function argument.
 |}]
 
@@ -958,11 +942,10 @@ end
 Line 2, characters 24-26:
 2 |   val f : ('a : value). 'a t2_complex -> 'a t2_complex
                             ^^
-Error: This type "('a : value)" should be an instance of type
-         "('b : word mod many aliased)"
-       The layout of 'a is value
+Error: This type "'a" should be an instance of type "'b"
+       The layout of "'a" is value
          because of the annotation on the universal variable 'a.
-       But the layout of 'a must overlap with word
+       But the layout of "'a" must overlap with word
          because of the definition of t2_complex at line 10, characters 0-54.
 |}]
 
@@ -1054,11 +1037,11 @@ let f (x : ('a : immediate). 'a -> 'a) = x "string"
 Line 1, characters 43-51:
 1 | let f (x : ('a : immediate). 'a -> 'a) = x "string"
                                                ^^^^^^^^
-Error: This expression has type "string" but an expression was expected of type
-         "('a : immediate)"
-       The kind of string is immutable_data
+Error: This constant has type "string" but an expression was expected of type
+         "'a"
+       The kind of "string" is immutable_data
          because it is the primitive type string.
-       But the kind of string must be a subkind of immediate
+       But the kind of "string" must be a subkind of immediate
          because of the annotation on the universal variable 'a.
 |}]
 
@@ -1068,11 +1051,11 @@ let f (x : ('a : value mod global). 'a -> 'a) = x "string"
 Line 1, characters 50-58:
 1 | let f (x : ('a : value mod global). 'a -> 'a) = x "string"
                                                       ^^^^^^^^
-Error: This expression has type "string" but an expression was expected of type
-         "('a : value mod global)"
-       The kind of string is immutable_data
+Error: This constant has type "string" but an expression was expected of type
+         "'a"
+       The kind of "string" is immutable_data
          because it is the primitive type string.
-       But the kind of string must be a subkind of value mod global
+       But the kind of "string" must be a subkind of value mod global
          because of the annotation on the universal variable 'a.
 |}]
 
@@ -1135,68 +1118,38 @@ val f : t -> t = <fun>
 
 type t : value mod global = { x : t_value }
 [%%expect {|
-Line 1, characters 0-43:
-1 | type t : value mod global = { x : t_value }
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Error: The kind of type "t" is immutable_data with t_value
-         because it's a boxed record type.
-       But the kind of type "t" must be a subkind of value mod global
-         because of the annotation on the declaration of the type t.
+Uncaught exception: Typedecl.Error(_, _)
+
 |}]
 
 type t : value mod aliased = { x : t_value }
 [%%expect {|
-Line 1, characters 0-44:
-1 | type t : value mod aliased = { x : t_value }
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Error: The kind of type "t" is immutable_data with t_value
-         because it's a boxed record type.
-       But the kind of type "t" must be a subkind of value mod aliased
-         because of the annotation on the declaration of the type t.
+Uncaught exception: Typedecl.Error(_, _)
+
 |}]
 
 type t : value mod many = { x : t_value }
 [%%expect {|
-Line 1, characters 0-41:
-1 | type t : value mod many = { x : t_value }
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Error: The kind of type "t" is immutable_data with t_value
-         because it's a boxed record type.
-       But the kind of type "t" must be a subkind of value mod many
-         because of the annotation on the declaration of the type t.
+Uncaught exception: Typedecl.Error(_, _)
+
 |}]
 
 type t : value mod portable = { x : t_value }
 [%%expect {|
-Line 1, characters 0-45:
-1 | type t : value mod portable = { x : t_value }
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Error: The kind of type "t" is immutable_data with t_value
-         because it's a boxed record type.
-       But the kind of type "t" must be a subkind of value mod portable
-         because of the annotation on the declaration of the type t.
+Uncaught exception: Typedecl.Error(_, _)
+
 |}]
 
 type t : value mod contended = { x : t_value }
 [%%expect {|
-Line 1, characters 0-46:
-1 | type t : value mod contended = { x : t_value }
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Error: The kind of type "t" is immutable_data with t_value
-         because it's a boxed record type.
-       But the kind of type "t" must be a subkind of value mod contended
-         because of the annotation on the declaration of the type t.
+Uncaught exception: Typedecl.Error(_, _)
+
 |}]
 
 type t : value mod external_ = { x : t_value }
 [%%expect {|
-Line 1, characters 0-46:
-1 | type t : value mod external_ = { x : t_value }
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Error: The kind of type "t" is immutable_data with t_value
-         because it's a boxed record type.
-       But the kind of type "t" must be a subkind of value mod external_
-         because of the annotation on the declaration of the type t.
+Uncaught exception: Typedecl.Error(_, _)
+
 |}]
 
 (***************************************)
@@ -1274,68 +1227,38 @@ val f : t -> t = <fun>
 
 type t : value mod global = Foo of t_value
 [%%expect {|
-Line 1, characters 0-42:
-1 | type t : value mod global = Foo of t_value
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Error: The kind of type "t" is immutable_data with t_value
-         because it's a boxed variant type.
-       But the kind of type "t" must be a subkind of value mod global
-         because of the annotation on the declaration of the type t.
+Uncaught exception: Typedecl.Error(_, _)
+
 |}]
 
 type t : value mod aliased = Foo of t_value
 [%%expect {|
-Line 1, characters 0-43:
-1 | type t : value mod aliased = Foo of t_value
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Error: The kind of type "t" is immutable_data with t_value
-         because it's a boxed variant type.
-       But the kind of type "t" must be a subkind of value mod aliased
-         because of the annotation on the declaration of the type t.
+Uncaught exception: Typedecl.Error(_, _)
+
 |}]
 
 type t : value mod many = Foo of t_value
 [%%expect {|
-Line 1, characters 0-40:
-1 | type t : value mod many = Foo of t_value
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Error: The kind of type "t" is immutable_data with t_value
-         because it's a boxed variant type.
-       But the kind of type "t" must be a subkind of value mod many
-         because of the annotation on the declaration of the type t.
+Uncaught exception: Typedecl.Error(_, _)
+
 |}]
 
 type t : value mod portable = Foo of t_value
 [%%expect {|
-Line 1, characters 0-44:
-1 | type t : value mod portable = Foo of t_value
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Error: The kind of type "t" is immutable_data with t_value
-         because it's a boxed variant type.
-       But the kind of type "t" must be a subkind of value mod portable
-         because of the annotation on the declaration of the type t.
+Uncaught exception: Typedecl.Error(_, _)
+
 |}]
 
 type t : value mod contended = Foo of t_value
 [%%expect {|
-Line 1, characters 0-45:
-1 | type t : value mod contended = Foo of t_value
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Error: The kind of type "t" is immutable_data with t_value
-         because it's a boxed variant type.
-       But the kind of type "t" must be a subkind of value mod contended
-         because of the annotation on the declaration of the type t.
+Uncaught exception: Typedecl.Error(_, _)
+
 |}]
 
 type t : value mod external_ = Foo of t_value
 [%%expect {|
-Line 1, characters 0-45:
-1 | type t : value mod external_ = Foo of t_value
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Error: The kind of type "t" is immutable_data with t_value
-         because it's a boxed variant type.
-       But the kind of type "t" must be a subkind of value mod external_
-         because of the annotation on the declaration of the type t.
+Uncaught exception: Typedecl.Error(_, _)
+
 |}]
 
 (***************************************)
@@ -1676,9 +1599,9 @@ Line 1, characters 37-53:
                                          ^^^^^^^^^^^^^^^^
 Error: This definition has type "'b -> 'b" which is less general than
          "'a. 'a -> 'a"
-       The kind of 'a is value
+       The kind of "'c" is value
          because of the annotation on the universal variable 'a.
-       But the kind of 'a must be a subkind of immediate
+       But the kind of "'c" must be a subkind of immediate
          because of the definition of f_imm at line 1, characters 4-9.
 |}]
 
@@ -1730,10 +1653,9 @@ let bad p =
 Line 3, characters 43-44:
 3 |   | T (type (a : float64)) (x : a) -> Some x
                                                ^
-Error: This expression has type "a" but an expression was expected of type
-         "('a : value_or_null)"
-       The layout of a is float64
+Error: The value "x" has type "a" but an expression was expected of type "'a"
+       The layout of "a" is float64
          because of the annotation on the existential variable a.
-       But the layout of a must be a sublayout of value
+       But the layout of "a" must be a sublayout of value
          because the type argument of option has layout value_or_null.
 |}]

@@ -136,7 +136,8 @@ let position = (o ())#pos
 Line 2, characters 10-16:
 2 |   inherit parent call_pos ()
               ^^^^^^
-Warning 6 [labels-omitted]: label call_pos was omitted in the application of this function.
+Warning 6 [labels-omitted]: label "call_pos" was omitted in the application of
+  this function.
 
 val o : call_pos:[%call_pos] -> unit -> parent = <fun>
 val position : lexing_position =
@@ -196,6 +197,11 @@ val a : lexing_position =
   {pos_fname = "a"; pos_lnum = 0; pos_bol = 0; pos_cnum = -1}
 val b : lexing_position =
   {pos_fname = ""; pos_lnum = 1; pos_bol = 4512; pos_cnum = 4538}
+|}, Principal{|
+val a : lexing_position =
+  {pos_fname = "a"; pos_lnum = 0; pos_bol = 0; pos_cnum = -1}
+val b : lexing_position =
+  {pos_fname = ""; pos_lnum = 1; pos_bol = 4859; pos_cnum = 4885}
 |}]
 
 class c :
@@ -217,6 +223,11 @@ let x, y = (new c ~y:pos_a ())#xy
 [%%expect{|
 val x : lexing_position =
   {pos_fname = ""; pos_lnum = 1; pos_bol = 5199; pos_cnum = 5211}
+val y : lexing_position =
+  {pos_fname = "a"; pos_lnum = 0; pos_bol = 0; pos_cnum = -1}
+|}, Principal{|
+val x : lexing_position =
+  {pos_fname = ""; pos_lnum = 1; pos_bol = 5546; pos_cnum = 5558}
 val y : lexing_position =
   {pos_fname = "a"; pos_lnum = 0; pos_bol = 0; pos_cnum = -1}
 |}]

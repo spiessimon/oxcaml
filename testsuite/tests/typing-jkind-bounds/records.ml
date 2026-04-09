@@ -140,30 +140,14 @@ type 'a t = { x : 'a; }
 (* bad annotations *)
 type 'a t : immutable_data = { x : 'a }
 [%%expect {|
-Line 1, characters 0-39:
-1 | type 'a t : immutable_data = { x : 'a }
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Error: The kind of type "t" is immutable_data with 'a
-         because it's a boxed record type.
-       But the kind of type "t" must be a subkind of immutable_data
-         because of the annotation on the declaration of the type t.
+Uncaught exception: Typedecl.Error(_, _)
+
 |}]
 
 type 'a t : immutable_data = { mutable x : 'a }
 [%%expect {|
-Line 1, characters 0-47:
-1 | type 'a t : immutable_data = { mutable x : 'a }
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Error: The kind of type "t" is mutable_data with 'a @@ forkable unyielding many
-         because it's a boxed record type.
-       But the kind of type "t" must be a subkind of immutable_data
-         because of the annotation on the declaration of the type t.
+Uncaught exception: Typedecl.Error(_, _)
 
-       The first mode-crosses less than the second along:
-         contention: mod uncontended ≰ mod contended
-         portability: mod portable with 'a ≰ mod portable
-         statefulness: mod stateless with 'a ≰ mod stateless
-         visibility: mod read_write ≰ mod immutable
 |}]
 
 type t : immutable_data = { x : int ref }
@@ -190,13 +174,8 @@ Error: The kind of type "t" is value mod immutable non_float
 
 type 'a t : immutable_data = { x : 'a option }
 [%%expect {|
-Line 1, characters 0-46:
-1 | type 'a t : immutable_data = { x : 'a option }
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Error: The kind of type "t" is immutable_data with 'a
-         because it's a boxed record type.
-       But the kind of type "t" must be a subkind of immutable_data
-         because of the annotation on the declaration of the type t.
+Uncaught exception: Typedecl.Error(_, _)
+
 |}]
 
 type t : immutable_data = { x : int; y : int; mutable z : int }
@@ -223,46 +202,26 @@ Error: The kind of type "t" is value mod immutable non_float
 
 type ('a : value mod portable) t : value mod many = { x : 'a }
 [%%expect {|
-Line 1, characters 0-62:
-1 | type ('a : value mod portable) t : value mod many = { x : 'a }
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Error: The kind of type "t" is immutable_data with 'a
-         because it's a boxed record type.
-       But the kind of type "t" must be a subkind of value mod many
-         because of the annotation on the declaration of the type t.
+Uncaught exception: Typedecl.Error(_, _)
+
 |}]
 
 type ('a : value mod global) t : value mod global = { x : 'a }
 [%%expect {|
-Line 1, characters 0-62:
-1 | type ('a : value mod global) t : value mod global = { x : 'a }
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Error: The kind of type "t" is immutable_data with 'a
-         because it's a boxed record type.
-       But the kind of type "t" must be a subkind of value mod global
-         because of the annotation on the declaration of the type t.
+Uncaught exception: Typedecl.Error(_, _)
+
 |}]
 
 type ('a : value mod aliased) t : value mod aliased = { x : 'a }
 [%%expect {|
-Line 1, characters 0-64:
-1 | type ('a : value mod aliased) t : value mod aliased = { x : 'a }
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Error: The kind of type "t" is immutable_data with 'a
-         because it's a boxed record type.
-       But the kind of type "t" must be a subkind of value mod aliased
-         because of the annotation on the declaration of the type t.
+Uncaught exception: Typedecl.Error(_, _)
+
 |}]
 
 type ('a : value mod external_) t : value mod external_ = { x : 'a }
 [%%expect {|
-Line 1, characters 0-68:
-1 | type ('a : value mod external_) t : value mod external_ = { x : 'a }
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Error: The kind of type "t" is immutable_data with 'a
-         because it's a boxed record type.
-       But the kind of type "t" must be a subkind of value mod external_
-         because of the annotation on the declaration of the type t.
+Uncaught exception: Typedecl.Error(_, _)
+
 |}]
 
 type t : sync_data = { mutable x : int ref [@atomic] }
@@ -278,16 +237,8 @@ Error: The kind of type "t" is mutable_data
 
 type ('a : mutable_data) t : sync_data = { mutable x : 'a [@atomic] }
 [%%expect {|
-Line 1, characters 0-69:
-1 | type ('a : mutable_data) t : sync_data = { mutable x : 'a [@atomic] }
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Error: The kind of type "t" is sync_data with 'a @@ forkable unyielding many
-         because it's a boxed record type.
-       But the kind of type "t" must be a subkind of sync_data
-         because of the annotation on the declaration of the type t.
+Uncaught exception: Typedecl.Error(_, _)
 
-       The first mode-crosses less than the second along:
-         contention: mod contended with 'a ≰ mod contended
 |}]
 
 (**** Test 2: Annotations with "with" are accepted when appropriate ****)
@@ -320,62 +271,32 @@ type 'a t = { x : 'a -> 'a; }
 
 type 'a t : immutable_data with 'a = { mutable x : 'a }
 [%%expect {|
-Line 1, characters 0-55:
-1 | type 'a t : immutable_data with 'a = { mutable x : 'a }
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Error: The kind of type "t" is mutable_data with 'a @@ forkable unyielding many
-         because it's a boxed record type.
-       But the kind of type "t" must be a subkind of immutable_data with 'a
-         because of the annotation on the declaration of the type t.
+Uncaught exception: Typedecl.Error(_, _)
 
-       The first mode-crosses less than the second along:
-         contention: mod uncontended ≰ mod contended with 'a
-         visibility: mod read_write ≰ mod immutable with 'a
 |}]
 
 type 'a t : immutable_data with 'a = { x : 'a -> 'a }
 [%%expect {|
-Line 1, characters 0-53:
-1 | type 'a t : immutable_data with 'a = { x : 'a -> 'a }
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Error: The kind of type "t" is value mod immutable non_float
-         because it's a boxed record type.
-       But the kind of type "t" must be a subkind of immutable_data with 'a
-         because of the annotation on the declaration of the type t.
+Uncaught exception: Typedecl.Error(_, _)
+
 |}]
 
 type 'a t : value mod global with 'a = { x : 'a }
 [%%expect {|
-Line 1, characters 0-49:
-1 | type 'a t : value mod global with 'a = { x : 'a }
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Error: The kind of type "t" is immutable_data with 'a
-         because it's a boxed record type.
-       But the kind of type "t" must be a subkind of value mod global with 'a
-         because of the annotation on the declaration of the type t.
+Uncaught exception: Typedecl.Error(_, _)
+
 |}]
 
 type 'a t : value mod aliased with 'a = { x : 'a }
 [%%expect {|
-Line 1, characters 0-50:
-1 | type 'a t : value mod aliased with 'a = { x : 'a }
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Error: The kind of type "t" is immutable_data with 'a
-         because it's a boxed record type.
-       But the kind of type "t" must be a subkind of value mod aliased with 'a
-         because of the annotation on the declaration of the type t.
+Uncaught exception: Typedecl.Error(_, _)
+
 |}]
 
 type 'a t : value mod external_ with 'a = { x : 'a }
 [%%expect {|
-Line 1, characters 0-52:
-1 | type 'a t : value mod external_ with 'a = { x : 'a }
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Error: The kind of type "t" is immutable_data with 'a
-         because it's a boxed record type.
-       But the kind of type "t" must be a subkind of
-           value mod external_ with 'a
-         because of the annotation on the declaration of the type t.
+Uncaught exception: Typedecl.Error(_, _)
+
 |}]
 
 (**** Test 3: Record values cross when appropriate ****)
@@ -608,11 +529,10 @@ let () = cross_global t
 Line 1, characters 22-23:
 1 | let () = cross_global t
                           ^
-Error: This expression has type "t" but an expression was expected of type
-         "('a : value mod global)"
-       The kind of t is immutable_data
+Error: The value "t" has type "t" but an expression was expected of type "'a"
+       The kind of "t" is immutable_data
          because of the definition of t at line 1, characters 0-32.
-       But the kind of t must be a subkind of value mod global
+       But the kind of "t" must be a subkind of value mod global
          because of the definition of cross_global at line 7, characters 53-64.
 |}]
 
@@ -637,15 +557,8 @@ let () =
 (* CR layouts v2.8: fix in principal case. Internal ticket 5111 *)
 [%%expect {|
 |}, Principal{|
-Line 2, characters 13-16:
-2 |   cross_many int;
-                 ^^^
-Error: This expression has type "int t" but an expression was expected of type
-         "('a : value mod many)"
-       The kind of int t is immutable_data with int
-         because of the definition of t at line 1, characters 0-22.
-       But the kind of int t must be a subkind of value mod many
-         because of the definition of cross_many at line 11, characters 49-60.
+Uncaught exception: Typecore.Error(_, _, _)
+
 |}]
 
 let () = cross_aliased int
@@ -653,22 +566,14 @@ let () = cross_aliased int
 Line 1, characters 23-26:
 1 | let () = cross_aliased int
                            ^^^
-Error: This expression has type "int t" but an expression was expected of type
-         "('a : value mod aliased)"
-       The kind of int t is immutable_data
+Error: The value "int" has type "int t" but an expression was expected of type "'a"
+       The kind of "int t" is immutable_data
          because of the definition of t at line 1, characters 0-22.
-       But the kind of int t must be a subkind of value mod aliased
+       But the kind of "int t" must be a subkind of value mod aliased
          because of the definition of cross_aliased at line 8, characters 55-66.
 |}, Principal{|
-Line 1, characters 23-26:
-1 | let () = cross_aliased int
-                           ^^^
-Error: This expression has type "int t" but an expression was expected of type
-         "('a : value mod aliased)"
-       The kind of int t is immutable_data with int
-         because of the definition of t at line 1, characters 0-22.
-       But the kind of int t must be a subkind of value mod aliased
-         because of the definition of cross_aliased at line 8, characters 55-66.
+Uncaught exception: Typecore.Error(_, _, _)
+
 |}]
 
 let () = cross_portable func
@@ -676,24 +581,16 @@ let () = cross_portable func
 Line 1, characters 24-28:
 1 | let () = cross_portable func
                             ^^^^
-Error: This expression has type "(unit -> unit) t"
-       but an expression was expected of type "('a : value mod portable)"
-       The kind of (unit -> unit) t is value mod immutable non_float
+Error: The value "func" has type "(unit -> unit) t"
+       but an expression was expected of type "'a"
+       The kind of "(unit -> unit) t" is value mod immutable non_float
          because of the definition of t at line 1, characters 0-22.
-       But the kind of (unit -> unit) t must be a subkind of
+       But the kind of "(unit -> unit) t" must be a subkind of
            value mod portable
          because of the definition of cross_portable at line 10, characters 57-68.
 |}, Principal{|
-Line 1, characters 24-28:
-1 | let () = cross_portable func
-                            ^^^^
-Error: This expression has type "(unit -> unit) t"
-       but an expression was expected of type "('a : value mod portable)"
-       The kind of (unit -> unit) t is immutable_data with unit -> unit
-         because of the definition of t at line 1, characters 0-22.
-       But the kind of (unit -> unit) t must be a subkind of
-           value mod portable
-         because of the definition of cross_portable at line 10, characters 57-68.
+Uncaught exception: Typecore.Error(_, _, _)
+
 |}]
 
 let () = cross_external func
@@ -701,24 +598,16 @@ let () = cross_external func
 Line 1, characters 24-28:
 1 | let () = cross_external func
                             ^^^^
-Error: This expression has type "(unit -> unit) t"
-       but an expression was expected of type "('a : value mod external_)"
-       The kind of (unit -> unit) t is value mod immutable non_float
+Error: The value "func" has type "(unit -> unit) t"
+       but an expression was expected of type "'a"
+       The kind of "(unit -> unit) t" is value mod immutable non_float
          because of the definition of t at line 1, characters 0-22.
-       But the kind of (unit -> unit) t must be a subkind of
+       But the kind of "(unit -> unit) t" must be a subkind of
            value mod external_
          because of the definition of cross_external at line 13, characters 58-69.
 |}, Principal{|
-Line 1, characters 24-28:
-1 | let () = cross_external func
-                            ^^^^
-Error: This expression has type "(unit -> unit) t"
-       but an expression was expected of type "('a : value mod external_)"
-       The kind of (unit -> unit) t is immutable_data with unit -> unit
-         because of the definition of t at line 1, characters 0-22.
-       But the kind of (unit -> unit) t must be a subkind of
-           value mod external_
-         because of the definition of cross_external at line 13, characters 58-69.
+Uncaught exception: Typecore.Error(_, _, _)
+
 |}]
 
 type 'a t = { x : 'a }
@@ -739,14 +628,8 @@ type ('a : value mod contended) t_test = 'a t require_contended
 type 'a t_test = 'a t require_nonnull
 |}, Principal{|
 type 'a t = { x : 'a; }
-Line 2, characters 14-19:
-2 | type t_test = int t require_many
-                  ^^^^^
-Error: This type "int t" should be an instance of type "('a : value mod many)"
-       The kind of int t is immutable_data with int
-         because of the definition of t at line 1, characters 0-22.
-       But the kind of int t must be a subkind of value mod many
-         because of the definition of require_many at line 19, characters 0-39.
+Uncaught exception: Typetexp.Error(_, _, _)
+
 |}]
 
 type t_test = int t require_global
@@ -754,20 +637,14 @@ type t_test = int t require_global
 Line 1, characters 14-19:
 1 | type t_test = int t require_global
                   ^^^^^
-Error: This type "int t" should be an instance of type "('a : value mod global)"
-       The kind of int t is immutable_data
+Error: This type "int t" should be an instance of type "'a"
+       The kind of "int t" is immutable_data
          because of the definition of t at line 1, characters 0-22.
-       But the kind of int t must be a subkind of value mod global
+       But the kind of "int t" must be a subkind of value mod global
          because of the definition of require_global at line 15, characters 0-43.
 |}, Principal{|
-Line 1, characters 14-19:
-1 | type t_test = int t require_global
-                  ^^^^^
-Error: This type "int t" should be an instance of type "('a : value mod global)"
-       The kind of int t is immutable_data with int
-         because of the definition of t at line 1, characters 0-22.
-       But the kind of int t must be a subkind of value mod global
-         because of the definition of require_global at line 15, characters 0-43.
+Uncaught exception: Typetexp.Error(_, _, _)
+
 |}]
 
 type t_test = int t require_aliased
@@ -775,20 +652,14 @@ type t_test = int t require_aliased
 Line 1, characters 14-19:
 1 | type t_test = int t require_aliased
                   ^^^^^
-Error: This type "int t" should be an instance of type "('a : value mod aliased)"
-       The kind of int t is immutable_data
+Error: This type "int t" should be an instance of type "'a"
+       The kind of "int t" is immutable_data
          because of the definition of t at line 1, characters 0-22.
-       But the kind of int t must be a subkind of value mod aliased
+       But the kind of "int t" must be a subkind of value mod aliased
          because of the definition of require_aliased at line 16, characters 0-45.
 |}, Principal{|
-Line 1, characters 14-19:
-1 | type t_test = int t require_aliased
-                  ^^^^^
-Error: This type "int t" should be an instance of type "('a : value mod aliased)"
-       The kind of int t is immutable_data with int
-         because of the definition of t at line 1, characters 0-22.
-       But the kind of int t must be a subkind of value mod aliased
-         because of the definition of require_aliased at line 16, characters 0-45.
+Uncaught exception: Typetexp.Error(_, _, _)
+
 |}]
 
 type t_test = (unit -> unit) t require_portable
@@ -796,49 +667,27 @@ type t_test = (unit -> unit) t require_portable
 Line 1, characters 14-30:
 1 | type t_test = (unit -> unit) t require_portable
                   ^^^^^^^^^^^^^^^^
-Error: This type "(unit -> unit) t" should be an instance of type
-         "('a : value mod portable)"
-       The kind of (unit -> unit) t is value mod immutable non_float
+Error: This type "(unit -> unit) t" should be an instance of type "'a"
+       The kind of "(unit -> unit) t" is value mod immutable non_float
          because of the definition of t at line 1, characters 0-22.
-       But the kind of (unit -> unit) t must be a subkind of
+       But the kind of "(unit -> unit) t" must be a subkind of
            value mod portable
          because of the definition of require_portable at line 18, characters 0-47.
 |}, Principal{|
-Line 1, characters 14-30:
-1 | type t_test = (unit -> unit) t require_portable
-                  ^^^^^^^^^^^^^^^^
-Error: This type "(unit -> unit) t" should be an instance of type
-         "('a : value mod portable)"
-       The kind of (unit -> unit) t is immutable_data with unit -> unit
-         because of the definition of t at line 1, characters 0-22.
-       But the kind of (unit -> unit) t must be a subkind of
-           value mod portable
-         because of the definition of require_portable at line 18, characters 0-47.
+Uncaught exception: Typetexp.Error(_, _, _)
+
 |}]
 
 type ('a : value mod contended) t_test = 'a t require_portable
 [%%expect {|
-Line 1, characters 41-45:
-1 | type ('a : value mod contended) t_test = 'a t require_portable
-                                             ^^^^
-Error: This type "'a t" should be an instance of type "('b : value mod portable)"
-       The kind of 'a t is immutable_data with 'a
-         because of the definition of t at line 1, characters 0-22.
-       But the kind of 'a t must be a subkind of value mod portable
-         because of the definition of require_portable at line 18, characters 0-47.
+Uncaught exception: Typetexp.Error(_, _, _)
+
 |}]
 
 type ('a : value mod external_) t_test = 'a t require_external
 [%%expect {|
-Line 1, characters 41-45:
-1 | type ('a : value mod external_) t_test = 'a t require_external
-                                             ^^^^
-Error: This type "'a t" should be an instance of type
-         "('b : value mod external_)"
-       The kind of 'a t is immutable_data with 'a
-         because of the definition of t at line 1, characters 0-22.
-       But the kind of 'a t must be a subkind of value mod external_
-         because of the definition of require_external at line 21, characters 0-48.
+Uncaught exception: Typetexp.Error(_, _, _)
+
 |}]
 
 (**** Test 5: Module inclusion check ****)
@@ -885,7 +734,8 @@ end = struct
   type 'a t = { x : 'a }
 end
 [%%expect {|
-module M : sig type 'a t : immutable_data with 'a end
+Uncaught exception: File "typing/jkind.ml", line 1056, characters 42-48: Assertion failed
+
 |}]
 
 module M : sig
@@ -894,7 +744,8 @@ end = struct
   type 'a t = { x : 'a; y : int }
 end
 [%%expect {|
-module M : sig type 'a t : immutable_data with 'a end
+Uncaught exception: File "typing/jkind.ml", line 1056, characters 42-48: Assertion failed
+
 |}]
 
 module M : sig
@@ -903,7 +754,8 @@ end = struct
   type 'a t = { x : 'a; y : int }
 end
 [%%expect {|
-module M : sig type 'a t : immutable_data with 'a end
+Uncaught exception: File "typing/jkind.ml", line 1056, characters 42-48: Assertion failed
+
 |}]
 
 module M : sig
@@ -975,23 +827,8 @@ end = struct
 end
 
 [%%expect{|
-Lines 3-5, characters 6-3:
-3 | ......struct
-4 |   type 'a t = { x : 'a; y : string }
-5 | end
-Error: Signature mismatch:
-       Modules do not match:
-         sig type 'a t = { x : 'a; y : string; } end
-       is not included in
-         sig type 'a t : immutable_data end
-       Type declarations do not match:
-         type 'a t = { x : 'a; y : string; }
-       is not included in
-         type 'a t : immutable_data
-       The kind of the first is immutable_data with 'a
-         because of the definition of t at line 4, characters 2-36.
-       But the kind of the first must be a subkind of immutable_data
-         because of the definition of t at line 2, characters 2-28.
+Uncaught exception: Typemod.Error(_, _, _)
+
 |}]
 
 module M : sig

@@ -401,6 +401,16 @@ let f_scannable_literal arr : #(bool option * string * int) =
 val f_scannable_literal :
   #(int * string * bool option) iarray -> #(bool option * string * int) =
   <fun>
+|}, Principal{|
+Line 4, characters 4-20:
+4 |   | [: #(x, y, z) :] -> #(z, y, x)
+        ^^^^^^^^^^^^^^^^
+Warning 18 [not-principal]: this type-based array disambiguation is not
+  principal.
+
+val f_scannable_literal :
+  #(int * string * bool option) iarray -> #(bool option * string * int) =
+  <fun>
 |}]
 
 let f_ignorable_literal arr : #(#(int64# * float#) * int32# * int) =
@@ -409,6 +419,16 @@ let f_ignorable_literal arr : #(#(int64# * float#) * int32# * int) =
   | [: #(x, y, #(z, q)) :] -> #(#(q, z), y, x)
   | _ -> assert false
 [%%expect{|
+val f_ignorable_literal :
+  #(int * int32# * #(float# * int64#)) iarray ->
+  #(#(int64# * float#) * int32# * int) = <fun>
+|}, Principal{|
+Line 4, characters 4-26:
+4 |   | [: #(x, y, #(z, q)) :] -> #(#(q, z), y, x)
+        ^^^^^^^^^^^^^^^^^^^^^^
+Warning 18 [not-principal]: this type-based array disambiguation is not
+  principal.
+
 val f_ignorable_literal :
   #(int * int32# * #(float# * int64#)) iarray ->
   #(#(int64# * float#) * int32# * int) = <fun>

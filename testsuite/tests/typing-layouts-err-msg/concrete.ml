@@ -19,10 +19,10 @@ Line 5, characters 15-37:
 5 | let () = match (assert false : t_any) with _ -> ()
                    ^^^^^^^^^^^^^^^^^^^^^^
 Error: This expression has type "t_any" but an expression was expected of type
-         "('a : '_representable_layout_1)"
-       The layout of t_any is any
+         "'a"
+       The layout of "t_any" is any
          because of the definition of t_any at line 1, characters 0-16.
-       But the layout of t_any must be representable
+       But the layout of "t_any" must be representable
          because a value of this type is matched against a pattern.
 |}]
 
@@ -62,11 +62,10 @@ and t2 = t_any t
 Line 2, characters 9-14:
 2 | and t2 = t_any t
              ^^^^^
-Error: This type "t_any" should be an instance of type
-         "('a : '_representable_layout_2)"
-       The layout of t_any is any
+Error: This type "t_any" should be an instance of type "'a"
+       The layout of "t_any" is any
          because of the definition of t_any at line 1, characters 0-16.
-       But the layout of t_any must be representable
+       But the layout of "t_any" must be representable
          because it instantiates an unannotated type parameter of t.
 |}]
 
@@ -84,11 +83,10 @@ Line 1, characters 4-5:
 1 | let x: t_any = assert false
         ^
 Error: This pattern matches values of type "t_any"
-       but a pattern was expected which matches values of type
-         "('a : '_representable_layout_3)"
-       The layout of t_any is any
+       but a pattern was expected which matches values of type "'a"
+       The layout of "t_any" is any
          because of the definition of t_any at line 1, characters 0-16.
-       But the layout of t_any must be representable
+       But the layout of "t_any" must be representable
          because it's the type of a variable bound by a `let`.
 |}]
 
@@ -100,11 +98,10 @@ Line 1, characters 6-16:
 1 | let f (x: t_any) = ()
           ^^^^^^^^^^
 Error: This pattern matches values of type "t_any"
-       but a pattern was expected which matches values of type
-         "('a : '_representable_layout_4)"
-       The layout of t_any is any
+       but a pattern was expected which matches values of type "'a"
+       The layout of "t_any" is any
          because of the definition of t_any at line 1, characters 0-16.
-       But the layout of t_any must be representable
+       But the layout of "t_any" must be representable
          because we must know concretely how to pass a function argument.
 |}]
 
@@ -116,10 +113,10 @@ Line 1, characters 18-30:
 1 | let f (): t_any = assert false
                       ^^^^^^^^^^^^
 Error: This expression has type "t_any" but an expression was expected of type
-         "('a : '_representable_layout_5)"
-       The layout of t_any is any
+         "'a"
+       The layout of "t_any" is any
          because of the definition of t_any at line 1, characters 0-16.
-       But the layout of t_any must be representable
+       But the layout of "t_any" must be representable
          because we must know concretely how to return a function result.
 |}]
 
@@ -170,11 +167,11 @@ Line 1, characters 9-21:
 1 | let _ = (assert false : t_any); ()
              ^^^^^^^^^^^^
 Error: This expression has type "t_any" but an expression was expected of type
-         "('a : '_representable_layout_6)"
+         "'a"
        because it is in the left-hand side of a sequence
-       The layout of t_any is any
+       The layout of "t_any" is any
          because of the definition of t_any at line 1, characters 0-16.
-       But the layout of t_any must be representable
+       But the layout of "t_any" must be representable
          because it's the type of a statement.
 |}]
 

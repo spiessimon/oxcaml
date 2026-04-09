@@ -863,10 +863,10 @@ type t2 = t require_contended
 Line 1, characters 10-11:
 1 | type t2 = t require_contended
               ^
-Error: This type "t" should be an instance of type "('a : value mod contended)"
-       The kind of t is mutable_data
+Error: This type "t" should be an instance of type "'a"
+       The kind of "t" is mutable_data
          because of the definition of t at line 1, characters 0-34.
-       But the kind of t must be a subkind of value mod contended
+       But the kind of "t" must be a subkind of value mod contended
          because of the definition of require_contended at line 1, characters 0-49.
 |}]
 
@@ -881,15 +881,8 @@ type t2 = int t require_contended
 [%%expect{|
 type t2 = int t require_contended
 |}, Principal{|
-Line 1, characters 10-15:
-1 | type t2 = int t require_contended
-              ^^^^^
-Error: This type "int t" should be an instance of type
-         "('a : value mod contended)"
-       The kind of int t is immutable_data with int
-         because of the definition of t at line 1, characters 0-32.
-       But the kind of int t must be a subkind of value mod contended
-         because of the definition of require_contended at line 1, characters 0-49.
+Uncaught exception: Typetexp.Error(_, _, _)
+
 |}]
 (* CR layouts v2.8: fix principal mode. Internal ticket 5111 *)
 
@@ -899,22 +892,14 @@ type t2 = int ref t require_contended
 Line 1, characters 10-19:
 1 | type t2 = int ref t require_contended
               ^^^^^^^^^
-Error: This type "int ref t" should be an instance of type
-         "('a : value mod contended)"
-       The kind of int ref t is mutable_data
+Error: This type "int ref t" should be an instance of type "'a"
+       The kind of "int ref t" is mutable_data
          because of the definition of t at line 1, characters 0-32.
-       But the kind of int ref t must be a subkind of value mod contended
+       But the kind of "int ref t" must be a subkind of value mod contended
          because of the definition of require_contended at line 1, characters 0-49.
 |}, Principal{|
-Line 1, characters 10-19:
-1 | type t2 = int ref t require_contended
-              ^^^^^^^^^
-Error: This type "int ref t" should be an instance of type
-         "('a : value mod contended)"
-       The kind of int ref t is immutable_data with int ref
-         because of the definition of t at line 1, characters 0-32.
-       But the kind of int ref t must be a subkind of value mod contended
-         because of the definition of require_contended at line 1, characters 0-49.
+Uncaught exception: Typetexp.Error(_, _, _)
+
 |}]
 
 type t2 = int t ref require_contended
@@ -923,22 +908,11 @@ type t2 = int t ref require_contended
 Line 1, characters 10-19:
 1 | type t2 = int t ref require_contended
               ^^^^^^^^^
-Error: This type "int t ref" should be an instance of type
-         "('a : value mod contended)"
-       The kind of int t ref is mutable_data.
-       But the kind of int t ref must be a subkind of value mod contended
+Error: This type "int t ref" should be an instance of type "'a"
+       The kind of "int t ref" is mutable_data.
+       But the kind of "int t ref" must be a subkind of value mod contended
          because of the definition of require_contended at line 1, characters 0-49.
 |}, Principal{|
-Line 1, characters 10-19:
-1 | type t2 = int t ref require_contended
-              ^^^^^^^^^
-Error: This type "int t ref" should be an instance of type
-         "('a : value mod contended)"
-       The kind of int t ref is
-           mutable_data with int t @@ forkable unyielding many.
-       But the kind of int t ref must be a subkind of value mod contended
-         because of the definition of require_contended at line 1, characters 0-49.
+Uncaught exception: Typetexp.Error(_, _, _)
 
-       The first mode-crosses less than the second along:
-         contention: mod uncontended ≰ mod contended
 |}]

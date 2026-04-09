@@ -78,7 +78,7 @@ module N : sig type t = B end
 - : u = C
 type t = M.t = A
 type u = M.u = C
-- : u = C
+- : u/2 = C
 module L : sig type v = V end
 - : v = V
 module L : sig type v = V end
@@ -87,7 +87,7 @@ type t1 = A
 module M1 : sig type u = v and v = t1 end
 module N1 : sig type u = v and v = t1 end
 type t1 = B
-module N2 : sig type u = v and v = t1/2 end
+module N2 : sig type u = v and v = N1.u end
 module type PR6566 = sig type t = string end
 module PR6566 : sig type t = int end
 Line 1, characters 26-32:

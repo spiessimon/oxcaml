@@ -70,7 +70,7 @@ module F : S -> T = functor (M : S) -> struct
   let g = M.f
 end
 [%%expect{|
-module F : S -> T @@ stateless
+module F : functor S -> T @@ stateless
 |}]
 
 module F (M : S @ portable) (M' : S) = struct
@@ -128,7 +128,7 @@ module F : S @ portable -> T @ portable = functor (M : S @ portable) -> struct
     let () = use_portable g
 end
 [%%expect{|
-module F : S @ portable -> T @ portable
+module F : functor S @ portable -> T @ portable
 |}]
 
 module M' @ portable = F(M)
@@ -222,7 +222,7 @@ module type U = sig
     include functor FT
 end
 [%%expect{|
-module type FT = S @ portable -> T @ portable
+module type FT = functor S @ portable -> T @ portable
 Line 5, characters 20-22:
 5 |     include functor FT
                         ^^
@@ -563,9 +563,9 @@ Line 2, characters 10-43:
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Error: Signature mismatch:
        Modules do not match:
-         S @ unique -> (functor () -> sig end) @ once
+         functor S @ unique -> (functor () -> sig end) @ once
        is not included in
-         S @ unique -> functor () -> sig end
+         functor S @ unique -> functor () -> sig end
        Got "once"
        but expected "many".
 |}]
@@ -755,9 +755,9 @@ Error: Signature mismatch:
          Nonportable_Portable
        In module "F":
        Modules do not match:
-         functor (M : S @ portable) -> ...
+         (M : S @ portable) -> ...
        is not included in
-         functor (M : S @ nonportable) -> ...
+         (M : S @ nonportable) -> ...
        Module types do not match:
          S @ portable
        does not include
@@ -815,9 +815,9 @@ Line 1, characters 37-38:
                                          ^
 Error: Signature mismatch:
        Modules do not match:
-         functor (Arg : S @ shareable) -> ...
+         (Arg : S @ shareable) -> ...
        is not included in
-         functor S @ nonportable -> ...
+         S @ nonportable -> ...
        Module types do not match:
          S @ shareable
        does not include
@@ -832,12 +832,14 @@ Error: Signature mismatch:
 
 module F (M : S -> S) = (M : S @ shareable -> S)
 [%%expect{|
-module F : functor (M : S -> S) -> S @ shareable -> S @@ stateless
+module F : functor (M : functor S -> S) -> functor S @ shareable -> S @@
+  stateless
 |}]
 
 module F (M : S -> S @ shareable) = (M : S -> S)
 [%%expect{|
-module F : functor (M : S -> S @ shareable) -> S -> S @@ stateless
+module F : functor (M : functor S -> S @ shareable) -> functor S -> S @@
+  stateless
 |}]
 
 module F (M : S -> S) = (M : S -> S @ shareable)
@@ -849,7 +851,7 @@ Error: Signature mismatch:
        Modules do not match:
          functor (Arg : S) -> sig val f : unit -> unit end
        is not included in
-         S -> S @ shareable
+         functor S -> S @ shareable
        Modules do not match:
          sig val f : unit -> unit end @ nonportable
        is not included in
@@ -872,9 +874,9 @@ Line 3, characters 34-35:
                                       ^
 Error: Signature mismatch:
        Modules do not match:
-         functor (Arg : T @ unique) -> ...
+         (Arg : T @ unique) -> ...
        is not included in
-         functor T @ aliased -> ...
+         T @ aliased -> ...
        Module types do not match:
          T @ unique
        does not include
@@ -884,12 +886,14 @@ Error: Signature mismatch:
 
 module F (M : T -> S) = (M : T @ unique -> S)
 [%%expect{|
-module F : functor (M : T -> S) -> T @ unique -> S @@ stateless
+module F : functor (M : functor T -> S) -> functor T @ unique -> S @@
+  stateless
 |}]
 
 module F (M : S -> T @ unique) = (M : S -> T)
 [%%expect{|
-module F : functor (M : S -> T @ unique) -> S -> T @@ stateless
+module F : functor (M : functor S -> T @ unique) -> functor S -> T @@
+  stateless
 |}]
 
 module F (M : S -> T) = (M : S -> T @ unique)
@@ -901,7 +905,7 @@ Error: Signature mismatch:
        Modules do not match:
          functor (Arg : S) -> sig val t : int * int end
        is not included in
-         S -> T @ unique
+         functor S -> T @ unique
        Got "aliased"
        but expected "unique".
 |}]
@@ -955,8 +959,9 @@ module F(G : S -> S @ portable) = struct
 end
 [%%expect{|
 module F :
-  functor (G : S -> S @ portable) -> sig module H : S -> S @ portable end @@
-  stateless
+  functor (G : functor S -> S @ portable) ->
+    sig module H : functor S -> S @ portable end
+  @@ stateless
 |}]
 
 module F(G : S -> S) = struct
@@ -971,7 +976,7 @@ Error: Signature mismatch:
        Modules do not match:
          functor (X : S) -> sig val f : unit -> unit end
        is not included in
-         S -> S @ portable
+         functor S -> S @ portable
        Modules do not match:
          sig val f : unit -> unit end @ nonportable
        is not included in
@@ -1009,14 +1014,18 @@ module F(G : S -> S) = struct
     = functor (X : S) -> struct include G(X) end
 end
 [%%expect{|
-module F : functor (G : S -> S) -> sig module H : S @ portable -> S end @@
-  stateless
+module F :
+  functor (G : functor S -> S) ->
+    sig module H : functor S @ portable -> S end
+  @@ stateless
 |}]
 
 module F (M : (S @ portable -> S) -> S) = (M : (S -> S) -> S)
 [%%expect{|
-module F : functor (M : (S @ portable -> S) -> S) -> (S -> S) -> S @@
-  stateless
+module F :
+  functor (M : functor (functor S @ portable -> S) -> S) ->
+    functor (functor S -> S) -> S
+  @@ stateless
 |}]
 
 module F (M : (S -> S) -> S) = (M : (S @ portable -> S) -> S)
@@ -1025,18 +1034,15 @@ Line 1, characters 32-33:
 1 | module F (M : (S -> S) -> S) = (M : (S @ portable -> S) -> S)
                                     ^
 Error: Signature mismatch:
-       Modules do not match:
-         functor (Arg : $S1) -> ...
-       is not included in
-         functor $T1 -> ...
+       Modules do not match: (Arg : $S1) -> ... is not included in $T1 -> ...
        Module types do not match:
-         $S1 = S -> S
+         $S1 = functor S -> S
        does not include
-         $T1 = S @ portable -> S
+         $T1 = functor S @ portable -> S
        Modules do not match:
-         functor S @ portable -> ...
+         S @ portable -> ...
        is not included in
-         functor S @ nonportable -> ...
+         S @ nonportable -> ...
        Module types do not match:
          S @ portable
        does not include
@@ -1055,14 +1061,11 @@ Line 1, characters 43-44:
 1 | module F (M : (S -> S @ portable) -> S) = (M : (S -> S) -> S)
                                                ^
 Error: Signature mismatch:
-       Modules do not match:
-         functor (Arg : $S1) -> ...
-       is not included in
-         functor $T1 -> ...
+       Modules do not match: (Arg : $S1) -> ... is not included in $T1 -> ...
        Module types do not match:
-         $S1 = S -> S @ portable
+         $S1 = functor S -> S @ portable
        does not include
-         $T1 = S -> S
+         $T1 = functor S -> S
        Modules do not match: S @ nonportable is not included in S @ portable
        Values do not match:
          val f : unit -> unit (* in a structure at nonportable *)
@@ -1074,6 +1077,8 @@ Error: Signature mismatch:
 
 module F (M : (S -> S) -> S) = (M : (S -> S @ portable) -> S)
 [%%expect{|
-module F : functor (M : (S -> S) -> S) -> (S -> S @ portable) -> S @@
-  stateless
+module F :
+  functor (M : functor (functor S -> S) -> S) ->
+    functor (functor S -> S @ portable) -> S
+  @@ stateless
 |}]

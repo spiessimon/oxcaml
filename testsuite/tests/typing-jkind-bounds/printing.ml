@@ -18,43 +18,20 @@ Error: The kind of type "t" is immutable_data
 
 type 'a t : immutable_data = A of 'a
 [%%expect {|
-Line 1, characters 0-36:
-1 | type 'a t : immutable_data = A of 'a
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Error: The kind of type "t" is immutable_data with 'a
-         because it's a boxed variant type.
-       But the kind of type "t" must be a subkind of immutable_data
-         because of the annotation on the declaration of the type t.
+Uncaught exception: Typedecl.Error(_, _)
+
 |}]
 
 type ('a, 'b) t : immutable_data with 'a = { a : 'a; b : 'b }
 [%%expect {|
-Line 1, characters 0-61:
-1 | type ('a, 'b) t : immutable_data with 'a = { a : 'a; b : 'b }
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Error: The kind of type "t" is immutable_data with 'a with 'b
-         because it's a boxed record type.
-       But the kind of type "t" must be a subkind of immutable_data with 'a
-         because of the annotation on the declaration of the type t.
+Uncaught exception: Typedecl.Error(_, _)
+
 |}]
 
 type 'a t : immutable_data = Foo of 'a @@ portable
 [%%expect {|
-Line 1, characters 0-50:
-1 | type 'a t : immutable_data = Foo of 'a @@ portable
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Error: The kind of type "t" is immutable_data with 'a @@ portable
-         because it's a boxed variant type.
-       But the kind of type "t" must be a subkind of immutable_data
-         because of the annotation on the declaration of the type t.
+Uncaught exception: Typedecl.Error(_, _)
 
-       The first mode-crosses less than the second along:
-         linearity: mod many with 'a ≰ mod many
-         contention: mod contended with 'a ≰ mod contended
-         forkable: mod forkable with 'a ≰ mod forkable
-         yielding: mod unyielding with 'a ≰ mod unyielding
-         statefulness: mod stateless with 'a ≰ mod stateless
-         visibility: mod immutable with 'a ≰ mod immutable
 |}]
 
 module M : sig
@@ -85,30 +62,8 @@ end = struct
   type 'a t = Foo of 'a @@ contended many
 end
 [%%expect {|
-Lines 3-5, characters 6-3:
-3 | ......struct
-4 |   type 'a t = Foo of 'a @@ contended many
-5 | end
-Error: Signature mismatch:
-       Modules do not match:
-         sig type 'a t = Foo of 'a @@ many contended end
-       is not included in
-         sig type 'a t : immutable_data end
-       Type declarations do not match:
-         type 'a t = Foo of 'a @@ many contended
-       is not included in
-         type 'a t : immutable_data
-       The kind of the first is immutable_data with 'a @@ many contended
-         because of the definition of t at line 4, characters 2-41.
-       But the kind of the first must be a subkind of immutable_data
-         because of the definition of t at line 2, characters 2-28.
+Uncaught exception: Typemod.Error(_, _, _)
 
-       The first mode-crosses less than the second along:
-         portability: mod portable with 'a ≰ mod portable
-         forkable: mod forkable with 'a ≰ mod forkable
-         yielding: mod unyielding with 'a ≰ mod unyielding
-         statefulness: mod stateless with 'a ≰ mod stateless
-         visibility: mod immutable with 'a ≰ mod immutable
 |}]
 
 module M : sig
@@ -119,28 +74,8 @@ end = struct
     type t = Foo of a | Bar of a @@ contended
 end
 [%%expect {|
-Lines 4-7, characters 6-3:
-4 | ......struct
-5 |     type a
-6 |     type t = Foo of a | Bar of a @@ contended
-7 | end
-Error: Signature mismatch:
-       Modules do not match:
-         sig type a type t = Foo of a | Bar of a @@ contended end
-       is not included in
-         sig type a type t : immutable_data with a @@ portable end
-       Type declarations do not match:
-         type t = Foo of a | Bar of a @@ contended
-       is not included in
-         type t : immutable_data with a @@ portable
-       The kind of the first is immutable_data with a
-         because of the definition of t at line 6, characters 4-45.
-       But the kind of the first must be a subkind of
-           immutable_data with a @@ portable
-         because of the definition of t at line 3, characters 2-44.
+Uncaught exception: Typemod.Error(_, _, _)
 
-       The first mode-crosses less than the second along:
-         portability: mod portable with a ≰ mod portable
 |}]
 
 type a
@@ -152,10 +87,10 @@ type ('a : immutable_data) t
 Line 3, characters 11-12:
 3 | let f () : a t = failwith ""
                ^
-Error: This type "a" should be an instance of type "('a : immutable_data)"
-       The kind of a is value
+Error: This type "a" should be an instance of type "'a"
+       The kind of "a" is value
          because of the definition of a at line 1, characters 0-6.
-       But the kind of a must be a subkind of immutable_data
+       But the kind of "a" must be a subkind of immutable_data
          because of the definition of t at line 2, characters 0-28.
 |}]
 
@@ -168,28 +103,15 @@ type ('a : immutable_data) t
 Line 3, characters 11-12:
 3 | let f () : a t = failwith ""
                ^
-Error: This type "a" = "int ref" should be an instance of type
-         "('a : immutable_data)"
-       The kind of a is mutable_data.
-       But the kind of a must be a subkind of immutable_data
+Error: This type "a" = "int ref" should be an instance of type "'a"
+       The kind of "a" is mutable_data.
+       But the kind of "a" must be a subkind of immutable_data
          because of the definition of t at line 2, characters 0-28.
 |}, Principal{|
 type a = int ref
 type ('a : immutable_data) t
-Line 3, characters 11-12:
-3 | let f () : a t = failwith ""
-               ^
-Error: This type "a" = "int ref" should be an instance of type
-         "('a : immutable_data)"
-       The kind of a is mutable_data with int @@ forkable unyielding many.
-       But the kind of a must be a subkind of immutable_data
-         because of the definition of t at line 2, characters 0-28.
+Uncaught exception: Typetexp.Error(_, _, _)
 
-       The first mode-crosses less than the second along:
-         contention: mod uncontended ≰ mod contended
-         portability: mod portable with int ≰ mod portable
-         statefulness: mod stateless with int ≰ mod stateless
-         visibility: mod read_write ≰ mod immutable
 |}]
 
 type 'a u = Foo of 'a @@ portable
@@ -201,33 +123,16 @@ type ('a : immutable_data) t
 Line 3, characters 11-25:
 3 | let f () : (int -> int) u t = failwith ""
                ^^^^^^^^^^^^^^
-Error: This type "(int -> int) u" should be an instance of type
-         "('a : immutable_data)"
-       The kind of (int -> int) u is value mod portable immutable non_float
+Error: This type "(int -> int) u" should be an instance of type "'a"
+       The kind of "(int -> int) u" is value mod portable immutable non_float
          because of the definition of u at line 1, characters 0-33.
-       But the kind of (int -> int) u must be a subkind of immutable_data
+       But the kind of "(int -> int) u" must be a subkind of immutable_data
          because of the definition of t at line 2, characters 0-28.
 |}, Principal{|
 type 'a u = Foo of 'a @@ portable
 type ('a : immutable_data) t
-Line 3, characters 11-25:
-3 | let f () : (int -> int) u t = failwith ""
-               ^^^^^^^^^^^^^^
-Error: This type "(int -> int) u" should be an instance of type
-         "('a : immutable_data)"
-       The kind of (int -> int) u is
-           immutable_data with int -> int @@ portable
-         because of the definition of u at line 1, characters 0-33.
-       But the kind of (int -> int) u must be a subkind of immutable_data
-         because of the definition of t at line 2, characters 0-28.
+Uncaught exception: Typetexp.Error(_, _, _)
 
-       The first mode-crosses less than the second along:
-         linearity: mod many with int -> int ≰ mod many
-         contention: mod contended with int -> int ≰ mod contended
-         forkable: mod forkable with int -> int ≰ mod forkable
-         yielding: mod unyielding with int -> int ≰ mod unyielding
-         statefulness: mod stateless with int -> int ≰ mod stateless
-         visibility: mod immutable with int -> int ≰ mod immutable
 |}]
 
 module M : sig
@@ -261,24 +166,8 @@ end = struct
   type 'a t : value mod contended with 'a
 end
 [%%expect {|
-Lines 3-5, characters 6-3:
-3 | ......struct
-4 |   type 'a t : value mod contended with 'a
-5 | end
-Error: Signature mismatch:
-       Modules do not match:
-         sig type 'a t : value mod contended with 'a end
-       is not included in
-         sig type 'a t : value mod portable with 'a end
-       Type declarations do not match:
-         type 'a t : value mod contended with 'a
-       is not included in
-         type 'a t : value mod portable with 'a
-       The kind of the first is value mod contended with 'a
-         because of the definition of t at line 4, characters 2-41.
-       But the kind of the first must be a subkind of
-           value mod portable with 'a
-         because of the definition of t at line 2, characters 2-40.
+Uncaught exception: Typemod.Error(_, _, _)
+
 |}]
 
 module M : sig
@@ -287,24 +176,8 @@ end = struct
   type 'a t : value mod contended with 'a
 end
 [%%expect {|
-Lines 3-5, characters 6-3:
-3 | ......struct
-4 |   type 'a t : value mod contended with 'a
-5 | end
-Error: Signature mismatch:
-       Modules do not match:
-         sig type 'a t : value mod contended with 'a end
-       is not included in
-         sig type 'a t : value mod portable contended with 'a end
-       Type declarations do not match:
-         type 'a t : value mod contended with 'a
-       is not included in
-         type 'a t : value mod portable contended with 'a
-       The kind of the first is value mod contended with 'a
-         because of the definition of t at line 4, characters 2-41.
-       But the kind of the first must be a subkind of
-           value mod portable contended with 'a
-         because of the definition of t at line 2, characters 2-50.
+Uncaught exception: Typemod.Error(_, _, _)
+
 |}]
 
 module M : sig
@@ -313,23 +186,8 @@ end = struct
   type 'a t : value mod portable with 'a
 end
 [%%expect {|
-Lines 3-5, characters 6-3:
-3 | ......struct
-4 |   type 'a t : value mod portable with 'a
-5 | end
-Error: Signature mismatch:
-       Modules do not match:
-         sig type 'a t : value mod portable with 'a end
-       is not included in
-         sig type 'a t : value mod portable end
-       Type declarations do not match:
-         type 'a t : value mod portable with 'a
-       is not included in
-         type 'a t : value mod portable
-       The kind of the first is value mod portable with 'a
-         because of the definition of t at line 4, characters 2-40.
-       But the kind of the first must be a subkind of value mod portable
-         because of the definition of t at line 2, characters 2-52.
+Uncaught exception: Typemod.Error(_, _, _)
+
 |}]
 
 module M : sig
@@ -338,29 +196,8 @@ end = struct
   type 'a t : mutable_data with 'a
 end
 [%%expect {|
-Lines 3-5, characters 6-3:
-3 | ......struct
-4 |   type 'a t : mutable_data with 'a
-5 | end
-Error: Signature mismatch:
-       Modules do not match:
-         sig type 'a t : mutable_data with 'a end
-       is not included in
-         sig type 'a t : mutable_data with 'a @@ forkable unyielding many end
-       Type declarations do not match:
-         type 'a t : mutable_data with 'a
-       is not included in
-         type 'a t : mutable_data with 'a @@ forkable unyielding many
-       The kind of the first is mutable_data with 'a
-         because of the definition of t at line 4, characters 2-34.
-       But the kind of the first must be a subkind of
-           mutable_data with 'a @@ forkable unyielding many
-         because of the definition of t at line 2, characters 2-40.
+Uncaught exception: Typemod.Error(_, _, _)
 
-       The first mode-crosses less than the second along:
-         linearity: mod many with 'a ≰ mod many
-         forkable: mod forkable with 'a ≰ mod forkable
-         yielding: mod unyielding with 'a ≰ mod unyielding
 |}]
 
 module M : sig
@@ -369,23 +206,8 @@ end = struct
   type 'a t : value mod portable with 'a @@ portable with 'a
 end
 [%%expect {|
-Lines 3-5, characters 6-3:
-3 | ......struct
-4 |   type 'a t : value mod portable with 'a @@ portable with 'a
-5 | end
-Error: Signature mismatch:
-       Modules do not match:
-         sig type 'a t : value mod portable with 'a end
-       is not included in
-         sig type 'a t : value mod portable end
-       Type declarations do not match:
-         type 'a t : value mod portable with 'a
-       is not included in
-         type 'a t : value mod portable
-       The kind of the first is value mod portable with 'a
-         because of the definition of t at line 4, characters 2-60.
-       But the kind of the first must be a subkind of value mod portable
-         because of the definition of t at line 2, characters 2-52.
+Uncaught exception: Typemod.Error(_, _, _)
+
 |}]
 
 type 'a t_mutable : mutable_data with 'a
@@ -395,24 +217,8 @@ end = struct
   type 'a t : immutable_data with 'a t_mutable
 end
 [%%expect {|
-type 'a t_mutable : mutable_data with 'a
-Lines 4-6, characters 6-3:
-4 | ......struct
-5 |   type 'a t : immutable_data with 'a t_mutable
-6 | end
-Error: Signature mismatch:
-       Modules do not match:
-         sig type 'a t : immutable_data with 'a t_mutable end
-       is not included in
-         sig type 'a t : immutable_data with 'a end
-       Type declarations do not match:
-         type 'a t : immutable_data with 'a t_mutable
-       is not included in
-         type 'a t : immutable_data with 'a
-       The kind of the first is immutable_data with 'a t_mutable
-         because of the definition of t at line 5, characters 2-46.
-       But the kind of the first must be a subkind of immutable_data with 'a
-         because of the definition of t at line 3, characters 2-56.
+Uncaught exception: File "typing/jkind.ml", line 1056, characters 42-48: Assertion failed
+
 |}]
 
 module M : sig
@@ -421,26 +227,6 @@ end = struct
   type 'a t : immutable_data with 'a ref
 end
 [%%expect {|
-Lines 3-5, characters 6-3:
-3 | ......struct
-4 |   type 'a t : immutable_data with 'a ref
-5 | end
-Error: Signature mismatch:
-       Modules do not match:
-         sig type 'a t : mutable_data with 'a @@ forkable unyielding many end
-       is not included in
-         sig type 'a t : immutable_data with 'a end
-       Type declarations do not match:
-         type 'a t : mutable_data with 'a @@ forkable unyielding many
-       is not included in
-         type 'a t : immutable_data with 'a
-       The kind of the first is
-           mutable_data with 'a @@ forkable unyielding many
-         because of the definition of t at line 4, characters 2-40.
-       But the kind of the first must be a subkind of immutable_data with 'a
-         because of the definition of t at line 2, characters 2-56.
+Uncaught exception: Typemod.Error(_, _, _)
 
-       The first mode-crosses less than the second along:
-         contention: mod uncontended ≰ mod contended with 'a
-         visibility: mod read_write ≰ mod immutable with 'a
 |}]

@@ -53,9 +53,9 @@ type m2 = (module S with type t = t_value);;
 [%%expect{|
 module type S = sig type t : immediate end
 type m1 = (module S with type t = int)
-Line 6, characters 18-40:
-6 | type m2 = (module S with type t = string);;
-                      ^^^^^^^^^^^^^^^^^^^^^^
+Line 6, characters 18-41:
+6 | type m2 = (module S with type t = t_value);;
+                      ^^^^^^^^^^^^^^^^^^^^^^^
 Error: In this "with" constraint, the new definition of "t"
        does not match its original definition in the constrained signature:
        Type declarations do not match:
@@ -76,9 +76,9 @@ end
 type m = (module S with type t = t_value);;
 [%%expect{|
 module type S = sig type t = int end
-Line 5, characters 17-39:
-5 | type m = (module S with type t = string);;
-                     ^^^^^^^^^^^^^^^^^^^^^^
+Line 5, characters 17-40:
+5 | type m = (module S with type t = t_value);;
+                     ^^^^^^^^^^^^^^^^^^^^^^^
 Error: In the constrained signature, type "t" is defined to be "int".
        Package "with" constraints may only be used on abstract types.
 |}];;
@@ -146,9 +146,9 @@ Line 6, characters 0-16:
 6 | and t2 = t_value;;
     ^^^^^^^^^^^^^^^^
 Error:
-       The kind of t2 is value
+       The kind of "t2" is value
          because of the definition of t_value at line 1, characters 0-12.
-       But the kind of t2 must be a subkind of immediate
+       But the kind of "t2" must be a subkind of immediate
          because of the definition of t at line 2, characters 2-22.
 |}];;
 
@@ -332,10 +332,10 @@ type t1 = int t
 Line 8, characters 10-17:
 8 | type t2 = t_value t
               ^^^^^^^
-Error: This type "t_value" should be an instance of type "('a : immediate)"
-       The kind of t_value is value
+Error: This type "t_value" should be an instance of type "'a"
+       The kind of "t_value" is value
          because of the definition of t_value at line 1, characters 0-12.
-       But the kind of t_value must be a subkind of immediate
+       But the kind of "t_value" must be a subkind of immediate
          because of the definition of t at line 5, characters 0-39.
 |}];;
 

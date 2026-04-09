@@ -74,10 +74,10 @@ Line 4, characters 35-41:
 4 |   type 'a s = 'a -> int constraint 'a = t
                                        ^^^^^^
 Error: The type constraints are not consistent.
-       Type "('a : '_representable_layout_1)" is not compatible with type "t"
-       The layout of t is any
+       Type "'a" is not compatible with type "t"
+       The layout of "t" is any
          because of the definition of t at line 2, characters 2-14.
-       But the layout of t must be representable
+       But the layout of "t" must be representable
          because it instantiates an unannotated type parameter of s.
 |}]
 
@@ -91,10 +91,10 @@ Line 4, characters 35-41:
 4 |   type 'a s = int -> 'a constraint 'a = t
                                        ^^^^^^
 Error: The type constraints are not consistent.
-       Type "('a : '_representable_layout_2)" is not compatible with type "t"
-       The layout of t is any
+       Type "'a" is not compatible with type "t"
+       The layout of "t" is any
          because of the definition of t at line 2, characters 2-14.
-       But the layout of t must be representable
+       But the layout of "t" must be representable
          because it instantiates an unannotated type parameter of s.
 |}]
 
@@ -104,10 +104,10 @@ Line 1, characters 20-32:
 1 | let f1 () : t_any = assert false;;
                         ^^^^^^^^^^^^
 Error: This expression has type "t_any" but an expression was expected of type
-         "('a : '_representable_layout_3)"
-       The layout of t_any is any
+         "'a"
+       The layout of "t_any" is any
          because of the definition of t_any at line 1, characters 0-18.
-       But the layout of t_any must be representable
+       But the layout of "t_any" must be representable
          because we must know concretely how to return a function result.
 |}];;
 
@@ -117,11 +117,10 @@ Line 1, characters 7-18:
 1 | let f1 (x : t_any) = ();;
            ^^^^^^^^^^^
 Error: This pattern matches values of type "t_any"
-       but a pattern was expected which matches values of type
-         "('a : '_representable_layout_4)"
-       The layout of t_any is any
+       but a pattern was expected which matches values of type "'a"
+       The layout of "t_any" is any
          because of the definition of t_any at line 1, characters 0-18.
-       But the layout of t_any must be representable
+       But the layout of "t_any" must be representable
          because we must know concretely how to pass a function argument.
 |}];;
 
@@ -232,10 +231,10 @@ let string_id (x : string imm_id) = x;;
 Line 1, characters 19-25:
 1 | let string_id (x : string imm_id) = x;;
                        ^^^^^^
-Error: This type "string" should be an instance of type "('a : immediate)"
-       The kind of string is immutable_data
+Error: This type "string" should be an instance of type "'a"
+       The kind of "string" is immutable_data
          because it is the primitive type string.
-       But the kind of string must be a subkind of immediate
+       But the kind of "string" must be a subkind of immediate
          because of the definition of imm_id at line 1, characters 0-33.
 |}];;
 
@@ -254,11 +253,11 @@ let not_helloworld = id_for_imms "hello world";;
 Line 1, characters 33-46:
 1 | let not_helloworld = id_for_imms "hello world";;
                                      ^^^^^^^^^^^^^
-Error: This expression has type "string" but an expression was expected of type
-         "'a imm_id" = "('a : immediate)"
-       The kind of string is immutable_data
+Error: This constant has type "string" but an expression was expected of type
+         "'a imm_id" = "'a"
+       The kind of "string" is immutable_data
          because it is the primitive type string.
-       But the kind of string must be a subkind of immediate
+       But the kind of "string" must be a subkind of immediate
          because of the definition of id_for_imms at line 1, characters 16-35.
 |}]
 
@@ -271,10 +270,10 @@ and s4 = string t4;;
 Line 2, characters 9-15:
 2 | and s4 = string t4;;
              ^^^^^^
-Error: This type "string" should be an instance of type "('a : immediate)"
-       The kind of string is immutable_data
+Error: This type "string" should be an instance of type "'a"
+       The kind of "string" is immutable_data
          because it is the primitive type string.
-       But the kind of string must be a subkind of immediate
+       But the kind of "string" must be a subkind of immediate
          because of the annotation on 'a in the declaration of the type t4.
 |}];;
 
@@ -285,10 +284,10 @@ and ('a : immediate) t4;;
 Line 1, characters 10-16:
 1 | type s4 = string t4
               ^^^^^^
-Error: This type "string" should be an instance of type "('a : immediate)"
-       The kind of string is immutable_data
+Error: This type "string" should be an instance of type "'a"
+       The kind of "string" is immutable_data
          because it is the primitive type string.
-       But the kind of string must be a subkind of immediate
+       But the kind of "string" must be a subkind of immediate
          because of the annotation on 'a in the declaration of the type t4.
 |}]
 
@@ -319,9 +318,9 @@ Line 3, characters 0-15:
 3 | and s5 = string;;
     ^^^^^^^^^^^^^^^
 Error:
-       The kind of s5 is immutable_data
+       The kind of "s5" is immutable_data
          because it is the primitive type string.
-       But the kind of s5 must be a subkind of immediate
+       But the kind of "s5" must be a subkind of immediate
          because of the annotation on 'a in the declaration of the type t4.
 |}]
 
@@ -376,10 +375,10 @@ let h5 (x : int void5) = f5 x
 Line 1, characters 12-15:
 1 | let h5 (x : int void5) = f5 x
                 ^^^
-Error: This type "int" should be an instance of type "('a : void)"
-       The layout of int is value
+Error: This type "int" should be an instance of type "'a"
+       The layout of "int" is value
          because it is the primitive type int.
-       But the layout of int must be a sublayout of void
+       But the layout of "int" must be a sublayout of void
          because of the definition of void5 at line 1, characters 0-37.
 |}];;
 
@@ -388,11 +387,10 @@ let h5' (x : int) = Void5 x
 Line 1, characters 26-27:
 1 | let h5' (x : int) = Void5 x
                               ^
-Error: This expression has type "int" but an expression was expected of type
-         "('a : void)"
-       The layout of int is value
+Error: The value "x" has type "int" but an expression was expected of type "'a"
+       The layout of "int" is value
          because it is the primitive type int.
-       But the layout of int must be a sublayout of void
+       But the layout of "int" must be a sublayout of void
          because of the definition of void5 at line 1, characters 0-37.
 |}];;
 
@@ -427,9 +425,9 @@ Line 2, characters 2-32:
       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Error: This definition has type "'b -> unit" which is less general than
          "'a. 'a -> unit"
-       The kind of 'a is value
+       The kind of "'c" is value
          because it is or unifies with an unannotated universal variable.
-       But the kind of 'a must be a subkind of immediate
+       But the kind of "'c" must be a subkind of immediate
          because of the definition of t6_imm at line 1, characters 0-42.
 |}];;
 
@@ -443,9 +441,9 @@ Line 3, characters 4-34:
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Error: This method has type "'b -> unit" which is less general than
          "'a. 'a -> unit"
-       The kind of 'a is value
+       The kind of "'c" is value
          because it is or unifies with an unannotated universal variable.
-       But the kind of 'a must be a subkind of immediate
+       But the kind of "'c" must be a subkind of immediate
          because of the definition of t6_imm at line 1, characters 0-42.
 |}];;
 
@@ -464,21 +462,15 @@ type ('a : immediate) t7 = Foo7 of 'a
 Line 3, characters 12-21:
 3 | type t7' = (int * int) t7;;
                 ^^^^^^^^^
-Error: This type "int * int" should be an instance of type "('a : immediate)"
-       The kind of int * int is immutable_data
+Error: This type "int * int" should be an instance of type "'a"
+       The kind of "int * int" is immutable_data
          because it's a tuple type.
-       But the kind of int * int must be a subkind of immediate
+       But the kind of "int * int" must be a subkind of immediate
          because of the definition of t7 at line 1, characters 0-37.
 |}, Principal{|
 type ('a : immediate) t7 = Foo7 of 'a
-Line 3, characters 12-21:
-3 | type t7' = (int * int) t7;;
-                ^^^^^^^^^
-Error: This type "int * int" should be an instance of type "('a : immediate)"
-       The kind of int * int is immutable_data with int
-         because it's a tuple type.
-       But the kind of int * int must be a subkind of immediate
-         because of the definition of t7 at line 1, characters 0-37.
+Uncaught exception: Typetexp.Error(_, _, _)
+
 |}]
 
 (**********************************************************)
@@ -526,10 +518,10 @@ end;;
 Line 4, characters 13-19:
 4 |   type bad = t_void t
                  ^^^^^^
-Error: This type "t_void" should be an instance of type "('a : value)"
-       The layout of t_void is void
+Error: This type "t_void" should be an instance of type "'a"
+       The layout of "t_void" is void
          because of the definition of t_void at line 6, characters 0-19.
-       But the layout of t_void must be a sublayout of value
+       But the layout of "t_void" must be a sublayout of value
          because of the definition of t at line 2, characters 2-42.
 |}];;
 
@@ -541,10 +533,10 @@ Line 2, characters 54-78:
 2 |   type 'a t = [ `Foo of 'a | `Baz of int ] constraint 'a = void_unboxed_record
                                                           ^^^^^^^^^^^^^^^^^^^^^^^^
 Error: The type constraints are not consistent.
-       Type "('a : value)" is not compatible with type "void_unboxed_record"
-       The layout of void_unboxed_record is void
+       Type "'a" is not compatible with type "void_unboxed_record"
+       The layout of "void_unboxed_record" is void
          because of the definition of void_unboxed_record at line 12, characters 0-60.
-       But the layout of void_unboxed_record must be a sublayout of value
+       But the layout of "void_unboxed_record" must be a sublayout of value
          because it instantiates an unannotated type parameter of t,
          chosen to have layout value.
 |}];;
@@ -607,11 +599,11 @@ end;;
 Line 7, characters 13-14:
 7 |     | V t -> t, 27
                  ^
-Error: This expression has type "void_unboxed_record"
-       but an expression was expected of type "('a : value_or_null)"
-       The layout of void_unboxed_record is void
+Error: The value "t" has type "void_unboxed_record"
+       but an expression was expected of type "'a"
+       The layout of "void_unboxed_record" is void
          because of the definition of void_unboxed_record at line 12, characters 0-60.
-       But the layout of void_unboxed_record must be a sublayout of value
+       But the layout of "void_unboxed_record" must be a sublayout of value
          because it's the type of a tuple element.
 |}];;
 
@@ -625,11 +617,10 @@ Line 4, characters 7-21:
 4 |     | ({vur_void = _},i) -> i
            ^^^^^^^^^^^^^^
 Error: This pattern matches values of type "void_unboxed_record"
-       but a pattern was expected which matches values of type
-         "('a : value_or_null)"
-       The layout of void_unboxed_record is void
+       but a pattern was expected which matches values of type "'a"
+       The layout of "void_unboxed_record" is void
          because of the definition of void_unboxed_record at line 12, characters 0-60.
-       But the layout of void_unboxed_record must be a sublayout of value
+       But the layout of "void_unboxed_record" must be a sublayout of value
          because it's the type of a tuple element.
 |}];;
 
@@ -642,10 +633,10 @@ end;;
 Line 4, characters 13-19:
 4 |   type bad = t_void t
                  ^^^^^^
-Error: This type "t_void" should be an instance of type "('a : value)"
-       The layout of t_void is void
+Error: This type "t_void" should be an instance of type "'a"
+       The layout of "t_void" is void
          because of the definition of t_void at line 6, characters 0-19.
-       But the layout of t_void must be a sublayout of value
+       But the layout of "t_void" must be a sublayout of value
          because of the definition of t at line 2, characters 2-24.
 |}];;
 
@@ -657,10 +648,10 @@ Line 2, characters 34-58:
 2 |   type 'a t = int * 'a constraint 'a = void_unboxed_record
                                       ^^^^^^^^^^^^^^^^^^^^^^^^
 Error: The type constraints are not consistent.
-       Type "('a : value)" is not compatible with type "void_unboxed_record"
-       The layout of void_unboxed_record is void
+       Type "'a" is not compatible with type "void_unboxed_record"
+       The layout of "void_unboxed_record" is void
          because of the definition of void_unboxed_record at line 12, characters 0-60.
-       But the layout of void_unboxed_record must be a sublayout of value
+       But the layout of "void_unboxed_record" must be a sublayout of value
          because it instantiates an unannotated type parameter of t,
          chosen to have layout value.
 |}];;
@@ -690,11 +681,11 @@ end;;
 Line 5, characters 11-23:
 5 |   match 3, X.vr.vr_void with
                ^^^^^^^^^^^^
-Error: This expression has type "t_void" but an expression was expected of type
-         "('a : value_or_null)"
-       The layout of t_void is void
+Error: The field access "X.vr.vr_void" has type "t_void"
+       but an expression was expected of type "'a"
+       The layout of "t_void" is void
          because of the definition of t_void at line 6, characters 0-19.
-       But the layout of t_void must be a sublayout of value
+       But the layout of "t_void" must be a sublayout of value
          because it's the type of a tuple element.
 |}];;
 
@@ -734,10 +725,10 @@ Error: Signature mismatch:
          val x : ('a : immediate). 'a
        is not included in
          val x : string
-       The type "('a : immediate)" is not compatible with the type "string"
-       The kind of string is immutable_data
+       The type "'a" is not compatible with the type "string"
+       The kind of "string" is immutable_data
          because it is the primitive type string.
-       But the kind of string must be a subkind of immediate
+       But the kind of "string" must be a subkind of immediate
          because of the definition of x at line 8, characters 10-26.
 |}];;
 
@@ -774,11 +765,10 @@ Error: Signature mismatch:
          val x : ('a : immediate). 'a t
        is not included in
          val x : string
-       The type "'a t" = "('a : immediate)" is not compatible with the type
-         "string"
-       The kind of string is immutable_data
+       The type "'a t" = "'a" is not compatible with the type "string"
+       The kind of "string" is immutable_data
          because it is the primitive type string.
-       But the kind of string must be a subkind of immediate
+       But the kind of "string" must be a subkind of immediate
          because of the definition of x at line 8, characters 10-26.
 |}]
 
@@ -808,11 +798,11 @@ end;;
 Line 2, characters 17-30:
 2 |   let foo x = VV (x # getvoid)
                      ^^^^^^^^^^^^^
-Error: This expression has type "('a : value)"
+Error: The method call "x#getvoid" has type "'a"
        but an expression was expected of type "t_void"
-       The layout of t_void is void
+       The layout of "t_void" is void
          because of the definition of t_void at line 6, characters 0-19.
-       But the layout of t_void must be a sublayout of value
+       But the layout of "t_void" must be a sublayout of value
          because it's the type of an object field.
 |}];;
 
@@ -852,9 +842,9 @@ Line 3, characters 2-24:
 3 |   and ('a : void) s = 'a
       ^^^^^^^^^^^^^^^^^^^^^^
 Error:
-       The layout of 'a s is void
+       The layout of "'a s" is void
          because of the annotation on 'a in the declaration of the type s.
-       But the layout of 'a s must be a sublayout of value
+       But the layout of "'a s" must be a sublayout of value
          because it's the type of an object field.
 |}];;
 
@@ -866,10 +856,10 @@ Line 2, characters 36-47:
 2 |   type 'a t = < l : 'a > constraint 'a = t_void
                                         ^^^^^^^^^^^
 Error: The type constraints are not consistent.
-       Type "('a : value)" is not compatible with type "t_void"
-       The layout of t_void is void
+       Type "'a" is not compatible with type "t_void"
+       The layout of "t_void" is void
          because of the definition of t_void at line 6, characters 0-19.
-       But the layout of t_void must be a sublayout of value
+       But the layout of "t_void" must be a sublayout of value
          because it's the type of an object field.
 |}];;
 
@@ -940,10 +930,10 @@ end
 Line 6, characters 24-26:
 6 |       val virtual baz : 'a t
                             ^^
-Error: This type "('a : value)" should be an instance of type "('b : void)"
-       The layout of 'a is value
+Error: This type "'a" should be an instance of type "'b"
+       The layout of "'a" is value
          because it's a type argument to a class constructor.
-       But the layout of 'a must overlap with void
+       But the layout of "'a" must overlap with void
          because of the definition of t at line 2, characters 2-20.
 |}];;
 
@@ -959,10 +949,10 @@ end;;
 Line 6, characters 29-31:
 6 |       method void_id (A a) : 'a t = a
                                  ^^
-Error: This type "('a : value)" should be an instance of type "('b : void)"
-       The layout of 'a is value
+Error: This type "'a" should be an instance of type "'b"
+       The layout of "'a" is value
          because it's a type argument to a class constructor.
-       But the layout of 'a must overlap with void
+       But the layout of "'a" must overlap with void
          because of the definition of t at line 2, characters 2-30.
 |}];;
 
@@ -979,10 +969,10 @@ end;;
 Line 5, characters 4-6:
 5 |     'a t ->
         ^^
-Error: This type "('a : value)" should be an instance of type "('b : void)"
-       The layout of 'a is value
+Error: This type "'a" should be an instance of type "'b"
+       The layout of "'a" is value
          because it's a type argument to a class constructor.
-       But the layout of 'a must overlap with void
+       But the layout of "'a" must overlap with void
          because of the definition of t at line 2, characters 2-30.
 |}];;
 
@@ -1012,10 +1002,10 @@ type t13 = t_void Lazy.t;;
 Line 1, characters 11-17:
 1 | type t13 = t_void Lazy.t;;
                ^^^^^^
-Error: This type "t_void" should be an instance of type "('a : value)"
-       The layout of t_void is void
+Error: This type "t_void" should be an instance of type "'a"
+       The layout of "t_void" is void
          because of the definition of t_void at line 6, characters 0-19.
-       But the layout of t_void must be a sublayout of value
+       But the layout of "t_void" must be a sublayout of value
          because the type argument of Lazy.t has this layout.
 |}];;
 
@@ -1024,11 +1014,10 @@ let x13 (VV v) = lazy v;;
 Line 1, characters 22-23:
 1 | let x13 (VV v) = lazy v;;
                           ^
-Error: This expression has type "t_void" but an expression was expected of type
-         "('a : value)"
-       The layout of t_void is void
+Error: The value "v" has type "t_void" but an expression was expected of type "'a"
+       The layout of "t_void" is void
          because of the definition of t_void at line 6, characters 0-19.
-       But the layout of t_void must be a sublayout of value
+       But the layout of "t_void" must be a sublayout of value
          because it's the type of a lazy expression.
 |}];;
 
@@ -1039,11 +1028,10 @@ let x13 v =
 Line 3, characters 17-18:
 3 |   | lazy v -> VV v
                      ^
-Error: This expression has type "('a : value)"
-       but an expression was expected of type "t_void"
-       The layout of t_void is void
+Error: The value "v" has type "'a" but an expression was expected of type "t_void"
+       The layout of "t_void" is void
          because of the definition of t_void at line 6, characters 0-19.
-       But the layout of t_void must be a sublayout of value
+       But the layout of "t_void" must be a sublayout of value
          because it's the type of a lazy expression.
 |}];;
 
@@ -1054,10 +1042,10 @@ type t13 = t_void option;;
 Line 1, characters 11-17:
 1 | type t13 = t_void option;;
                ^^^^^^
-Error: This type "t_void" should be an instance of type "('a : value_or_null)"
-       The layout of t_void is void
+Error: This type "t_void" should be an instance of type "'a"
+       The layout of "t_void" is void
          because of the definition of t_void at line 6, characters 0-19.
-       But the layout of t_void must be a sublayout of value
+       But the layout of "t_void" must be a sublayout of value
          because the type argument of option has layout value_or_null.
 |}];;
 
@@ -1066,11 +1054,10 @@ let x13 (VV v) = Some v;;
 Line 1, characters 22-23:
 1 | let x13 (VV v) = Some v;;
                           ^
-Error: This expression has type "t_void" but an expression was expected of type
-         "('a : value_or_null)"
-       The layout of t_void is void
+Error: The value "v" has type "t_void" but an expression was expected of type "'a"
+       The layout of "t_void" is void
          because of the definition of t_void at line 6, characters 0-19.
-       But the layout of t_void must be a sublayout of value
+       But the layout of "t_void" must be a sublayout of value
          because the type argument of option has layout value_or_null.
 |}];;
 
@@ -1082,11 +1069,10 @@ let x13 v =
 Line 3, characters 17-18:
 3 |   | Some v -> VV v
                      ^
-Error: This expression has type "('a : value_or_null)"
-       but an expression was expected of type "t_void"
-       The layout of t_void is void
+Error: The value "v" has type "'a" but an expression was expected of type "t_void"
+       The layout of "t_void" is void
          because of the definition of t_void at line 6, characters 0-19.
-       But the layout of t_void must be a sublayout of value
+       But the layout of "t_void" must be a sublayout of value
          because the type argument of option has layout value_or_null.
 |}];;
 
@@ -1097,10 +1083,10 @@ type t13 = t_void list;;
 Line 1, characters 11-17:
 1 | type t13 = t_void list;;
                ^^^^^^
-Error: This type "t_void" should be an instance of type "('a : value_or_null)"
-       The layout of t_void is void
+Error: This type "t_void" should be an instance of type "'a"
+       The layout of "t_void" is void
          because of the definition of t_void at line 6, characters 0-19.
-       But the layout of t_void must be a sublayout of value
+       But the layout of "t_void" must be a sublayout of value
          because the type argument of list has layout value_or_null.
 |}];;
 
@@ -1109,11 +1095,10 @@ let x13 (VV v) = [v];;
 Line 1, characters 18-19:
 1 | let x13 (VV v) = [v];;
                       ^
-Error: This expression has type "t_void" but an expression was expected of type
-         "('a : value_or_null)"
-       The layout of t_void is void
+Error: The value "v" has type "t_void" but an expression was expected of type "'a"
+       The layout of "t_void" is void
          because of the definition of t_void at line 6, characters 0-19.
-       But the layout of t_void must be a sublayout of value
+       But the layout of "t_void" must be a sublayout of value
          because the type argument of list has layout value_or_null.
 |}];;
 
@@ -1125,11 +1110,10 @@ let x13 v =
 Line 3, characters 14-15:
 3 |   | [v] -> VV v
                   ^
-Error: This expression has type "('a : value_or_null)"
-       but an expression was expected of type "t_void"
-       The layout of t_void is void
+Error: The value "v" has type "'a" but an expression was expected of type "t_void"
+       The layout of "t_void" is void
          because of the definition of t_void at line 6, characters 0-19.
-       But the layout of t_void must be a sublayout of value
+       But the layout of "t_void" must be a sublayout of value
          because the type argument of list has layout value_or_null.
 |}];;
 
@@ -1175,9 +1159,9 @@ Line 2, characters 0-18:
 2 | and foo14 = t_void;;
     ^^^^^^^^^^^^^^^^^^
 Error:
-       The layout of foo14 is void
+       The layout of "foo14" is void
          because of the definition of t_void at line 6, characters 0-19.
-       But the layout of foo14 must be a sublayout of value
+       But the layout of "foo14" must be a sublayout of value
          because the type argument of list has layout value_or_null.
 |}];;
 
@@ -1313,9 +1297,9 @@ Line 15, characters 4-8:
 Error: This pattern matches values of type "(M.t_void, M.t_void) eq"
        but a pattern was expected which matches values of type
          "(M.t_void, M.t_imm) eq"
-       The layout of M.t_void is void
+       The layout of "M.t_void" is void
          because of the definition of t_void at line 4, characters 2-20.
-       But the layout of M.t_void must overlap with value
+       But the layout of "M.t_void" must overlap with value
          because of the definition of t_imm at line 5, characters 2-24.
 |}]
 
@@ -1342,11 +1326,10 @@ let f (x : t_void) =
 Line 2, characters 15-16:
 2 |   let g ?(x2 = x) () = () in
                    ^
-Error: This expression has type "t_void" but an expression was expected of type
-         "('a : value_or_null)"
-       The layout of t_void is void
+Error: The value "x" has type "t_void" but an expression was expected of type "'a"
+       The layout of "t_void" is void
          because of the definition of t_void at line 1, characters 0-18.
-       But the layout of t_void must be a sublayout of value
+       But the layout of "t_void" must be a sublayout of value
          because the type argument of option has layout value_or_null.
 |}]
 
@@ -1570,11 +1553,10 @@ Line 4, characters 9-19:
 4 |     let* x : t_void = assert false
              ^^^^^^^^^^
 Error: This pattern matches values of type "t_void"
-       but a pattern was expected which matches values of type
-         "('a : value_or_null)"
-       The layout of t_void is void
+       but a pattern was expected which matches values of type "'a"
+       The layout of "t_void" is void
          because of the definition of t_void at line 1, characters 0-18.
-       But the layout of t_void must be a sublayout of value
+       But the layout of "t_void" must be a sublayout of value
          because it's the type of a tuple element.
 |}]
 
@@ -1593,11 +1575,10 @@ Line 4, characters 9-22:
 4 |     let* x : t_float64 = assert false
              ^^^^^^^^^^^^^
 Error: This pattern matches values of type "t_float64"
-       but a pattern was expected which matches values of type
-         "('a : value_or_null)"
-       The layout of t_float64 is float64
+       but a pattern was expected which matches values of type "'a"
+       The layout of "t_float64" is float64
          because of the definition of t_float64 at line 5, characters 0-24.
-       But the layout of t_float64 must be a sublayout of value
+       But the layout of "t_float64" must be a sublayout of value
          because it's the type of a tuple element.
 |}]
 
@@ -1620,10 +1601,10 @@ Line 4, characters 16-28:
 4 |   let x () = eq (mk_void ()) (mk_void ())
                     ^^^^^^^^^^^^
 Error: This expression has type "t_void" but an expression was expected of type
-         "('a : value)"
-       The layout of t_void is void
+         "'a"
+       The layout of "t_void" is void
          because of the definition of t_void at line 1, characters 0-18.
-       But the layout of t_void must be a sublayout of value
+       But the layout of "t_void" must be a sublayout of value
          because of the definition of eq at line 2, characters 2-43.
 |}]
 
@@ -1648,11 +1629,10 @@ end
 Line 8, characters 27-28:
 8 |   let g (x : t_void) = M.f x
                                ^
-Error: This expression has type "t_void" but an expression was expected of type
-         "('a : value)"
-       The layout of t_void is void
+Error: The value "x" has type "t_void" but an expression was expected of type "'a"
+       The layout of "t_void" is void
          because of the definition of t_void at line 1, characters 0-18.
-       But the layout of t_void must be a sublayout of value
+       But the layout of "t_void" must be a sublayout of value
          because of the definition of f at line 3, characters 4-20.
 |}]
 
@@ -1690,10 +1670,10 @@ Line 1, characters 14-37:
 1 | let f _ = `Mk (assert false : t_void)
                   ^^^^^^^^^^^^^^^^^^^^^^^
 Error: This expression has type "t_void" but an expression was expected of type
-         "('a : value_or_null)"
-       The layout of t_void is void
+         "'a"
+       The layout of "t_void" is void
          because of the definition of t_void at line 1, characters 0-18.
-       But the layout of t_void must be a sublayout of value
+       But the layout of "t_void" must be a sublayout of value
          because it's the type of the field of a polymorphic variant.
 |}]
 
@@ -1730,9 +1710,9 @@ Line 2, characters 19-31:
 2 | let f35 : 'a t35 = fun () -> ()
                        ^^^^^^^^^^^^
 Error:
-       The kind of 'a -> 'b is value mod aliased immutable non_float
+       The kind of "'a -> 'b" is value mod aliased immutable non_float
          because it's a function type.
-       But the kind of 'a -> 'b must be a subkind of immediate
+       But the kind of "'a -> 'b" must be a subkind of immediate
          because of the definition of t35 at line 1, characters 0-30.
 |}]
 
@@ -1750,11 +1730,11 @@ Line 1, characters 10-22:
 1 | let () = (assert false : t_any); ()
               ^^^^^^^^^^^^
 Error: This expression has type "t_any" but an expression was expected of type
-         "('a : '_representable_layout_5)"
+         "'a"
        because it is in the left-hand side of a sequence
-       The layout of t_any is any
+       The layout of "t_any" is any
          because of the definition of t_any at line 1, characters 0-18.
-       But the layout of t_any must be representable
+       But the layout of "t_any" must be representable
          because it's the type of a statement.
 |}]
 
@@ -1769,11 +1749,11 @@ Line 1, characters 25-37:
 1 | let () = while false do (assert false : t_any); done
                              ^^^^^^^^^^^^
 Error: This expression has type "t_any" but an expression was expected of type
-         "('a : '_representable_layout_6)"
+         "'a"
        because it is in the body of a while-loop
-       The layout of t_any is any
+       The layout of "t_any" is any
          because of the definition of t_any at line 1, characters 0-18.
-       But the layout of t_any must be representable
+       But the layout of "t_any" must be representable
          because it's the type of a statement.
 |}]
 
@@ -1788,11 +1768,11 @@ Line 1, characters 28-40:
 1 | let () = for i = 0 to 0 do (assert false : t_any); done
                                 ^^^^^^^^^^^^
 Error: This expression has type "t_any" but an expression was expected of type
-         "('a : '_representable_layout_7)"
+         "'a"
        because it is in the body of a for-loop
-       The layout of t_any is any
+       The layout of "t_any" is any
          because of the definition of t_any at line 1, characters 0-18.
-       But the layout of t_any must be representable
+       But the layout of "t_any" must be representable
          because it's the type of a statement.
 |}]
 

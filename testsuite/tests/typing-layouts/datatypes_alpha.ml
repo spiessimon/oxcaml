@@ -86,9 +86,9 @@ Line 2, characters 0-29:
 2 | and 'b t1_constraint' = t_any
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Error:
-       The layout of 'b t1_constraint' is any
+       The layout of "'b t1_constraint'" is any
          because of the definition of t_any at line 2, characters 0-16.
-       But the layout of 'b t1_constraint' must be representable
+       But the layout of "'b t1_constraint'" must be representable
          because it instantiates an unannotated type parameter of t1_constraint.
 |}]
 (* CR layouts errors: this error is blamed on the wrong piece *)
@@ -324,12 +324,12 @@ val f6 : t6 -> float = <fun>
 Line 8, characters 32-36:
 8 |   let { fld6 = fld6 } = x in S6 fld6;;
                                     ^^^^
-Error: This expression has type "float" but an expression was expected of type
-         "('a : immediate)"
-       The kind of float is
+Error: The value "fld6" has type "float" but an expression was expected of type
+         "'a"
+       The kind of "float" is
            value mod forkable unyielding many stateless immutable
          because it is the primitive type float.
-       But the kind of float must be a subkind of immediate
+       But the kind of "float" must be a subkind of immediate
          because of the definition of s6 at line 2, characters 0-35.
 |}];;
 

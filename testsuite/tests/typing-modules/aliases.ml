@@ -17,40 +17,40 @@ module C = Char
 module C' :
   sig
     type t = char
-    external code : char -> int = "%identity"
-    val chr : int -> char
-    val escaped : char -> string
-    val compare : t -> t -> int
-    val equal : t -> t -> bool
+    external code : char -> int @@ portable = "%identity"
+    val chr : int -> char @@ portable
+    val escaped : char -> string @@ portable
+    val compare : t -> t -> int @@ portable
+    val equal : t -> t -> bool @@ portable
     module Ascii :
       sig
-        val min : char
-        val max : char
-        val is_valid : char -> bool
-        val is_upper : char -> bool
-        val is_lower : char -> bool
-        val is_letter : char -> bool
-        val is_alphanum : char -> bool
-        val is_white : char -> bool
-        val is_blank : char -> bool
-        val is_graphic : char -> bool
-        val is_print : char -> bool
-        val is_control : char -> bool
-        val is_digit : char -> bool
-        val digit_to_int : char -> int
-        val digit_of_int : int -> char
-        val is_hex_digit : char -> bool
-        val hex_digit_to_int : char -> int
-        val lower_hex_digit_of_int : int -> char
-        val upper_hex_digit_of_int : int -> char
-        val uppercase : char -> char
-        val lowercase : char -> char
+        val min : char @@ portable
+        val max : char @@ portable
+        val is_valid : char -> bool @@ portable
+        val is_upper : char -> bool @@ portable
+        val is_lower : char -> bool @@ portable
+        val is_letter : char -> bool @@ portable
+        val is_alphanum : char -> bool @@ portable
+        val is_white : char -> bool @@ portable
+        val is_blank : char -> bool @@ portable
+        val is_graphic : char -> bool @@ portable
+        val is_print : char -> bool @@ portable
+        val is_control : char -> bool @@ portable
+        val is_digit : char -> bool @@ portable
+        val digit_to_int : char -> int @@ portable
+        val digit_of_int : int -> char @@ portable
+        val is_hex_digit : char -> bool @@ portable
+        val hex_digit_to_int : char -> int @@ portable
+        val lower_hex_digit_of_int : int -> char @@ portable
+        val upper_hex_digit_of_int : int -> char @@ portable
+        val uppercase : char -> char @@ portable
+        val lowercase : char -> char @@ portable
       end
-    val lowercase_ascii : char -> char
-    val uppercase_ascii : char -> char
-    val seeded_hash : int -> t -> int
-    val hash : t -> int
-    external unsafe_chr : int -> char = "%identity"
+    val lowercase_ascii : char -> char @@ portable
+    val uppercase_ascii : char -> char @@ portable
+    val seeded_hash : int -> t -> int @@ portable
+    val hash : t -> int @@ portable
+    external unsafe_chr : int -> char @@ portable = "%identity"
   end
 - : char = 'B'
 module C3 :
@@ -83,35 +83,35 @@ module C4 = F(struct end);;
 C4.chr 66;;
 [%%expect{|
 module F :
-  (X : sig end) ->
+  functor (X : sig end) ->
     sig
       type t = char
-      external code : char -> int = "%identity"
-      val chr : int -> char
-      val escaped : char -> string
-      val compare : t -> t -> int
-      val equal : t -> t -> bool
+      external code : char -> int @@ portable = "%identity"
+      val chr : int -> char @@ portable
+      val escaped : char -> string @@ portable
+      val compare : t -> t -> int @@ portable
+      val equal : t -> t -> bool @@ portable
       module Ascii = Char.Ascii
-      val lowercase_ascii : char -> char
-      val uppercase_ascii : char -> char
-      val seeded_hash : int -> t -> int
-      val hash : t -> int
-      external unsafe_chr : int -> char = "%identity"
+      val lowercase_ascii : char -> char @@ portable
+      val uppercase_ascii : char -> char @@ portable
+      val seeded_hash : int -> t -> int @@ portable
+      val hash : t -> int @@ portable
+      external unsafe_chr : int -> char @@ portable = "%identity"
     end
 module C4 :
   sig
     type t = char
-    external code : char -> int = "%identity"
-    val chr : int -> char
-    val escaped : char -> string
-    val compare : t -> t -> int
-    val equal : t -> t -> bool
+    external code : char -> int @@ portable = "%identity"
+    val chr : int -> char @@ portable
+    val escaped : char -> string @@ portable
+    val compare : t -> t -> int @@ portable
+    val equal : t -> t -> bool @@ portable
     module Ascii = Char.Ascii
-    val lowercase_ascii : char -> char
-    val uppercase_ascii : char -> char
-    val seeded_hash : int -> t -> int
-    val hash : t -> int
-    external unsafe_chr : int -> char = "%identity"
+    val lowercase_ascii : char -> char @@ portable
+    val uppercase_ascii : char -> char @@ portable
+    val seeded_hash : int -> t -> int @@ portable
+    val hash : t -> int @@ portable
+    external unsafe_chr : int -> char @@ portable = "%identity"
   end
 - : char = 'B'
 |}];;
@@ -119,7 +119,7 @@ module C4 :
 module G(X:sig end) = struct module M = X end;; (* does not alias X *)
 module M = G(struct end);;
 [%%expect{|
-module G : (X : sig end) -> sig module M : sig end end
+module G : functor (X : sig end) -> sig module M : sig end end
 module M : sig module M : sig end end
 |}];;
 
@@ -169,8 +169,9 @@ module M5 = G(struct end);;
 M5.N'.x;;
 [%%expect{|
 module F :
-  (X : sig end) -> sig module N : sig val x : int end module N' = N end
-module G : (X : sig end) -> sig module N' : sig val x : int end end
+  functor (X : sig end) ->
+    sig module N : sig val x : int end module N' = N end
+module G : functor (X : sig end) -> sig module N' : sig val x : int end end
 module M5 : sig module N' : sig val x : int end end
 - : int = 1
 |}];;
@@ -292,7 +293,7 @@ val pow : t -> t -> t = <fun>
 
 module F(X:sig module C = Char end) = struct module C = X.C end;;
 [%%expect{|
-module F : (X : sig module C = Char end) -> sig module C = Char end
+module F : functor (X : sig module C = Char end) -> sig module C = Char end
 |}];;
 
 (* Applicative functors *)
@@ -410,7 +411,7 @@ end;;
 include T;;
 let f (x : t) : T.t = x ;;
 [%%expect{|
-module F : (M : sig end) -> sig type t end
+module F : functor (M : sig end) -> sig type t end
 module T : sig module M : sig end type t = F(M).t end
 module M = T.M
 type t = F(M).t
@@ -497,11 +498,11 @@ module G = F (M.Y);;
 module N = G (M);;
 module N = F (M.Y) (M);;
 [%%expect{|
-module FF : (X : sig end) -> sig type t end
+module FF : functor (X : sig end) -> sig type t end
 module M :
   sig module X : sig end module Y : sig type t = FF(X).t end type t = Y.t end
-module F : (Y : sig type t end) (M : sig type t = Y.t end) -> sig end
-module G : (M : sig type t = M.Y.t end) -> sig end
+module F : functor (Y : sig type t end) (M : sig type t = Y.t end) -> sig end
+module G : functor (M : sig type t = M.Y.t end) -> sig end
 module N : sig end
 module N : sig end
 |}];;
@@ -515,7 +516,7 @@ end
 include T
 let f (x : t) : T.t = x
 [%%expect {|
-module F : (M : sig end) -> sig type t end
+module F : functor (M : sig end) -> sig type t end
 module T : sig module M : sig end type t = F(M).t end
 module M = T.M
 type t = F(M).t
@@ -538,7 +539,7 @@ module A1 : sig end
 module A2 : sig end
 module L1 : sig module X = A1 end
 module L2 : sig module X = A2 end
-module F : (L : sig module X : sig end end) -> sig end
+module F : functor (L : sig module X : sig end @@ stateless end) -> sig end
 module F1 : sig end
 module F2 : sig end
 |}];;
@@ -720,7 +721,7 @@ module type A = Alias with module N := F(List);;
 module rec Bad : A = Bad;;
 [%%expect{|
 module type Alias = sig module N : sig end module M = N end
-module F : (X : sig end) -> sig type t end
+module F : functor (X : sig end) -> sig type t end
 Line 1:
 Error: Module type declarations do not match:
          module type A = sig module M = F(List) end
@@ -812,7 +813,7 @@ end = struct
   type a = Foo.b
 end;;
 [%%expect{|
-module F : (X : sig end) -> sig type t end
+module F : functor (X : sig end) -> sig type t end
 module M :
   sig type a module Foo : sig module Bar : sig end type b = a end end
 |}];;
@@ -933,7 +934,7 @@ module M :
         module A : sig val x : string end
         module B : sig val x : int end
       end
-    module F : (X : sig module A = N.A end) -> sig val s : string end
+    module F : functor (X : sig module A = N.A end) -> sig val s : string end
   end
 module N : sig val s : string end
 val s : string = "hello"

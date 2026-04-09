@@ -12,10 +12,9 @@ let f (x: float#): ('a : value) = x
 Line 1, characters 34-35:
 1 | let f (x: float#): ('a : value) = x
                                       ^
-Error: This expression has type "float#" but an expression was expected of type
-         "('a : value)"
-       The layout of float# is float64
+Error: The value "x" has type "float#" but an expression was expected of type "'a"
+       The layout of "float#" is float64
          because it is the unboxed version of the primitive type float.
-       But the layout of float# must be a sublayout of value
+       But the layout of "float#" must be a sublayout of value
          because of the annotation on the type variable 'a.
 |}];;

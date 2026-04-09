@@ -412,7 +412,7 @@ let g () =
 Line 5, characters 52-54:
 5 |   let local_ f a b : (int -> int) @ once portable = 42 in
                                                         ^^
-Error: This expression has type "int" but an expression was expected of type
+Error: The constant "42" has type "int" but an expression was expected of type
          "int -> int"
 |}]
 
@@ -426,12 +426,12 @@ let g () = exclave_ local_
 Line 2, characters 6-7:
 2 |   let f = (() : _ @ unique once) in
           ^
-Warning 26 [unused-var]: unused variable f.
+Warning 26 [unused-var]: unused variable "f".
 
 Line 3, characters 6-7:
 3 |   let f x y @ local unique = exclave_ local_ (x + y : _ @ once unique) in
           ^
-Warning 26 [unused-var]: unused variable f.
+Warning 26 [unused-var]: unused variable "f".
 
 val g : unit -> unit @ local once = <fun>
 |}]
@@ -674,7 +674,7 @@ module F : functor (X : S @ portable) -> sig end @@ stateless
 module F (_ : S @ portable) = struct
 end
 [%%expect{|
-module F : S @ portable -> sig end @@ stateless
+module F : functor S @ portable -> sig end @@ stateless
 |}]
 
 module M' = (M : S @ portable)
@@ -721,13 +721,14 @@ module M : S @@ stateless
 module type S' = functor () (M : S @ portable) (_ : S @ portable) -> S @ portable
 [%%expect{|
 module type S' =
-  functor () (M : S @ portable) -> S @ portable -> S @ portable
+  functor () (M : S @ portable) -> functor S @ portable -> S @ portable
 |}]
 
 
 module type S' = () -> S @ portable -> S @ portable -> S @ portable
 [%%expect{|
-module type S' = functor () -> S @ portable -> S @ portable -> S @ portable
+module type S' =
+  functor () -> functor S @ portable -> functor S @ portable -> S @ portable
 |}]
 
 (* Unlike arrow type, which is by default interpreted as curried and extra
@@ -735,8 +736,8 @@ module type S' = functor () -> S @ portable -> S @ portable -> S @ portable
 module type S' = S @ local -> S -> S
 module type S'' = S @ local -> (S -> S)
 [%%expect{|
-module type S' = S @ local -> S -> S
-module type S'' = S @ local -> S -> S
+module type S' = functor S @ local -> functor S -> S
+module type S'' = functor S @ local -> functor S -> S
 |}]
 
 module (F @ portable) () = struct end
@@ -753,8 +754,9 @@ module G : functor () -> (functor () -> sig end) @ contended @@ portable
 module (G @ portable) (F : (S @ unique -> S @ once) @ local) @ contended = struct end
 [%%expect{|
 module G :
-  functor (F : (S @ unique -> S @ once) @ local) -> sig end @ contended @@
-  stateless
+  functor (F : (functor S @ unique -> S @ once) @ local) ->
+    sig end @ contended
+  @@ stateless
 |}]
 
 module (G' @ portable) = F
@@ -904,8 +906,8 @@ module type S = sig
 end;;
 
 [%%expect{|
-module F_struct : sig end -> sig end @@ stateless
-module type F_sig = sig end -> sig end
+module F_struct : functor sig end -> sig end @@ stateless
+module type F_sig = functor sig end -> sig end
 module T : sig end @@ stateless
 module type S = sig end
 |}]
@@ -922,6 +924,32 @@ let f x =
   | _ -> assert false;;
 
 [%%expect{|
+val f : ('a : value_or_null mod separable). 'a iarray -> 'a iarray = <fun>
+|}, Principal{|
+Line 4, characters 4-25:
+4 |   | ([:x:] [@test.attr1]) -> (([:x:])[@test.attr1])
+        ^^^^^^^^^^^^^^^^^^^^^
+Warning 18 [not-principal]: this type-based array disambiguation is not
+  principal.
+
+Line 5, characters 4-40:
+5 |   | ([:x;y:] [@test.attr2][@test.attr3]) ->
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Warning 18 [not-principal]: this type-based array disambiguation is not
+  principal.
+
+Line 4, characters 29-51:
+4 |   | ([:x:] [@test.attr1]) -> (([:x:])[@test.attr1])
+                                 ^^^^^^^^^^^^^^^^^^^^^^
+Warning 18 [not-principal]: this type-based array disambiguation is not
+  principal.
+
+Line 6, characters 6-42:
+6 |       ([:x;y:] [@test.attr2][@test.attr3])
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Warning 18 [not-principal]: this type-based array disambiguation is not
+  principal.
+
 val f : ('a : value_or_null mod separable). 'a iarray -> 'a iarray = <fun>
 |}]
 
@@ -1014,9 +1042,10 @@ let matches =
 
 [%%expect{|
 type xy = x:int * y:int
-val lt : x:int * y:int * x:int * int = (~x:1, ~y:2, ~x:3, 4)
-val matches : int = 1
-val matches : int * int = (1, 2)
+Line 4, characters 9-30:
+4 | let lt = (~x:1, ~y:2, ~x:3, 4)
+             ^^^^^^^^^^^^^^^^^^^^^
+Error: This tuple expression has two labels named "x"
 |}]
 
 (********************)
@@ -1367,10 +1396,8 @@ type 'a contended : immutable_data with 'a @@ contended
 type 'a contended_with_int : immutable_data with 'a @@ contended with int
 
 [%%expect{|
-type 'a list : immutable_data with 'a
-type ('a, 'b) either : immutable_data with 'a with 'b
-type 'a contended : immutable_data with 'a @@ contended
-type 'a contended_with_int : immutable_data with 'a @@ contended
+Uncaught exception: File "typing/jkind.ml", line 1056, characters 42-48: Assertion failed
+
 |}]
 
 type 'a abstract
@@ -1511,7 +1538,7 @@ let f (x : bool) = (x : int)[@error_message "custom message"]
 Line 1, characters 20-21:
 1 | let f (x : bool) = (x : int)[@error_message "custom message"]
                         ^
-Error: This expression has type "bool" but an expression was expected of type
+Error: The value "x" has type "bool" but an expression was expected of type
          "int"
        custom message
 |}]
@@ -1522,11 +1549,10 @@ let f (v : float#) : ((_ : value)[@error_message "need a value"]) = v
 Line 1, characters 68-69:
 1 | let f (v : float#) : ((_ : value)[@error_message "need a value"]) = v
                                                                         ^
-Error: This expression has type "float#" but an expression was expected of type
-         "('a : value)"
-       The layout of float# is float64
+Error: The value "v" has type "float#" but an expression was expected of type "'a"
+       The layout of "float#" is float64
          because it is the unboxed version of the primitive type float.
-       But the layout of float# must be a sublayout of value
+       But the layout of "float#" must be a sublayout of value
          because of the annotation on the wildcard _ at line 1, characters 22-33.
          need a value
 |}]
@@ -1546,12 +1572,14 @@ module _ = Base(Name1)(Value1)(Name2)(Value2(Name2_1)(Value2_1)) [@jane.non_eras
 
 
 [%%expect{|
-module Base : sig end -> sig end -> sig end -> sig end -> sig end @@
-  stateless
+module Base :
+  functor sig end ->
+    functor sig end -> functor sig end -> functor sig end -> sig end
+  @@ stateless
 module Name1 : sig end @@ stateless
 module Name2 : sig end @@ stateless
 module Value1 : sig end @@ stateless
-module Value2 : sig end -> sig end -> sig end @@ stateless
+module Value2 : functor sig end -> functor sig end -> sig end @@ stateless
 module Name2_1 : sig end @@ stateless
 module Name2_1 : sig end @@ stateless
 Line 9, characters 11-95:
@@ -1592,7 +1620,7 @@ Line 2, characters 19-43:
 2 |     (a, b) as t -> overwrite_ t with (b, _)
                        ^^^^^^^^^^^^^^^^^^^^^^^^
 Alert Translcore: Overwrite not implemented.
-Uncaught exception: File "parsing/location.ml", line 1136, characters 2-8: Assertion failed
+Uncaught exception: File "parsing/location.ml", line 1168, characters 2-8: Assertion failed
 
 |}]
 

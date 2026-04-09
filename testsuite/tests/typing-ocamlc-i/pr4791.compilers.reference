@@ -9,4 +9,4 @@ File "pr4791.ml", line 8, characters 0-10:
   Beware that this warning is purely informational and will not catch all
   instances of erroneous printed interface.
 type t = A
-module B : sig type t = B val f : t/2 -> t/1 end
+module B : sig type t = B val f : t/2 -> t end

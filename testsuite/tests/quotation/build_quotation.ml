@@ -105,7 +105,7 @@
 
 <[ [] ]>;;
 [%%expect {|
-- : <[$('a) list]> expr = <[[]]>
+- : <['a list]> expr = <[[]]>
 |}];;
 
 <[ [1; 2; 3] ]>;;
@@ -115,7 +115,7 @@
 
 <[ [||] ]>;;
 [%%expect {|
-- : <[$('a) array]> expr = <[[||]]>
+- : <['a array]> expr = <[[||]]>
 |}];;
 
 <[ [| 1; 2; 3 |] ]>;;
@@ -125,7 +125,7 @@
 
 <[ None ]>;;
 [%%expect {|
-- : <[$('a) option]> expr = <[None]>
+- : <['a option]> expr = <[None]>
 |}];;
 
 <[ Some 111 ]>;;
@@ -135,72 +135,67 @@
 
 <[ `A 42 ]>;;
 [%%expect {|
-- : <[[> `A of int ] as '_weak1]> expr = <[`A 42]>
+- : <[[> `A of int ]]> expr = <[`A 42]>
 |}];;
 
 let _ = <[ `B 123 ]>;;
 [%%expect {|
-- : <[[> `B of int ] as '_weak2]> expr = <[`B 123]>
+- : <[[> `B of int ]]> expr = <[`B 123]>
 |}];;
 
 let x0 = <[ `C 543 ]>;;
 [%%expect {|
-val x0 : <[[> `C of int ] as '_weak3]> expr = <[`C 543]>
+val x0 : <[[> `C of int ]]> expr = <[`C 543]>
 |}];;
 
 <[ if true then `A 10 else `B ("foo", 42) ]>;;
 [%%expect {|
-- : <[[> `A of int | `B of string * int ] as '_weak4]> expr =
+- : <[[> `A of int | `B of string * int ]]> expr =
 <[if true then (`A 10) else `B ("foo", 42)]>
 |}];;
 
 <[ function | `A x -> x | `B (_, foo) -> foo ]>;;
 [%%expect {|
-- : <[([< `A of '_weak6 | `B of '_weak7 * '_weak6 ] as '_weak5) -> '_weak6]>
-    expr
-= <[function | `A x -> x | `B (_, foo) -> foo]>
+- : <[[< `A of 'a | `B of 'b * 'a ] -> 'a]> expr =
+<[function | `A x -> x | `B (_, foo) -> foo]>
 |}];;
 
 <[ function | `A x -> x | `B (_, foo) -> foo | _ -> 42 ]>;;
 [%%expect {|
-- : <[([> `A of int | `B of '_weak9 * int ] as '_weak8) -> int]> expr =
+- : <[[> `A of int | `B of 'a * int ] -> int]> expr =
 <[function | `A x -> x | `B (_, foo) -> foo | _ -> 42]>
 |}];;
 
 <[ List.map ]>;;
 [%%expect {|
-- : <[($('a) -> $('b)) -> $('a) list -> $('b) list]> expr = <[Stdlib.List.map
-]>
+- : <[('a -> 'b) -> 'a list -> 'b list]> expr = <[Stdlib.List.map]>
 |}];;
 
 <[ fun x -> 42 ]>;;
 [%%expect {|
-- : <[$('a) -> int]> expr = <[fun x -> 42]>
+- : <['a -> int]> expr = <[fun x -> 42]>
 |}];;
 
 <[ fun _ -> 42 ]>;;
 [%%expect {|
-- : <[$('a) -> int]> expr = <[fun _ -> 42]>
+- : <['a -> int]> expr = <[fun _ -> 42]>
 |}];;
 
 <[ fun x y -> x ]>;;
 [%%expect {|
-- : <[$('a) -> $('b) -> $('a)]> expr = <[fun x y -> x]>
+- : <['a -> 'b -> 'a]> expr = <[fun x y -> x]>
 |}];;
 
 <[ fun f x y -> f ~a:y ~b:x ]>;;
 [%%expect {|
-- : <[(a:$('a) -> b:$('b) -> $('c)) -> $('b) -> $('a) -> $('c)]> expr =
+- : <[(a:'a -> b:'b -> 'c) -> 'b -> 'a -> 'c]> expr =
 <[fun f x y -> f ~a:y ~b:x]>
 |}];;
 
 <[ fun f x y -> f ?a:y ?b:x ]>;;
 [%%expect {|
-- : <[
-     (?a:$('a) -> ?b:$('b) -> $('c)) -> $('b) option -> $('a) option -> $('c)
-     ]>
-    expr
-= <[fun f x y -> f ?a:y ?b:x]>
+- : <[(?a:'a -> ?b:'b -> 'c) -> 'b option -> 'a option -> 'c]> expr =
+<[fun f x y -> f ?a:y ?b:x]>
 |}];;
 
 <[ fun (x, y) -> x + y ]>;;
@@ -210,12 +205,12 @@ val x0 : <[[> `C of int ] as '_weak3]> expr = <[`C 543]>
 
 <[ function | _ -> 12 ]>;;
 [%%expect {|
-- : <[$('a) -> int]> expr = <[function | _ -> 12]>
+- : <['a -> int]> expr = <[function | _ -> 12]>
 |}];;
 
 <[ function | x -> x ]>;;
 [%%expect {|
-- : <[$('a) -> $('a)]> expr = <[function | x -> x]>
+- : <['a -> 'a]> expr = <[function | x -> x]>
 |}];;
 
 <[ function | 42 -> true | _ -> false ]>;;
@@ -230,7 +225,7 @@ val x0 : <[[> `C of int ] as '_weak3]> expr = <[`C 543]>
 
 <[ function | (x, y) as z -> (x, y, z) ]>;;
 [%%expect {|
-- : <[$('a) * $('b) -> $('a) * $('b) * ($('a) * $('b))]> expr =
+- : <['a * 'b -> 'a * 'b * ('a * 'b)]> expr =
 <[function | (x, y) as z -> (x, y, z)]>
 |}];;
 
@@ -246,25 +241,24 @@ val x0 : <[[> `C of int ] as '_weak3]> expr = <[`C 543]>
 
 <[ function | `A -> true | `B -> false ]>;;
 [%%expect {|
-- : <[([< `A | `B ] as '_weak10) -> bool]> expr =
-<[function | `A -> true | `B -> false]>
+- : <[[< `A | `B ] -> bool]> expr = <[function | `A -> true | `B -> false]>
 |}];;
 
 <[ function | `Foo x -> x | `Bar (y, z) -> y + z | `Baz -> 0 ]>;;
 [%%expect {|
-- : <[([< `Bar of int * int | `Baz | `Foo of int ] as '_weak11) -> int]> expr
-= <[function | `Foo x -> x | `Bar (y, z) -> y + z | `Baz -> 0]>
+- : <[[< `Bar of int * int | `Baz | `Foo of int ] -> int]> expr =
+<[function | `Foo x -> x | `Bar (y, z) -> y + z | `Baz -> 0]>
 |}];;
 
 <[ function | lazy x as l -> Lazy.force l ]>;;
 [%%expect {|
-- : <[$('a) Lazy.t -> $('a)]> expr =
+- : <['a Lazy.t -> 'a]> expr =
 <[function | lazy (x) as l -> Stdlib.Lazy.force l]>
 |}];;
 
 <[ fun f x d -> match f x with | res -> res | exception e -> d ]>;;
 [%%expect {|
-- : <[($('a) -> $('b)) -> $('a) -> $('b) -> $('b)]> expr =
+- : <[('a -> 'b) -> 'a -> 'b -> 'b]> expr =
 <[fun f x d -> match f x with | res -> res | (exception e) -> d]>
 |}];;
 
@@ -275,12 +269,12 @@ val x0 : <[[> `C of int ] as '_weak3]> expr = <[`C 543]>
 
 <[ function | [] -> false | x::xs -> true ]>;;
 [%%expect {|
-- : <[$('a) list -> bool]> expr = <[function | [] -> false | x::xs -> true]>
+- : <['a list -> bool]> expr = <[function | [] -> false | x::xs -> true]>
 |}];;
 
 <[ fun x d -> match x with | Some y -> y | None -> d ]>;;
 [%%expect {|
-- : <[$('a) option -> $('a) -> $('a)]> expr =
+- : <['a option -> 'a -> 'a]> expr =
 <[fun x d -> match x with | Some (y) -> y | None -> d]>
 |}];;
 
@@ -292,33 +286,29 @@ val x0 : <[[> `C of int ] as '_weak3]> expr = <[`C 543]>
 
 <[ fun (type a) (f : a -> a) (x : a) -> f (f x) ]>;;
 [%%expect {|
-- : <[($('a) -> $('a)) -> $('a) -> $('a)]> expr =
+- : <[('a -> 'a) -> 'a -> 'a]> expr =
 <[fun (type a) (f : a -> a) (x : a) -> f (f x)]>
 |}];;
 
 <[ fun x (type a) (f : a -> a * a) (g : int -> a) -> f (g x) ]>;;
 [%%expect {|
-- : <[int -> ($('a) -> $('a) * $('a)) -> (int -> $('a)) -> $('a) * $('a)]>
-    expr
-= <[fun x (type a) (f : a -> (a) * (a)) (g : int -> a) -> f (g x)]>
+- : <[int -> ('a -> 'a * 'a) -> (int -> 'a) -> 'a * 'a]> expr =
+<[fun x (type a) (f : a -> (a) * (a)) (g : int -> a) -> f (g x)]>
 |}];;
 
 <[ fun (f : 'a. 'a -> 'a) -> f f ]>;;
 [%%expect {|
-- : <[('a. 'a -> 'a) -> $('b) -> $('b)]> expr =
-<[fun (f : 'a. 'a -> 'a) -> f f]>
+- : <[('a. 'a -> 'a) -> 'b -> 'b]> expr = <[fun (f : 'a. 'a -> 'a) -> f f]>
 |}];;
 
 <[ fun x -> fun x -> fun x -> 42 ]>;;
 [%%expect {|
-- : <[$('a) -> $('b) -> $('c) -> int]> expr =
-<[fun x -> fun x__1 -> fun x__2 -> 42]>
+- : <['a -> 'b -> 'c -> int]> expr = <[fun x -> fun x__1 -> fun x__2 -> 42]>
 |}];;
 
 <[ fun x -> fun x -> fun x__1 -> 42 ]>;;
 [%%expect {|
-- : <[$('a) -> $('b) -> $('c) -> int]> expr =
-<[fun x -> fun x__1 -> fun x__2 -> 42]>
+- : <['a -> 'b -> 'c -> int]> expr = <[fun x -> fun x__1 -> fun x__2 -> 42]>
 |}];;
 
 <[ let z = 10 in z ]>;;
@@ -337,8 +327,7 @@ Line 1, characters 3-31:
 1 | <[ let Some x = Some "foo" in x ]>;;
        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Warning 8 [partial-match]: this pattern-matching is not exhaustive.
-Here is an example of a case that is not matched:
-None
+  Here is an example of a case that is not matched: "None"
 
 - : <[string]> expr = <[match Some "foo" with | Some (x) -> x]>
 |}];;
@@ -349,8 +338,7 @@ Line 1, characters 3-29:
 1 | <[ let x::xs = [1; 2; 3] in x ]>;;
        ^^^^^^^^^^^^^^^^^^^^^^^^^^
 Warning 8 [partial-match]: this pattern-matching is not exhaustive.
-Here is an example of a case that is not matched:
-[]
+  Here is an example of a case that is not matched: "[]"
 
 - : <[int]> expr = <[match [1; 2; 3] with | x::xs -> x]>
 |}];;
@@ -361,8 +349,7 @@ Line 1, characters 3-30:
 1 | <[ let x::xs = [1; 2; 3] in xs ]>;;
        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Warning 8 [partial-match]: this pattern-matching is not exhaustive.
-Here is an example of a case that is not matched:
-[]
+  Here is an example of a case that is not matched: "[]"
 
 - : <[int list]> expr = <[match [1; 2; 3] with | x::xs -> xs]>
 |}];;
@@ -478,7 +465,7 @@ Here is an example of a case that is not matched:
 
 <[ while true do () done ]>;;
 [%%expect {|
-- : 'a expr = <[while true do  () done]>
+- : <['a]> expr = <[while true do  () done]>
 |}];;
 
 <[
@@ -504,7 +491,7 @@ Here is an example of a case that is not matched:
 
 <[ assert false ]>;;
 [%%expect {|
-- : 'a expr = <[assert false]>
+- : <['a]> expr = <[assert false]>
 |}];;
 
 <[ lazy 42 ]>;;
@@ -596,62 +583,63 @@ Hint: Label "x" is defined outside any quotations.
 
 <[ raise (Match_failure ("foo", 42, 100)) ]>;;
 [%%expect {|
-- : 'a expr = <[Stdlib.raise (Match_failure ("foo", 42, 100))]>
+- : <['a]> expr = <[Stdlib.raise (Match_failure ("foo", 42, 100))]>
 |}];;
 
 <[ raise Out_of_memory ]>;;
 [%%expect {|
-- : 'a expr = <[Stdlib.raise Out_of_memory]>
+- : <['a]> expr = <[Stdlib.raise Out_of_memory]>
 |}];;
 
 <[ raise (Invalid_argument "arg") ]>;;
 [%%expect {|
-- : 'a expr = <[Stdlib.raise (Invalid_argument "arg")]>
+- : <['a]> expr = <[Stdlib.raise (Invalid_argument "arg")]>
 |}];;
 
 <[ raise (Failure "fail") ]>;;
 [%%expect {|
-- : 'a expr = <[Stdlib.raise (Failure "fail")]>
+- : <['a]> expr = <[Stdlib.raise (Failure "fail")]>
 |}];;
 
 <[ raise Not_found ]>;;
 [%%expect {|
-- : 'a expr = <[Stdlib.raise Not_found]>
+- : <['a]> expr = <[Stdlib.raise Not_found]>
 |}];;
 
 <[ raise (Sys_error "err") ]>;;
 [%%expect {|
-- : 'a expr = <[Stdlib.raise (Sys_error "err")]>
+- : <['a]> expr = <[Stdlib.raise (Sys_error "err")]>
 |}];;
 
 <[ raise End_of_file ]>;;
 [%%expect {|
-- : 'a expr = <[Stdlib.raise End_of_file]>
+- : <['a]> expr = <[Stdlib.raise End_of_file]>
 |}];;
 
 <[ raise Division_by_zero ]>;;
 [%%expect {|
-- : 'a expr = <[Stdlib.raise Division_by_zero]>
+- : <['a]> expr = <[Stdlib.raise Division_by_zero]>
 |}];;
 
 <[ raise Stack_overflow ]>;;
 [%%expect {|
-- : 'a expr = <[Stdlib.raise Stack_overflow]>
+- : <['a]> expr = <[Stdlib.raise Stack_overflow]>
 |}];;
 
 <[ raise Sys_blocked_io ]>;;
 [%%expect {|
-- : 'a expr = <[Stdlib.raise Sys_blocked_io]>
+- : <['a]> expr = <[Stdlib.raise Sys_blocked_io]>
 |}];;
 
 <[ raise (Assert_failure ("assert", 42, 100)) ]>;;
 [%%expect {|
-- : 'a expr = <[Stdlib.raise (Assert_failure ("assert", 42, 100))]>
+- : <['a]> expr = <[Stdlib.raise (Assert_failure ("assert", 42, 100))]>
 |}];;
 
 <[ raise (Undefined_recursive_module ("M", 42, 100)) ]>;;
 [%%expect {|
-- : 'a expr = <[Stdlib.raise (Undefined_recursive_module ("M", 42, 100))]>
+- : <['a]> expr = <[Stdlib.raise (Undefined_recursive_module ("M", 42, 100))
+]>
 |}];;
 
 <[ let exception E in () ]>;;
@@ -661,12 +649,12 @@ Hint: Label "x" is defined outside any quotations.
 
 <[ let exception E in raise E ]>;;
 [%%expect {|
-- : 'a expr = <[let exception E in Stdlib.raise E]>
+- : <['a]> expr = <[let exception E in Stdlib.raise E]>
 |}];;
 
 <[ let module M = Option in M.map ]>;;
 [%%expect {|
-- : <[($('a) -> $('b)) -> $('a) option -> $('b) option]> expr =
+- : <[('a -> 'b) -> 'a option -> 'b option]> expr =
 <[let module M = Stdlib.Option in M.map]>
 |}];;
 
@@ -745,10 +733,10 @@ Error: Module definition using "struct..end"
 
 <[ Mod.mk 42 ]>;;
 [%%expect {|
-Line 1, characters 3-9:
+Line 1, characters 3-6:
 1 | <[ Mod.mk 42 ]>;;
-       ^^^^^^
-Error: Identifier "Mod" is used at line 1, characters 3-9,
+       ^^^
+Error: Identifier "Mod" is used at line 1, characters 3-6,
        inside a quotation (<[ ... ]>);
        it is introduced at file "_none_", line 1, outside any quotations.
 |}];;
@@ -864,7 +852,7 @@ Error: Adding attributes on tags in polymorphic variant types
 
 <[ fun x -> $ (<[ x ]>) ]>;;
 [%%expect {|
-- : <[$('a) -> $('a)]> expr = <[fun x -> x]>
+- : <['a -> 'a]> expr = <[fun x -> x]>
 |}];;
 
 <[ $ (<[ 42 ]>) ]>;;
@@ -899,7 +887,7 @@ let x = <[ "foo" ]> and y = <[ "bar" ]> in <[ $x ^ $y ]>;;
 
 <[ fun x -> <[ <[ $($x) ]> ]> ]>;;
 [%%expect {|
-- : <[<[$($('a)) expr]> expr -> <[$($('a)) expr]> expr]> expr =
+- : <[<[<['a]> expr]> expr -> <[<['a]> expr]> expr]> expr =
 <[fun x -> <[<[$($x)]>]>]>
 |}];;
 
@@ -910,16 +898,13 @@ let x = <[<[42]>]> in <[ <[ $($x) ]> ]>;;
 
 <[ raise Out_of_fibers ]>;;
 [%%expect {|
-- : 'a expr = <[Stdlib.raise Out_of_fibers]>
+- : <['a]> expr = <[Stdlib.raise Out_of_fibers]>
 |}];;
 
 <[ fun (f : x:'a -> ?y:'b -> 'c -> unit) x y z -> f ~x ?y:None z ]>
 [%%expect {|
-- : <[
-     (x:$('a) -> ?y:$('b) -> $('c) -> unit) ->
-     $('a) -> $('d) -> $('c) -> unit]>
-    expr
-= <[fun (f : x:'a -> ?y:'b -> 'c -> unit) x y z -> f ~x:x ?y:None z]>
+- : <[(x:'a -> ?y:'b -> 'c -> unit) -> 'a -> 'd -> 'c -> unit]> expr =
+<[fun (f : x:'a -> ?y:'b -> 'c -> unit) x y z -> f ~x:x ?y:None z]>
 |}];;
 
 <[ let rec add : int * int -> int = fun (x, y) -> x + y in add ]>
@@ -933,8 +918,7 @@ let x = <[<[42]>]> in <[ <[ $($x) ]> ]>;;
 
 <[ let rec id : 'a. 'a -> 'a = fun x -> x in id ]>
 [%%expect {|
-- : <[$('a) -> $('a)]> expr =
-<[let rec id : 'a. 'a -> 'a = (fun x -> x) in id]>
+- : <['a -> 'a]> expr = <[let rec id : 'a. 'a -> 'a = (fun x -> x) in id]>
 |}];;
 
 <[ let rec foo : int -> int = fun x -> if x < 0 then bar x else 0
@@ -966,13 +950,13 @@ let x = <[<[42]>]> in <[ <[ $($x) ]> ]>;;
 
 <[ fun x -> function None -> 0 | Some x -> x ]>
 [%%expect {|
-- : <[$('a) -> int option -> int]> expr =
+- : <['a -> int option -> int]> expr =
 <[fun x -> function | None -> 0 | Some (x__1) -> x__1]>
 |}];;
 
 <[ fun f x -> (f [@inlined]) x [@nontail] ]>
 [%%expect {|
-- : <[($('a) -> $('b)) -> $('a) -> $('b)]> expr =
+- : <[('a -> 'b) -> 'a -> 'b]> expr =
 <[fun f x -> ((f [@inlined]) x [@nontail])]>
 |}];;
 

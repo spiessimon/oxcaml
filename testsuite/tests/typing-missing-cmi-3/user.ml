@@ -19,7 +19,12 @@ let x:'a. 'a Middle.t =
   let _r = ref 0 in
   Middle.T
 [%%expect {|
-val x : 'a Middle.t = Middle.T
+Line 3, characters 2-10:
+3 |   Middle.T
+      ^^^^^^^^
+Error: Non-value detected in [value_kind].
+       Please report this error to the Jane Street compilers team.
+       Could not find cmi for: 'a Middle.t
 |}]
 
 
@@ -96,19 +101,26 @@ let t = Middle.r.Middle.x
 Line 1, characters 8-16:
 1 | let t = Middle.r.Middle.x
             ^^^^^^^^
-Error: This expression has type "Original.r"
-       but an expression was expected of type "('a : '_representable_layout_1)"
-       The layout of Original.r is any
+Error: The value "Middle.r" has type "Original.r"
+       but an expression was expected of type "'a"
+       The layout of "Original.r" is any
          because the .cmi file for Original.r is missing.
-       But the layout of Original.r must be representable
+       But the layout of "Original.r" must be representable
          because it's the record type used in a projection.
        No .cmi file found containing Original.r.
        Hint: Adding "original" to your dependencies might help.
+       Type "Original.r" is abstract because no corresponding cmi file
+       was found in path.
 |}]
 
 let k = match Middle.s with Middle.S -> ()
 [%%expect {|
-val k : unit = ()
+Line 1, characters 14-22:
+1 | let k = match Middle.s with Middle.S -> ()
+                  ^^^^^^^^
+Error: Non-value detected in [value_kind].
+       Please report this error to the Jane Street compilers team.
+       Could not find cmi for: Middle.s
 |}]
 
 (* #11560: gadts and missing cmis *)
@@ -116,7 +128,12 @@ val k : unit = ()
 let  f : type a b. (a Middle.ti -> unit) -> (a,b) Middle.gadt -> b -> unit =
   fun call Middle.G x -> call x
 [%%expect {|
-val f : ('a Middle.ti -> unit) -> ('a, 'b) Middle.gadt -> 'b -> unit = <fun>
+Line 2, characters 30-31:
+2 |   fun call Middle.G x -> call x
+                                  ^
+Error: Non-value detected in [value_kind].
+       Please report this error to the Jane Street compilers team.
+       Could not find cmi for: b
 |}]
 
 (* Check re-exportation of GADTs *)
@@ -124,8 +141,12 @@ val f : ('a Middle.ti -> unit) -> ('a, 'b) Middle.gadt -> 'b -> unit = <fun>
 let f : type a. a Middle.is_int -> a -> int = fun Middle.Is_int x -> x
 let g : bool Middle.is_int -> 'a = function _ -> .
 [%%expect{|
-val f : 'a Middle.is_int -> 'a -> int = <fun>
-val g : bool Middle.is_int -> 'a = <fun>
+Line 1, characters 50-63:
+1 | let f : type a. a Middle.is_int -> a -> int = fun Middle.Is_int x -> x
+                                                      ^^^^^^^^^^^^^
+Error: Non-value detected in [value_kind].
+       Please report this error to the Jane Street compilers team.
+       Could not find cmi for: a Middle.is_int
 |}]
 
 let f (x: Middle.u) = x

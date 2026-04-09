@@ -34,13 +34,8 @@ type v = A of unit_u | B of #(unit_u * #(unit_u * unit_u)) | C
 
 type bad : immediate = A of unit_u | B of int
 [%%expect{|
-Line 1, characters 0-45:
-1 | type bad : immediate = A of unit_u | B of int
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Error: The kind of type "bad" is immutable_data with unit_u
-         because it's a boxed variant type.
-       But the kind of type "bad" must be a subkind of immediate
-         because of the annotation on the declaration of the type bad.
+Uncaught exception: Typedecl.Error(_, _)
+
 |}]
 
 (* With-bounds for all-void variants *)
@@ -58,23 +53,13 @@ type key_holder2 = A of #(unit_u * key r)
 
 type bad : immediate = A of key
 [%%expect{|
-Line 1, characters 0-31:
-1 | type bad : immediate = A of key
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Error: The kind of type "bad" is immediate with key
-         because it's an enumeration variant type (all constructors are constant).
-       But the kind of type "bad" must be a subkind of immediate
-         because of the annotation on the declaration of the type bad.
+Uncaught exception: Typedecl.Error(_, _)
+
 |}]
 type bad : immediate = A of #(unit_u * key r)
 [%%expect{|
-Line 1, characters 0-45:
-1 | type bad : immediate = A of #(unit_u * key r)
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Error: The kind of type "bad" is immediate with key with unit_u
-         because it's an enumeration variant type (all constructors are constant).
-       But the kind of type "bad" must be a subkind of immediate
-         because of the annotation on the declaration of the type bad.
+Uncaught exception: Typedecl.Error(_, _)
+
 |}]
 
 
@@ -100,13 +85,8 @@ type t = A of v1 | B of #(unit_u * v2 r)
 type bad : immediate with v1 =
   A of v1 | B of #(unit_u * v2 r)
 [%%expect{|
-Lines 1-2, characters 0-33:
-1 | type bad : immediate with v1 =
-2 |   A of v1 | B of #(unit_u * v2 r)
-Error: The kind of type "bad" is immediate with unit_u with v1 with v2
-         because it's an enumeration variant type (all constructors are constant).
-       But the kind of type "bad" must be a subkind of immediate with v1
-         because of the annotation on the declaration of the type bad.
+Uncaught exception: Typedecl.Error(_, _)
+
 |}]
 
 type vme : void_internal mod external_

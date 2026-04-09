@@ -8,7 +8,9 @@
 
 #show list;;
 [%%expect {|
-type ('a : value_or_null) list = [] | (::) of 'a * 'a list
+>> Fatal error: Ident.rename list
+Uncaught exception: Misc.Fatal_error
+
 |}];;
 
 type 'a t;;

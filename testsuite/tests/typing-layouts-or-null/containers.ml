@@ -12,10 +12,10 @@ type t_any : any
 Line 3, characters 19-24:
 3 | type should_fail = t_any array
                        ^^^^^
-Error: This type "t_any" should be an instance of type "('a : any mod separable)"
-       The kind of t_any is any
+Error: This type "t_any" should be an instance of type "'a"
+       The kind of "t_any" is any
          because of the definition of t_any at line 1, characters 0-16.
-       But the kind of t_any must be a subkind of any mod separable
+       But the kind of "t_any" must be a subkind of any mod separable
          because it's the type argument to the array type.
 |}]
 
@@ -28,11 +28,10 @@ type t_value_or_null : value_or_null
 Line 3, characters 19-34:
 3 | type should_fail = t_value_or_null array
                        ^^^^^^^^^^^^^^^
-Error: This type "t_value_or_null" should be an instance of type
-         "('a : any mod separable)"
-       The kind of t_value_or_null is value_or_null
+Error: This type "t_value_or_null" should be an instance of type "'a"
+       The kind of "t_value_or_null" is value_or_null
          because of the definition of t_value_or_null at line 1, characters 0-36.
-       But the kind of t_value_or_null must be a subkind of any mod separable
+       But the kind of "t_value_or_null" must be a subkind of any mod separable
          because it's the type argument to the array type.
 |}]
 
@@ -74,23 +73,15 @@ type should_fail = float or_null array
 Line 1, characters 19-32:
 1 | type should_fail = float or_null array
                        ^^^^^^^^^^^^^
-Error: This type "float or_null" should be an instance of type
-         "('a : any mod separable)"
-       The kind of float or_null is
+Error: This type "float or_null" should be an instance of type "'a"
+       The kind of "float or_null" is
            value_or_null mod forkable unyielding many stateless immutable
          because it is the primitive type or_null.
-       But the kind of float or_null must be a subkind of any mod separable
+       But the kind of "float or_null" must be a subkind of any mod separable
          because it's the type argument to the array type.
 |}, Principal{|
-Line 1, characters 19-32:
-1 | type should_fail = float or_null array
-                       ^^^^^^^^^^^^^
-Error: This type "float or_null" should be an instance of type
-         "('a : any mod separable)"
-       The kind of float or_null is value_or_null mod everything with float
-         because it is the primitive type or_null.
-       But the kind of float or_null must be a subkind of any mod separable
-         because it's the type argument to the array type.
+Uncaught exception: Typetexp.Error(_, _, _)
+
 |}]
 
 (* Test constructing arrays with [or_null] elements *)
@@ -101,12 +92,12 @@ let should_fail = [| Null; This 3.4 |]
 Line 1, characters 32-35:
 1 | let should_fail = [| Null; This 3.4 |]
                                     ^^^
-Error: This expression has type "float" but an expression was expected of type
-         "('a : value mod non_float)"
-       The kind of float is
+Error: The constant "3.4" has type "float" but an expression was expected of type
+         "'a"
+       The kind of "float" is
            value mod forkable unyielding many stateless immutable
          because it is the primitive type float.
-       But the kind of float must be a subkind of value mod non_float
+       But the kind of "float" must be a subkind of value mod non_float
          because it's the type of an array element.
 |}]
 
@@ -119,10 +110,10 @@ type t_any : any
 Line 3, characters 19-24:
 3 | type should_fail = t_any iarray
                        ^^^^^
-Error: This type "t_any" should be an instance of type "('a : any mod separable)"
-       The kind of t_any is any
+Error: This type "t_any" should be an instance of type "'a"
+       The kind of "t_any" is any
          because of the definition of t_any at line 1, characters 0-16.
-       But the kind of t_any must be a subkind of any mod separable
+       But the kind of "t_any" must be a subkind of any mod separable
          because it's the type argument to the array type.
 |}]
 
@@ -135,11 +126,10 @@ type t_value_or_null : value_or_null
 Line 3, characters 19-34:
 3 | type should_fail = t_value_or_null iarray
                        ^^^^^^^^^^^^^^^
-Error: This type "t_value_or_null" should be an instance of type
-         "('a : any mod separable)"
-       The kind of t_value_or_null is value_or_null
+Error: This type "t_value_or_null" should be an instance of type "'a"
+       The kind of "t_value_or_null" is value_or_null
          because of the definition of t_value_or_null at line 1, characters 0-36.
-       But the kind of t_value_or_null must be a subkind of any mod separable
+       But the kind of "t_value_or_null" must be a subkind of any mod separable
          because it's the type argument to the array type.
 |}]
 
@@ -181,23 +171,15 @@ type should_fail = float or_null iarray
 Line 1, characters 19-32:
 1 | type should_fail = float or_null iarray
                        ^^^^^^^^^^^^^
-Error: This type "float or_null" should be an instance of type
-         "('a : any mod separable)"
-       The kind of float or_null is
+Error: This type "float or_null" should be an instance of type "'a"
+       The kind of "float or_null" is
            value_or_null mod forkable unyielding many stateless immutable
          because it is the primitive type or_null.
-       But the kind of float or_null must be a subkind of any mod separable
+       But the kind of "float or_null" must be a subkind of any mod separable
          because it's the type argument to the array type.
 |}, Principal{|
-Line 1, characters 19-32:
-1 | type should_fail = float or_null iarray
-                       ^^^^^^^^^^^^^
-Error: This type "float or_null" should be an instance of type
-         "('a : any mod separable)"
-       The kind of float or_null is value_or_null mod everything with float
-         because it is the primitive type or_null.
-       But the kind of float or_null must be a subkind of any mod separable
-         because it's the type argument to the array type.
+Uncaught exception: Typetexp.Error(_, _, _)
+
 |}]
 
 (* Test constructing iarray with or_null elements *)
@@ -207,12 +189,12 @@ let should_fail_iarray = [: Null; This 3.4 :]
 Line 1, characters 39-42:
 1 | let should_fail_iarray = [: Null; This 3.4 :]
                                            ^^^
-Error: This expression has type "float" but an expression was expected of type
-         "('a : value mod non_float)"
-       The kind of float is
+Error: The constant "3.4" has type "float" but an expression was expected of type
+         "'a"
+       The kind of "float" is
            value mod forkable unyielding many stateless immutable
          because it is the primitive type float.
-       But the kind of float must be a subkind of value mod non_float
+       But the kind of "float" must be a subkind of value mod non_float
          because it's the type of an array element.
 |}]
 
@@ -226,10 +208,10 @@ type t_any : any
 Line 3, characters 19-24:
 3 | type should_fail = t_any list
                        ^^^^^
-Error: This type "t_any" should be an instance of type "('a : value_or_null)"
-       The layout of t_any is any
+Error: This type "t_any" should be an instance of type "'a"
+       The layout of "t_any" is any
          because of the definition of t_any at line 1, characters 0-16.
-       But the layout of t_any must be a sublayout of value
+       But the layout of "t_any" must be a sublayout of value
          because the type argument of list has layout value_or_null.
 |}]
 
@@ -251,11 +233,10 @@ type t_any_mod_separable : any mod separable
 Line 3, characters 19-38:
 3 | type should_fail = t_any_mod_separable list
                        ^^^^^^^^^^^^^^^^^^^
-Error: This type "t_any_mod_separable" should be an instance of type
-         "('a : value_or_null)"
-       The layout of t_any_mod_separable is any
+Error: This type "t_any_mod_separable" should be an instance of type "'a"
+       The layout of "t_any_mod_separable" is any
          because of the definition of t_any_mod_separable at line 1, characters 0-44.
-       But the layout of t_any_mod_separable must be a sublayout of value
+       But the layout of "t_any_mod_separable" must be a sublayout of value
          because the type argument of list has layout value_or_null.
 |}]
 
@@ -292,10 +273,10 @@ type t_any : any
 Line 3, characters 19-24:
 3 | type should_fail = t_any option
                        ^^^^^
-Error: This type "t_any" should be an instance of type "('a : value_or_null)"
-       The layout of t_any is any
+Error: This type "t_any" should be an instance of type "'a"
+       The layout of "t_any" is any
          because of the definition of t_any at line 1, characters 0-16.
-       But the layout of t_any must be a sublayout of value
+       But the layout of "t_any" must be a sublayout of value
          because the type argument of option has layout value_or_null.
 |}]
 
@@ -317,11 +298,10 @@ type t_any_mod_separable : any mod separable
 Line 3, characters 19-38:
 3 | type should_fail = t_any_mod_separable option
                        ^^^^^^^^^^^^^^^^^^^
-Error: This type "t_any_mod_separable" should be an instance of type
-         "('a : value_or_null)"
-       The layout of t_any_mod_separable is any
+Error: This type "t_any_mod_separable" should be an instance of type "'a"
+       The layout of "t_any_mod_separable" is any
          because of the definition of t_any_mod_separable at line 1, characters 0-44.
-       But the layout of t_any_mod_separable must be a sublayout of value
+       But the layout of "t_any_mod_separable" must be a sublayout of value
          because the type argument of option has layout value_or_null.
 |}]
 

@@ -61,10 +61,10 @@ Line 1, characters 34-36:
 1 | module type S1f'' = S1f with type 'a t = 'a list;;
                                       ^^
 Error: The type constraints are not consistent.
-       Type "('a : value)" is not compatible with type "('a0 : float64)"
-       The layout of 'a is float64
+       Type "'a" is not compatible with type "'a0"
+       The layout of "'a0" is float64
          because of the definition of t at line 2, characters 2-23.
-       But the layout of 'a must overlap with value
+       But the layout of "'a0" must overlap with value
          because it instantiates an unannotated type parameter of t,
          chosen to have layout value.
 |}];;
@@ -152,11 +152,11 @@ module type T2' = sig type ('a : immediate) t = 'a s2' end
 Line 5, characters 25-30:
 5 |   let f () : 'a X.t = `B "bad"
                              ^^^^^
-Error: This expression has type "string" but an expression was expected of type
-         "('a : immediate)"
-       The kind of string is immutable_data
+Error: This constant has type "string" but an expression was expected of type
+         "'a"
+       The kind of "string" is immutable_data
          because it is the primitive type string.
-       But the kind of string must be a subkind of immediate
+       But the kind of "string" must be a subkind of immediate
          because of the definition of t at line 2, characters 2-25.
 |}]
 
@@ -265,11 +265,10 @@ end;;
 Line 2, characters 27-29:
 2 |   type 'a t = 'a Bar3f.t * 'a list
                                ^^
-Error: This type "('a : float64)" should be an instance of type
-         "('b : value_or_null)"
-       The layout of 'a is float64
+Error: This type "'a" should be an instance of type "'b"
+       The layout of "'a" is float64
          because of the annotation on 'a in the declaration of the type t.
-       But the layout of 'a must overlap with value
+       But the layout of "'a" must overlap with value
          because the type argument of list has layout value_or_null.
 |}];;
 
@@ -294,10 +293,10 @@ type t3f : float64
 Line 12, characters 11-18:
 12 |   type s = Foo3f.t t
                 ^^^^^^^
-Error: This type "Foo3f.t" should be an instance of type "('a : float64)"
-       The layout of Foo3f.t is value
+Error: This type "Foo3f.t" should be an instance of type "'a"
+       The layout of "Foo3f.t" is value
          because an abstract type has the value layout by default.
-       But the layout of Foo3f.t must be a sublayout of float64
+       But the layout of "Foo3f.t" must be a sublayout of float64
          because of the definition of t at line 10, characters 2-23.
 |}];;
 
@@ -349,10 +348,10 @@ type ('a : float64) t4_float64
 Line 2, characters 12-16:
 2 | type t4f' = M4.s t4_float64;;
                 ^^^^
-Error: This type "M4.s" should be an instance of type "('a : float64)"
-       The layout of M4.s is value
+Error: This type "M4.s" should be an instance of type "'a"
+       The layout of "M4.s" is value
          because of the definition of s at line 2, characters 2-21.
-       But the layout of M4.s must be a sublayout of float64
+       But the layout of "M4.s" must be a sublayout of float64
          because of the definition of t4_float64 at line 1, characters 0-30.
 |}]
 
@@ -379,10 +378,10 @@ type t4 = M4'.s t4_float64;;
 Line 1, characters 10-15:
 1 | type t4 = M4'.s t4_float64;;
               ^^^^^
-Error: This type "M4'.s" should be an instance of type "('a : float64)"
-       The layout of M4'.s is value
+Error: This type "M4'.s" should be an instance of type "'a"
+       The layout of "M4'.s" is value
          because of the definition of s at line 2, characters 2-45.
-       But the layout of M4'.s must be a sublayout of float64
+       But the layout of "M4'.s" must be a sublayout of float64
          because of the definition of t4_float64 at line 1, characters 0-30.
 |}];;
 
@@ -412,11 +411,11 @@ val x3 : int list = [42]
 Line 14, characters 17-23:
 14 | let x3' = M3_1.f "test";;
                       ^^^^^^
-Error: This expression has type "string" but an expression was expected of type
-         "('a : immediate)"
-       The kind of string is immutable_data
+Error: This constant has type "string" but an expression was expected of type
+         "'a"
+       The kind of "string" is immutable_data
          because it is the primitive type string.
-       But the kind of string must be a subkind of immediate
+       But the kind of "string" must be a subkind of immediate
          because of the definition of f at line 3, characters 2-20.
 |}]
 
@@ -462,9 +461,9 @@ module type S6_2f = sig
 end;;
 [%%expect{|
 module type S6_1f = sig type t : float64 end
-Line 6, characters 10-42:
+Line 6, characters 18-41:
 6 |   val m : (module S6_1f with type t = int)
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                      ^^^^^^^^^^^^^^^^^^^^^^^
 Error: In this "with" constraint, the new definition of "t"
        does not match its original definition in the constrained signature:
        Type declarations do not match:
@@ -486,9 +485,9 @@ module type S6_4f = sig
 end;;
 [%%expect{|
 module type S6_3 = sig type t end
-Line 6, characters 10-47:
+Line 6, characters 18-46:
 6 |   val m : (module S6_3 with type t = t_float64)
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Error: In this "with" constraint, the new definition of "t"
        does not match its original definition in the constrained signature:
        Type declarations do not match:
@@ -510,9 +509,9 @@ module type S6_6 = sig
 end
 [%%expect{|
 module type S6_5 = sig type t : immediate end
-Line 6, characters 10-44:
+Line 6, characters 18-43:
 6 |   val m : (module S6_5 with type t = string)
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^
 Error: In this "with" constraint, the new definition of "t"
        does not match its original definition in the constrained signature:
        Type declarations do not match:
@@ -530,9 +529,9 @@ module type S6_6' = sig
   val m : (module S6_5 with type t = s)
 end
 [%%expect{|
-Line 3, characters 10-39:
+Line 3, characters 18-38:
 3 |   val m : (module S6_5 with type t = s)
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                      ^^^^^^^^^^^^^^^^^^^^
 Error: In this "with" constraint, the new definition of "t"
        does not match its original definition in the constrained signature:
        Type declarations do not match:
@@ -560,7 +559,7 @@ module F (_ : sig end) = struct
   assert false
 end;;
 [%%expect {|
-module F : sig end -> sig end
+module F : functor sig end -> sig end
 |}];;
 
 (****************************************)
@@ -1116,11 +1115,8 @@ Error: Signature mismatch:
        is not the same as:
          "Mk : ('a : immediate). 'a -> 'a t"
        The type "'a t" is not equal to the type "'a0 t"
-       because the layouts of their variables are different.
-       The layout of 'a is value
-         because of the definition of t at line 4, characters 2-50.
-       The layout of 'a0 is immediate
-         because of the definition of t at line 2, characters 2-54.
+       The type variable "'a" has kind value,
+       but the type variable "'a0" has kind immediate
 |}]
 
 module M : sig
@@ -1148,11 +1144,8 @@ Error: Signature mismatch:
        is not the same as:
          "Mk : 'a -> 'a t"
        The type "'a t" is not equal to the type "'a0 t"
-       because the layouts of their variables are different.
-       The layout of 'a is immediate
-         because of the definition of t at line 4, characters 2-54.
-       The layout of 'a0 is value
-         because of the definition of t at line 2, characters 2-50.
+       The type variable "'a" has kind immediate,
+       but the type variable "'a0" has kind value
 |}]
 
 module M : sig
@@ -1210,11 +1203,8 @@ Error: Signature mismatch:
        is not the same as:
          "Mk : ('a -> 'a) -> t"
        The type "'a -> 'a" is not equal to the type "'a0 -> 'a0"
-       because the layouts of their variables are different.
-       The layout of 'a is any
-         because of the definition of t at line 4, characters 2-43.
-       The layout of 'a0 is value
-         because of the definition of t at line 2, characters 2-45.
+       The type variable "'a" has kind any,
+       but the type variable "'a0" has kind value
 |}]
 
 module M : sig
@@ -1242,11 +1232,8 @@ Error: Signature mismatch:
        is not the same as:
          "Mk : ('a : any). ('a -> 'a) -> t"
        The type "'a -> 'a" is not equal to the type "'a0 -> 'a0"
-       because the layouts of their variables are different.
-       The layout of 'a is value
-         because of the definition of t at line 4, characters 2-45.
-       The layout of 'a0 is any
-         because of the definition of t at line 2, characters 2-43.
+       The type variable "'a" has kind value,
+       but the type variable "'a0" has kind any
 |}]
 
 module M : sig
@@ -1282,11 +1269,8 @@ Error: Signature mismatch:
          type 'a t constraint 'a = 'b -> 'c
        Their parameters differ:
        The type "'b -> 'c" is not equal to the type "'b0 -> 'c0"
-       because the layouts of their variables are different.
-       The layout of 'b is value
-         because of the definition of t at line 4, characters 2-56.
-       The layout of 'b0 is immediate
-         because of the definition of t at line 2, characters 2-64.
+       The type variable "'b" has kind value,
+       but the type variable "'b0" has kind immediate
 |}]
 
 module M : sig
@@ -1311,11 +1295,8 @@ Error: Signature mismatch:
          type 'a t constraint 'a = 'b -> 'c
        Their parameters differ:
        The type "'b -> 'c" is not equal to the type "'b0 -> 'c0"
-       because the layouts of their variables are different.
-       The layout of 'b is immediate
-         because of the definition of t at line 4, characters 2-64.
-       The layout of 'b0 is value
-         because of the definition of t at line 2, characters 2-56.
+       The type variable "'b" has kind immediate,
+       but the type variable "'b0" has kind value
 |}]
 
 module M : sig

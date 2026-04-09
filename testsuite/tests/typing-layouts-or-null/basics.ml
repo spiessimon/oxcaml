@@ -25,11 +25,10 @@ Line 1, characters 6-31:
 1 | let f (x : t_any_mod_separable) = x
           ^^^^^^^^^^^^^^^^^^^^^^^^^
 Error: This pattern matches values of type "t_any_mod_separable"
-       but a pattern was expected which matches values of type
-         "('a : '_representable_layout_1)"
-       The layout of t_any_mod_separable is any
+       but a pattern was expected which matches values of type "'a"
+       The layout of "t_any_mod_separable" is any
          because of the definition of t_any_mod_separable at line 2, characters 0-44.
-       But the layout of t_any_mod_separable must be representable
+       But the layout of "t_any_mod_separable" must be representable
          because we must know concretely how to pass a function argument.
 |}]
 
@@ -80,10 +79,10 @@ Line 2, characters 13-19:
 2 |   let g () = X.g ()
                  ^^^^^^
 Error: This expression has type "t_any_mod_separable"
-       but an expression was expected of type "('a : '_representable_layout_2)"
-       The layout of t_any_mod_separable is any
+       but an expression was expected of type "'a"
+       The layout of "t_any_mod_separable" is any
          because of the definition of t_any_mod_separable at line 2, characters 0-44.
-       But the layout of t_any_mod_separable must be representable
+       But the layout of "t_any_mod_separable" must be representable
          because we must know concretely how to return a function result.
 |}]
 
@@ -162,10 +161,10 @@ type t = t_any id_any_mod_separable
 Line 1, characters 9-14:
 1 | type t = t_any id_any_mod_separable
              ^^^^^
-Error: This type "t_any" should be an instance of type "('a : any mod separable)"
-       The kind of t_any is any
+Error: This type "t_any" should be an instance of type "'a"
+       The kind of "t_any" is any
          because of the definition of t_any at line 1, characters 0-16.
-       But the kind of t_any must be a subkind of any mod separable
+       But the kind of "t_any" must be a subkind of any mod separable
          because of the definition of id_any_mod_separable at line 2, characters 0-55.
 |}]
 
@@ -212,10 +211,10 @@ type t = t_value_or_null id_value
 Line 1, characters 9-24:
 1 | type t = t_value_or_null id_value
              ^^^^^^^^^^^^^^^
-Error: This type "t_value_or_null" should be an instance of type "('a : value)"
-       The kind of t_value_or_null is value_or_null
+Error: This type "t_value_or_null" should be an instance of type "'a"
+       The kind of "t_value_or_null" is value_or_null
          because of the definition of t_value_or_null at line 3, characters 0-36.
-       But the kind of t_value_or_null must be a subkind of value
+       But the kind of "t_value_or_null" must be a subkind of value
          because of the definition of id_value at line 4, characters 0-31.
 |}]
 
@@ -259,11 +258,10 @@ type t = t_value_or_null id_any_mod_separable
 Line 1, characters 9-24:
 1 | type t = t_value_or_null id_any_mod_separable
              ^^^^^^^^^^^^^^^
-Error: This type "t_value_or_null" should be an instance of type
-         "('a : any mod separable)"
-       The kind of t_value_or_null is value_or_null
+Error: This type "t_value_or_null" should be an instance of type "'a"
+       The kind of "t_value_or_null" is value_or_null
          because of the definition of t_value_or_null at line 3, characters 0-36.
-       But the kind of t_value_or_null must be a subkind of any mod separable
+       But the kind of "t_value_or_null" must be a subkind of any mod separable
          because of the definition of id_any_mod_separable at line 2, characters 0-55.
 |}]
 
@@ -326,11 +324,10 @@ type t = t_any_mod_separable id_value
 Line 1, characters 9-28:
 1 | type t = t_any_mod_separable id_value
              ^^^^^^^^^^^^^^^^^^^
-Error: This type "t_any_mod_separable" should be an instance of type
-         "('a : value)"
-       The layout of t_any_mod_separable is any
+Error: This type "t_any_mod_separable" should be an instance of type "'a"
+       The layout of "t_any_mod_separable" is any
          because of the definition of t_any_mod_separable at line 2, characters 0-44.
-       But the layout of t_any_mod_separable must be a sublayout of value
+       But the layout of "t_any_mod_separable" must be a sublayout of value
          because of the definition of id_value at line 4, characters 0-31.
 |}]
 
@@ -360,11 +357,10 @@ type t = t_any_mod_separable id_value_or_null
 Line 1, characters 9-28:
 1 | type t = t_any_mod_separable id_value_or_null
              ^^^^^^^^^^^^^^^^^^^
-Error: This type "t_any_mod_separable" should be an instance of type
-         "('a : value_or_null)"
-       The layout of t_any_mod_separable is any
+Error: This type "t_any_mod_separable" should be an instance of type "'a"
+       The layout of "t_any_mod_separable" is any
          because of the definition of t_any_mod_separable at line 2, characters 0-44.
-       But the layout of t_any_mod_separable must be a sublayout of value
+       But the layout of "t_any_mod_separable" must be a sublayout of value
          because of the definition of id_value_or_null at line 3, characters 0-47.
 |}]
 
@@ -397,11 +393,10 @@ type t = t_any_mod_separable id_bits64
 Line 1, characters 9-28:
 1 | type t = t_any_mod_separable id_bits64
              ^^^^^^^^^^^^^^^^^^^
-Error: This type "t_any_mod_separable" should be an instance of type
-         "('a : bits64)"
-       The layout of t_any_mod_separable is any
+Error: This type "t_any_mod_separable" should be an instance of type "'a"
+       The layout of "t_any_mod_separable" is any
          because of the definition of t_any_mod_separable at line 2, characters 0-44.
-       But the layout of t_any_mod_separable must be a sublayout of bits64
+       But the layout of "t_any_mod_separable" must be a sublayout of bits64
          because of the definition of id_bits64 at line 5, characters 0-33.
 |}]
 
@@ -446,10 +441,10 @@ type should_fail = t_value_or_null t1
 Line 1, characters 19-34:
 1 | type should_fail = t_value_or_null t1
                        ^^^^^^^^^^^^^^^
-Error: This type "t_value_or_null" should be an instance of type "('a : value)"
-       The kind of t_value_or_null is value_or_null
+Error: This type "t_value_or_null" should be an instance of type "'a"
+       The kind of "t_value_or_null" is value_or_null
          because of the definition of t_value_or_null at line 3, characters 0-36.
-       But the kind of t_value_or_null must be a subkind of value
+       But the kind of "t_value_or_null" must be a subkind of value
          because of the definition of t1 at line 3, characters 0-71.
 |}]
 
@@ -459,11 +454,10 @@ type should_fail = t_any_mod_separable t1
 Line 1, characters 19-38:
 1 | type should_fail = t_any_mod_separable t1
                        ^^^^^^^^^^^^^^^^^^^
-Error: This type "t_any_mod_separable" should be an instance of type
-         "('a : value)"
-       The layout of t_any_mod_separable is any
+Error: This type "t_any_mod_separable" should be an instance of type "'a"
+       The layout of "t_any_mod_separable" is any
          because of the definition of t_any_mod_separable at line 2, characters 0-44.
-       But the layout of t_any_mod_separable must be a sublayout of value
+       But the layout of "t_any_mod_separable" must be a sublayout of value
          because of the definition of t1 at line 3, characters 0-71.
 |}]
 
@@ -476,7 +470,7 @@ let u () =
 Line 2, characters 10-11:
 2 |   let rec x : t_value_or_null = assert false in
               ^
-Warning 26 [unused-var]: unused variable x.
+Warning 26 [unused-var]: unused variable "x".
 
 val u : unit -> unit = <fun>
 |}]

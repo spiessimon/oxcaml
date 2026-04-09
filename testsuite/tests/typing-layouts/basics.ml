@@ -80,10 +80,10 @@ Line 4, characters 35-41:
 4 |   type 'a s = 'a -> int constraint 'a = t
                                        ^^^^^^
 Error: The type constraints are not consistent.
-       Type "('a : '_representable_layout_1)" is not compatible with type "t"
-       The layout of t is any
+       Type "'a" is not compatible with type "t"
+       The layout of "t" is any
          because of the definition of t at line 2, characters 2-14.
-       But the layout of t must be representable
+       But the layout of "t" must be representable
          because it instantiates an unannotated type parameter of s.
 |}]
 
@@ -252,11 +252,10 @@ end;;
 Line 4, characters 72-73:
 4 |   let f1 () = A {a = (fun x y -> Stdlib_upstream_compatible.Float_u.abs x)}
                                                                             ^
-Error: This expression has type "('a : value)"
-       but an expression was expected of type
+Error: The value "x" has type "'a" but an expression was expected of type
          "Stdlib_upstream_compatible.Float_u.t" = "float#"
-       The layout of Stdlib_upstream_compatible.Float_u.t is float64.
-       But the layout of Stdlib_upstream_compatible.Float_u.t must be a sublayout of
+       The layout of "Stdlib_upstream_compatible.Float_u.t" is float64.
+       But the layout of "Stdlib_upstream_compatible.Float_u.t" must be a sublayout of
          value
          because of the definition of s at line 2, characters 2-55.
 |}]
@@ -287,11 +286,10 @@ end;;
 Line 4, characters 67-68:
 4 |   let f1 () = A (fun x y -> Stdlib_upstream_compatible.Float_u.abs x)
                                                                        ^
-Error: This expression has type "('a : value)"
-       but an expression was expected of type
+Error: The value "x" has type "'a" but an expression was expected of type
          "Stdlib_upstream_compatible.Float_u.t" = "float#"
-       The layout of Stdlib_upstream_compatible.Float_u.t is float64.
-       But the layout of Stdlib_upstream_compatible.Float_u.t must be a sublayout of
+       The layout of "Stdlib_upstream_compatible.Float_u.t" is float64.
+       But the layout of "Stdlib_upstream_compatible.Float_u.t" must be a sublayout of
          value
          because of the definition of s at line 2, characters 2-50.
 |}]
@@ -306,11 +304,10 @@ end;;
 Line 4, characters 74-75:
 4 |   let f6 () = A {a = (fun x y -> Stdlib_upstream_compatible.Float_u.add x y)}
                                                                               ^
-Error: This expression has type "('a : value)"
-       but an expression was expected of type
+Error: The value "y" has type "'a" but an expression was expected of type
          "Stdlib_upstream_compatible.Float_u.t" = "float#"
-       The layout of Stdlib_upstream_compatible.Float_u.t is float64.
-       But the layout of Stdlib_upstream_compatible.Float_u.t must be a sublayout of
+       The layout of "Stdlib_upstream_compatible.Float_u.t" is float64.
+       But the layout of "Stdlib_upstream_compatible.Float_u.t" must be a sublayout of
          value
          because of the definition of s at line 2, characters 2-70.
 |}]
@@ -325,11 +322,10 @@ end;;
 Line 4, characters 69-70:
 4 |   let f6 () = A (fun x y -> Stdlib_upstream_compatible.Float_u.add x y)
                                                                          ^
-Error: This expression has type "('a : value)"
-       but an expression was expected of type
+Error: The value "y" has type "'a" but an expression was expected of type
          "Stdlib_upstream_compatible.Float_u.t" = "float#"
-       The layout of Stdlib_upstream_compatible.Float_u.t is float64.
-       But the layout of Stdlib_upstream_compatible.Float_u.t must be a sublayout of
+       The layout of "Stdlib_upstream_compatible.Float_u.t" is float64.
+       But the layout of "Stdlib_upstream_compatible.Float_u.t" must be a sublayout of
          value
          because of the definition of s at line 2, characters 2-65.
 |}]
@@ -344,10 +340,10 @@ Line 4, characters 35-41:
 4 |   type 'a s = 'a -> int constraint 'a = t
                                        ^^^^^^
 Error: The type constraints are not consistent.
-       Type "('a : '_representable_layout_2)" is not compatible with type "t"
-       The layout of t is any
+       Type "'a" is not compatible with type "t"
+       The layout of "t" is any
          because of the definition of t at line 2, characters 2-14.
-       But the layout of t must be representable
+       But the layout of "t" must be representable
          because it instantiates an unannotated type parameter of s.
 |}]
 
@@ -361,10 +357,10 @@ Line 4, characters 35-41:
 4 |   type 'a s = int -> 'a constraint 'a = t
                                        ^^^^^^
 Error: The type constraints are not consistent.
-       Type "('a : '_representable_layout_3)" is not compatible with type "t"
-       The layout of t is any
+       Type "'a" is not compatible with type "t"
+       The layout of "t" is any
          because of the definition of t at line 2, characters 2-14.
-       But the layout of t must be representable
+       But the layout of "t" must be representable
          because it instantiates an unannotated type parameter of s.
 |}]
 
@@ -374,10 +370,10 @@ Line 1, characters 20-32:
 1 | let f1 () : t_any = assert false;;
                         ^^^^^^^^^^^^
 Error: This expression has type "t_any" but an expression was expected of type
-         "('a : '_representable_layout_4)"
-       The layout of t_any is any
+         "'a"
+       The layout of "t_any" is any
          because of the definition of t_any at line 5, characters 0-18.
-       But the layout of t_any must be representable
+       But the layout of "t_any" must be representable
          because we must know concretely how to return a function result.
 |}];;
 
@@ -387,11 +383,10 @@ Line 1, characters 7-18:
 1 | let f1 (x : t_any) = ();;
            ^^^^^^^^^^^
 Error: This pattern matches values of type "t_any"
-       but a pattern was expected which matches values of type
-         "('a : '_representable_layout_5)"
-       The layout of t_any is any
+       but a pattern was expected which matches values of type "'a"
+       The layout of "t_any" is any
          because of the definition of t_any at line 5, characters 0-18.
-       But the layout of t_any must be representable
+       But the layout of "t_any" must be representable
          because we must know concretely how to pass a function argument.
 |}];;
 
@@ -489,10 +484,10 @@ let string_id (x : string imm_id) = x;;
 Line 1, characters 19-25:
 1 | let string_id (x : string imm_id) = x;;
                        ^^^^^^
-Error: This type "string" should be an instance of type "('a : immediate)"
-       The kind of string is immutable_data
+Error: This type "string" should be an instance of type "'a"
+       The kind of "string" is immutable_data
          because it is the primitive type string.
-       But the kind of string must be a subkind of immediate
+       But the kind of "string" must be a subkind of immediate
          because of the definition of imm_id at line 1, characters 0-33.
 |}];;
 
@@ -511,11 +506,11 @@ let not_helloworld = id_for_imms "hello world";;
 Line 1, characters 33-46:
 1 | let not_helloworld = id_for_imms "hello world";;
                                      ^^^^^^^^^^^^^
-Error: This expression has type "string" but an expression was expected of type
-         "'a imm_id" = "('a : immediate)"
-       The kind of string is immutable_data
+Error: This constant has type "string" but an expression was expected of type
+         "'a imm_id" = "'a"
+       The kind of "string" is immutable_data
          because it is the primitive type string.
-       But the kind of string must be a subkind of immediate
+       But the kind of "string" must be a subkind of immediate
          because of the definition of id_for_imms at line 1, characters 16-35.
 |}]
 
@@ -528,10 +523,10 @@ and s4 = string t4;;
 Line 2, characters 9-15:
 2 | and s4 = string t4;;
              ^^^^^^
-Error: This type "string" should be an instance of type "('a : immediate)"
-       The kind of string is immutable_data
+Error: This type "string" should be an instance of type "'a"
+       The kind of "string" is immutable_data
          because it is the primitive type string.
-       But the kind of string must be a subkind of immediate
+       But the kind of "string" must be a subkind of immediate
          because of the annotation on 'a in the declaration of the type t4.
 |}];;
 
@@ -542,10 +537,10 @@ and ('a : immediate) t4;;
 Line 1, characters 10-16:
 1 | type s4 = string t4
               ^^^^^^
-Error: This type "string" should be an instance of type "('a : immediate)"
-       The kind of string is immutable_data
+Error: This type "string" should be an instance of type "'a"
+       The kind of "string" is immutable_data
          because it is the primitive type string.
-       But the kind of string must be a subkind of immediate
+       But the kind of "string" must be a subkind of immediate
          because of the annotation on 'a in the declaration of the type t4.
 |}]
 
@@ -576,9 +571,9 @@ Line 3, characters 0-15:
 3 | and s5 = string;;
     ^^^^^^^^^^^^^^^
 Error:
-       The kind of s5 is immutable_data
+       The kind of "s5" is immutable_data
          because it is the primitive type string.
-       But the kind of s5 must be a subkind of immediate
+       But the kind of "s5" must be a subkind of immediate
          because of the annotation on 'a in the declaration of the type t4.
 |}]
 
@@ -635,9 +630,9 @@ Line 2, characters 2-32:
       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Error: This definition has type "'b -> unit" which is less general than
          "'a. 'a -> unit"
-       The kind of 'a is value
+       The kind of "'c" is value
          because it is or unifies with an unannotated universal variable.
-       But the kind of 'a must be a subkind of immediate
+       But the kind of "'c" must be a subkind of immediate
          because of the definition of t6_imm at line 1, characters 0-42.
 |}];;
 
@@ -651,9 +646,9 @@ Line 3, characters 4-34:
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Error: This method has type "'b -> unit" which is less general than
          "'a. 'a -> unit"
-       The kind of 'a is value
+       The kind of "'c" is value
          because it is or unifies with an unannotated universal variable.
-       But the kind of 'a must be a subkind of immediate
+       But the kind of "'c" must be a subkind of immediate
          because of the definition of t6_imm at line 1, characters 0-42.
 |}];;
 
@@ -671,21 +666,15 @@ type ('a : immediate) t7 = Foo7 of 'a
 Line 3, characters 12-21:
 3 | type t7' = (int * int) t7;;
                 ^^^^^^^^^
-Error: This type "int * int" should be an instance of type "('a : immediate)"
-       The kind of int * int is immutable_data
+Error: This type "int * int" should be an instance of type "'a"
+       The kind of "int * int" is immutable_data
          because it's a tuple type.
-       But the kind of int * int must be a subkind of immediate
+       But the kind of "int * int" must be a subkind of immediate
          because of the definition of t7 at line 1, characters 0-37.
 |}, Principal{|
 type ('a : immediate) t7 = Foo7 of 'a
-Line 3, characters 12-21:
-3 | type t7' = (int * int) t7;;
-                ^^^^^^^^^
-Error: This type "int * int" should be an instance of type "('a : immediate)"
-       The kind of int * int is immutable_data with int
-         because it's a tuple type.
-       But the kind of int * int must be a subkind of immediate
-         because of the definition of t7 at line 1, characters 0-37.
+Uncaught exception: Typetexp.Error(_, _, _)
+
 |}]
 
 (**********************************************************)
@@ -718,11 +707,10 @@ end;;
 Line 5, characters 16-17:
 5 |     | `Bar v -> v
                     ^
-Error: This expression has type "('a : value_or_null)"
-       but an expression was expected of type
+Error: The value "v" has type "'a" but an expression was expected of type
          "Stdlib_upstream_compatible.Float_u.t" = "float#"
-       The layout of Stdlib_upstream_compatible.Float_u.t is float64.
-       But the layout of Stdlib_upstream_compatible.Float_u.t must be a sublayout of
+       The layout of "Stdlib_upstream_compatible.Float_u.t" is float64.
+       But the layout of "Stdlib_upstream_compatible.Float_u.t" must be a sublayout of
          value
          because it's the type of the field of a polymorphic variant.
 |}];;
@@ -736,10 +724,10 @@ end;;
 Line 4, characters 13-22:
 4 |   type bad = t_float64 t
                  ^^^^^^^^^
-Error: This type "t_float64" should be an instance of type "('a : value)"
-       The layout of t_float64 is float64
+Error: This type "t_float64" should be an instance of type "'a"
+       The layout of "t_float64" is float64
          because of the definition of t_float64 at line 4, characters 0-24.
-       But the layout of t_float64 must be a sublayout of value
+       But the layout of "t_float64" must be a sublayout of value
          because of the definition of t at line 2, characters 2-42.
 |}];;
 
@@ -751,10 +739,10 @@ Line 2, characters 54-68:
 2 |   type 'a t = [ `Foo of 'a | `Baz of int ] constraint 'a = t_float64
                                                           ^^^^^^^^^^^^^^
 Error: The type constraints are not consistent.
-       Type "('a : value)" is not compatible with type "t_float64"
-       The layout of t_float64 is float64
+       Type "'a" is not compatible with type "t_float64"
+       The layout of "t_float64" is float64
          because of the definition of t_float64 at line 4, characters 0-24.
-       But the layout of t_float64 must be a sublayout of value
+       But the layout of "t_float64" must be a sublayout of value
          because it instantiates an unannotated type parameter of t,
          chosen to have layout value.
 |}];;
@@ -816,11 +804,10 @@ end;;
 Line 6, characters 21-22:
 6 |     | (a, _) -> f_id a
                          ^
-Error: This expression has type "('a : value_or_null)"
-       but an expression was expected of type "float#"
-       The layout of float# is float64
+Error: The value "a" has type "'a" but an expression was expected of type "float#"
+       The layout of "float#" is float64
          because it is the unboxed version of the primitive type float.
-       But the layout of float# must be a sublayout of value
+       But the layout of "float#" must be a sublayout of value
          because it's the type of a tuple element.
 |}];;
 
@@ -833,10 +820,10 @@ end;;
 Line 4, characters 13-22:
 4 |   type bad = t_float64 t
                  ^^^^^^^^^
-Error: This type "t_float64" should be an instance of type "('a : value)"
-       The layout of t_float64 is float64
+Error: This type "t_float64" should be an instance of type "'a"
+       The layout of "t_float64" is float64
          because of the definition of t_float64 at line 4, characters 0-24.
-       But the layout of t_float64 must be a sublayout of value
+       But the layout of "t_float64" must be a sublayout of value
          because of the definition of t at line 2, characters 2-24.
 |}];;
 
@@ -848,10 +835,10 @@ Line 2, characters 34-48:
 2 |   type 'a t = int * 'a constraint 'a = t_float64
                                       ^^^^^^^^^^^^^^
 Error: The type constraints are not consistent.
-       Type "('a : value)" is not compatible with type "t_float64"
-       The layout of t_float64 is float64
+       Type "'a" is not compatible with type "t_float64"
+       The layout of "t_float64" is float64
          because of the definition of t_float64 at line 4, characters 0-24.
-       But the layout of t_float64 must be a sublayout of value
+       But the layout of "t_float64" must be a sublayout of value
          because it instantiates an unannotated type parameter of t,
          chosen to have layout value.
 |}];;
@@ -906,10 +893,10 @@ Error: Signature mismatch:
          val x : ('a : immediate). 'a
        is not included in
          val x : string
-       The type "('a : immediate)" is not compatible with the type "string"
-       The kind of string is immutable_data
+       The type "'a" is not compatible with the type "string"
+       The kind of "string" is immutable_data
          because it is the primitive type string.
-       But the kind of string must be a subkind of immediate
+       But the kind of "string" must be a subkind of immediate
          because of the definition of x at line 8, characters 10-26.
 |}];;
 
@@ -946,11 +933,10 @@ Error: Signature mismatch:
          val x : ('a : immediate). 'a t
        is not included in
          val x : string
-       The type "'a t" = "('a : immediate)" is not compatible with the type
-         "string"
-       The kind of string is immutable_data
+       The type "'a t" = "'a" is not compatible with the type "string"
+       The kind of "string" is immutable_data
          because it is the primitive type string.
-       But the kind of string must be a subkind of immediate
+       But the kind of "string" must be a subkind of immediate
          because of the definition of x at line 8, characters 10-26.
 |}]
 
@@ -1001,11 +987,11 @@ end;;
 Line 4, characters 19-33:
 4 |   let foo x = f_id (x # getfloat)
                        ^^^^^^^^^^^^^^
-Error: This expression has type "('a : value)"
-       but an expression was expected of type "'b t" = "('b : float64)"
-       The layout of 'a t is float64
+Error: The method call "x#getfloat" has type "'a"
+       but an expression was expected of type "'b t" = "'b"
+       The layout of "'b t" is float64
          because of the definition of t at line 2, characters 2-28.
-       But the layout of 'a t must be a sublayout of value
+       But the layout of "'b t" must be a sublayout of value
          because it's the type of an object field.
 |}];;
 
@@ -1045,9 +1031,9 @@ Line 3, characters 2-27:
 3 |   and ('a : float64) s = 'a
       ^^^^^^^^^^^^^^^^^^^^^^^^^
 Error:
-       The layout of 'a s is float64
+       The layout of "'a s" is float64
          because of the annotation on 'a in the declaration of the type s.
-       But the layout of 'a s must be a sublayout of value
+       But the layout of "'a s" must be a sublayout of value
          because it's the type of an object field.
 |}];;
 
@@ -1059,10 +1045,10 @@ Line 2, characters 36-50:
 2 |   type 'a t = < l : 'a > constraint 'a = t_float64
                                         ^^^^^^^^^^^^^^
 Error: The type constraints are not consistent.
-       Type "('a : value)" is not compatible with type "t_float64"
-       The layout of t_float64 is float64
+       Type "'a" is not compatible with type "t_float64"
+       The layout of "t_float64" is float64
          because of the definition of t_float64 at line 4, characters 0-24.
-       But the layout of t_float64 must be a sublayout of value
+       But the layout of "t_float64" must be a sublayout of value
          because it's the type of an object field.
 |}];;
 
@@ -1137,10 +1123,10 @@ end
 Line 6, characters 24-26:
 6 |       val virtual baz : 'a t
                             ^^
-Error: This type "('a : value)" should be an instance of type "('b : float64)"
-       The layout of 'a is value
+Error: This type "'a" should be an instance of type "'b"
+       The layout of "'a" is value
          because it's a type argument to a class constructor.
-       But the layout of 'a must overlap with float64
+       But the layout of "'a" must overlap with float64
          because of the definition of t at line 2, characters 2-23.
 |}];;
 
@@ -1156,10 +1142,10 @@ end;;
 Line 6, characters 26-28:
 6 |       method void_id (a : 'a t) : 'a t = a
                               ^^
-Error: This type "('a : value)" should be an instance of type "('b : float64)"
-       The layout of 'a is value
+Error: This type "'a" should be an instance of type "'b"
+       The layout of "'a" is value
          because it's a type argument to a class constructor.
-       But the layout of 'a must overlap with float64
+       But the layout of "'a" must overlap with float64
          because of the definition of t at line 2, characters 2-28.
 |}];;
 
@@ -1176,10 +1162,10 @@ end;;
 Line 5, characters 4-6:
 5 |     'a t ->
         ^^
-Error: This type "('a : value)" should be an instance of type "('b : float64)"
-       The layout of 'a is value
+Error: This type "'a" should be an instance of type "'b"
+       The layout of "'a" is value
          because it's a type argument to a class constructor.
-       But the layout of 'a must overlap with float64
+       But the layout of "'a" must overlap with float64
          because of the definition of t at line 2, characters 2-28.
 |}];;
 
@@ -1211,10 +1197,10 @@ type t13f = t_float64 Lazy.t;;
 Line 1, characters 12-21:
 1 | type t13f = t_float64 Lazy.t;;
                 ^^^^^^^^^
-Error: This type "t_float64" should be an instance of type "('a : value)"
-       The layout of t_float64 is float64
+Error: This type "t_float64" should be an instance of type "'a"
+       The layout of "t_float64" is float64
          because of the definition of t_float64 at line 4, characters 0-24.
-       But the layout of t_float64 must be a sublayout of value
+       But the layout of "t_float64" must be a sublayout of value
          because the type argument of Lazy.t has this layout.
 |}];;
 
@@ -1223,11 +1209,11 @@ let x13f (v : t_float64) = lazy v;;
 Line 1, characters 32-33:
 1 | let x13f (v : t_float64) = lazy v;;
                                     ^
-Error: This expression has type "t_float64"
-       but an expression was expected of type "('a : value)"
-       The layout of t_float64 is float64
+Error: The value "v" has type "t_float64" but an expression was expected of type
+         "'a"
+       The layout of "t_float64" is float64
          because of the definition of t_float64 at line 4, characters 0-24.
-       But the layout of t_float64 must be a sublayout of value
+       But the layout of "t_float64" must be a sublayout of value
          because it's the type of a lazy expression.
 |}];;
 
@@ -1240,11 +1226,11 @@ val f_id : t_float64 -> t_float64 = <fun>
 Line 4, characters 19-20:
 4 |   | lazy v -> f_id v
                        ^
-Error: This expression has type "('a : value)"
-       but an expression was expected of type "t_float64"
-       The layout of t_float64 is float64
+Error: The value "v" has type "'a" but an expression was expected of type
+         "t_float64"
+       The layout of "t_float64" is float64
          because of the definition of t_float64 at line 4, characters 0-24.
-       But the layout of t_float64 must be a sublayout of value
+       But the layout of "t_float64" must be a sublayout of value
          because it's the type of a lazy expression.
 |}];;
 
@@ -1255,10 +1241,10 @@ type t13f = t_float64 option;;
 Line 1, characters 12-21:
 1 | type t13f = t_float64 option;;
                 ^^^^^^^^^
-Error: This type "t_float64" should be an instance of type "('a : value_or_null)"
-       The layout of t_float64 is float64
+Error: This type "t_float64" should be an instance of type "'a"
+       The layout of "t_float64" is float64
          because of the definition of t_float64 at line 4, characters 0-24.
-       But the layout of t_float64 must be a sublayout of value
+       But the layout of "t_float64" must be a sublayout of value
          because the type argument of option has layout value_or_null.
 |}];;
 
@@ -1267,11 +1253,11 @@ let x13f (v : t_float64) = Some v;;
 Line 1, characters 32-33:
 1 | let x13f (v : t_float64) = Some v;;
                                     ^
-Error: This expression has type "t_float64"
-       but an expression was expected of type "('a : value_or_null)"
-       The layout of t_float64 is float64
+Error: The value "v" has type "t_float64" but an expression was expected of type
+         "'a"
+       The layout of "t_float64" is float64
          because of the definition of t_float64 at line 4, characters 0-24.
-       But the layout of t_float64 must be a sublayout of value
+       But the layout of "t_float64" must be a sublayout of value
          because the type argument of option has layout value_or_null.
 |}];;
 
@@ -1283,11 +1269,11 @@ let x13f v =
 Line 3, characters 19-20:
 3 |   | Some v -> f_id v
                        ^
-Error: This expression has type "('a : value_or_null)"
-       but an expression was expected of type "t_float64"
-       The layout of t_float64 is float64
+Error: The value "v" has type "'a" but an expression was expected of type
+         "t_float64"
+       The layout of "t_float64" is float64
          because of the definition of t_float64 at line 4, characters 0-24.
-       But the layout of t_float64 must be a sublayout of value
+       But the layout of "t_float64" must be a sublayout of value
          because the type argument of option has layout value_or_null.
 |}];;
 
@@ -1297,10 +1283,10 @@ type t13f = t_float64 list;;
 Line 1, characters 12-21:
 1 | type t13f = t_float64 list;;
                 ^^^^^^^^^
-Error: This type "t_float64" should be an instance of type "('a : value_or_null)"
-       The layout of t_float64 is float64
+Error: This type "t_float64" should be an instance of type "'a"
+       The layout of "t_float64" is float64
          because of the definition of t_float64 at line 4, characters 0-24.
-       But the layout of t_float64 must be a sublayout of value
+       But the layout of "t_float64" must be a sublayout of value
          because the type argument of list has layout value_or_null.
 |}];;
 
@@ -1309,11 +1295,11 @@ let x13 (v : t_float64) = [v];;
 Line 1, characters 27-28:
 1 | let x13 (v : t_float64) = [v];;
                                ^
-Error: This expression has type "t_float64"
-       but an expression was expected of type "('a : value_or_null)"
-       The layout of t_float64 is float64
+Error: The value "v" has type "t_float64" but an expression was expected of type
+         "'a"
+       The layout of "t_float64" is float64
          because of the definition of t_float64 at line 4, characters 0-24.
-       But the layout of t_float64 must be a sublayout of value
+       But the layout of "t_float64" must be a sublayout of value
          because the type argument of list has layout value_or_null.
 |}];;
 
@@ -1325,11 +1311,11 @@ let x13 v =
 Line 3, characters 16-17:
 3 |   | [v] -> f_id v
                     ^
-Error: This expression has type "('a : value_or_null)"
-       but an expression was expected of type "t_float64"
-       The layout of t_float64 is float64
+Error: The value "v" has type "'a" but an expression was expected of type
+         "t_float64"
+       The layout of "t_float64" is float64
          because of the definition of t_float64 at line 4, characters 0-24.
-       But the layout of t_float64 must be a sublayout of value
+       But the layout of "t_float64" must be a sublayout of value
          because the type argument of list has layout value_or_null.
 |}];;
 
@@ -1371,9 +1357,9 @@ Line 2, characters 0-21:
 2 | and foo14 = t_float64;;
     ^^^^^^^^^^^^^^^^^^^^^
 Error:
-       The layout of foo14 is float64
+       The layout of "foo14" is float64
          because of the definition of t_float64 at line 4, characters 0-24.
-       But the layout of foo14 must be a sublayout of value
+       But the layout of "foo14" must be a sublayout of value
          because the type argument of list has layout value_or_null.
 |}];;
 
@@ -1523,9 +1509,9 @@ Line 15, characters 4-8:
 Error: This pattern matches values of type "(Mf.t_float64, Mf.t_float64) eq"
        but a pattern was expected which matches values of type
          "(Mf.t_float64, Mf.t_imm) eq"
-       The layout of Mf.t_float64 is float64
+       The layout of "Mf.t_float64" is float64
          because of the definition of t_float64 at line 4, characters 2-26.
-       But the layout of Mf.t_float64 must overlap with value
+       But the layout of "Mf.t_float64" must overlap with value
          because of the definition of t_imm at line 5, characters 2-24.
 |}]
 
@@ -1555,11 +1541,11 @@ let f (x : t_float64) =
 Line 2, characters 15-16:
 2 |   let g ?(x2 = x) () = () in
                    ^
-Error: This expression has type "t_float64"
-       but an expression was expected of type "('a : value_or_null)"
-       The layout of t_float64 is float64
+Error: The value "x" has type "t_float64" but an expression was expected of type
+         "'a"
+       The layout of "t_float64" is float64
          because of the definition of t_float64 at line 4, characters 0-24.
-       But the layout of t_float64 must be a sublayout of value
+       But the layout of "t_float64" must be a sublayout of value
          because the type argument of option has layout value_or_null.
 |}]
 
@@ -1699,11 +1685,10 @@ Line 4, characters 9-22:
 4 |     let* x : t_float64 = assert false
              ^^^^^^^^^^^^^
 Error: This pattern matches values of type "t_float64"
-       but a pattern was expected which matches values of type
-         "('a : value_or_null)"
-       The layout of t_float64 is float64
+       but a pattern was expected which matches values of type "'a"
+       The layout of "t_float64" is float64
          because of the definition of t_float64 at line 4, characters 0-24.
-       But the layout of t_float64 must be a sublayout of value
+       But the layout of "t_float64" must be a sublayout of value
          because it's the type of a tuple element.
 |}]
 
@@ -1723,10 +1708,10 @@ Line 3, characters 14-29:
 3 | let x () = eq (mk_float64 ()) (mk_float64 ())
                   ^^^^^^^^^^^^^^^
 Error: This expression has type "t_float64"
-       but an expression was expected of type "('a : value)"
-       The layout of t_float64 is float64
+       but an expression was expected of type "'a"
+       The layout of "t_float64" is float64
          because of the definition of t_float64 at line 4, characters 0-24.
-       But the layout of t_float64 must be a sublayout of value
+       But the layout of "t_float64" must be a sublayout of value
          because of the definition of eq at line 1, characters 0-41.
 |}]
 
@@ -1748,11 +1733,11 @@ module M : sig val f : 'a -> 'a end
 Line 7, characters 28-29:
 7 | let g (x : t_float64) = M.f x
                                 ^
-Error: This expression has type "t_float64"
-       but an expression was expected of type "('a : value)"
-       The layout of t_float64 is float64
+Error: The value "x" has type "t_float64" but an expression was expected of type
+         "'a"
+       The layout of "t_float64" is float64
          because of the definition of t_float64 at line 4, characters 0-24.
-       But the layout of t_float64 must be a sublayout of value
+       But the layout of "t_float64" must be a sublayout of value
          because of the definition of f at line 2, characters 2-18.
 |}]
 
@@ -1789,10 +1774,10 @@ Line 1, characters 14-40:
 1 | let f _ = `Mk (assert false : t_float64)
                   ^^^^^^^^^^^^^^^^^^^^^^^^^^
 Error: This expression has type "t_float64"
-       but an expression was expected of type "('a : value_or_null)"
-       The layout of t_float64 is float64
+       but an expression was expected of type "'a"
+       The layout of "t_float64" is float64
          because of the definition of t_float64 at line 4, characters 0-24.
-       But the layout of t_float64 must be a sublayout of value
+       But the layout of "t_float64" must be a sublayout of value
          because it's the type of the field of a polymorphic variant.
 |}]
 
@@ -1876,9 +1861,9 @@ Line 2, characters 19-31:
 2 | let f35 : 'a t35 = fun () -> ()
                        ^^^^^^^^^^^^
 Error:
-       The kind of 'a -> 'b is value mod aliased immutable non_float
+       The kind of "'a -> 'b" is value mod aliased immutable non_float
          because it's a function type.
-       But the kind of 'a -> 'b must be a subkind of immediate
+       But the kind of "'a -> 'b" must be a subkind of immediate
          because of the definition of t35 at line 1, characters 0-30.
 |}]
 
@@ -1896,11 +1881,11 @@ Line 1, characters 10-22:
 1 | let () = (assert false : t_any); ()
               ^^^^^^^^^^^^
 Error: This expression has type "t_any" but an expression was expected of type
-         "('a : '_representable_layout_6)"
+         "'a"
        because it is in the left-hand side of a sequence
-       The layout of t_any is any
+       The layout of "t_any" is any
          because of the definition of t_any at line 5, characters 0-18.
-       But the layout of t_any must be representable
+       But the layout of "t_any" must be representable
          because it's the type of a statement.
 |}]
 
@@ -1915,11 +1900,11 @@ Line 1, characters 25-37:
 1 | let () = while false do (assert false : t_any); done
                              ^^^^^^^^^^^^
 Error: This expression has type "t_any" but an expression was expected of type
-         "('a : '_representable_layout_7)"
+         "'a"
        because it is in the body of a while-loop
-       The layout of t_any is any
+       The layout of "t_any" is any
          because of the definition of t_any at line 5, characters 0-18.
-       But the layout of t_any must be representable
+       But the layout of "t_any" must be representable
          because it's the type of a statement.
 |}]
 
@@ -1934,11 +1919,11 @@ Line 1, characters 28-40:
 1 | let () = for i = 0 to 0 do (assert false : t_any); done
                                 ^^^^^^^^^^^^
 Error: This expression has type "t_any" but an expression was expected of type
-         "('a : '_representable_layout_8)"
+         "'a"
        because it is in the body of a for-loop
-       The layout of t_any is any
+       The layout of "t_any" is any
          because of the definition of t_any at line 5, characters 0-18.
-       But the layout of t_any must be representable
+       But the layout of "t_any" must be representable
          because it's the type of a statement.
 |}]
 
@@ -1966,9 +1951,9 @@ Error: Signature mismatch:
        is not included in
          val f : ('a : any). 'a -> 'a
        The type "'a -> 'a" is not compatible with the type "'b -> 'b"
-       The layout of 'a is any
+       The layout of "'b" is any
          because of the definition of f at line 2, characters 2-30.
-       But the layout of 'a must be representable
+       But the layout of "'b" must be representable
          because of the definition of f at line 4, characters 8-13.
 |}]
 
@@ -2022,9 +2007,9 @@ Error: Signature mismatch:
        is not included in
          val f : ('a : any). 'a -> 'a
        The type "'a -> 'a" is not compatible with the type "'b -> 'b"
-       The layout of 'a is any
+       The layout of "'b" is any
          because of the definition of f at line 2, characters 2-30.
-       But the layout of 'a must be a sublayout of value
+       But the layout of "'b" must be a sublayout of value
          because of the definition of f at line 6, characters 2-18.
 |}]
 
@@ -2044,9 +2029,9 @@ Error: Signature mismatch:
        is not included in
          val f : ('a : float64). 'a -> 'a
        The type "'a -> 'a" is not compatible with the type "'b -> 'b"
-       The layout of 'a is float64
+       The layout of "'b" is float64
          because of the definition of f at line 10, characters 2-34.
-       But the layout of 'a must be a sublayout of value
+       But the layout of "'b" must be a sublayout of value
          because of the definition of f at line 6, characters 2-18.
 |}]
 
@@ -2279,7 +2264,7 @@ type ('a : any) bar
 Line 5, characters 32-33:
 5 |   : < foo : 'a . 'a foo bar > = x
                                     ^
-Error: This expression has type "< foo : ('a : float64). 'a foo bar >"
+Error: The value "x" has type "< foo : ('a : float64). 'a foo bar >"
        but an expression was expected of type "< foo : 'a. 'a foo bar >"
        Type "'a foo" = "'a" is not compatible with type "'a0 foo" = "'a0"
        The method "foo" has type "('a : float64). 'a foo bar",
@@ -2338,11 +2323,11 @@ type 'a t40 = 'a
 Line 2, characters 33-34:
 2 | let f40 (x: t_float64): 'a t40 = x
                                      ^
-Error: This expression has type "t_float64"
-       but an expression was expected of type "'a t40" = "('a : value)"
-       The layout of t_float64 is float64
+Error: The value "x" has type "t_float64" but an expression was expected of type
+         "'a t40" = "'a"
+       The layout of "t_float64" is float64
          because of the definition of t_float64 at line 4, characters 0-24.
-       But the layout of t_float64 must be a sublayout of value
+       But the layout of "t_float64" must be a sublayout of value
          because of the definition of t40 at line 1, characters 0-16.
 |}]
 
@@ -2378,10 +2363,10 @@ and ('a : immediate) t2 = 'a
 Line 1, characters 10-16:
 1 | type t1 = string t2 as (_ : immediate)
               ^^^^^^
-Error: This type "string" should be an instance of type "('a : immediate)"
-       The kind of string is immutable_data
+Error: This type "string" should be an instance of type "'a"
+       The kind of "string" is immutable_data
          because it is the primitive type string.
-       But the kind of string must be a subkind of immediate
+       But the kind of "string" must be a subkind of immediate
          because of the annotation on 'a in the declaration of the type t2.
 |}]
 
@@ -2847,11 +2832,11 @@ let three =
 Line 2, characters 14-18:
 2 |   let rec x = #3.4 in
                   ^^^^
-Error: This expression has type "float#" but an expression was expected of type
-         "('a : value_or_null)"
-       The layout of float# is float64
+Error: This constant has type "float#" but an expression was expected of type
+         "'a"
+       The layout of "float#" is float64
          because it is the unboxed version of the primitive type float.
-       But the layout of float# must be a sublayout of value
+       But the layout of "float#" must be a sublayout of value
          because it's the type of the recursive variable x.
 |}]
 
@@ -2949,10 +2934,9 @@ type t3 = t1 t2  (* it is important to reject this *)
 Line 1, characters 10-12:
 1 | type t3 = t1 t2  (* it is important to reject this *)
               ^^
-Error: This type "t1" should be an instance of type
-         "('a : immediate & immediate)"
-       The kind of t1 is value mod non_float & value mod non_float
+Error: This type "t1" should be an instance of type "'a"
+       The kind of "t1" is value mod non_float & value mod non_float
          because it is an unboxed tuple.
-       But the kind of t1 must be a subkind of immediate & immediate
+       But the kind of "t1" must be a subkind of immediate & immediate
          because of the definition of t2 at line 2, characters 0-36.
 |}]

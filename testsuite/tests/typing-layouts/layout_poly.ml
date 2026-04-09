@@ -30,10 +30,10 @@ Line 3, characters 14-36:
 3 | let f () = id (assert false : t_any)
                   ^^^^^^^^^^^^^^^^^^^^^^
 Error: This expression has type "t_any" but an expression was expected of type
-         "('a : '_representable_layout_1)"
-       The layout of t_any is any
+         "'a"
+       The layout of "t_any" is any
          because of the definition of t_any at line 3, characters 0-16.
-       But the layout of t_any must be representable
+       But the layout of "t_any" must be representable
          because it's the layout polymorphic type in an external declaration
          ([@layout_poly] forces all variables of layout 'any' to be
          representable at call sites).
@@ -50,9 +50,9 @@ Line 3, characters 14-38:
                   ^^^^^^^^^^^^^^^^^^^^^^^^
 Error: This expression has type "t_any t"
        but an expression was expected of type "'a t"
-       The layout of t_any is any
+       The layout of "t_any" is any
          because of the definition of t_any at line 3, characters 0-16.
-       But the layout of t_any must be representable
+       But the layout of "t_any" must be representable
          because it's the layout polymorphic type in an external declaration
          ([@layout_poly] forces all variables of layout 'any' to be
          representable at call sites).
@@ -77,11 +77,11 @@ end
 Line 4, characters 63-68:
 4 |   let () = Format.printf "%f %s\n" (F.to_float (id' #1.)) (id' "abc")
                                                                    ^^^^^
-Error: This expression has type "string" but an expression was expected of type
-         "('a : float64)"
-       The layout of string is value
+Error: This constant has type "string" but an expression was expected of type
+         "'a"
+       The layout of "string" is value
          because it is the primitive type string.
-       But the layout of string must be a sublayout of float64
+       But the layout of "string" must be a sublayout of float64
          because of the definition of id' at line 2, characters 10-18.
 |}]
 
@@ -131,9 +131,9 @@ Error: Signature mismatch:
        is not included in
          external id : ('a : any). 'a s -> 'a s = "%identity"
        The type "'a s -> 'a s" is not compatible with the type "'b s -> 'b s"
-       The layout of 'a is any
+       The layout of "'b" is any
          because of the definition of id at line 3, characters 2-54.
-       But the layout of 'a must be representable
+       But the layout of "'b" must be representable
          because it's the layout polymorphic type in an external declaration
          ([@layout_poly] forces all variables of layout 'any' to be
          representable at call sites).
@@ -176,9 +176,9 @@ Error: Signature mismatch:
            = "%identity" [@@layout_poly]
        The type "('a, 'b) s -> ('a, 'b) s" is not compatible with the type
          "(t_any, 'c) s -> (t_any, 'c) s"
-       The layout of t_any is any
+       The layout of "t_any" is any
          because of the definition of t_any at line 2, characters 0-16.
-       But the layout of t_any must be representable
+       But the layout of "t_any" must be representable
          because it's the layout polymorphic type in an external declaration
          ([@layout_poly] forces all variables of layout 'any' to be
          representable at call sites).
@@ -301,11 +301,11 @@ let () = Format.printf "%s\n" (S.id "abc")
 Line 1, characters 36-41:
 1 | let () = Format.printf "%s\n" (S.id "abc")
                                         ^^^^^
-Error: This expression has type "string" but an expression was expected of type
-         "('a : float64)"
-       The layout of string is value
+Error: This constant has type "string" but an expression was expected of type
+         "'a"
+       The layout of "string" is value
          because it is the primitive type string.
-       But the layout of string must be a sublayout of float64
+       But the layout of "string" must be a sublayout of float64
          because of the definition of id at line 2, characters 2-35.
 |}]
 
@@ -333,9 +333,9 @@ Error: Signature mismatch:
        is not included in
          val id : ('a : any). 'a -> 'a
        The type "'a -> 'a" is not compatible with the type "'b -> 'b"
-       The layout of 'a is any
+       The layout of "'b" is any
          because of the definition of id at line 2, characters 2-31.
-       But the layout of 'a must be representable
+       But the layout of "'b" must be representable
          because it's the layout polymorphic type in an external declaration
          ([@layout_poly] forces all variables of layout 'any' to be
          representable at call sites).
@@ -535,11 +535,11 @@ external id : ('a : any) ('b : any). 'a -> 'b = "%identity" [@@layout_poly]
 Line 2, characters 28-32:
 2 | let f (x: float#): int64# = id x
                                 ^^^^
-Error: This expression has type "('a : float64)"
-       but an expression was expected of type "int64#"
-       The layout of int64# is bits64
+Error: This expression has type "'a" but an expression was expected of type
+         "int64#"
+       The layout of "int64#" is bits64
          because it is the unboxed version of the primitive type int64.
-       But the layout of int64# must be a sublayout of float64
+       But the layout of "int64#" must be a sublayout of float64
          because it's the layout polymorphic type in an external declaration
          ([@layout_poly] forces all variables of layout 'any' to be
          representable at call sites).
@@ -566,8 +566,8 @@ external[@layout_poly] id : ('a : any). 'a -> 'a = "%identity" [@@untagged]
 Line 1, characters 40-42:
 1 | external[@layout_poly] id : ('a : any). 'a -> 'a = "%identity" [@@untagged]
                                             ^^
-Error: Don't know how to untag this type. Only "int8", "int16", "int", and
-       other immediate types can be untagged.
+Error: Don't know how to untag this type. Only "int8", "int16", "int",
+       and other immediate types can be untagged.
 |}]
 
 external[@layout_poly] id : ('a : any). 'a -> 'a =
@@ -770,9 +770,9 @@ Line 1, characters 26-40:
 1 | let fails = restricted [| fun () -> "no" |]
                               ^^^^^^^^^^^^^^
 Error:
-       The kind of 'a -> 'b is value mod aliased immutable non_float
+       The kind of "'a -> 'b" is value mod aliased immutable non_float
          because it's a function type.
-       But the kind of 'a -> 'b must be a subkind of
+       But the kind of "'a -> 'b" must be a subkind of
            value_or_null mod portable contended separable
          because it's the layout polymorphic type in an external declaration
          ([@layout_poly] forces all variables of layout 'any' to be

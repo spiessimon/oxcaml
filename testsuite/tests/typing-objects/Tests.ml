@@ -78,7 +78,7 @@ class ['a] c = object
 end
 [%%expect {|
 module F :
-  (X : sig type t end) ->
+  functor (X : sig type t end) ->
     sig class type ['a] c = object method m : 'a -> X.t end end
 class ['a] c : object constraint 'a = < m : 'a -> Int.t; .. > end
 |}]
@@ -731,9 +731,9 @@ Error: Multiple definition of the type name "t".
 
 fun x -> (x :> < m : 'a -> 'a > as 'a);;
 [%%expect{|
-- : < m : (< m : 'a > as 'b) -> 'b as 'a; .. > -> 'b = <fun>
+- : < m : (< m : 'a -> 'a > as 'a) -> 'a; .. > -> 'a = <fun>
 |}, Principal{|
-- : < m : < m : 'a > -> < m : 'a > as 'a; .. > -> (< m : 'b -> 'b > as 'b) =
+- : < m : (< m : 'a -> 'a > as 'a) -> 'a; .. > -> (< m : 'b -> 'b > as 'b) =
 <fun>
 |}];;
 
@@ -769,7 +769,7 @@ val x : '_weak2 list ref = {contents = []}
 module F(X : sig end) =
   struct type t = int let _ = (x : < m : t> list ref) end;;
 [%%expect{|
-module F : (X : sig end) -> sig type t = int end
+module F : functor (X : sig end) -> sig type t = int end
 |}];;
 x;;
 [%%expect{|

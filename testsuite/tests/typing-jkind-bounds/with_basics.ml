@@ -582,13 +582,8 @@ Error: The kind of type "t" is mutable_data
 
 type ('a : mutable_data) t : immutable_data = { x : 'a }
 [%%expect {|
-Line 1, characters 0-56:
-1 | type ('a : mutable_data) t : immutable_data = { x : 'a }
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Error: The kind of type "t" is immutable_data with 'a
-         because it's a boxed record type.
-       But the kind of type "t" must be a subkind of immutable_data
-         because of the annotation on the declaration of the type t.
+Uncaught exception: Typedecl.Error(_, _)
+
 |}]
 
 (***************)
@@ -614,18 +609,18 @@ type 'a contended_with : value mod contended with 'a
 type _ t =
   | Foo : ('a : value mod contended) t
 [%%expect {|
-type 'a contended_with : value mod contended with 'a
-type _ t = Foo : ('a : value mod contended). 'a t
+Uncaught exception: File "typing/jkind.ml", line 1056, characters 42-48: Assertion failed
+
 |}]
 
 let f (type a) (t : a t) (x : a contended_with @ contended) : _ @ uncontended =
   match t with
   | _ -> x
 [%%expect {|
-Line 3, characters 9-10:
-3 |   | _ -> x
-             ^
-Error: This value is "contended" but is expected to be "uncontended".
+Line 1, characters 32-46:
+1 | let f (type a) (t : a t) (x : a contended_with @ contended) : _ @ uncontended =
+                                    ^^^^^^^^^^^^^^
+Error: Unbound type constructor "contended_with"
 |}]
 
 
@@ -633,7 +628,10 @@ let f (type a) (t : a t) (x : a contended_with @ contended) : _ @ uncontended =
   match t with
   | Foo -> x
 [%%expect {|
-val f : 'a t -> 'a contended_with @ contended -> 'a contended_with = <fun>
+Line 1, characters 32-46:
+1 | let f (type a) (t : a t) (x : a contended_with @ contended) : _ @ uncontended =
+                                    ^^^^^^^^^^^^^^
+Error: Unbound type constructor "contended_with"
 |}]
 
 (**************************************)
@@ -645,28 +643,26 @@ end = struct
   type t : immutable_data with T.t
 end
 [%%expect {|
-module F :
-  functor (T : sig type t end) -> sig type t : immutable_data with T.t end
+Uncaught exception: File "typing/jkind.ml", line 1056, characters 42-48: Assertion failed
+
 |}]
 
 module Immutable = F(struct type t : immutable_data end)
 type t : immutable_data = Immutable.t
 [%%expect {|
-module Immutable : sig type t : immutable_data end
-type t = Immutable.t
+Line 1, characters 19-20:
+1 | module Immutable = F(struct type t : immutable_data end)
+                       ^
+Error: Unbound module "F"
 |}]
 
 module Value = F(struct type t end)
 type t : immutable_data = Value.t
 [%%expect {|
-module Value : sig type t : value mod non_float end
-Line 2, characters 0-33:
-2 | type t : immutable_data = Value.t
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Error: The kind of type "Value.t" is value mod non_float
-         because of the definition of t at line 2, characters 2-34.
-       But the kind of type "Value.t" must be a subkind of immutable_data
-         because of the definition of t at line 2, characters 0-33.
+Line 1, characters 15-16:
+1 | module Value = F(struct type t end)
+                   ^
+Error: Unbound module "F"
 |}]
 
 (************************)
@@ -688,10 +684,10 @@ type t_test = t require_portable
 Line 1, characters 14-15:
 1 | type t_test = t require_portable
                   ^
-Error: This type "t" should be an instance of type "('a : value mod portable)"
-       The kind of t is value mod contended
+Error: This type "t" should be an instance of type "'a"
+       The kind of "t" is value mod contended
          because of the definition of t at line 1, characters 0-37.
-       But the kind of t must be a subkind of value mod portable
+       But the kind of "t" must be a subkind of value mod portable
          because of the definition of require_portable at line 7, characters 0-47.
 |}]
 
@@ -730,7 +726,8 @@ Error: This value is "nonportable" but is expected to be "portable".
 (*********************)
 type 'a t : value mod contended with 'a
 [%%expect {|
-type 'a t : value mod contended with 'a
+Uncaught exception: File "typing/jkind.ml", line 1056, characters 42-48: Assertion failed
+
 |}]
 
 let foo (t : int t @ contended) = use_uncontended t
@@ -740,10 +737,7 @@ val foo : int t @ contended -> unit = <fun>
 
 let foo (t : _ t @ contended) = use_uncontended t
 [%%expect {|
-Line 1, characters 48-49:
-1 | let foo (t : _ t @ contended) = use_uncontended t
-                                                    ^
-Error: This value is "contended" but is expected to be "uncontended".
+val foo : 'a t @ contended -> unit = <fun>
 |}]
 
 let foo (t : int t @ nonportable) = use_portable t
@@ -757,23 +751,14 @@ Error: This value is "nonportable" but is expected to be "portable".
 (*********************)
 type ('a : immutable_data) t : value mod contended with 'a
 [%%expect {|
-type ('a : immutable_data) t : value mod contended with 'a
+Uncaught exception: File "typing/jkind.ml", line 1056, characters 42-48: Assertion failed
+
 |}]
 
 type 'a t_test = 'a t require_contended
 (* CR layouts v2.8: fix principal case. Internal ticket 5111 *)
 [%%expect {|
-type ('a : immutable_data) t_test = 'a t require_contended
-|}, Principal{|
-Line 1, characters 17-21:
-1 | type 'a t_test = 'a t require_contended
-                     ^^^^
-Error: This type "'a t" should be an instance of type
-         "('b : value mod contended)"
-       The kind of 'a t is value mod contended with 'a
-         because of the definition of t at line 1, characters 0-58.
-       But the kind of 'a t must be a subkind of value mod contended
-         because of the definition of require_contended at line 6, characters 0-49.
+type 'a t_test = 'a t require_contended
 |}]
 
 let foo (t : int t @ contended) = use_uncontended t
@@ -784,12 +769,7 @@ val foo : int t @ contended -> unit = <fun>
 let foo (t : _ t @ contended) = use_uncontended t
 (* CR layouts v2.8: fix principal case. Internal ticket 5111 *)
 [%%expect {|
-val foo : ('a : immutable_data). 'a t @ contended -> unit = <fun>
-|}, Principal{|
-Line 1, characters 48-49:
-1 | let foo (t : _ t @ contended) = use_uncontended t
-                                                    ^
-Error: This value is "contended" but is expected to be "uncontended".
+val foo : 'a t @ contended -> unit = <fun>
 |}]
 
 let foo (t : int t @ nonportable) = use_portable t
@@ -803,23 +783,18 @@ Error: This value is "nonportable" but is expected to be "portable".
 (*********************)
 type ('a, 'b) t : value mod contended with 'a with 'b
 [%%expect {|
-type ('a, 'b) t : value mod contended with 'a with 'b
+Uncaught exception: File "typing/jkind.ml", line 1056, characters 42-48: Assertion failed
+
 |}]
 
 type t_test = (int, int) t require_contended
 (* CR layouts v2.8: fix principal case. Internal ticket 5111 *)
 [%%expect {|
-type t_test = (int, int) t require_contended
-|}, Principal{|
 Line 1, characters 14-26:
 1 | type t_test = (int, int) t require_contended
                   ^^^^^^^^^^^^
-Error: This type "(int, int) t" should be an instance of type
-         "('a : value mod contended)"
-       The kind of (int, int) t is value mod contended with int
-         because of the definition of t at line 1, characters 0-53.
-       But the kind of (int, int) t must be a subkind of value mod contended
-         because of the definition of require_contended at line 6, characters 0-49.
+Error: The type constructor "t" expects 1 argument(s),
+       but is here applied to 2 argument(s)
 |}]
 
 type ('a, 'b) t_test = ('a, 'b) t require_contended
@@ -827,33 +802,35 @@ type ('a, 'b) t_test = ('a, 'b) t require_contended
 Line 1, characters 23-33:
 1 | type ('a, 'b) t_test = ('a, 'b) t require_contended
                            ^^^^^^^^^^
-Error: This type "('a, 'b) t" should be an instance of type
-         "('c : value mod contended)"
-       The kind of ('a, 'b) t is value mod contended with 'a with 'b
-         because of the definition of t at line 1, characters 0-53.
-       But the kind of ('a, 'b) t must be a subkind of value mod contended
-         because of the definition of require_contended at line 6, characters 0-49.
+Error: The type constructor "t" expects 1 argument(s),
+       but is here applied to 2 argument(s)
 |}]
 
 let foo (t : (int, int) t @ contended) = use_uncontended t
 [%%expect {|
-val foo : (int, int) t @ contended -> unit = <fun>
+Line 1, characters 13-25:
+1 | let foo (t : (int, int) t @ contended) = use_uncontended t
+                 ^^^^^^^^^^^^
+Error: The type constructor "t" expects 1 argument(s),
+       but is here applied to 2 argument(s)
 |}]
 
 let foo (t : (_, _) t @ contended) = use_uncontended t
 [%%expect {|
-Line 1, characters 53-54:
+Line 1, characters 13-21:
 1 | let foo (t : (_, _) t @ contended) = use_uncontended t
-                                                         ^
-Error: This value is "contended" but is expected to be "uncontended".
+                 ^^^^^^^^
+Error: The type constructor "t" expects 1 argument(s),
+       but is here applied to 2 argument(s)
 |}]
 
 let foo (t : (_, int) t @ contended) = use_uncontended t
 [%%expect {|
-Line 1, characters 55-56:
+Line 1, characters 13-23:
 1 | let foo (t : (_, int) t @ contended) = use_uncontended t
-                                                           ^
-Error: This value is "contended" but is expected to be "uncontended".
+                 ^^^^^^^^^^
+Error: The type constructor "t" expects 1 argument(s),
+       but is here applied to 2 argument(s)
 |}]
 
 (********************************************************)
@@ -888,28 +865,35 @@ end = struct
   type 'a t = { x : 'a }
 end
 [%%expect {|
-module T : sig type 'a t : value mod contended with 'a end
+Uncaught exception: File "typing/jkind.ml", line 1056, characters 42-48: Assertion failed
+
 |}]
 
 let foo (t : int T.t @ contended) = use_uncontended t
 [%%expect {|
-val foo : int T.t @ contended -> unit = <fun>
+Line 1, characters 13-20:
+1 | let foo (t : int T.t @ contended) = use_uncontended t
+                 ^^^^^^^
+Error: The type constructor "T.t" expects 0 argument(s),
+       but is here applied to 1 argument(s)
 |}]
 
 let foo (t : _ T.t @ contended) = use_uncontended t
 [%%expect {|
-Line 1, characters 50-51:
+Line 1, characters 13-18:
 1 | let foo (t : _ T.t @ contended) = use_uncontended t
-                                                      ^
-Error: This value is "contended" but is expected to be "uncontended".
+                 ^^^^^
+Error: The type constructor "T.t" expects 0 argument(s),
+       but is here applied to 1 argument(s)
 |}]
 
 let foo (t : int T.t @ nonportable) = use_portable t
 [%%expect {|
-Line 1, characters 51-52:
+Line 1, characters 13-20:
 1 | let foo (t : int T.t @ nonportable) = use_portable t
-                                                       ^
-Error: This value is "nonportable" but is expected to be "portable".
+                 ^^^^^^^
+Error: The type constructor "T.t" expects 0 argument(s),
+       but is here applied to 1 argument(s)
 |}]
 
 (*************************)
@@ -1016,13 +1000,8 @@ type 'a u = Foo of { x : 'a }
 type 'a t : immutable_data = 'a u = Foo of { x : 'a }
 [%%expect {|
 type 'a u = Foo of { x : 'a; }
-Line 2, characters 0-53:
-2 | type 'a t : immutable_data = 'a u = Foo of { x : 'a }
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Error: The kind of type "t" is immutable_data with 'a
-         because it's a boxed variant type.
-       But the kind of type "t" must be a subkind of immutable_data
-         because of the annotation on the declaration of the type t.
+Uncaught exception: Typedecl.Error(_, _)
+
 |}]
 
 (**********************************)
@@ -1063,7 +1042,7 @@ end
 let () = use_uncontended (M.get_contended ())
 [%%expect {|
 module type S' =
-  sig type 'a t = 'a t val get_contended : unit -> int t @ contended end
+  sig type 'a t = 'a t/2 val get_contended : unit -> int t @ contended end
 module M : S'
 |}]
 

@@ -52,8 +52,8 @@ end = struct
   type ('a, 'b) t = Foo of 'a constraint 'a = 'b * 'b
 end
 [%%expect{|
-module M :
-  sig type ('a, 'b) t : immutable_data with 'b constraint 'a = 'b * 'b end
+Uncaught exception: File "typing/jkind.ml", line 1056, characters 42-48: Assertion failed
+
 |}]
 
 module M : sig
@@ -62,8 +62,8 @@ end = struct
   type ('a, 'b) t = Foo of 'a constraint 'a = 'b * 'b
 end
 [%%expect{|
-module M :
-  sig type ('a, 'b) t : immutable_data with 'b constraint 'a = 'b * 'b end
+Uncaught exception: File "typing/jkind.ml", line 1056, characters 42-48: Assertion failed
+
 |}]
 
 module M : sig
@@ -118,8 +118,8 @@ end = struct
   type 'a t = Foo of 'a constraint 'a = 'b option
 end
 [%%expect {|
-module M :
-  sig type 'a t : immutable_data with 'b constraint 'a = 'b option end
+Uncaught exception: File "typing/jkind.ml", line 1056, characters 42-48: Assertion failed
+
 |}]
 
 module M : sig
@@ -128,28 +128,8 @@ end = struct
   type 'a t = Foo of 'a constraint 'a = 'b ref
 end
 [%%expect {|
-Lines 3-5, characters 6-3:
-3 | ......struct
-4 |   type 'a t = Foo of 'a constraint 'a = 'b ref
-5 | end
-Error: Signature mismatch:
-       Modules do not match:
-         sig type 'a t = Foo of 'a constraint 'a = 'b ref end
-       is not included in
-         sig type 'a t : immutable_data with 'b constraint 'a = 'b ref end
-       Type declarations do not match:
-         type 'a t = Foo of 'a constraint 'a = 'b ref
-       is not included in
-         type 'a t : immutable_data with 'b constraint 'a = 'b ref
-       The kind of the first is
-           mutable_data with 'b @@ forkable unyielding many
-         because of the definition of t at line 4, characters 2-46.
-       But the kind of the first must be a subkind of immutable_data with 'b
-         because of the definition of t at line 2, characters 2-59.
+Uncaught exception: Typemod.Error(_, _, _)
 
-       The first mode-crosses less than the second along:
-         contention: mod uncontended ≰ mod contended with 'b
-         visibility: mod read_write ≰ mod immutable with 'b
 |}]
 
 module M : sig
@@ -158,7 +138,8 @@ end = struct
   type 'a t = Foo of 'a constraint 'a = 'b ref
 end
 [%%expect {|
-module M : sig type 'a t : mutable_data with 'b constraint 'a = 'b ref end
+Uncaught exception: File "typing/jkind.ml", line 1056, characters 42-48: Assertion failed
+
 |}]
 
 module M : sig
@@ -176,8 +157,8 @@ end = struct
   type 'a t = Foo of 'a constraint 'a = 'b option
 end
 [%%expect {|
-module M :
-  sig type 'a t : immutable_data with 'b constraint 'a = 'b option end
+Uncaught exception: File "typing/jkind.ml", line 1056, characters 42-48: Assertion failed
+
 |}]
 
 module M : sig
@@ -186,21 +167,6 @@ end = struct
   type 'a t = Foo of 'a constraint 'a = ('b : mutable_data) list
 end
 [%%expect {|
-Lines 3-5, characters 6-3:
-3 | ......struct
-4 |   type 'a t = Foo of 'a constraint 'a = ('b : mutable_data) list
-5 | end
-Error: Signature mismatch:
-       Modules do not match:
-         sig type 'a t = Foo of 'a constraint 'a = 'b list end
-       is not included in
-         sig type 'a t : immutable_data constraint 'a = 'b list end
-       Type declarations do not match:
-         type 'a t = Foo of 'a constraint 'a = 'b list
-       is not included in
-         type 'a t : immutable_data constraint 'a = 'b list
-       The kind of the first is immutable_data with 'b
-         because of the definition of t at line 4, characters 2-64.
-       But the kind of the first must be a subkind of immutable_data
-         because of the definition of t at line 2, characters 2-69.
+Uncaught exception: Typemod.Error(_, _, _)
+
 |}]

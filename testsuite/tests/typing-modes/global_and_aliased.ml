@@ -162,11 +162,10 @@ type _fail = w_aliased u_global
 Line 1, characters 13-22:
 1 | type _fail = w_aliased u_global
                  ^^^^^^^^^
-Error: This type "w_aliased" should be an instance of type
-         "('a : value mod global)"
-       The kind of w_aliased is value mod aliased
+Error: This type "w_aliased" should be an instance of type "'a"
+       The kind of "w_aliased" is value mod aliased
          because of the definition of w_aliased at line 5, characters 0-34.
-       But the kind of w_aliased must be a subkind of value mod global
+       But the kind of "w_aliased" must be a subkind of value mod global
          because of the definition of u_global at line 1, characters 0-37.
 |}]
 

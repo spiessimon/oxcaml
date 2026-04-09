@@ -543,10 +543,10 @@ Line 2, characters 30-51:
 2 | let f_16 () = let mutable x = (assert false : t_16) in ();;
                                   ^^^^^^^^^^^^^^^^^^^^^
 Error: This expression has type "t_16" but an expression was expected of type
-         "('a : '_representable_layout_1)"
-       The layout of t_16 is any
+         "'a"
+       The layout of "t_16" is any
          because of the definition of t_16 at line 1, characters 0-15.
-       But the layout of t_16 must be representable
+       But the layout of "t_16" must be representable
          because it's the type of a variable bound by a `let`.
 |}, Principal{|
 type t_16 : any
@@ -554,11 +554,10 @@ Line 2, characters 26-27:
 2 | let f_16 () = let mutable x = (assert false : t_16) in ();;
                               ^
 Error: This pattern matches values of type "t_16"
-       but a pattern was expected which matches values of type
-         "('a : '_representable_layout_1)"
-       The layout of t_16 is any
+       but a pattern was expected which matches values of type "'a"
+       The layout of "t_16" is any
          because of the definition of t_16 at line 1, characters 0-15.
-       But the layout of t_16 must be representable
+       But the layout of "t_16" must be representable
          because it's the type of a variable bound by a `let`.
 |}]
 
@@ -572,9 +571,9 @@ let x_17 =
 Line 3, characters 7-8:
 3 |   x <- 3;
            ^
-Error: This expression has type "int" but an expression was expected of type
+Error: The constant "3" has type "int" but an expression was expected of type
          "float"
-  Hint: Did you mean "3."?
+Hint: Did you mean "3."?
 |}]
 
 (* Test 18.1: unmutated mutable variable warning *)
@@ -585,7 +584,7 @@ let x_18_1 =
 Line 2, characters 14-15:
 2 |   let mutable x = 3 in x + 1
                   ^
-Warning 186 [unmutated-mutable]: mutable variable x was never mutated.
+Warning 186 [unmutated-mutable]: mutable variable "x" was never mutated.
 
 val x_18_1 : int = 4
 |}]
@@ -598,7 +597,7 @@ let x_18_2 =
 Line 2, characters 14-15:
 2 |   let mutable x = 3 in x <- 4; 4
                   ^
-Warning 26 [unused-var]: variable x was mutated but never used.
+Warning 26 [unused-var]: variable "x" was mutated but never used.
 
 val x_18_2 : int = 4
 |}]
@@ -611,7 +610,7 @@ let x_18_3 =
 Line 2, characters 14-15:
 2 |   let mutable x = 3 in 5
                   ^
-Warning 26 [unused-var]: unused variable x.
+Warning 26 [unused-var]: unused variable "x".
 
 val x_18_3 : int = 5
 |}]
@@ -623,6 +622,14 @@ let f_19 () =
   x
 [%%expect{|
 val f_19 : unit -> int = <fun>
+|}, Principal{|
+Line 4, characters 2-3:
+4 |   x
+      ^
+Error: This value is "local"
+       but is expected to be "local" to the parent region or "global"
+         because it is a function return value.
+         Hint: Use exclave_ to return a local value.
 |}]
 
 let foo_20 y =

@@ -76,9 +76,9 @@ Line 2, characters 0-29:
 2 | and 'b t1_constraint' = t_any
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Error:
-       The layout of 'b t1_constraint' is any
+       The layout of "'b t1_constraint'" is any
          because of the definition of t_any at line 3, characters 0-16.
-       But the layout of 'b t1_constraint' must be representable
+       But the layout of "'b t1_constraint'" must be representable
          because it instantiates an unannotated type parameter of t1_constraint.
 |}]
 
@@ -333,12 +333,12 @@ val f6 : t6 -> float = <fun>
 Line 8, characters 32-36:
 8 |   let { fld6 = fld6 } = x in S6 fld6;;
                                     ^^^^
-Error: This expression has type "float" but an expression was expected of type
-         "('a : immediate)"
-       The kind of float is
+Error: The value "fld6" has type "float" but an expression was expected of type
+         "'a"
+       The kind of "float" is
            value mod forkable unyielding many stateless immutable
          because it is the primitive type float.
-       But the kind of float must be a subkind of immediate
+       But the kind of "float" must be a subkind of immediate
          because of the definition of s6 at line 2, characters 0-35.
 |}];;
 
@@ -452,9 +452,9 @@ Line 10, characters 10-20:
 10 | type t4 = t_any M.t2 M.t1
                ^^^^^^^^^^
 Error: This type "t_any M.t2" should be an instance of type "'a M.t2"
-       The layout of t_any is any
+       The layout of "t_any" is any
          because of the definition of t_any at line 3, characters 0-16.
-       But the layout of t_any must be a sublayout of value
+       But the layout of "t_any" must be a sublayout of value
          because of the definition of t1 at line 2, characters 2-42.
 |}]
 
@@ -476,9 +476,9 @@ Line 10, characters 10-20:
 10 | type t4 = t_any M.t2 M.t1
                ^^^^^^^^^^
 Error: This type "t_any M.t2" should be an instance of type "'a M.t2"
-       The layout of t_any is any
+       The layout of "t_any" is any
          because of the definition of t_any at line 3, characters 0-16.
-       But the layout of t_any must be a sublayout of value
+       But the layout of "t_any" must be a sublayout of value
          because of the definition of t1 at line 3, characters 2-41.
 |}]
 
@@ -500,9 +500,9 @@ Line 10, characters 10-20:
 10 | type t4 = t_any M.t2 M.t1
                ^^^^^^^^^^
 Error: This type "t_any M.t2" should be an instance of type "'a M.t2"
-       The layout of t_any is any
+       The layout of "t_any" is any
          because of the definition of t_any at line 3, characters 0-16.
-       But the layout of t_any must be a sublayout of value
+       But the layout of "t_any" must be a sublayout of value
          because of the definition of t1 at line 3, characters 2-42.
 |}]
 

@@ -23,10 +23,10 @@ type 'a should_not_accept_or_null = 'a id_value_or_null
 Line 3, characters 23-38:
 3 | type should_not_work = t_value_or_null should_not_accept_or_null
                            ^^^^^^^^^^^^^^^
-Error: This type "t_value_or_null" should be an instance of type "('a : value)"
-       The kind of t_value_or_null is value_or_null
+Error: This type "t_value_or_null" should be an instance of type "'a"
+       The kind of "t_value_or_null" is value_or_null
          because of the definition of t_value_or_null at line 1, characters 0-36.
-       But the kind of t_value_or_null must be a subkind of value
+       But the kind of "t_value_or_null" must be a subkind of value
          because of the definition of should_not_accept_or_null at line 1, characters 0-55.
 |}]
 
@@ -63,9 +63,9 @@ Error: Signature mismatch:
        is not included in
          val should_not_work : 'a -> unit
        The type "'a -> unit" is not compatible with the type "'b -> unit"
-       The kind of 'a is value_or_null
+       The kind of "'b" is value_or_null
          because of the definition of should_not_work at line 6, characters 2-57.
-       But the kind of 'a must be a subkind of value
+       But the kind of "'b" must be a subkind of value
          because of the definition of should_not_work at line 2, characters 2-34.
 |}]
 
@@ -105,10 +105,10 @@ end
 Line 4, characters 12-27:
 4 |   type t2 = t_value_or_null t
                 ^^^^^^^^^^^^^^^
-Error: This type "t_value_or_null" should be an instance of type "('a : value)"
-       The kind of t_value_or_null is value_or_null
+Error: This type "t_value_or_null" should be an instance of type "'a"
+       The kind of "t_value_or_null" is value_or_null
          because of the definition of t_value_or_null at line 1, characters 0-36.
-       But the kind of t_value_or_null must be a subkind of value
+       But the kind of "t_value_or_null" must be a subkind of value
          because of the definition of t at line 2, characters 2-16.
 |}]
 
@@ -134,10 +134,10 @@ end
 Line 4, characters 12-27:
 4 |   type t2 = t_value_or_null t
                 ^^^^^^^^^^^^^^^
-Error: This type "t_value_or_null" should be an instance of type "('a : value)"
-       The kind of t_value_or_null is value_or_null
+Error: This type "t_value_or_null" should be an instance of type "'a"
+       The kind of "t_value_or_null" is value_or_null
          because of the definition of t_value_or_null at line 1, characters 0-36.
-       But the kind of t_value_or_null must be a subkind of value
+       But the kind of "t_value_or_null" must be a subkind of value
          because of the definition of t at line 2, characters 2-25.
 |}]
 
@@ -164,9 +164,9 @@ Error: Signature mismatch:
        is not included in
          val f : 'a -> 'a
        The type "'a -> 'a" is not compatible with the type "'b -> 'b"
-       The kind of 'a is value_or_null
+       The kind of "'b" is value_or_null
          because of the definition of f at line 2, characters 2-40.
-       But the kind of 'a must be a subkind of value
+       But the kind of "'b" must be a subkind of value
          because of the definition of f at line 4, characters 8-28.
 |}]
 
@@ -191,9 +191,9 @@ Error: Signature mismatch:
        is not included in
          val f : 'a -> 'a
        The type "'a -> 'a" is not compatible with the type "'b -> 'b"
-       The kind of 'a is value_or_null
+       The kind of "'b" is value_or_null
          because of the definition of f at line 2, characters 2-40.
-       But the kind of 'a must be a subkind of value
+       But the kind of "'b" must be a subkind of value
          because of the definition of f at line 4, characters 6-7.
 |}]
 
@@ -219,9 +219,9 @@ Error: Signature mismatch:
        is not included in
          val f : 'a -> 'a
        The type "'a -> 'a" is not compatible with the type "'b -> 'b"
-       The kind of 'a is value_or_null
+       The kind of "'b" is value_or_null
          because of the definition of f at line 2, characters 2-41.
-       But the kind of 'a must be a subkind of value
+       But the kind of "'b" must be a subkind of value
          because of the definition of f at line 4, characters 6-7.
 |}]
 
@@ -247,9 +247,9 @@ Error: Signature mismatch:
        is not included in
          val f : 'a -> 'a
        The type "'a -> 'a" is not compatible with the type "'b -> 'b"
-       The kind of 'a is value_or_null
+       The kind of "'b" is value_or_null
          because of the definition of f at line 2, characters 2-41.
-       But the kind of 'a must be a subkind of value
+       But the kind of "'b" must be a subkind of value
          because of the definition of f at line 4, characters 6-7.
 |}]
 
@@ -276,9 +276,9 @@ Error: Signature mismatch:
        is not included in
          val f : 'a -> 'a
        The type "'a -> 'a" is not compatible with the type "'b -> 'b"
-       The kind of 'a is value_or_null
+       The kind of "'b" is value_or_null
          because of the definition of f at line 2, characters 2-41.
-       But the kind of 'a must be a subkind of value
+       But the kind of "'b" must be a subkind of value
          because of the definition of f at line 4, characters 6-7.
 |}]
 
@@ -346,9 +346,9 @@ Line 1, characters 14-35:
 1 | type fails = (t_value_or_null dummy) constrained
                   ^^^^^^^^^^^^^^^^^^^^^
 Error: This type "t_value_or_null dummy" should be an instance of type "'a dummy"
-       The kind of t_value_or_null is value_or_null
+       The kind of "t_value_or_null" is value_or_null
          because of the definition of t_value_or_null at line 1, characters 0-36.
-       But the kind of t_value_or_null must be a subkind of value
+       But the kind of "t_value_or_null" must be a subkind of value
          because of the definition of constrained at line 1, characters 0-49.
 |}]
 
@@ -375,9 +375,9 @@ Line 1, characters 14-35:
 1 | type fails = (t_value_or_null dummy) constrained'
                   ^^^^^^^^^^^^^^^^^^^^^
 Error: This type "t_value_or_null dummy" should be an instance of type "'a dummy"
-       The kind of t_value_or_null is value_or_null
+       The kind of "t_value_or_null" is value_or_null
          because of the definition of t_value_or_null at line 1, characters 0-36.
-       But the kind of t_value_or_null must be a subkind of value
+       But the kind of "t_value_or_null" must be a subkind of value
          because of the definition of constrained' at lines 1-2, characters 0-44.
 |}]
 

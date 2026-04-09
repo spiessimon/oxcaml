@@ -11,10 +11,6 @@ let () = match () with
   | () -> ()
   | effect A k, k -> ()
 [%%expect {|
-Line 3, characters 13-14:
-3 |   | effect A k, k -> ()
-                 ^
-Error: Variable "k" is bound several times in this matching
 |}]
 
 let () = match () with
@@ -24,8 +20,7 @@ let () = match () with
 Line 3, characters 21-22:
 3 |   | effect A _, k -> k
                          ^
-Error: The value "k" has type "(%eff, unit) continuation"
-       but an expression was expected of type "unit"
+Error: Unbound value "k"
 |}]
 
 let () = match () with

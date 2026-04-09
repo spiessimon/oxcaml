@@ -1,0 +1,5 @@
+Thread 1 killed on uncaught exception Failure("failed to allocate domain")
+Raised by primitive operation at Stdlib__Domain.Runtime_5.spawn in file "domain.ml", line 437, characters 17-41
+Called from Stdlib__Domain.Safe.spawn in file "domain.ml", lines 604-607, characters 4-11
+Called from Use_domains.(fun) in file "use_domains.ml", line 13, characters 18-52
+Called from Thread.create.(fun) in file "thread.ml", line 57, characters 8-14

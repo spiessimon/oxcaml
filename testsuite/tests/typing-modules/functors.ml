@@ -36,7 +36,7 @@ module X : x
 module Y : y
 module Z : z
 module W : w
-module F : (X : x) (Y : y) (Z : z) -> sig end
+module F : functor (X : x) (Y : y) (Z : z) -> sig end
 |}]
 
 
@@ -91,7 +91,7 @@ Error: This application of the functor "F" is ill-typed.
          (X : x) (Y : y) -> ...
        1. Module X matches the expected module type x
        2. Modules do not match:
-            W : sig type w = W.w end
+            W : w
           is not included in
             y
           The type "y" is required but not provided
@@ -101,7 +101,7 @@ module type f = functor (X:empty)(Y:empty) -> empty
 module F: f =
   functor(X:empty)(Y:empty)(Z:empty) -> Empty
 [%%expect {|
-module type f = (X : empty) (Y : empty) -> empty
+module type f = functor (X : empty) (Y : empty) -> empty
 Line 3, characters 9-45:
 3 |   functor(X:empty)(Y:empty)(Z:empty) -> Empty
              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -118,7 +118,7 @@ Error: Signature mismatch:
 module type f = functor (X:a)(Y:b) -> c
 module F:f = functor (X:a)(Y:b)(Z:c) -> Empty
 [%%expect {|
-module type f = (X : a) (Y : b) -> c
+module type f = functor (X : a) (Y : b) -> c
 Line 2, characters 21-45:
 2 | module F:f = functor (X:a)(Y:b)(Z:c) -> Empty
                          ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -143,9 +143,9 @@ Lines 2-4, characters 2-5:
 4 |   end
 Error: Signature mismatch:
        Modules do not match:
-         sig module F : (X : sig type t end) -> sig end end
+         sig module F : functor (X : sig type t end) -> sig end end
        is not included in
-         sig module F : (X : sig end) -> sig end end
+         sig module F : functor (X : sig end) -> sig end end
        In module "F":
        Modules do not match:
          (X : $S1) -> ...
@@ -161,7 +161,7 @@ Error: Signature mismatch:
 module F(X:sig type t end) = struct end
 module M = F(struct type x end)
 [%%expect {|
-module F : (X : sig type t end) -> sig end
+module F : functor (X : sig type t end) -> sig end
 Line 2, characters 11-31:
 2 | module M = F(struct type x end)
                ^^^^^^^^^^^^^^^^^^^^
@@ -175,7 +175,7 @@ end
 type u = F(X)(Z).t
 [%%expect {|
 module F :
-  (X : sig type x end) (Y : sig type y end) (Z : sig type z end) ->
+  functor (X : sig type x end) (Y : sig type y end) (Z : sig type z end) ->
     sig type t = X of X.x | Y of Y.y | Z of Z.z end
 Line 4, characters 9-16:
 4 | type u = F(X)(Z).t
@@ -194,7 +194,7 @@ Error: The functor application "F(X)(Z)" is ill-typed.
 module F()(X:sig type t end) = struct end
 module M = F()()
 [%%expect {|
-module F : () (X : sig type t end) -> sig end
+module F : functor () (X : sig type t end) -> sig end
 Line 2, characters 11-16:
 2 | module M = F()()
                ^^^^^
@@ -219,10 +219,11 @@ Lines 3-5, characters 6-3:
 5 | end
 Error: Signature mismatch:
        Modules do not match:
-         sig module F : (X : sig type y end) -> sig end end
+         sig module F : functor (X : sig type y end) -> sig end end
        is not included in
          sig
-           module F : (X : sig type x end) (X : sig type y end) -> sig end
+           module F :
+             functor (X : sig type x end) (X : sig type y end) -> sig end
          end
        In module "F":
        Modules do not match:
@@ -289,8 +290,9 @@ module K = struct include X include Y end
 module M = F(K)(struct type x = K.x end)( (* struct type z = K.y end *) )
 [%%expect {|
 module F :
-  (A : sig type x type y end) (B : sig type x = A.x end)
-  (C : sig type y = A.y end) -> sig end
+  functor (A : sig type x type y end) (B : sig type x = A.x end)
+          (C : sig type y = A.y end)
+    -> sig end
 module K : sig type x = X.x type y = Y.y end
 Line 10, characters 11-73:
 10 | module M = F(K)(struct type x = K.x end)( (* struct type z = K.y end *) )
@@ -441,8 +443,9 @@ module type f =
 module F: f = functor (A:sig include x include y end)(Z:sig type y = A.y end) -> struct end
 [%%expect {|
 module type f =
-  (A : sig type x type y end) (B : sig type x = A.x end)
-  (C : sig type y = A.y end) -> sig end
+  functor (A : sig type x type y end) (B : sig type x = A.x end)
+          (C : sig type y = A.y end)
+    -> sig end
 Line 4, characters 22-91:
 4 | module F: f = functor (A:sig include x include y end)(Z:sig type y = A.y end) -> struct end
                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -464,9 +467,9 @@ module type f =
 module F: f = functor (X:sig include x include y end)(Z:sig type zv = Z of X.y end) -> struct end
 [%%expect {|
 module type f =
-  (B : sig type x type y type u = x type v = y end)
-  (Y : sig type yu = Y of B.u end) (Z : sig type zv = Z of B.v end) ->
-    sig end
+  functor (B : sig type x type y type u = x type v = y end)
+          (Y : sig type yu = Y of B.u end) (Z : sig type zv = Z of B.v end)
+    -> sig end
 Line 4, characters 22-97:
 4 | module F: f = functor (X:sig include x include y end)(Z:sig type zv = Z of X.y end) -> struct end
                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -554,7 +557,7 @@ module M = struct
   end
 end
 [%%expect {|
-module F : (X : x) (B : b) (Y : y) -> sig type t end
+module F : functor (X : x) (B : b) (Y : y) -> sig type t end
 Line 8, characters 15-57:
 8 |     module U = F(struct type x end)(B)(struct type w end)
                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -581,11 +584,11 @@ module M = struct
   end
 end
 [%%expect {|
-module F : (X : a) -> sig type t end
+module F : functor (X : a) -> sig type t end
 Line 6, characters 13-17:
 6 |     type t = F(X).t
                  ^^^^
-Error: Modules do not match: a is not included in a/2
+Error: Modules do not match: (a with P.X) is not included in a/2
 Line 3, characters 2-15:
   Definition of module type "a"
 Line 1, characters 0-13:
@@ -612,10 +615,10 @@ Error: Signature mismatch:
          sig
            module type aa = a
            module type a
-           module F : (X : aa) (Y : a) -> sig end
+           module F : functor (X : aa) (Y : a) -> sig end
          end
        is not included in
-         sig module F : (X : a) (Y : a) -> sig end end
+         sig module F : functor (X : a) (Y : a) -> sig end end
        In module "F":
        Modules do not match:
          (X : aa) (Y : a) -> ...
@@ -692,18 +695,26 @@ Error: Signature mismatch:
        Modules do not match:
          sig
            module F :
-             (X : (A : sig type xa end) (B : sig type xz end) -> sig end)
-             (Y : (A : sig type ya end) (B : sig type ybb end) -> sig end)
-             (Z : (A : sig type za end) (B : sig type zbb end) -> sig end) ->
-               sig end
+             functor (X : functor (A : sig type xa end) (B : sig type xz end)
+                            -> sig end)
+                     (Y : functor (A : sig type ya end)
+                                  (B : sig type ybb end)
+                            -> sig end)
+                     (Z : functor (A : sig type za end)
+                                  (B : sig type zbb end)
+                            -> sig end)
+               -> sig end
          end
        is not included in
          sig
            module F :
-             (X : (A : sig type xa end) (B : sig type xz end) -> sig end)
-             (Y : (A : sig type ya end) (B : sig type yb end) -> sig end)
-             (Z : (A : sig type za end) (B : sig type zb end) -> sig end) ->
-               sig end
+             functor (X : functor (A : sig type xa end) (B : sig type xz end)
+                            -> sig end)
+                     (Y : functor (A : sig type ya end) (B : sig type yb end)
+                            -> sig end)
+                     (Z : functor (A : sig type za end) (B : sig type zb end)
+                            -> sig end)
+               -> sig end
          end
        In module "F":
        Modules do not match:
@@ -712,9 +723,11 @@ Error: Signature mismatch:
          (X : $T1) (Y : $T2) (Z : $T3) -> ...
        1. Module types $S1 and $T1 match
        2. Module types do not match:
-            $S2 = (A : sig type ya end) (B : sig type ybb end) -> sig end
+            $S2 =
+            functor (A : sig type ya end) (B : sig type ybb end) -> sig end
           does not include
-            $T2 = (A : sig type ya end) (B : sig type yb end) -> sig end
+            $T2 =
+            functor (A : sig type ya end) (B : sig type yb end) -> sig end
           Modules do not match:
             (A : $S1) (B : $S2) -> ...
           is not included in
@@ -726,9 +739,11 @@ Error: Signature mismatch:
                $T2 = sig type ybb end
              The type "yb" is required but not provided
        3. Module types do not match:
-            $S3 = (A : sig type za end) (B : sig type zbb end) -> sig end
+            $S3 =
+            functor (A : sig type za end) (B : sig type zbb end) -> sig end
           does not include
-            $T3 = (A : sig type za end) (B : sig type zb end) -> sig end
+            $T3 =
+            functor (A : sig type za end) (B : sig type zb end) -> sig end
           Modules do not match:
             (A : $S1) (B : $S2) -> ...
           is not included in
@@ -773,17 +788,22 @@ Error: Signature mismatch:
        Modules do not match:
          sig
            module F :
-             (X : (A : sig type xa end) (B : sig type xz end) -> sig end)
-             (Y : (A : sig type ya end) (B : sig type yb end) -> sig end) ->
-               sig end
+             functor (X : functor (A : sig type xa end) (B : sig type xz end)
+                            -> sig end)
+                     (Y : functor (A : sig type ya end) (B : sig type yb end)
+                            -> sig end)
+               -> sig end
          end
        is not included in
          sig
            module F :
-             (X : (A : sig type xa end) (B : sig type xz end) -> sig end)
-             (Y : (A : sig type ya end) (B : sig type yb end) -> sig end)
-             (Z : (A : sig type za end) (B : sig type zb end) -> sig end) ->
-               sig end
+             functor (X : functor (A : sig type xa end) (B : sig type xz end)
+                            -> sig end)
+                     (Y : functor (A : sig type ya end) (B : sig type yb end)
+                            -> sig end)
+                     (Z : functor (A : sig type za end) (B : sig type zb end)
+                            -> sig end)
+               -> sig end
          end
        In module "F":
        Modules do not match:
@@ -793,7 +813,8 @@ Error: Signature mismatch:
        1. Module types $S1 and $T1 match
        2. Module types $S2 and $T2 match
        3. An argument appears to be missing with module type
-              $T3 = (A : sig type za end) (B : sig type zb end) -> sig end
+              $T3 =
+              functor (A : sig type za end) (B : sig type zb end) -> sig end
 |}]
 
 module M: sig
@@ -836,18 +857,27 @@ Error: Signature mismatch:
        Modules do not match:
          sig
            module F :
-             (X : (A : sig type xaa end) (B : sig type xz end) -> sig end)
-             (Y : (A : sig type ya end) (B : sig type ybb end) -> sig end)
-             (Z : (A : sig type za end) (B : sig type zbb end) -> sig end) ->
-               sig end
+             functor (X : functor (A : sig type xaa end)
+                                  (B : sig type xz end)
+                            -> sig end)
+                     (Y : functor (A : sig type ya end)
+                                  (B : sig type ybb end)
+                            -> sig end)
+                     (Z : functor (A : sig type za end)
+                                  (B : sig type zbb end)
+                            -> sig end)
+               -> sig end
          end
        is not included in
          sig
            module F :
-             (X : (A : sig type xa end) (B : sig type xz end) -> sig end)
-             (Y : (A : sig type ya end) (B : sig type yb end) -> sig end)
-             (Z : (A : sig type za end) (B : sig type zb end) -> sig end) ->
-               sig end
+             functor (X : functor (A : sig type xa end) (B : sig type xz end)
+                            -> sig end)
+                     (Y : functor (A : sig type ya end) (B : sig type yb end)
+                            -> sig end)
+                     (Z : functor (A : sig type za end) (B : sig type zb end)
+                            -> sig end)
+               -> sig end
          end
        In module "F":
        Modules do not match:
@@ -855,9 +885,11 @@ Error: Signature mismatch:
        is not included in
          (X : $T1) (Y : $T2) (Z : $T3) -> ...
        1. Module types do not match:
-            $S1 = (A : sig type xaa end) (B : sig type xz end) -> sig end
+            $S1 =
+            functor (A : sig type xaa end) (B : sig type xz end) -> sig end
           does not include
-            $T1 = (A : sig type xa end) (B : sig type xz end) -> sig end
+            $T1 =
+            functor (A : sig type xa end) (B : sig type xz end) -> sig end
           Modules do not match:
             (A : $S1) (B : $S2) -> ...
           is not included in
@@ -869,17 +901,21 @@ Error: Signature mismatch:
              The type "xa" is required but not provided
           2. Module types $S2 and $T2 match
        2. Module types do not match:
-            $S2 = (A : sig type ya end) (B : sig type ybb end) -> sig end
+            $S2 =
+            functor (A : sig type ya end) (B : sig type ybb end) -> sig end
           does not include
-            $T2 = (A : sig type ya end) (B : sig type yb end) -> sig end
+            $T2 =
+            functor (A : sig type ya end) (B : sig type yb end) -> sig end
           Modules do not match:
             (A : $S1) (B : $S2) -> ...
           is not included in
             (A : $T1) (B : $T2) -> ...
        3. Module types do not match:
-            $S3 = (A : sig type za end) (B : sig type zbb end) -> sig end
+            $S3 =
+            functor (A : sig type za end) (B : sig type zbb end) -> sig end
           does not include
-            $T3 = (A : sig type za end) (B : sig type zb end) -> sig end
+            $T3 =
+            functor (A : sig type za end) (B : sig type zb end) -> sig end
           Modules do not match:
             (A : $S1) (B : $S2) -> ...
           is not included in
@@ -926,18 +962,7 @@ Error: Signature mismatch:
          sig
            module B :
              sig
-               module C :
-                 sig
-                   module D :
-                     sig
-                       module E :
-                         sig
-                           module F :
-                             (X : sig type x end) (Y : sig type y' end)
-                             (W : sig type w end) -> sig end
-                         end
-                     end
-                 end
+               module C : sig module D : sig module E : sig ... end end end
              end
          end
        is not included in
@@ -959,9 +984,10 @@ Error: Signature mismatch:
                    module E :
                      sig
                        module F :
-                         sig ... end ->
-                           sig ... end ->
-                             sig ... end -> sig ... end -> sig end
+                         functor sig ... end ->
+                           functor sig ... end ->
+                             functor sig ... end ->
+                               functor sig ... end -> sig end
                      end
                  end
              end
@@ -976,9 +1002,10 @@ Error: Signature mismatch:
                module E :
                  sig
                    module F :
-                     sig type x end ->
-                       sig type y end ->
-                         sig type z end -> sig type w end -> sig end
+                     functor sig type x end ->
+                       functor sig type y end ->
+                         functor sig type z end ->
+                           functor sig type w end -> sig end
                  end
              end
          end
@@ -990,9 +1017,10 @@ Error: Signature mismatch:
            module E :
              sig
                module F :
-                 sig type x end ->
-                   sig type y end ->
-                     sig type z end -> sig type w end -> sig end
+                 functor sig type x end ->
+                   functor sig type y end ->
+                     functor sig type z end ->
+                       functor sig type w end -> sig end
              end
          end
        In module "B.C.D.E":
@@ -1001,8 +1029,9 @@ Error: Signature mismatch:
        is not included in
          sig
            module F :
-             sig type x end ->
-               sig type y end -> sig type z end -> sig type w end -> sig end
+             functor sig type x end ->
+               functor sig type y end ->
+                 functor sig type z end -> functor sig type w end -> sig end
          end
        In module "B.C.D.E.F":
        Modules do not match:
@@ -1087,22 +1116,42 @@ module F: s = functor
   -> struct end
 [%%expect {|
 module type s =
-  (X : sig type when_ type shall type we type three type meet type again end)
-  (Y : sig type in_ val thunder : in_ val lightning : in_ type rain end)
-  (Z : sig type when_ type the type hurlyburly's type done_ end)
-  (Z : sig type when_ type the type battle's type lost type and_ type won end)
-  (W : sig
-         type that
-         type will
-         type be
-         type ere
-         type the_
-         type set
-         type of_
-         type sun
-       end)
-  (S : sig type where type the type place end)
-  (R : sig type upon type the type heath end) -> sig end
+  functor (X : sig
+                 type when_
+                 type shall
+                 type we
+                 type three
+                 type meet
+                 type again
+               end)
+          (Y : sig
+                 type in_
+                 val thunder : in_
+                 val lightning : in_
+                 type rain
+               end)
+          (Z : sig type when_ type the type hurlyburly's type done_ end)
+          (Z : sig
+                 type when_
+                 type the
+                 type battle's
+                 type lost
+                 type and_
+                 type won
+               end)
+          (W : sig
+                 type that
+                 type will
+                 type be
+                 type ere
+                 type the_
+                 type set
+                 type of_
+                 type sun
+               end)
+          (S : sig type where type the type place end)
+          (R : sig type upon type the type heath end)
+    -> sig end
 Lines 11-18, characters 2-15:
 11 | ..(X: sig type when_ type shall type we type tree type meet type again end)
 12 |   (Y:sig type in_ val thunder:in_ val lightning: in_ type pain end)
@@ -1218,12 +1267,15 @@ end
 
 module U = F(PF)(PF)(PF)
 [%%expect {|
-module F : (X : sig type witness module type t module M : t end) -> X.t
+module F :
+  functor (X : sig type witness module type t module M : t end) ->
+    (X.t with X.M)
 module PF :
   sig
     type witness
     module type t =
-      (X : sig type witness module type t module M : t end) -> X.t
+      functor (X : sig type witness module type t module M : t end) ->
+        (X.t with X.M)
     module M = F
   end
 module U :
@@ -1247,7 +1299,9 @@ Error: This application of the functor "F" is ill-typed.
        4. Module PF matches the expected module type
        5. Module PF matches the expected module type
        6. Modules do not match:
-            F : (X : sig type witness module type t module M : t end) -> X.t
+            F :
+            functor (X : sig type witness module type t module M : t end) ->
+              (X.t with X.M)
           is not included in
             $T6 = sig type witness module type t module M : t end
           This module should not be a functor, a structure was expected.
@@ -1278,15 +1332,17 @@ module type arg = sig type arg end
 module A : sig type arg end
 module Add_one' :
   sig
-    module M : arg -> sig type arg = A.arg end
-    module type t = arg -> sig type arg = A.arg end
+    module M : functor arg -> sig type arg = A.arg end
+    module type t = functor arg -> sig type arg = A.arg end
   end
 module Add_one :
   sig type witness module M = Add_one'.M module type t = Add_one'.t end
 module Add_three :
   sig
-    module M : arg -> arg -> arg -> sig type arg = A.arg end
-    module type t = arg -> arg -> arg -> sig type arg = A.arg end
+    module M :
+      functor arg -> functor arg -> functor arg -> sig type arg = A.arg end
+    module type t =
+      functor arg -> functor arg -> functor arg -> sig type arg = A.arg end
     type witness
   end
 |}]
@@ -1367,16 +1423,19 @@ Lines 14-16, characters 2-3:
 Error: Signature mismatch:
        Modules do not match:
          sig
-           module F : (X : sig type x end) (Z : sig type z end) -> sig end
+           module F :
+             functor (X : sig type x end) (Z : sig type z end) -> sig end
          end
        is not included in
          sig
            module F :
-             (X : sig
-                    type x
-                    module type t =
-                      (Y : sig type y end) (Z : sig type z end) -> sig end
-                  end)
+             functor (X : sig
+                            type x
+                            module type t =
+                              functor (Y : sig type y end)
+                                      (Z : sig type z end)
+                                -> sig end
+                          end)
                -> X.t
          end
        In module "F":
@@ -1418,18 +1477,19 @@ Error: Signature mismatch:
        Modules do not match:
          sig
            module F :
-             (Wrong : sig type wrong end)
-             (X : sig module type t module M : t end) -> X.t
+             functor (Wrong : sig type wrong end)
+                     (X : sig module type t module M : t end)
+               -> X.t
          end
        is not included in
          sig
            module F :
-             (X : sig
-                    module type T
-                    module type t = T -> T -> T
-                    module M : t
-                  end)
-               -> X.T -> X.T -> X.T
+             functor (X : sig
+                            module type T
+                            module type t = functor T -> functor T -> T
+                            module M : t
+                          end)
+               -> functor X.T -> functor X.T -> X.T
          end
        In module "F":
        Modules do not match:
@@ -1439,8 +1499,8 @@ Error: Signature mismatch:
        1. An extra argument is provided of module type
               $S1 = sig type wrong end
        2. Module types $S2 and $T2 match
-       3. Module types X/3.T and X/2.T match
-       4. Module types X/3.T and X/2.T match
+       3. Module types X.T and X.T match
+       4. Module types X.T and X.T match
 |}]
 
 
@@ -1476,27 +1536,30 @@ Error: Signature mismatch:
        Modules do not match:
          sig
            module F :
-             sig type wrong end ->
-               (X : sig module type T end) (Res : X.T) (Res : X.T)
-               (Res : X.T) -> X.T
+             functor sig type wrong end ->
+               functor (X : sig module type T end) (Res : X.T) (Res : X.T)
+                       (Res : X.T)
+                 -> (X.T with Res)
          end
        is not included in
          sig
            module F :
-             sig end ->
-               (X : sig
-                      module type T
-                      module type inner = sig module type t module M : t end
-                      module F :
-                        (X : inner) -> (T -> T -> T) ->
-                          sig module type res = X.t end
-                      module Y :
-                        sig
-                          module type t = T -> T -> T
-                          module M : (X : T) (Y : T) -> T
-                        end
-                    end)
-               -> X.F(X.Y)(X.Y.M).res
+             functor sig end ->
+               functor (X : sig
+                              module type T
+                              module type inner =
+                                sig module type t module M : t end
+                              module F :
+                                functor (X : inner) ->
+                                  functor (functor T -> functor T -> T) ->
+                                    sig module type res = X.t end
+                              module Y :
+                                sig
+                                  module type t = functor T -> functor T -> T
+                                  module M : functor (X : T) (Y : T) -> T
+                                end
+                            end)
+                 -> X.F(X.Y)(X.Y.M).res
          end
        In module "F":
        Modules do not match:
@@ -1526,8 +1589,9 @@ module Z = struct type t = Z of int end
 module Error=F(X)(struct type t = int end)(Y)(Z)
 [%%expect {|
 module F :
-  (X : sig type t end) (Y : sig type t = Y of X.t end)
-  (Z : sig type t = Z of X.t end) -> sig end
+  functor (X : sig type t end) (Y : sig type t = Y of X.t end)
+          (Z : sig type t = Z of X.t end)
+    -> sig end
 module X : sig type t = U end
 module Y : sig type t = Y of int end
 module Z : sig type t = Z of int end
@@ -1560,10 +1624,6 @@ Error: This application of the functor "F" is ill-typed.
           Constructors have different names, "Y" and "Z".
        4. The following extra argument is provided
               Z : sig type t = Z.t = Z of int end
-File "_none_", line 1:
-  Definition of module "Y"
-Line 6, characters 0-39:
-  Definition of module "Y/2"
 |}]
 
 (** Final state in the presence of extensions
@@ -1601,8 +1661,13 @@ module TY : sig type t end
 module type Ext = sig module type T module X : T end
 module AExt : sig module type T = A module X = A end
 module FiveArgsExt :
-  sig module type T = ty -> ty -> ty -> ty -> ty -> sig end module X : T end
-module Bar : (W : A) (X : Ext) (Y : B) (Z : Ext) -> Z.T
+  sig
+    module type T =
+      functor ty ->
+        functor ty -> functor ty -> functor ty -> functor ty -> sig end
+    module X : T
+  end
+module Bar : functor (W : A) (X : Ext) (Y : B) (Z : Ext) -> (Z.T with Z.X)
 type fine = Bar(A)(FiveArgsExt)(B)(AExt).a
 |}]
 
@@ -1684,13 +1749,15 @@ end
 [%%expect{|
 module Shape_arg :
   sig
-    module M1 : (Arg1 : sig end) -> sig module type S1 = sig type t end end
-    module type S2 = sig module Make : (Arg2 : sig end) -> M1(Arg2).S1 end
+    module M1 :
+      functor (Arg1 : sig end) -> sig module type S1 = sig type t end end
+    module type S2 =
+      sig module Make : functor (Arg2 : sig end) -> M1(Arg2).S1 end
     module M2 : S2
     module M3 :
-      (Arg4 : sig end) ->
+      functor (Arg4 : sig end) ->
         sig module type S3 = sig type t = M2.Make(Arg4).t end end
-    module M4 : (Arg5 : sig end) -> M3(Arg5).S3
+    module M4 : functor (Arg5 : sig end) -> M3(Arg5).S3
   end
 |}]
 
@@ -1724,7 +1791,7 @@ module B : sig module O : sig module N : sig type t = A.M.t end end end
 module F(X:A) = struct end
 module R = F(struct end[@warning "-73"]);;
 [%%expect {|
-module F : (X : A) -> sig end
+module F : functor (X : A) -> sig end
 Line 2, characters 11-40:
 2 | module R = F(struct end[@warning "-73"]);;
                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1736,7 +1803,7 @@ module F()(X:empty)()(Y:A) = struct end
 module R =
   F(struct end[@warning "-73"])(struct end)(struct end[@warning "-73"])();;
 [%%expect {|
-module F : () (X : empty) () (Y : A) -> sig end
+module F : functor () (X : empty) () (Y : A) -> sig end
 Line 3, characters 2-73:
 3 |   F(struct end[@warning "-73"])(struct end)(struct end[@warning "-73"])();;
       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1756,7 +1823,7 @@ module F(X:empty) = struct end
 module R =
   F(struct end)();;
 [%%expect {|
-module F : (X : empty) -> sig end
+module F : functor (X : empty) -> sig end
 Line 3, characters 2-17:
 3 |   F(struct end)();;
       ^^^^^^^^^^^^^^^
@@ -1793,8 +1860,9 @@ include
     end)
 [%%expect {|
 module F :
-  (A : sig type 'a t end) (B : sig type 'a t val f : 'a A.t -> 'a t end) ->
-    sig end
+  functor (A : sig type 'a t end)
+          (B : sig type 'a t val f : 'a A.t -> 'a t end)
+    -> sig end
 Lines 15-21, characters 2-8:
 15 | ..F
 16 |     (struct
@@ -1817,12 +1885,10 @@ Error: This application of the functor "F" is ill-typed.
           is not included in
             type 'a t
           They have different arities.
-          Lines 9-12, characters 0-3:
-            Definition of module "A/1"
        2. Modules do not match:
             $S2 : sig val f : 'a -> 'a end
           is not included in
-            $T2 = sig type 'a t val f : 'a A/2.t -> 'a t end
+            $T2 = sig type 'a t val f : 'a A.t -> 'a t end
 |}]
 
 
@@ -1836,8 +1902,9 @@ struct end
 module R = G(struct end)(struct let f (x,_) = x end)
 [%%expect {|
 module G :
-  (A : sig type 'a t = 'a * 'a end) (B : sig val f : 'a A.t -> 'a end) ->
-    sig end
+  functor (A : sig type 'a t = 'a * 'a end)
+          (B : sig val f : 'a A.t -> 'a end)
+    -> sig end
 Line 8, characters 11-52:
 8 | module R = G(struct end)(struct let f (x,_) = x end)
                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1867,7 +1934,8 @@ module R = With_expansion(struct
     ()
 [%%expect {|
 module With_expansion :
-  (A : sig module type t module M : t end) (B : sig module type t = A.t end)
+  functor (A : sig module type t module M : t end)
+          (B : sig module type t = A.t end)
     -> B.t
 Lines 5-11, characters 11-6:
  5 | ...........With_expansion(struct
@@ -1910,7 +1978,7 @@ Error: This application of the functor "With_expansion" is ill-typed.
          (A : ...) (B : $T2) () () -> ...
        1. Module $S1 matches the expected module type
        2. An argument appears to be missing with module type
-              $T2 = sig module type t = A/2.t end
+              $T2 = sig module type t = A.t end
        3. Module () matches the expected module type
        4. Module () matches the expected module type
 |}]
@@ -1943,8 +2011,9 @@ module _ =
     end)
 [%%expect {|
 module H :
-  (X : sig type 'a t type 'a s end) (Y : sig val f : 'a X.s -> 'a end) ->
-    sig end
+  functor (X : sig type 'a t type 'a s end)
+          (Y : sig val f : 'a X.s -> 'a end)
+    -> sig end
 Lines 18-25, characters 2-8:
 18 | ..H
 19 |     (struct
@@ -1965,12 +2034,10 @@ Error: This application of the functor "H" is ill-typed.
             $T1 = sig type 'a t type 'a s end
           Type declarations do not match: type t is not included in type 'a t
           They have different arities.
-          Line 5, characters 0-32:
-            Definition of module "X/1"
        2. Modules do not match:
             $S2 : sig val f : 'a -> 'a end
           is not included in
-            $T2 = sig val f : 'a X/2.s -> 'a end
+            $T2 = sig val f : 'a X.s -> 'a end
           Values do not match:
             val f : 'a -> 'a
           is not included in
@@ -1998,14 +2065,16 @@ Error: Signature mismatch:
        Modules do not match:
          sig
            module F :
-             (X : sig type 'a t = 'a list end)
-             (Y : sig type 'a t = ('a * 'a) * 'a X.t end) -> sig end
+             functor (X : sig type 'a t = 'a list end)
+                     (Y : sig type 'a t = ('a * 'a) * 'a X.t end)
+               -> sig end
          end
        is not included in
          sig
            module F :
-             (X : sig type 'a t = 'a * 'a end)
-             (Y : sig type 'a t = 'a X.t * 'a list end) -> sig end
+             functor (X : sig type 'a t = 'a * 'a end)
+                     (Y : sig type 'a t = 'a X.t * 'a list end)
+               -> sig end
          end
        In module "F":
        Modules do not match:
@@ -2059,17 +2128,19 @@ Error: The functor application "Set.Make(Set)(A)" is ill-typed.
             Set.OrderedType
           Modules do not match:
             sig
-              module type OrderedType = Set.OrderedType
+              module type OrderedType = Stdlib__Set.OrderedType
               module type S = Set.S
               module Make = Set.Make
+              module MakePortable = Set.MakePortable
             end
           is not included in
-            Set.OrderedType
+            Stdlib__Set.OrderedType
           The type "t" is required but not provided
-          File "set.mli", line 52, characters 4-10: Expected declaration
+          File "set.mli", line 57, characters 4-10: Expected declaration
           The value "compare" is required but not provided
-          File "set.mli", line 55, characters 4-31: Expected declaration
-       2. The following extra argument is provided A : sig type a = A.a end
+          File "set.mli", line 60, characters 4-31: Expected declaration
+       2. The following extra argument is provided
+              A : sig module type S = A.S module M = A.M end
 |}]
 
 
@@ -2099,7 +2170,7 @@ Error: Signature mismatch:
 module F_empty(_:empty) = Empty
 module M: empty = F_empty
 [%%expect {|
-module F_empty : empty -> sig end
+module F_empty : functor empty -> sig end
 Line 2, characters 18-25:
 2 | module M: empty = F_empty
                       ^^^^^^^
@@ -2124,12 +2195,13 @@ module F(X:empty -> empty) = Empty
 module G(X:empty) = Empty
 module A = F(Empty)
 [%%expect {|
-module F : (X : empty -> empty) -> sig end
-module G : (X : empty) -> sig end
+module F : functor (X : functor empty -> empty) -> sig end
+module G : functor (X : empty) -> sig end
 Line 3, characters 11-19:
 3 | module A = F(Empty)
                ^^^^^^^^
-Error: Modules do not match: sig end is not included in empty -> empty
+Error: Modules do not match: sig end is not included in
+       functor empty -> empty
      This module should not be a structure, a functor was expected.
 |}]
 
@@ -2138,8 +2210,8 @@ module B = G(F_empty)
 Line 1, characters 11-21:
 1 | module B = G(F_empty)
                ^^^^^^^^^^
-Error: Modules do not match: (Arg : empty) -> sig end is not included in
-       empty
+Error: Modules do not match: functor (Arg : empty) -> sig end
+     is not included in empty
      This module should not be a functor, a structure was expected.
      Hint: Did you forget to apply the functor?
 |}]
@@ -2151,11 +2223,14 @@ Line 1, characters 49-72:
                                                      ^^^^^^^^^^^^^^^^^^^^^^^
 Error: Signature mismatch:
        Modules do not match:
-         sig module F : a end
+         sig module F : (a with X) end
        is not included in
-         sig module F : empty -> empty end
+         sig module F : functor empty -> empty end
        In module "F":
-       Modules do not match: a is not included in empty -> empty
+       Modules do not match:
+         ((a with X) with F)
+       is not included in
+         functor empty -> empty
 |}]
 
 (** Incorrect hint: the compatibility check consider that [X.T] can not be equal
@@ -2196,14 +2271,16 @@ Error: Signature mismatch:
            type t
            module Inner : sig type t end
            module F :
-             (X : sig val f : t val g : Inner.t val h : int end) -> sig end
+             functor (X : sig val f : t val g : Inner.t val h : int end) ->
+               sig end
          end
        is not included in
          sig
            type t
            module Inner : sig type t end
            module F :
-             (X : sig val f : t val g : Inner.t val h : float end) -> sig end
+             functor (X : sig val f : t val g : Inner.t val h : float end) ->
+               sig end
          end
        In module "F":
        Modules do not match:
@@ -2254,16 +2331,18 @@ Error: Signature mismatch:
            type t
            module Inner : sig type t end
            module F :
-             (X : sig val f : t val h : int end) (A : a)
-             (Y : sig val f : Inner.t val h : int end) -> sig end
+             functor (X : sig val f : t val h : int end) (A : a)
+                     (Y : sig val f : Inner.t val h : int end)
+               -> sig end
          end
        is not included in
          sig
            type t
            module Inner : sig type t end
            module F :
-             (A : a) (X : sig val f : t val h : int end) (A : a)
-             (Y : sig val f : Inner.t val h : int end) -> sig end
+             functor (A : a) (X : sig val f : t val h : int end) (A : a)
+                     (Y : sig val f : Inner.t val h : int end)
+               -> sig end
          end
        In module "F":
        Modules do not match:

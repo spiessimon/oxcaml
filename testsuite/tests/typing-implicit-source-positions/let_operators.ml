@@ -21,6 +21,8 @@ Line 2, characters 2-6:
 Error: The operator "let+" has type
          "call_pos:[%call_pos] -> 'a -> (lexing_position * 'a -> 'b) -> 'b"
        but it was expected to have type "'c -> ('d -> 'e) -> 'f"
+       The first argument is labeled "call_pos",
+       but an unlabeled argument was expected
 |}]
 
 let ( let* ) ?(call_pos = 1) a g = g (call_pos, a);; 
@@ -37,6 +39,8 @@ Line 4, characters 2-6:
 Error: The operator "let*" has type
          "?call_pos:int -> 'a -> (int * 'a -> 'b) -> 'b"
        but it was expected to have type "'c -> ('d -> 'e) -> 'f"
+       The first argument is labeled "?call_pos",
+       but an unlabeled argument was expected
 |}]
 
 (* Infix operators work! *)
@@ -49,6 +53,11 @@ val ( >>| ) :
   call_pos:[%call_pos] -> 'a -> (lexing_position * 'a -> 'b) -> 'b = <fun>
 - : lexing_position =
 {pos_fname = ""; pos_lnum = 3; pos_bol = 1140; pos_cnum = 1144}
+|}, Principal{|
+val ( >>| ) :
+  call_pos:[%call_pos] -> 'a -> (lexing_position * 'a -> 'b) -> 'b = <fun>
+- : lexing_position =
+{pos_fname = ""; pos_lnum = 3; pos_bol = 1901; pos_cnum = 1905}
 |}]
 
 (* TEST

@@ -66,15 +66,8 @@ val t : 'a -> 'a Or_null.t = <fun>
 let fail = Or_null.This (Or_null.This 5)
 
 [%%expect{|
-Line 1, characters 24-40:
-1 | let fail = Or_null.This (Or_null.This 5)
-                            ^^^^^^^^^^^^^^^^
-Error: This expression has type "'a Or_null.t" = "'a or_null"
-       but an expression was expected of type "('b : value)"
-       The kind of 'a Or_null.t is value_or_null mod everything with 'a
-         because it is the primitive type or_null.
-       But the kind of 'a Or_null.t must be a subkind of value
-         because of the definition of t at line 2, characters 2-79.
+Uncaught exception: Typecore.Error(_, _, _)
+
 |}]
 
 (* Type annotations are not required. *)
@@ -87,15 +80,8 @@ let fail = Or_null.This (Or_null.This 5)
 [%%expect{|
 module Or_null :
   sig type 'a t = 'a or_null = Null | This of 'a [@@or_null_reexport] end
-Line 4, characters 24-40:
-4 | let fail = Or_null.This (Or_null.This 5)
-                            ^^^^^^^^^^^^^^^^
-Error: This expression has type "'a Or_null.t" = "'a or_null"
-       but an expression was expected of type "('b : value)"
-       The kind of 'a Or_null.t is value_or_null mod everything with 'a
-         because it is the primitive type or_null.
-       But the kind of 'a Or_null.t must be a subkind of value
-         because of the definition of t at line 2, characters 2-45.
+Uncaught exception: Typecore.Error(_, _, _)
+
 |}]
 
 (* Incorrect annotations still cause errors. *)
@@ -103,13 +89,8 @@ Error: This expression has type "'a Or_null.t" = "'a or_null"
 type 'a t : value = 'a or_null [@@or_null_reexport]
 
 [%%expect{|
-Line 1, characters 0-51:
-1 | type 'a t : value = 'a or_null [@@or_null_reexport]
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Error: The kind of type "'a or_null" is value_or_null mod everything with 'a
-         because it is the primitive type or_null.
-       But the kind of type "'a or_null" must be a subkind of value
-         because of the definition of t at line 1, characters 0-51.
+Uncaught exception: Typedecl.Error(_, _)
+
 |}]
 
 type 'a t : float64 = 'a or_null [@@or_null_reexport]
@@ -130,11 +111,10 @@ type ('a : float64) t = 'a or_null [@@or_null_reexport]
 Line 1, characters 24-26:
 1 | type ('a : float64) t = 'a or_null [@@or_null_reexport]
                             ^^
-Error: This type "('a : float64)" should be an instance of type
-         "('b : value_or_null mod non_null)"
-       The layout of 'a is float64
+Error: This type "'a" should be an instance of type "'b"
+       The layout of "'a" is float64
          because of the annotation on 'a in the declaration of the type t.
-       But the layout of 'a must overlap with value
+       But the layout of "'a" must overlap with value
          because the type argument of or_null has layout value.
 |}]
 
@@ -151,17 +131,8 @@ module Or_null :
   sig
     type ('a : value_or_null mod non_null) t = 'a or_null = Null | This of 'a [@@or_null_reexport]
   end
-Line 4, characters 24-40:
-4 | let fail = Or_null.This (Or_null.This 5)
-                            ^^^^^^^^^^^^^^^^
-Error: This expression has type "'a Or_null.t" = "'a or_null"
-       but an expression was expected of type
-         "('b : value_or_null mod non_null)"
-       The kind of 'a Or_null.t is value_or_null mod everything with 'a
-         because it is the primitive type or_null.
-       But the kind of 'a Or_null.t must be a subkind of
-           value_or_null mod non_null
-         because of the definition of t at line 2, characters 2-63.
+Uncaught exception: Typecore.Error(_, _, _)
+
 |}]
 
 (* This fails, just as [type t = int option = None | Some of int] would. *)

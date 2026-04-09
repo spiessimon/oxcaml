@@ -40,6 +40,6 @@ type t : value mod stateless
 
 type 'a t : immutable_data with 'a
 [%%expect {|
-type 'a t
-  : value mod forkable unyielding many stateless immutable non_float with 'a
+Uncaught exception: File "typing/jkind.ml", line 1056, characters 42-48: Assertion failed
+
 |}]

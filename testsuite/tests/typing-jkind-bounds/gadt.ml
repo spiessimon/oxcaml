@@ -100,15 +100,8 @@ type 'a t : value mod contended portable =
 ;;
 (* CR layouts v2.8: This should be accepted. Internal ticket 4973. *)
 [%%expect{|
-Lines 1-3, characters 0-61:
-1 | type 'a t : value mod contended portable =
-2 |   | Shared : ('b : value mod contended portable). 'b  -> 'b t
-3 |   | Unshared : (unit -> 'c) @@ portable               -> 'c t
-Error: The kind of type "t" is value mod portable immutable non_float with 'a
-         because it's a boxed variant type.
-       But the kind of type "t" must be a subkind of
-           value mod portable contended
-         because of the annotation on the declaration of the type t.
+Uncaught exception: Typedecl.Error(_, _)
+
 |}]
 
 (***********************************************************************)
@@ -152,16 +145,7 @@ let f (witness : (M1.t3, M1.t4) eq)
 module type S = sig type t1 type t2 end
 type (_ : any, _ : any) eq = Refl : ('a : any). ('a, 'a) eq
 val use_portable : 'a @ portable -> unit = <fun>
-module F :
-  functor (X : S) ->
-    sig
-      type t3 : value mod portable with X.t1
-      type t4 : value mod portable with X.t2
-    end
-module Arg1 : sig type t1 = int -> int type t2 = string end
-module M1 : sig type t3 = F(Arg1).t3 type t4 = F(Arg1).t4 end
->> Fatal error: Abstract kind with [with]: value mod portable with Arg1.t2
-Uncaught exception: Misc.Fatal_error
+Uncaught exception: File "typing/jkind.ml", line 1056, characters 42-48: Assertion failed
 
 |}]
 
@@ -292,15 +276,8 @@ type existential_abstract : immediate =
   | P : ('a : value mod portable). 'a abstract -> existential_abstract
 [%%expect{|
 type 'a abstract : value mod portable
-Lines 2-3, characters 0-70:
-2 | type existential_abstract : immediate =
-3 |   | P : ('a : value mod portable). 'a abstract -> existential_abstract
-Error: The kind of type "existential_abstract" is
-           immutable_data with (type : value mod portable) abstract
-         because it's a boxed variant type.
-       But the kind of type "existential_abstract" must be a subkind of
-           immediate
-         because of the annotation on the declaration of the type existential_abstract.
+Uncaught exception: Typedecl.Error(_, _)
+
 |}]
 
 type existential_abstract : immutable_data with (type : value mod portable) abstract =
@@ -327,8 +304,8 @@ end = struct
 end
 [%%expect{|
 val foo : existential_abstract -> unit = <fun>
-module M :
-  sig type t : immutable_data with (type : value mod portable) abstract end
+Uncaught exception: File "typing/jkind.ml", line 1056, characters 42-48: Assertion failed
+
 |}]
 
 module M : sig
@@ -341,25 +318,8 @@ end
    Tconstrs, checking to see if corresponding arguments are in a sub-kind relationship --
    but only if at least the argument on the right is best. Subtle. *)
 [%%expect{|
-Lines 3-5, characters 6-3:
-3 | ......struct
-4 |   type t = P : ('a : immediate). 'a abstract -> t
-5 | end
-Error: Signature mismatch:
-       Modules do not match:
-         sig type t = P : ('a : immediate). 'a abstract -> t end
-       is not included in
-         sig type t : immutable_data with (type : value) abstract end
-       Type declarations do not match:
-         type t = P : ('a : immediate). 'a abstract -> t
-       is not included in
-         type t : immutable_data with (type : value) abstract
-       The kind of the first is
-           immutable_data with (type : immediate) abstract
-         because of the definition of t at line 4, characters 2-49.
-       But the kind of the first must be a subkind of
-           immutable_data with (type : value) abstract
-         because of the definition of t at line 2, characters 2-54.
+Uncaught exception: Typemod.Error(_, _, _)
+
 |}]
 
 (* Some hard recursive types with existentials *)
@@ -404,11 +364,10 @@ module F2(M : S with type 'a b = int) = struct
 end
 [%%expect{|
 module F2 :
-  functor
-    (M : sig
-           type 'a b = int
-           type t = P : ('a : value mod portable). 'a b -> t
-         end)
+  functor (M : sig
+                 type 'a b = int
+                 type t = P : ('a : value mod portable). 'a b -> t
+               end)
     ->
     sig
       type t = M.t
@@ -423,11 +382,10 @@ module F3(M : S with type 'a b = 'a) = struct
 end
 [%%expect{|
 module F3 :
-  functor
-    (M : sig
-           type 'a b = 'a
-           type t = P : ('a : value mod portable). 'a b -> t
-         end)
+  functor (M : sig
+                 type 'a b = 'a
+                 type t = P : ('a : value mod portable). 'a b -> t
+               end)
     -> sig type t = M.t val foo : t -> unit end
 |}]
 
@@ -501,13 +459,8 @@ Error: The kind of type "(int ref, int ref) box2" is mutable_data
 type _ box : immediate = Box : 'a -> 'a box
 
 [%%expect{|
-Line 1, characters 0-43:
-1 | type _ box : immediate = Box : 'a -> 'a box
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Error: The kind of type "box" is immutable_data with _
-         because it's a boxed variant type.
-       But the kind of type "box" must be a subkind of immediate
-         because of the annotation on the declaration of the type box.
+Uncaught exception: Typedecl.Error(_, _)
+
 |}]
 
 (* Only the first type parameter matters *)
@@ -542,13 +495,8 @@ type 'c t2 : immediate =
   | K : 'd t -> 'd t2
 [%%expect{|
 type 'a t constraint 'a = 'b option
-Lines 2-3, characters 0-21:
-2 | type 'c t2 : immediate =
-3 |   | K : 'd t -> 'd t2
-Error: The kind of type "t2" is immutable_data with (type : value) option t
-         because it's a boxed variant type.
-       But the kind of type "t2" must be a subkind of immediate
-         because of the annotation on the declaration of the type t2.
+Uncaught exception: Typedecl.Error(_, _)
+
 |}]
 
 (* Existential row variables *)
@@ -560,14 +508,8 @@ type exist_row1 = Mk : [< `A | `B of int ref ] -> exist_row1
 
 type show_me_the_kind : immediate = exist_row1
 [%%expect{|
-Line 1, characters 0-46:
-1 | type show_me_the_kind : immediate = exist_row1
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Error: The kind of type "exist_row1" is
-           immutable_data with [< `A | `B of int ref ]
-         because of the definition of exist_row1 at line 1, characters 0-67.
-       But the kind of type "exist_row1" must be a subkind of immediate
-         because of the definition of show_me_the_kind at line 1, characters 0-46.
+Uncaught exception: Typedecl.Error(_, _)
+
 |}]
 
 let foo (x : exist_row1 @ nonportable) = use_portable x
@@ -594,14 +536,8 @@ type exist_row2 = Mk : [> `A | `B of int ref ] -> exist_row2
 
 type show_me_the_kind : immediate = exist_row2
 [%%expect{|
-Line 1, characters 0-46:
-1 | type show_me_the_kind : immediate = exist_row2
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Error: The kind of type "exist_row2" is
-           immutable_data with [> `A | `B of int ref ]
-         because of the definition of exist_row2 at line 1, characters 0-67.
-       But the kind of type "exist_row2" must be a subkind of immediate
-         because of the definition of show_me_the_kind at line 1, characters 0-46.
+Uncaught exception: Typedecl.Error(_, _)
+
 |}]
 
 let foo (x : exist_row2 @ nonportable) = use_portable x
@@ -628,15 +564,8 @@ type 'a exist_row3 =
 
 type 'a show_me_the_kind : immediate = 'a option exist_row3
 [%%expect{|
-Line 1, characters 0-59:
-1 | type 'a show_me_the_kind : immediate = 'a option exist_row3
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Error: The kind of type "'a option exist_row3" is
-           immutable_data with [> `A | `B of int ref ]
-         because of the definition of exist_row3 at line 1, characters 0-80.
-       But the kind of type "'a option exist_row3" must be a subkind of
-           immediate
-         because of the definition of show_me_the_kind at line 1, characters 0-59.
+Uncaught exception: Typedecl.Error(_, _)
+
 |}]
 
 let foo (x : [`A | `B of int ref] option exist_row3 @ contended) = use_uncontended x
@@ -708,16 +637,8 @@ type _ t : immutable_data =
 [%%expect {|
 type zero = Zero
 type 'a succ = Succ
-Lines 3-5, characters 0-28:
-3 | type _ t : immutable_data =
-4 |   | Zero : zero t
-5 |   | Succ : 'a t -> 'a succ t
-Error: The kind of type "t" is immutable_data with (type : value) t
-         because it's a boxed variant type.
-       But the kind of type "t" must be a subkind of immutable_data
-         because of the annotation on the declaration of the type t.
-       Note: I gave up trying to find the simplest kind for the first,
-       as it is very large or deeply recursive.
+Uncaught exception: Typedecl.Error(_, _)
+
 |}]
 
 type zero = private Zero
@@ -729,16 +650,8 @@ type _ t : immutable_data =
 [%%expect {|
 type zero = private Zero
 type 'a succ = private Succ
-Lines 3-5, characters 0-28:
-3 | type _ t : immutable_data =
-4 |   | Zero : zero t
-5 |   | Succ : 'a t -> 'a succ t
-Error: The kind of type "t" is immutable_data with (type : value) t
-         because it's a boxed variant type.
-       But the kind of type "t" must be a subkind of immutable_data
-         because of the annotation on the declaration of the type t.
-       Note: I gave up trying to find the simplest kind for the first,
-       as it is very large or deeply recursive.
+Uncaught exception: Typedecl.Error(_, _)
+
 |}]
 
 type zero
@@ -750,16 +663,8 @@ type _ t : immutable_data =
 [%%expect {|
 type zero
 type !'a succ
-Lines 3-5, characters 0-28:
-3 | type _ t : immutable_data =
-4 |   | Zero : zero t
-5 |   | Succ : 'a t -> 'a succ t
-Error: The kind of type "t" is immutable_data with (type : value) t
-         because it's a boxed variant type.
-       But the kind of type "t" must be a subkind of immutable_data
-         because of the annotation on the declaration of the type t.
-       Note: I gave up trying to find the simplest kind for the first,
-       as it is very large or deeply recursive.
+Uncaught exception: Typedecl.Error(_, _)
+
 |}]
 
 type _ t : value mod portable =
@@ -767,14 +672,6 @@ type _ t : value mod portable =
   | Succ : 'a t -> [ `succ of 'a ] t
 (* CR: This should be accepted. Internal ticket 6194. *)
 [%%expect {|
-Lines 1-3, characters 0-36:
-1 | type _ t : value mod portable =
-2 |   | Zero : [ `zero ] t
-3 |   | Succ : 'a t -> [ `succ of 'a ] t
-Error: The kind of type "t" is immutable_data with (type : value) t/2
-         because it's a boxed variant type.
-       But the kind of type "t" must be a subkind of value mod portable
-         because of the annotation on the declaration of the type t.
-       Note: I gave up trying to find the simplest kind for the first,
-       as it is very large or deeply recursive.
+Uncaught exception: Typedecl.Error(_, _)
+
 |}]

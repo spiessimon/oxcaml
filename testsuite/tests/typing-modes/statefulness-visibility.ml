@@ -347,13 +347,8 @@ end = struct
   let set r x = ignore (exchange r x)
 end
 [%%expect{|
-module Atomic :
-  sig
-    type !'a t : sync_data with 'a @@ contended
-    val make : 'a -> 'a t @@ stateless
-    val get : 'a t @ read -> 'a @@ stateless
-    val set : 'a t -> 'a -> unit @@ stateless
-  end
+Uncaught exception: File "typing/jkind.ml", line 1056, characters 42-48: Assertion failed
+
 |}]
 
 
@@ -381,7 +376,10 @@ Error: This value is "immutable" but is expected to be "read_write".
 
 let foo (a @ read) = Atomic.get a
 [%%expect{|
-val foo : 'a Atomic.t @ read -> 'a = <fun>
+Line 1, characters 32-33:
+1 | let foo (a @ read) = Atomic.get a
+                                    ^
+Error: This value is "read" but is expected to be "read_write".
 |}]
 
 let foo (a @ read_write) = Atomic.get a
@@ -394,7 +392,7 @@ let foo (a @ immutable) = Atomic.get a
 Line 1, characters 37-38:
 1 | let foo (a @ immutable) = Atomic.get a
                                          ^
-Error: This value is "immutable" but is expected to be "read" or "read_write".
+Error: This value is "immutable" but is expected to be "read_write".
 |}]
 
 (* Closing over use of read_write gives stateful *)
@@ -408,8 +406,8 @@ Line 4, characters 24-27:
 4 |     let _ @ stateless = bar in
                             ^^^
 Error: This value is "stateful"
-         because it contains a usage (of the value "a" at line 3, characters 28-29)
-         which is expected to be "read_write".
+         because it closes over the value "Atomic.set" at line 3, characters 17-27
+         which is "stateful".
        However, the highlighted expression is expected to be "stateless".
 |}]
 
@@ -425,19 +423,19 @@ Error: This function when partially applied returns a value which is "stateful",
 
 let a @ read_write = Atomic.make 42
 [%%expect{|
-val a : int Atomic.t = <abstr>
+val a : int Atomic.t = {Atomic.contents = 42}
 |}]
 
 let foo @ stateless =
     fun () -> Atomic.set a 0
 [%%expect{|
-Line 2, characters 25-26:
+Line 2, characters 14-24:
 2 |     fun () -> Atomic.set a 0
-                             ^
-Error: This value is "immutable"
+                  ^^^^^^^^^^
+Error: The value "Atomic.set" is "stateful"
+       but is expected to be "stateless"
          because it is used inside the function at line 2, characters 4-28
          which is expected to be "stateless".
-       However, the highlighted expression is expected to be "read_write".
 |}]
 
 (* Closing over a stateful value also gives stateful. *)
@@ -489,7 +487,13 @@ let foo () =
     let _ @ observing = bar in
     ()
 [%%expect{|
-val foo : unit -> unit = <fun>
+Line 4, characters 24-27:
+4 |     let _ @ observing = bar in
+                            ^^^
+Error: This value is "stateful"
+         because it closes over the value "Atomic.get" at line 3, characters 17-27
+         which is "stateful".
+       However, the highlighted expression is expected to be "observing".
 |}]
 
 let foo () =
@@ -502,9 +506,9 @@ let foo () =
 Line 4, characters 22-25:
 4 |   let _ @ stateless = bar in
                           ^^^
-Error: This value is "observing"
-         because it contains a usage (of the value "a" at line 3, characters 26-27)
-         which is expected to be "read" or "read_write".
+Error: This value is "stateful"
+         because it closes over the value "Atomic.get" at line 3, characters 15-25
+         which is "stateful".
        However, the highlighted expression is expected to be "stateless".
 |}]
 

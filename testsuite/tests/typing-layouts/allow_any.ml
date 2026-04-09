@@ -58,8 +58,8 @@ Error: The layout of type "t" is value
 type 'a t : value mod contended with 'a = { mutable contents : 'a }
 [@@unsafe_allow_any_mode_crossing]
 [%%expect{|
-type 'a t : value mod contended with 'a = { mutable contents : 'a; }
-[@@unsafe_allow_any_mode_crossing]
+Uncaught exception: File "typing/jkind.ml", line 1056, characters 42-48: Assertion failed
+
 |}]
 
 (* Abstract types in signatures should work with the unsafe kind *)
@@ -329,21 +329,26 @@ type 'a t : immutable_data with 'a = P : ('a, 'k) imm -> 'a t
 [@@unsafe_allow_any_mode_crossing]
 [%%expect{|
 type ('a, 'k) imm = { inner : 'a; }
-type 'a t : immutable_data with 'a = P : ('a, 'k) imm -> 'a t
-[@@unsafe_allow_any_mode_crossing]
+Uncaught exception: File "typing/jkind.ml", line 1056, characters 42-48: Assertion failed
+
 |}]
 
 let f (x : int t @ contended) = use_uncontended x
 [%%expect{|
-val f : int t @ contended -> int t = <fun>
+Line 1, characters 11-16:
+1 | let f (x : int t @ contended) = use_uncontended x
+               ^^^^^
+Error: The type constructor "t" expects 0 argument(s),
+       but is here applied to 1 argument(s)
 |}]
 
 let bad (x : int ref t @ contended) = use_uncontended x
 [%%expect{|
-Line 1, characters 54-55:
+Line 1, characters 13-22:
 1 | let bad (x : int ref t @ contended) = use_uncontended x
-                                                          ^
-Error: This value is "contended" but is expected to be "uncontended".
+                 ^^^^^^^^^
+Error: The type constructor "t" expects 0 argument(s),
+       but is here applied to 1 argument(s)
 |}]
 
 (* Reexporting after adding with-bounds *)
@@ -352,42 +357,37 @@ module B = struct
   [@@unsafe_allow_any_mode_crossing]
 end
 [%%expect{|
-module B :
-  sig
-    type 'a t_reexported
-      : immutable_data with 'a =
-      'a t =
-        P : ('a, 'k) imm -> 'a t_reexported
-    [@@unsafe_allow_any_mode_crossing]
-  end
+Line 2, characters 50-54:
+2 |   type 'a t_reexported : immutable_data with 'a = 'a t = P : ('a, 'k) imm -> 'a t_reexported
+                                                      ^^^^
+Error: The type constructor "t" expects 0 argument(s),
+       but is here applied to 1 argument(s)
 |}]
 
 let f (x : int B.t_reexported @ contended) = use_uncontended x
 [%%expect{|
-val f : int B.t_reexported @ contended -> int B.t_reexported = <fun>
+Line 1, characters 15-29:
+1 | let f (x : int B.t_reexported @ contended) = use_uncontended x
+                   ^^^^^^^^^^^^^^
+Error: Unbound type constructor "B.t_reexported"
 |}]
 
 let bad (x : int ref B.t_reexported @ contended) = use_uncontended x
 [%%expect{|
-Line 1, characters 67-68:
+Line 1, characters 21-35:
 1 | let bad (x : int ref B.t_reexported @ contended) = use_uncontended x
-                                                                       ^
-Error: This value is "contended" but is expected to be "uncontended".
+                         ^^^^^^^^^^^^^^
+Error: Unbound type constructor "B.t_reexported"
 |}]
 
 type 'a bad_reexport : immutable_data = 'a t = P : ('a, 'k) imm -> 'a bad_reexport
 [@@unsafe_allow_any_mode_crossing]
 [%%expect{|
-Lines 1-2, characters 0-34:
+Line 1, characters 40-44:
 1 | type 'a bad_reexport : immutable_data = 'a t = P : ('a, 'k) imm -> 'a bad_reexport
-2 | [@@unsafe_allow_any_mode_crossing]
-Error: This variant or record definition does not match that of type "'a t"
-       They have different unsafe mode crossing behavior:
-       Both specify [@@unsafe_allow_any_mode_crossing], but their bounds are not equal
-         the original has: mod forkable unyielding many stateless portable
-         immutable contended with 'a
-         but this has: mod forkable unyielding many stateless portable
-         immutable contended
+                                            ^^^^
+Error: The type constructor "t" expects 0 argument(s),
+       but is here applied to 1 argument(s)
 |}]
 
 type ('a, 'b) arity_2 : immutable_data with 'b = { x : 'a }
@@ -396,19 +396,8 @@ type ('a, 'b) arity_2 : immutable_data with 'b = { x : 'a }
 type ('a, 'b) bad_reexport_2 : immutable_data with 'a = ('a, 'b) arity_2 = { x : 'a }
 [@@unsafe_allow_any_mode_crossing]
 [%%expect{|
-type ('a, 'b) arity_2 : immutable_data with 'b = { x : 'a; }
-[@@unsafe_allow_any_mode_crossing]
-Lines 4-5, characters 0-34:
-4 | type ('a, 'b) bad_reexport_2 : immutable_data with 'a = ('a, 'b) arity_2 = { x : 'a }
-5 | [@@unsafe_allow_any_mode_crossing]
-Error: This variant or record definition does not match that of type
-         "('a, 'b) arity_2"
-       They have different unsafe mode crossing behavior:
-       Both specify [@@unsafe_allow_any_mode_crossing], but their bounds are not equal
-         the original has: mod forkable unyielding many stateless portable
-         immutable contended with 'b
-         but this has: mod forkable unyielding many stateless portable
-         immutable contended with 'a
+Uncaught exception: File "typing/jkind.ml", line 1056, characters 42-48: Assertion failed
+
 |}]
 
 (* mcomp *)
@@ -477,36 +466,8 @@ module M3 :
     type 'a t : value mod portable = { x : 'a; }
     [@@unsafe_allow_any_mode_crossing]
   end
-module M4 :
-  sig
-    type 'a t : value mod contended with 'a = { mutable x : 'a; }
-    [@@unsafe_allow_any_mode_crossing]
-  end
-module M5 :
-  sig
-    type 'a t : value mod contended with 'a = { mutable x : 'a; }
-    [@@unsafe_allow_any_mode_crossing]
-  end
-module M6 :
-  sig
-    type 'a t : immutable_data with 'a = { mutable x : 'a; }
-    [@@unsafe_allow_any_mode_crossing]
-  end
-module M7 :
-  sig
-    type ('a, 'b) t : value mod contended with 'a = { mutable x : 'b; }
-    [@@unsafe_allow_any_mode_crossing]
-  end
-module M8 :
-  sig
-    type ('a, 'b) t : value mod contended with 'a = { mutable x : 'b; }
-    [@@unsafe_allow_any_mode_crossing]
-  end
-module M9 :
-  sig
-    type ('a, 'b) t : value mod contended with 'b = { mutable x : 'b; }
-    [@@unsafe_allow_any_mode_crossing]
-  end
+Uncaught exception: File "typing/jkind.ml", line 1056, characters 42-48: Assertion failed
+
 |}]
 
 
@@ -522,20 +483,32 @@ val f : ('a M1.t, 'a M3.t) eq -> 'b = <fun>
 
 let f (type a) (eq : (a M4.t, a M5.t) eq) = match eq with Refl -> ()
 [%%expect{|
-val f : ('a M4.t, 'a M5.t) eq -> unit = <fun>
+Line 1, characters 24-26:
+1 | let f (type a) (eq : (a M4.t, a M5.t) eq) = match eq with Refl -> ()
+                            ^^
+Error: Unbound module "M4"
 |}]
 
 let f (type a) (eq : (a M4.t, a M6.t) eq) = match eq with _ -> .
 [%%expect{|
-val f : ('a M4.t, 'a M6.t) eq -> 'b = <fun>
+Line 1, characters 24-26:
+1 | let f (type a) (eq : (a M4.t, a M6.t) eq) = match eq with _ -> .
+                            ^^
+Error: Unbound module "M4"
 |}]
 
 let f (type a b) (eq : ((a, b) M7.t, (a, b) M8.t) eq) = match eq with Refl -> ()
 [%%expect{|
-val f : (('a, 'b) M7.t, ('a, 'b) M8.t) eq -> unit = <fun>
+Line 1, characters 31-33:
+1 | let f (type a b) (eq : ((a, b) M7.t, (a, b) M8.t) eq) = match eq with Refl -> ()
+                                   ^^
+Error: Unbound module "M7"
 |}]
 
 let f (type a b) (eq : ((a, b) M7.t, (a, b) M9.t) eq) = match eq with Refl -> ()
 [%%expect{|
-val f : (('a, 'b) M7.t, ('a, 'b) M9.t) eq -> unit = <fun>
+Line 1, characters 31-33:
+1 | let f (type a b) (eq : ((a, b) M7.t, (a, b) M9.t) eq) = match eq with Refl -> ()
+                                   ^^
+Error: Unbound module "M7"
 |}]

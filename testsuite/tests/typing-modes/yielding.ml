@@ -259,10 +259,10 @@ type _z1 = w1 u1
 Line 1, characters 11-13:
 1 | type _z1 = w1 u1
                ^^
-Error: This type "w1" should be an instance of type "('a : value mod global)"
-       The kind of w1 is value mod global yielding
+Error: This type "w1" should be an instance of type "'a"
+       The kind of "w1" is value mod global yielding
          because of the definition of w1 at line 5, characters 0-35.
-       But the kind of w1 must be a subkind of value mod global
+       But the kind of "w1" must be a subkind of value mod global
          because of the definition of u1 at line 1, characters 0-31.
 |}]
 

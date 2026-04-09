@@ -44,13 +44,8 @@ type ('a : immutable_data) t = 'a option
 
 type 'a t : immutable_data = 'a option
 [%%expect {|
-Line 1, characters 0-38:
-1 | type 'a t : immutable_data = 'a option
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Error: The kind of type "'a option" is immutable_data with 'a
-         because it's a boxed variant type.
-       But the kind of type "'a option" must be a subkind of immutable_data
-         because of the definition of t at line 1, characters 0-38.
+Uncaught exception: Typedecl.Error(_, _)
+
 |}]
 
 type t : immutable_data = int ref option
@@ -76,15 +71,8 @@ type t_test = int option require_many
 type t_test = int option require_contended
 type ('a : value mod portable) t_test = 'a option require_portable
 |}, Principal{|
-Line 1, characters 14-24:
-1 | type t_test = int option require_portable
-                  ^^^^^^^^^^
-Error: This type "int option" should be an instance of type
-         "('a : value mod portable)"
-       The kind of int option is immutable_data with int
-         because it's a boxed variant type.
-       But the kind of int option must be a subkind of value mod portable
-         because of the definition of require_portable at line 10, characters 0-47.
+Uncaught exception: Typetexp.Error(_, _, _)
+
 |}]
 
 type t_test = (unit -> unit) option require_portable
@@ -92,24 +80,15 @@ type t_test = (unit -> unit) option require_portable
 Line 1, characters 14-35:
 1 | type t_test = (unit -> unit) option require_portable
                   ^^^^^^^^^^^^^^^^^^^^^
-Error: This type "(unit -> unit) option" should be an instance of type
-         "('a : value mod portable)"
-       The kind of (unit -> unit) option is value mod immutable non_float
+Error: This type "(unit -> unit) option" should be an instance of type "'a"
+       The kind of "(unit -> unit) option" is value mod immutable non_float
          because it's a boxed variant type.
-       But the kind of (unit -> unit) option must be a subkind of
+       But the kind of "(unit -> unit) option" must be a subkind of
            value mod portable
          because of the definition of require_portable at line 10, characters 0-47.
 |}, Principal{|
-Line 1, characters 14-35:
-1 | type t_test = (unit -> unit) option require_portable
-                  ^^^^^^^^^^^^^^^^^^^^^
-Error: This type "(unit -> unit) option" should be an instance of type
-         "('a : value mod portable)"
-       The kind of (unit -> unit) option is immutable_data with unit -> unit
-         because it's a boxed variant type.
-       But the kind of (unit -> unit) option must be a subkind of
-           value mod portable
-         because of the definition of require_portable at line 10, characters 0-47.
+Uncaught exception: Typetexp.Error(_, _, _)
+
 |}]
 
 type t_test = int option require_global
@@ -117,22 +96,14 @@ type t_test = int option require_global
 Line 1, characters 14-24:
 1 | type t_test = int option require_global
                   ^^^^^^^^^^
-Error: This type "int option" should be an instance of type
-         "('a : value mod global)"
-       The kind of int option is immutable_data
+Error: This type "int option" should be an instance of type "'a"
+       The kind of "int option" is immutable_data
          because it's a boxed variant type.
-       But the kind of int option must be a subkind of value mod global
+       But the kind of "int option" must be a subkind of value mod global
          because of the definition of require_global at line 7, characters 0-43.
 |}, Principal{|
-Line 1, characters 14-24:
-1 | type t_test = int option require_global
-                  ^^^^^^^^^^
-Error: This type "int option" should be an instance of type
-         "('a : value mod global)"
-       The kind of int option is immutable_data with int
-         because it's a boxed variant type.
-       But the kind of int option must be a subkind of value mod global
-         because of the definition of require_global at line 7, characters 0-43.
+Uncaught exception: Typetexp.Error(_, _, _)
+
 |}]
 
 let foo (t : int option @ contended portable once) =
@@ -173,17 +144,8 @@ Error: The kind of type "int ref" is mutable_data.
 
 type 'a t : mutable_data = 'a ref
 [%%expect {|
-Line 1, characters 0-33:
-1 | type 'a t : mutable_data = 'a ref
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Error: The kind of type "'a ref" is
-           mutable_data with 'a @@ forkable unyielding many.
-       But the kind of type "'a ref" must be a subkind of mutable_data
-         because of the definition of t at line 1, characters 0-33.
+Uncaught exception: Typedecl.Error(_, _)
 
-       The first mode-crosses less than the second along:
-         portability: mod portable with 'a ≰ mod portable
-         statefulness: mod stateless with 'a ≰ mod stateless
 |}]
 
 type t_test = int ref require_portable
@@ -195,18 +157,8 @@ type t_test = int ref require_portable
 type t_test = int ref require_many
 type ('a : value mod portable) t_test = 'a ref require_portable
 |}, Principal{|
-Line 1, characters 14-21:
-1 | type t_test = int ref require_portable
-                  ^^^^^^^
-Error: This type "int ref" should be an instance of type
-         "('a : value mod portable)"
-       The kind of int ref is
-           mutable_data with int @@ forkable unyielding many.
-       But the kind of int ref must be a subkind of value mod portable
-         because of the definition of require_portable at line 10, characters 0-47.
+Uncaught exception: Typetexp.Error(_, _, _)
 
-       The first mode-crosses less than the second along:
-         portability: mod portable with int ≰ mod portable
 |}]
 
 type t_test = int ref require_contended
@@ -214,24 +166,13 @@ type t_test = int ref require_contended
 Line 1, characters 14-21:
 1 | type t_test = int ref require_contended
                   ^^^^^^^
-Error: This type "int ref" should be an instance of type
-         "('a : value mod contended)"
-       The kind of int ref is mutable_data.
-       But the kind of int ref must be a subkind of value mod contended
+Error: This type "int ref" should be an instance of type "'a"
+       The kind of "int ref" is mutable_data.
+       But the kind of "int ref" must be a subkind of value mod contended
          because of the definition of require_contended at line 9, characters 0-49.
 |}, Principal{|
-Line 1, characters 14-21:
-1 | type t_test = int ref require_contended
-                  ^^^^^^^
-Error: This type "int ref" should be an instance of type
-         "('a : value mod contended)"
-       The kind of int ref is
-           mutable_data with int @@ forkable unyielding many.
-       But the kind of int ref must be a subkind of value mod contended
-         because of the definition of require_contended at line 9, characters 0-49.
+Uncaught exception: Typetexp.Error(_, _, _)
 
-       The first mode-crosses less than the second along:
-         contention: mod uncontended ≰ mod contended
 |}]
 
 let foo (t : int ref @ portable once) =
@@ -266,13 +207,8 @@ type 'a t = 'a list
 
 type 'a t : immutable_data = 'a list
 [%%expect {|
-Line 1, characters 0-36:
-1 | type 'a t : immutable_data = 'a list
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Error: The kind of type "'a list" is immutable_data with 'a
-         because it's a boxed variant type.
-       But the kind of type "'a list" must be a subkind of immutable_data
-         because of the definition of t at line 1, characters 0-36.
+Uncaught exception: Typedecl.Error(_, _)
+
 |}]
 
 type t : immutable_data = int ref list
@@ -297,15 +233,8 @@ type t_test = int list require_many
 type t_test = int list require_contended
 type ('a : value mod portable) t_test = 'a list require_portable
 |}, Principal{|
-Line 1, characters 14-22:
-1 | type t_test = int list require_portable
-                  ^^^^^^^^
-Error: This type "int list" should be an instance of type
-         "('a : value mod portable)"
-       The kind of int list is immutable_data with int
-         because it's a boxed variant type.
-       But the kind of int list must be a subkind of value mod portable
-         because of the definition of require_portable at line 10, characters 0-47.
+Uncaught exception: Typetexp.Error(_, _, _)
+
 |}]
 
 type t_test = (unit -> unit) list require_portable
@@ -313,24 +242,15 @@ type t_test = (unit -> unit) list require_portable
 Line 1, characters 14-33:
 1 | type t_test = (unit -> unit) list require_portable
                   ^^^^^^^^^^^^^^^^^^^
-Error: This type "(unit -> unit) list" should be an instance of type
-         "('a : value mod portable)"
-       The kind of (unit -> unit) list is value mod immutable non_float
+Error: This type "(unit -> unit) list" should be an instance of type "'a"
+       The kind of "(unit -> unit) list" is value mod immutable non_float
          because it's a boxed variant type.
-       But the kind of (unit -> unit) list must be a subkind of
+       But the kind of "(unit -> unit) list" must be a subkind of
            value mod portable
          because of the definition of require_portable at line 10, characters 0-47.
 |}, Principal{|
-Line 1, characters 14-33:
-1 | type t_test = (unit -> unit) list require_portable
-                  ^^^^^^^^^^^^^^^^^^^
-Error: This type "(unit -> unit) list" should be an instance of type
-         "('a : value mod portable)"
-       The kind of (unit -> unit) list is immutable_data with unit -> unit
-         because it's a boxed variant type.
-       But the kind of (unit -> unit) list must be a subkind of
-           value mod portable
-         because of the definition of require_portable at line 10, characters 0-47.
+Uncaught exception: Typetexp.Error(_, _, _)
+
 |}]
 
 type t_test = int list require_global
@@ -338,22 +258,14 @@ type t_test = int list require_global
 Line 1, characters 14-22:
 1 | type t_test = int list require_global
                   ^^^^^^^^
-Error: This type "int list" should be an instance of type
-         "('a : value mod global)"
-       The kind of int list is immutable_data
+Error: This type "int list" should be an instance of type "'a"
+       The kind of "int list" is immutable_data
          because it's a boxed variant type.
-       But the kind of int list must be a subkind of value mod global
+       But the kind of "int list" must be a subkind of value mod global
          because of the definition of require_global at line 7, characters 0-43.
 |}, Principal{|
-Line 1, characters 14-22:
-1 | type t_test = int list require_global
-                  ^^^^^^^^
-Error: This type "int list" should be an instance of type
-         "('a : value mod global)"
-       The kind of int list is immutable_data with int
-         because it's a boxed variant type.
-       But the kind of int list must be a subkind of value mod global
-         because of the definition of require_global at line 7, characters 0-43.
+Uncaught exception: Typetexp.Error(_, _, _)
+
 |}]
 
 let foo (t : int list @ contended portable once) =
@@ -395,13 +307,8 @@ Error: The kind of type "int array" is mutable_data
 
 type 'a t : mutable_data = 'a array
 [%%expect {|
-Line 1, characters 0-35:
-1 | type 'a t : mutable_data = 'a array
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Error: The kind of type "'a array" is mutable_data with 'a
-         because it is the primitive value type array.
-       But the kind of type "'a array" must be a subkind of mutable_data
-         because of the definition of t at line 1, characters 0-35.
+Uncaught exception: Typedecl.Error(_, _)
+
 |}]
 
 type t_test = int array require_portable
@@ -413,15 +320,8 @@ type t_test = int array require_portable
 type t_test = int array require_many
 type ('a : value mod portable) t_test = 'a array require_portable
 |}, Principal{|
-Line 1, characters 14-23:
-1 | type t_test = int array require_portable
-                  ^^^^^^^^^
-Error: This type "int array" should be an instance of type
-         "('a : value mod portable)"
-       The kind of int array is mutable_data with int
-         because it is the primitive value type array.
-       But the kind of int array must be a subkind of value mod portable
-         because of the definition of require_portable at line 10, characters 0-47.
+Uncaught exception: Typetexp.Error(_, _, _)
+
 |}]
 
 type t_test = int array require_contended
@@ -429,22 +329,14 @@ type t_test = int array require_contended
 Line 1, characters 14-23:
 1 | type t_test = int array require_contended
                   ^^^^^^^^^
-Error: This type "int array" should be an instance of type
-         "('a : value mod contended)"
-       The kind of int array is mutable_data
+Error: This type "int array" should be an instance of type "'a"
+       The kind of "int array" is mutable_data
          because it is the primitive value type array.
-       But the kind of int array must be a subkind of value mod contended
+       But the kind of "int array" must be a subkind of value mod contended
          because of the definition of require_contended at line 9, characters 0-49.
 |}, Principal{|
-Line 1, characters 14-23:
-1 | type t_test = int array require_contended
-                  ^^^^^^^^^
-Error: This type "int array" should be an instance of type
-         "('a : value mod contended)"
-       The kind of int array is mutable_data with int
-         because it is the primitive value type array.
-       But the kind of int array must be a subkind of value mod contended
-         because of the definition of require_contended at line 9, characters 0-49.
+Uncaught exception: Typetexp.Error(_, _, _)
+
 |}]
 
 let foo (t : int array @ portable once) =
@@ -476,13 +368,8 @@ type ('a : immutable_data) t = 'a iarray
 
 type 'a t : immutable_data = 'a iarray
 [%%expect {|
-Line 1, characters 0-38:
-1 | type 'a t : immutable_data = 'a iarray
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Error: The kind of type "'a iarray" is immutable_data with 'a
-         because it is the primitive value type iarray.
-       But the kind of type "'a iarray" must be a subkind of immutable_data
-         because of the definition of t at line 1, characters 0-38.
+Uncaught exception: Typedecl.Error(_, _)
+
 |}]
 
 type t : immutable_data = int ref iarray
@@ -508,15 +395,8 @@ type t_test = int iarray require_many
 type t_test = int iarray require_contended
 type ('a : value mod portable) t_test = 'a iarray require_portable
 |}, Principal{|
-Line 1, characters 14-24:
-1 | type t_test = int iarray require_portable
-                  ^^^^^^^^^^
-Error: This type "int iarray" should be an instance of type
-         "('a : value mod portable)"
-       The kind of int iarray is immutable_data with int
-         because it is the primitive value type iarray.
-       But the kind of int iarray must be a subkind of value mod portable
-         because of the definition of require_portable at line 10, characters 0-47.
+Uncaught exception: Typetexp.Error(_, _, _)
+
 |}]
 
 type t_test = (unit -> unit) iarray require_portable
@@ -524,24 +404,15 @@ type t_test = (unit -> unit) iarray require_portable
 Line 1, characters 14-35:
 1 | type t_test = (unit -> unit) iarray require_portable
                   ^^^^^^^^^^^^^^^^^^^^^
-Error: This type "(unit -> unit) iarray" should be an instance of type
-         "('a : value mod portable)"
-       The kind of (unit -> unit) iarray is value mod immutable non_float
+Error: This type "(unit -> unit) iarray" should be an instance of type "'a"
+       The kind of "(unit -> unit) iarray" is value mod immutable non_float
          because it is the primitive value type iarray.
-       But the kind of (unit -> unit) iarray must be a subkind of
+       But the kind of "(unit -> unit) iarray" must be a subkind of
            value mod portable
          because of the definition of require_portable at line 10, characters 0-47.
 |}, Principal{|
-Line 1, characters 14-35:
-1 | type t_test = (unit -> unit) iarray require_portable
-                  ^^^^^^^^^^^^^^^^^^^^^
-Error: This type "(unit -> unit) iarray" should be an instance of type
-         "('a : value mod portable)"
-       The kind of (unit -> unit) iarray is immutable_data with unit -> unit
-         because it is the primitive value type iarray.
-       But the kind of (unit -> unit) iarray must be a subkind of
-           value mod portable
-         because of the definition of require_portable at line 10, characters 0-47.
+Uncaught exception: Typetexp.Error(_, _, _)
+
 |}]
 
 type t_test = int iarray require_global
@@ -549,22 +420,14 @@ type t_test = int iarray require_global
 Line 1, characters 14-24:
 1 | type t_test = int iarray require_global
                   ^^^^^^^^^^
-Error: This type "int iarray" should be an instance of type
-         "('a : value mod global)"
-       The kind of int iarray is immutable_data
+Error: This type "int iarray" should be an instance of type "'a"
+       The kind of "int iarray" is immutable_data
          because it is the primitive value type iarray.
-       But the kind of int iarray must be a subkind of value mod global
+       But the kind of "int iarray" must be a subkind of value mod global
          because of the definition of require_global at line 7, characters 0-43.
 |}, Principal{|
-Line 1, characters 14-24:
-1 | type t_test = int iarray require_global
-                  ^^^^^^^^^^
-Error: This type "int iarray" should be an instance of type
-         "('a : value mod global)"
-       The kind of int iarray is immutable_data with int
-         because it is the primitive value type iarray.
-       But the kind of int iarray must be a subkind of value mod global
-         because of the definition of require_global at line 7, characters 0-43.
+Uncaught exception: Typetexp.Error(_, _, _)
+
 |}]
 
 let foo (t : int iarray @ contended portable once) =

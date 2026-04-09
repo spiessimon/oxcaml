@@ -8,7 +8,7 @@ end = struct
   type t = int
 end;;
 [%%expect{|
-module F : sig end -> sig type t = private int end
+module F : functor sig end -> sig type t = private int end
 |}]
 
 module Direct = F(struct end);;
@@ -20,7 +20,7 @@ module G(X : sig end) : sig
   type t = F(X).t
 end = F(X);;
 [%%expect{|
-module G : (X : sig end) -> sig type t = F(X).t end
+module G : functor (X : sig end) -> sig type t = F(X).t end
 |}]
 
 module Indirect = G(struct end);;
@@ -34,14 +34,14 @@ module Pub(_ : sig end) = struct
   type t = [ `Foo of t ]
 end;;
 [%%expect{|
-module Pub : sig end -> sig type t = [ `Foo of t ] end
+module Pub : functor sig end -> sig type t = [ `Foo of t ] end
 |}]
 
 module Priv(_ : sig end) = struct
   type t = private [ `Foo of t ]
 end;;
 [%%expect{|
-module Priv : sig end -> sig type t = private [ `Foo of t ] end
+module Priv : functor sig end -> sig type t = private [ `Foo of t ] end
 |}]
 
 module DirectPub = Pub(struct end);;
@@ -58,14 +58,14 @@ module H(X : sig end) : sig
   type t = Pub(X).t
 end = Pub(X);;
 [%%expect{|
-module H : (X : sig end) -> sig type t = Pub(X).t end
+module H : functor (X : sig end) -> sig type t = Pub(X).t end
 |}]
 
 module I(X : sig end) : sig
   type t = Priv(X).t
 end = Priv(X);;
 [%%expect{|
-module I : (X : sig end) -> sig type t = Priv(X).t end
+module I : functor (X : sig end) -> sig type t = Priv(X).t end
 |}]
 
 module IndirectPub = H(struct end);;
@@ -88,13 +88,15 @@ module DirectPrivEta =
   (functor (X : sig end) -> Priv(X))(struct end);;
 (* CR layouts v2.8: examine the interaction between kinds and nondep. *)
 [%%expect{|
-module DirectPrivEta : sig type t : immutable_data with t end
+Uncaught exception: File "typing/jkind.ml", line 1056, characters 42-48: Assertion failed
+
 |}]
 
 module DirectPrivEtaUnit =
   (functor (_ : sig end) -> Priv)(struct end)(struct end);;
 [%%expect{|
-module DirectPrivEtaUnit : sig type t : immutable_data with t end
+Uncaught exception: File "typing/jkind.ml", line 1056, characters 42-48: Assertion failed
+
 |}]
 
 (*** Test proposed by Jacques in
@@ -138,17 +140,19 @@ module Priv(_ : sig end) = struct
 end;;
 [%%expect{|
 module Priv :
-  sig end -> sig type t = private [ `Bar of int | `Foo of t -> int ] end
+  functor sig end ->
+    sig type t = private [ `Bar of int | `Foo of t -> int ] end
 |}]
 
 module I(X : sig end) : sig
   type t = Priv(X).t
 end = Priv(X);;
 [%%expect{|
-module I : (X : sig end) -> sig type t = Priv(X).t end
+module I : functor (X : sig end) -> sig type t = Priv(X).t end
 |}]
 
 module IndirectPriv = I(struct end);;
 [%%expect{|
-module IndirectPriv : sig type t : value mod immutable non_float with int end
+Uncaught exception: File "typing/jkind.ml", line 1056, characters 42-48: Assertion failed
+
 |}]

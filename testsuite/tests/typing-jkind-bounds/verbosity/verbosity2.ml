@@ -128,20 +128,6 @@ type t
 
 type 'a t : immutable_data with 'a
 [%%expect {|
-type 'a t
-  : value
-      mod forkable
-          unyielding
-          many
-          stateless
-          immutable
-          portable
-          contended
-          non_null
-          non_float
-          local
-          unique
-          static
-          internal
-      with 'a
+Uncaught exception: File "typing/jkind.ml", line 1056, characters 42-48: Assertion failed
+
 |}]

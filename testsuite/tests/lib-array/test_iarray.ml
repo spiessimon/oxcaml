@@ -85,7 +85,7 @@ Line 3, characters 4-5:
         ^
 Error: This pattern matches values of type "int"
        but a pattern was expected which matches values of type "float"
-  Hint: Did you mean "1."?
+Hint: Did you mean "1."?
 |}];;
 
 match marray with
@@ -107,11 +107,7 @@ match iarray with
 | _             -> "who knows?"
 ;;
 [%%expect{|
-Line 2, characters 2-6:
-2 | | [||]          -> "empty"
-      ^^^^
-Error: This pattern matches values of type "'a array"
-       but a pattern was expected which matches values of type "int iarray"
+- : string = "1--5"
 |}];;
 
 (** Confirm that immutable and mutable arrays have the same representation, even

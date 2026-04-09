@@ -38,11 +38,10 @@ type should_fail = t_immediate_or_null accept_immediate
 Line 1, characters 19-38:
 1 | type should_fail = t_immediate_or_null accept_immediate
                        ^^^^^^^^^^^^^^^^^^^
-Error: This type "t_immediate_or_null" should be an instance of type
-         "('a : immediate)"
-       The kind of t_immediate_or_null is immediate_or_null
+Error: This type "t_immediate_or_null" should be an instance of type "'a"
+       The kind of "t_immediate_or_null" is immediate_or_null
          because of the definition of t_immediate_or_null at line 1, characters 0-44.
-       But the kind of t_immediate_or_null must be a subkind of immediate
+       But the kind of "t_immediate_or_null" must be a subkind of immediate
          because of the definition of accept_immediate at line 1, characters 0-38.
 |}]
 
@@ -56,11 +55,10 @@ type should_fail = t_immediate_or_null accept_value
 Line 1, characters 19-38:
 1 | type should_fail = t_immediate_or_null accept_value
                        ^^^^^^^^^^^^^^^^^^^
-Error: This type "t_immediate_or_null" should be an instance of type
-         "('a : value)"
-       The kind of t_immediate_or_null is immediate_or_null
+Error: This type "t_immediate_or_null" should be an instance of type "'a"
+       The kind of "t_immediate_or_null" is immediate_or_null
          because of the definition of t_immediate_or_null at line 1, characters 0-44.
-       But the kind of t_immediate_or_null must be a subkind of value
+       But the kind of "t_immediate_or_null" must be a subkind of value
          because of the definition of accept_value at line 1, characters 0-30.
 |}]
 
@@ -173,11 +171,10 @@ type should_fail = t_immediate64_or_null accept_immediate64
 Line 1, characters 19-40:
 1 | type should_fail = t_immediate64_or_null accept_immediate64
                        ^^^^^^^^^^^^^^^^^^^^^
-Error: This type "t_immediate64_or_null" should be an instance of type
-         "('a : immediate64)"
-       The kind of t_immediate64_or_null is immediate64_or_null
+Error: This type "t_immediate64_or_null" should be an instance of type "'a"
+       The kind of "t_immediate64_or_null" is immediate64_or_null
          because of the definition of t_immediate64_or_null at line 1, characters 0-48.
-       But the kind of t_immediate64_or_null must be a subkind of immediate64
+       But the kind of "t_immediate64_or_null" must be a subkind of immediate64
          because of the definition of accept_immediate64 at line 1, characters 0-42.
 |}]
 
@@ -186,11 +183,10 @@ type should_fail = t_immediate64_or_null accept_immediate
 Line 1, characters 19-40:
 1 | type should_fail = t_immediate64_or_null accept_immediate
                        ^^^^^^^^^^^^^^^^^^^^^
-Error: This type "t_immediate64_or_null" should be an instance of type
-         "('a : immediate)"
-       The kind of t_immediate64_or_null is immediate64_or_null
+Error: This type "t_immediate64_or_null" should be an instance of type "'a"
+       The kind of "t_immediate64_or_null" is immediate64_or_null
          because of the definition of t_immediate64_or_null at line 1, characters 0-48.
-       But the kind of t_immediate64_or_null must be a subkind of immediate
+       But the kind of "t_immediate64_or_null" must be a subkind of immediate
          because of the definition of accept_immediate at line 1, characters 0-38.
 |}]
 
@@ -199,11 +195,10 @@ type should_fail = t_immediate64_or_null accept_value
 Line 1, characters 19-40:
 1 | type should_fail = t_immediate64_or_null accept_value
                        ^^^^^^^^^^^^^^^^^^^^^
-Error: This type "t_immediate64_or_null" should be an instance of type
-         "('a : value)"
-       The kind of t_immediate64_or_null is immediate64_or_null
+Error: This type "t_immediate64_or_null" should be an instance of type "'a"
+       The kind of "t_immediate64_or_null" is immediate64_or_null
          because of the definition of t_immediate64_or_null at line 1, characters 0-48.
-       But the kind of t_immediate64_or_null must be a subkind of value
+       But the kind of "t_immediate64_or_null" must be a subkind of value
          because of the definition of accept_value at line 1, characters 0-30.
 |}]
 
@@ -228,22 +223,14 @@ type should_fail = exn or_null accept_immediate64_or_null
 Line 1, characters 19-30:
 1 | type should_fail = exn or_null accept_immediate64_or_null
                        ^^^^^^^^^^^
-Error: This type "exn or_null" should be an instance of type
-         "('a : immediate64_or_null)"
-       The kind of exn or_null is value_or_null mod stateless immutable
+Error: This type "exn or_null" should be an instance of type "'a"
+       The kind of "exn or_null" is value_or_null mod stateless immutable
          because it is the primitive type or_null.
-       But the kind of exn or_null must be a subkind of immediate64_or_null
+       But the kind of "exn or_null" must be a subkind of immediate64_or_null
          because of the definition of accept_immediate64_or_null at line 1, characters 0-58.
 |}, Principal{|
-Line 1, characters 19-30:
-1 | type should_fail = exn or_null accept_immediate64_or_null
-                       ^^^^^^^^^^^
-Error: This type "exn or_null" should be an instance of type
-         "('a : immediate64_or_null)"
-       The kind of exn or_null is value_or_null mod everything with exn
-         because it is the primitive type or_null.
-       But the kind of exn or_null must be a subkind of immediate64_or_null
-         because of the definition of accept_immediate64_or_null at line 1, characters 0-58.
+Uncaught exception: Typetexp.Error(_, _, _)
+
 |}]
 
 module M64 : sig

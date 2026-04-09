@@ -34,10 +34,10 @@ type t = int8# list;;
 Line 1, characters 9-14:
 1 | type t = int8# list;;
              ^^^^^
-Error: This type "int8#" should be an instance of type "('a : value_or_null)"
-       The layout of int8# is bits8
+Error: This type "int8#" should be an instance of type "'a"
+       The layout of "int8#" is bits8
          because it is the unboxed version of the primitive type int8.
-       But the layout of int8# must be a sublayout of value
+       But the layout of "int8#" must be a sublayout of value
          because the type argument of list has layout value_or_null.
 |}];;
 
@@ -46,10 +46,10 @@ let f (_ : int8# list) = ();;
 Line 1, characters 11-16:
 1 | let f (_ : int8# list) = ();;
                ^^^^^
-Error: This type "int8#" should be an instance of type "('a : value_or_null)"
-       The layout of int8# is bits8
+Error: This type "int8#" should be an instance of type "'a"
+       The layout of "int8#" is bits8
          because it is the unboxed version of the primitive type int8.
-       But the layout of int8# must be a sublayout of value
+       But the layout of "int8#" must be a sublayout of value
          because the type argument of list has layout value_or_null.
 |}];;
 
@@ -58,10 +58,10 @@ type t = C of int8# list;;
 Line 1, characters 14-19:
 1 | type t = C of int8# list;;
                   ^^^^^
-Error: This type "int8#" should be an instance of type "('a : value_or_null)"
-       The layout of int8# is bits8
+Error: This type "int8#" should be an instance of type "'a"
+       The layout of "int8#" is bits8
          because it is the unboxed version of the primitive type int8.
-       But the layout of int8# must be a sublayout of value
+       But the layout of "int8#" must be a sublayout of value
          because the type argument of list has layout value_or_null.
 |}];;
 
@@ -70,10 +70,10 @@ type t = C : int8# list -> t;;
 Line 1, characters 13-18:
 1 | type t = C : int8# list -> t;;
                  ^^^^^
-Error: This type "int8#" should be an instance of type "('a : value_or_null)"
-       The layout of int8# is bits8
+Error: This type "int8#" should be an instance of type "'a"
+       The layout of "int8#" is bits8
          because it is the unboxed version of the primitive type int8.
-       But the layout of int8# must be a sublayout of value
+       But the layout of "int8#" must be a sublayout of value
          because the type argument of list has layout value_or_null.
 |}];;
 
@@ -92,10 +92,10 @@ type t = int8#c;;
 Line 1, characters 9-14:
 1 | type t = int8#c;;
              ^^^^^
-Error: This type "int8#" should be an instance of type "('a : value)"
-       The layout of int8# is bits8
+Error: This type "int8#" should be an instance of type "'a"
+       The layout of "int8#" is bits8
          because it is the unboxed version of the primitive type int8.
-       But the layout of int8# must be a sublayout of value
+       But the layout of "int8#" must be a sublayout of value
          because it's a type argument to a class constructor.
 |}];;
 
@@ -104,10 +104,10 @@ let f (_ : int8#c) = ();;
 Line 1, characters 11-16:
 1 | let f (_ : int8#c) = ();;
                ^^^^^
-Error: This type "int8#" should be an instance of type "('a : value)"
-       The layout of int8# is bits8
+Error: This type "int8#" should be an instance of type "'a"
+       The layout of "int8#" is bits8
          because it is the unboxed version of the primitive type int8.
-       But the layout of int8# must be a sublayout of value
+       But the layout of "int8#" must be a sublayout of value
          because it's a type argument to a class constructor.
 |}];;
 
@@ -116,10 +116,10 @@ type t = C of int8#c;;
 Line 1, characters 14-19:
 1 | type t = C of int8#c;;
                   ^^^^^
-Error: This type "int8#" should be an instance of type "('a : value)"
-       The layout of int8# is bits8
+Error: This type "int8#" should be an instance of type "'a"
+       The layout of "int8#" is bits8
          because it is the unboxed version of the primitive type int8.
-       But the layout of int8# must be a sublayout of value
+       But the layout of "int8#" must be a sublayout of value
          because it's a type argument to a class constructor.
 |}];;
 
@@ -128,10 +128,10 @@ type t = C : int8#c -> t;;
 Line 1, characters 13-18:
 1 | type t = C : int8#c -> t;;
                  ^^^^^
-Error: This type "int8#" should be an instance of type "('a : value)"
-       The layout of int8# is bits8
+Error: This type "int8#" should be an instance of type "'a"
+       The layout of "int8#" is bits8
          because it is the unboxed version of the primitive type int8.
-       But the layout of int8# must be a sublayout of value
+       But the layout of "int8#" must be a sublayout of value
          because it's a type argument to a class constructor.
 |}];;
 
@@ -143,10 +143,10 @@ type t = int8# c;;
 Line 1, characters 9-14:
 1 | type t = int8# c;;
              ^^^^^
-Error: This type "int8#" should be an instance of type "('a : value)"
-       The layout of int8# is bits8
+Error: This type "int8#" should be an instance of type "'a"
+       The layout of "int8#" is bits8
          because it is the unboxed version of the primitive type int8.
-       But the layout of int8# must be a sublayout of value
+       But the layout of "int8#" must be a sublayout of value
          because it's a type argument to a class constructor.
 |}];;
 
@@ -155,10 +155,10 @@ let f (_ : int8# c) = ();;
 Line 1, characters 11-16:
 1 | let f (_ : int8# c) = ();;
                ^^^^^
-Error: This type "int8#" should be an instance of type "('a : value)"
-       The layout of int8# is bits8
+Error: This type "int8#" should be an instance of type "'a"
+       The layout of "int8#" is bits8
          because it is the unboxed version of the primitive type int8.
-       But the layout of int8# must be a sublayout of value
+       But the layout of "int8#" must be a sublayout of value
          because it's a type argument to a class constructor.
 |}];;
 
@@ -167,10 +167,10 @@ type t = C of int8# c;;
 Line 1, characters 14-19:
 1 | type t = C of int8# c;;
                   ^^^^^
-Error: This type "int8#" should be an instance of type "('a : value)"
-       The layout of int8# is bits8
+Error: This type "int8#" should be an instance of type "'a"
+       The layout of "int8#" is bits8
          because it is the unboxed version of the primitive type int8.
-       But the layout of int8# must be a sublayout of value
+       But the layout of "int8#" must be a sublayout of value
          because it's a type argument to a class constructor.
 |}];;
 
@@ -179,10 +179,10 @@ type t = C : int8# c -> t;;
 Line 1, characters 13-18:
 1 | type t = C : int8# c -> t;;
                  ^^^^^
-Error: This type "int8#" should be an instance of type "('a : value)"
-       The layout of int8# is bits8
+Error: This type "int8#" should be an instance of type "'a"
+       The layout of "int8#" is bits8
          because it is the unboxed version of the primitive type int8.
-       But the layout of int8# must be a sublayout of value
+       But the layout of "int8#" must be a sublayout of value
          because it's a type argument to a class constructor.
 |}];;
 

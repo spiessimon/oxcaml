@@ -130,11 +130,10 @@ type t4_wrong = #(int * int) t3
 Line 1, characters 16-28:
 1 | type t4_wrong = #(int * int) t3
                     ^^^^^^^^^^^^
-Error: This type "#(int * int)" should be an instance of type
-         "('a : value & bits64)"
-       The layout of #(int * int) is value & value
+Error: This type "#(int * int)" should be an instance of type "'a"
+       The layout of "#(int * int)" is value & value
          because it is an unboxed tuple.
-       But the layout of #(int * int) must be a sublayout of value & bits64
+       But the layout of "#(int * int)" must be a sublayout of value & bits64
          because of the definition of t3 at line 1, characters 0-34.
 |}]
 (* CR layouts v7.1: The above error should identify the component of the product
@@ -147,11 +146,10 @@ type t4_wrong_inner = #{ i1 : int; i2 : int; }
 Line 2, characters 16-30:
 2 | type t4_wrong = t4_wrong_inner t3
                     ^^^^^^^^^^^^^^
-Error: This type "t4_wrong_inner" should be an instance of type
-         "('a : value & bits64)"
-       The layout of t4_wrong_inner is value & value
+Error: This type "t4_wrong_inner" should be an instance of type "'a"
+       The layout of "t4_wrong_inner" is value & value
          because of the definition of t4_wrong_inner at line 1, characters 0-45.
-       But the layout of t4_wrong_inner must be a sublayout of value & bits64
+       But the layout of "t4_wrong_inner" must be a sublayout of value & bits64
          because of the definition of t3 at line 1, characters 0-34.
 |}]
 
@@ -171,10 +169,10 @@ type t9 = #(int * int64#) t7
 Line 2, characters 11-15:
 2 | type t10 = bool t6
                ^^^^
-Error: This type "bool" should be an instance of type "('a : value & bits64)"
-       The layout of bool is value
+Error: This type "bool" should be an instance of type "'a"
+       The layout of "bool" is value
          because it is the primitive type bool.
-       But the layout of bool must be a sublayout of value & bits64
+       But the layout of "bool" must be a sublayout of value & bits64
          because of the definition of t6 at line 1, characters 0-37.
 |}]
 
@@ -194,10 +192,10 @@ type t9 = t9_record t7
 Line 3, characters 11-15:
 3 | type t10 = bool t6
                ^^^^
-Error: This type "bool" should be an instance of type "('a : value & bits64)"
-       The layout of bool is value
+Error: This type "bool" should be an instance of type "'a"
+       The layout of "bool" is value
          because it is the primitive type bool.
-       But the layout of bool must be a sublayout of value & bits64
+       But the layout of "bool" must be a sublayout of value & bits64
          because of the definition of t6 at line 1, characters 0-37.
 |}]
 
@@ -207,11 +205,10 @@ and 'a t7_wrong = { x : #(int * int64) t6_wrong }
 Line 2, characters 24-38:
 2 | and 'a t7_wrong = { x : #(int * int64) t6_wrong }
                             ^^^^^^^^^^^^^^
-Error: This type "#(int * int64)" should be an instance of type
-         "('a : value & bits64)"
-       The layout of #(int * int64) is value & value
+Error: This type "#(int * int64)" should be an instance of type "'a"
+       The layout of "#(int * int64)" is value & value
          because it is an unboxed tuple.
-       But the layout of #(int * int64) must be a sublayout of value & bits64
+       But the layout of "#(int * int64)" must be a sublayout of value & bits64
          because of the annotation on 'a in the declaration of the type
                                       t6_wrong.
 |}]
@@ -226,9 +223,9 @@ Line 1, characters 0-54:
 1 | type t6_wrong_inner_record = #{ i : int; i64 : int64 }
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Error:
-       The kind of t6_wrong_inner_record is value_or_null & bits64
+       The kind of "t6_wrong_inner_record" is value_or_null & bits64
          because it is an unboxed record.
-       But the kind of t6_wrong_inner_record must be a subkind of
+       But the kind of "t6_wrong_inner_record" must be a subkind of
            value & bits64
          because of the annotation on 'a in the declaration of the type
                                       t6_wrong.
@@ -266,11 +263,10 @@ val f_uvar_ok : ('a : float64 & value). 'a -> 'a t = <fun>
 Line 6, characters 28-30:
 6 | let f_uvar_bad : 'a . 'a -> 'a t = fun x -> x
                                 ^^
-Error: This type "('a : value)" should be an instance of type
-         "('b : float64 & value)"
-       The layout of 'a is value
+Error: This type "'a" should be an instance of type "'b"
+       The layout of "'a" is value
          because it is or unifies with an unannotated universal variable.
-       But the layout of 'a must overlap with float64 & value
+       But the layout of "'a" must overlap with float64 & value
          because of the definition of t at line 1, characters 0-34.
 |}]
 
@@ -459,11 +455,11 @@ Line 1, characters 25-31:
 1 | let poly_var_term = `Foo #(1,2)
                              ^^^^^^
 Error: This expression has type "#('a * 'b)"
-       but an expression was expected of type "('c : value_or_null)"
-       The layout of #('a * 'b) is
+       but an expression was expected of type "'c"
+       The layout of "#('a * 'b)" is
            '_representable_layout_1 & '_representable_layout_2
          because it is an unboxed tuple.
-       But the layout of #('a * 'b) must be a sublayout of value
+       But the layout of "#('a * 'b)" must be a sublayout of value
          because it's the type of the field of a polymorphic variant.
 |}]
 
@@ -485,11 +481,11 @@ Line 1, characters 24-31:
 1 | let tuple_term = ("hi", #(1, 2))
                             ^^^^^^^
 Error: This expression has type "#('a * 'b)"
-       but an expression was expected of type "('c : value_or_null)"
-       The layout of #('a * 'b) is
+       but an expression was expected of type "'c"
+       The layout of "#('a * 'b)" is
            '_representable_layout_3 & '_representable_layout_4
          because it is an unboxed tuple.
-       But the layout of #('a * 'b) must be a sublayout of value
+       But the layout of "#('a * 'b)" must be a sublayout of value
          because it's the type of a tuple element.
 |}]
 
@@ -555,11 +551,11 @@ Line 3, characters 15-21:
 3 |     method x = #(1,2)
                    ^^^^^^
 Error: This expression has type "#('a * 'b)"
-       but an expression was expected of type "('c : value)"
-       The layout of #('a * 'b) is
+       but an expression was expected of type "'c"
+       The layout of "#('a * 'b)" is
            '_representable_layout_5 & '_representable_layout_6
          because it is an unboxed tuple.
-       But the layout of #('a * 'b) must be a sublayout of value
+       But the layout of "#('a * 'b)" must be a sublayout of value
          because it's the type of an object field.
 |}]
 
@@ -572,12 +568,12 @@ end;;
 Line 3, characters 17-21:
 3 |     let #(x,y) = utup in
                      ^^^^
-Error: This expression has type "('a : value_or_null)"
-       but an expression was expected of type "#('b * 'c)"
-       The layout of #('a * 'b) is
+Error: The value "utup" has type "'a" but an expression was expected of type
+         "#('b * 'c)"
+       The layout of "#('b * 'c)" is
            '_representable_layout_7 & '_representable_layout_8
          because it is an unboxed tuple.
-       But the layout of #('a * 'b) must be a sublayout of value
+       But the layout of "#('b * 'c)" must be a sublayout of value
          because it's the type of a variable captured in an object.
 |}];;
 
@@ -605,10 +601,10 @@ Line 2, characters 25-43:
 2 | let poly_var_term = `Foo #{ i = 1; i2 = 2 }
                              ^^^^^^^^^^^^^^^^^^
 Error: This expression has type "poly_var_term_record"
-       but an expression was expected of type "('a : value_or_null)"
-       The layout of poly_var_term_record is value & value
+       but an expression was expected of type "'a"
+       The layout of "poly_var_term_record" is value & value
          because of the definition of poly_var_term_record at line 1, characters 0-50.
-       But the layout of poly_var_term_record must be a sublayout of value
+       But the layout of "poly_var_term_record" must be a sublayout of value
          because it's the type of the field of a polymorphic variant.
 |}]
 
@@ -634,10 +630,10 @@ Line 2, characters 24-42:
 2 | let tuple_term = ("hi", #{ i = 1; i2 = 2 })
                             ^^^^^^^^^^^^^^^^^^
 Error: This expression has type "record" but an expression was expected of type
-         "('a : value_or_null)"
-       The layout of record is value & value
+         "'a"
+       The layout of "record" is value & value
          because of the definition of record at line 1, characters 0-36.
-       But the layout of record must be a sublayout of value
+       But the layout of "record" must be a sublayout of value
          because it's the type of a tuple element.
 |}]
 
@@ -719,10 +715,10 @@ Line 4, characters 15-34:
 4 |     method x = #{ i1 = 1; i2 = 2 }
                    ^^^^^^^^^^^^^^^^^^^
 Error: This expression has type "class_record"
-       but an expression was expected of type "('a : value)"
-       The layout of class_record is value & value
+       but an expression was expected of type "'a"
+       The layout of "class_record" is value & value
          because of the definition of class_record at line 1, characters 0-43.
-       But the layout of class_record must be a sublayout of value
+       But the layout of "class_record" must be a sublayout of value
          because it's the type of an object field.
 |}]
 
@@ -737,11 +733,11 @@ type capture_record = #{ x : int; y : int; }
 Line 4, characters 20-24:
 4 |     let #{ x; y } = utup in
                         ^^^^
-Error: This expression has type "('a : value_or_null)"
-       but an expression was expected of type "capture_record"
-       The layout of capture_record is value & value
+Error: The value "utup" has type "'a" but an expression was expected of type
+         "capture_record"
+       The layout of "capture_record" is value & value
          because of the definition of capture_record at line 1, characters 0-43.
-       But the layout of capture_record must be a sublayout of value
+       But the layout of "capture_record" must be a sublayout of value
          because it's the type of a variable captured in an object.
 |}];;
 
@@ -922,9 +918,9 @@ Line 3, characters 14-21:
 3 |   type t2 = { t1 : t1 } [@@unboxed]
                   ^^^^^^^
 Error: [@@unboxed] record element types must have a representable layout.
-       The layout of t1/2 is any
+       The layout of t1 is any
          because of the definition of t1 at line 2, characters 2-15.
-       But the layout of t1/2 must be representable
+       But the layout of t1 must be representable
          because it is the type of record field t1.
 |}]
 
@@ -1141,8 +1137,8 @@ external ext_tuple_arg_with_attr_t : (#(int * bool) [@untagged]) -> int = "foo"
 Line 1, characters 38-51:
 1 | external ext_tuple_arg_with_attr_t : (#(int * bool) [@untagged]) -> int = "foo"
                                           ^^^^^^^^^^^^^
-Error: Don't know how to untag this type. Only "int8", "int16", "int", and
-       other immediate types can be untagged.
+Error: Don't know how to untag this type. Only "int8", "int16", "int",
+       and other immediate types can be untagged.
 |}]
 
 external ext_product_arg : t_product -> int = "foo" "bar"
@@ -1178,8 +1174,8 @@ external ext_product_arg_with_attr_t : (t_product [@untagged]) -> int = "foo"
 Line 1, characters 40-49:
 1 | external ext_product_arg_with_attr_t : (t_product [@untagged]) -> int = "foo"
                                             ^^^^^^^^^
-Error: Don't know how to untag this type. Only "int8", "int16", "int", and
-       other immediate types can be untagged.
+Error: Don't know how to untag this type. Only "int8", "int16", "int",
+       and other immediate types can be untagged.
 |}]
 
 external ext_tuple_return : int -> #(int * bool) = "foo" "bar"
@@ -1222,8 +1218,8 @@ external ext_tuple_return_with_attr_t :
 Line 2, characters 10-23:
 2 |   int -> (#(int * bool) [@untagged]) = "foo"
               ^^^^^^^^^^^^^
-Error: Don't know how to untag this type. Only "int8", "int16", "int", and
-       other immediate types can be untagged.
+Error: Don't know how to untag this type. Only "int8", "int16", "int",
+       and other immediate types can be untagged.
 |}]
 
 
@@ -1256,8 +1252,8 @@ external ext_product_return_with_attr_t : int -> (t_product [@untagged]) = "foo"
 Line 1, characters 50-59:
 1 | external ext_product_return_with_attr_t : int -> (t_product [@untagged]) = "foo"
                                                       ^^^^^^^^^
-Error: Don't know how to untag this type. Only "int8", "int16", "int", and
-       other immediate types can be untagged.
+Error: Don't know how to untag this type. Only "int8", "int16", "int",
+       and other immediate types can be untagged.
 |}]
 
 external[@layout_poly] id : ('a : any). 'a -> 'a = "%identity"
@@ -1320,8 +1316,8 @@ external ext_record_arg_with_attr_t :
 Line 2, characters 3-29:
 2 |   (ext_record_arg_attr_record [@untagged]) -> int = "foo"
        ^^^^^^^^^^^^^^^^^^^^^^^^^^
-Error: Don't know how to untag this type. Only "int8", "int16", "int", and
-       other immediate types can be untagged.
+Error: Don't know how to untag this type. Only "int8", "int16", "int",
+       and other immediate types can be untagged.
 |}]
 
 type t = #{ i : int; b : bool }
@@ -1370,8 +1366,8 @@ external ext_record_return_with_attr_t : int -> (t [@untagged]) = "foo"
 Line 1, characters 49-50:
 1 | external ext_record_return_with_attr_t : int -> (t [@untagged]) = "foo"
                                                      ^
-Error: Don't know how to untag this type. Only "int8", "int16", "int", and
-       other immediate types can be untagged.
+Error: Don't know how to untag this type. Only "int8", "int16", "int",
+       and other immediate types can be untagged.
 |}]
 
 external[@layout_poly] id : ('a : any). 'a -> 'a = "%identity"
@@ -1433,11 +1429,11 @@ Line 2, characters 37-44:
 2 | let[@warning "-26"] e2 = let rec x = #(1, y) and y = 42 in ()
                                          ^^^^^^^
 Error: This expression has type "#('a * 'b)"
-       but an expression was expected of type "('c : value_or_null)"
-       The layout of #('a * 'b) is
+       but an expression was expected of type "'c"
+       The layout of "#('a * 'b)" is
            '_representable_layout_9 & '_representable_layout_10
          because it is an unboxed tuple.
-       But the layout of #('a * 'b) must be a sublayout of value
+       But the layout of "#('a * 'b)" must be a sublayout of value
          because it's the type of the recursive variable x.
 |}]
 
@@ -1452,10 +1448,10 @@ Line 4, characters 37-56:
 4 | let[@warning "-26"] e2 = let rec x = #{ i1 = 1; i2 = y } and y = 42 in ()
                                          ^^^^^^^^^^^^^^^^^^^
 Error: This expression has type "letrec_record"
-       but an expression was expected of type "('a : value_or_null)"
-       The layout of letrec_record is value & value
+       but an expression was expected of type "'a"
+       The layout of "letrec_record" is value & value
          because of the definition of letrec_record at line 3, characters 0-44.
-       But the layout of letrec_record must be a sublayout of value
+       But the layout of "letrec_record" must be a sublayout of value
          because it's the type of the recursive variable x.
 |}]
 
@@ -1479,11 +1475,11 @@ Line 1, characters 21-29:
 1 | let _ = let rec _x = #(3, 10) and _y = 42 in 42
                          ^^^^^^^^
 Error: This expression has type "#('a * 'b)"
-       but an expression was expected of type "('c : value_or_null)"
-       The layout of #('a * 'b) is
+       but an expression was expected of type "'c"
+       The layout of "#('a * 'b)" is
            '_representable_layout_11 & '_representable_layout_12
          because it is an unboxed tuple.
-       But the layout of #('a * 'b) must be a sublayout of value
+       But the layout of "#('a * 'b)" must be a sublayout of value
          because it's the type of the recursive variable _x.
 |}]
 
@@ -1495,10 +1491,10 @@ Line 2, characters 21-41:
 2 | let _ = let rec _x = #{ i1 = 3; i2 = 10 } and _y = 42 in 42
                          ^^^^^^^^^^^^^^^^^^^^
 Error: This expression has type "letrec_simple"
-       but an expression was expected of type "('a : value_or_null)"
-       The layout of letrec_simple is value & value
+       but an expression was expected of type "'a"
+       The layout of "letrec_simple" is value & value
          because of the definition of letrec_simple at line 1, characters 0-44.
-       But the layout of letrec_simple must be a sublayout of value
+       But the layout of "letrec_simple" must be a sublayout of value
          because it's the type of the recursive variable _x.
 |}]
 
@@ -1585,12 +1581,11 @@ Line 1, characters 31-37:
 1 | let _ = Array.init 3 (fun _ -> #(1,2))
                                    ^^^^^^
 Error: This expression has type "#('a * 'b)"
-       but an expression was expected of type
-         "('c : value_or_null mod separable)"
-       The layout of #('a * 'b) is
+       but an expression was expected of type "'c"
+       The layout of "#('a * 'b)" is
            '_representable_layout_13 & '_representable_layout_14
          because it is an unboxed tuple.
-       But the layout of #('a * 'b) must be a sublayout of value.
+       But the layout of "#('a * 'b)" must be a sublayout of value.
 |}]
 
 external make : ('a : value & value) . int -> 'a -> 'a array =
@@ -1670,11 +1665,10 @@ Line 2, characters 31-50:
 2 | let _ = Array.init 3 (fun _ -> #{ i1 = 1; i2 = 2 })
                                    ^^^^^^^^^^^^^^^^^^^
 Error: This expression has type "array_init_record"
-       but an expression was expected of type
-         "('a : value_or_null mod separable)"
-       The layout of array_init_record is value & value
+       but an expression was expected of type "'a"
+       The layout of "array_init_record" is value & value
          because of the definition of array_init_record at line 1, characters 0-48.
-       But the layout of array_init_record must be a sublayout of value.
+       But the layout of "array_init_record" must be a sublayout of value.
 |}]
 
 (* Arrays of unboxed records of kind value *are* allowed in all cases *)
@@ -1702,12 +1696,12 @@ class product_instance_variable x =
 Line 2, characters 25-26:
 2 |   let sum = let #(a,b) = x in a + b in
                              ^
-Error: This expression has type "('a : value)"
-       but an expression was expected of type "#('b * 'c)"
-       The layout of #('a * 'b) is
+Error: The value "x" has type "'a" but an expression was expected of type
+         "#('b * 'c)"
+       The layout of "#('b * 'c)" is
            '_representable_layout_15 & '_representable_layout_16
          because it is an unboxed tuple.
-       But the layout of #('a * 'b) must be a sublayout of value
+       But the layout of "#('b * 'c)" must be a sublayout of value
          because it's the type of a term-level argument to a class constructor.
 |}]
 
@@ -1722,11 +1716,11 @@ type class_arg_record = #{ a : int; b : int; }
 Line 3, characters 28-29:
 3 |   let sum = let #{ a; b } = x in a + b in
                                 ^
-Error: This expression has type "('a : value)"
-       but an expression was expected of type "class_arg_record"
-       The layout of class_arg_record is value & value
+Error: The value "x" has type "'a" but an expression was expected of type
+         "class_arg_record"
+       The layout of "class_arg_record" is value & value
          because of the definition of class_arg_record at line 1, characters 0-45.
-       But the layout of class_arg_record must be a sublayout of value
+       But the layout of "class_arg_record" must be a sublayout of value
          because it's the type of a term-level argument to a class constructor.
 |}]
 
@@ -1753,11 +1747,11 @@ Line 1, characters 13-19:
 1 | let x = lazy #(1,2)
                  ^^^^^^
 Error: This expression has type "#('a * 'b)"
-       but an expression was expected of type "('c : value)"
-       The layout of #('a * 'b) is
+       but an expression was expected of type "'c"
+       The layout of "#('a * 'b)" is
            '_representable_layout_17 & '_representable_layout_18
          because it is an unboxed tuple.
-       But the layout of #('a * 'b) must be a sublayout of value
+       But the layout of "#('a * 'b)" must be a sublayout of value
          because it's the type of a lazy expression.
 |}]
 
@@ -1767,10 +1761,10 @@ type t = #(int * int) lazy_t
 Line 1, characters 9-21:
 1 | type t = #(int * int) lazy_t
              ^^^^^^^^^^^^
-Error: This type "#(int * int)" should be an instance of type "('a : value)"
-       The layout of #(int * int) is value & value
+Error: This type "#(int * int)" should be an instance of type "'a"
+       The layout of "#(int * int)" is value & value
          because it is an unboxed tuple.
-       But the layout of #(int * int) must be a sublayout of value
+       But the layout of "#(int * int)" must be a sublayout of value
          because the type argument of lazy_t has layout value.
 |}]
 
@@ -1782,10 +1776,10 @@ Line 2, characters 13-32:
 2 | let x = lazy #{ i1 = 1; i2 = 2 }
                  ^^^^^^^^^^^^^^^^^^^
 Error: This expression has type "lazy_record"
-       but an expression was expected of type "('a : value)"
-       The layout of lazy_record is value & value
+       but an expression was expected of type "'a"
+       The layout of "lazy_record" is value & value
          because of the definition of lazy_record at line 1, characters 0-42.
-       But the layout of lazy_record must be a sublayout of value
+       But the layout of "lazy_record" must be a sublayout of value
          because it's the type of a lazy expression.
 |}]
 
@@ -1796,10 +1790,10 @@ type lazy_t_record = #{ i1 : int; i2 : int; }
 Line 2, characters 9-22:
 2 | type t = lazy_t_record lazy_t
              ^^^^^^^^^^^^^
-Error: This type "lazy_t_record" should be an instance of type "('a : value)"
-       The layout of lazy_t_record is value & value
+Error: This type "lazy_t_record" should be an instance of type "'a"
+       The layout of "lazy_t_record" is value & value
          because of the definition of lazy_t_record at line 1, characters 0-44.
-       But the layout of lazy_t_record must be a sublayout of value
+       But the layout of "lazy_t_record" must be a sublayout of value
          because the type argument of lazy_t has layout value.
 |}]
 
@@ -1866,11 +1860,11 @@ Line 1, characters 28-34:
 1 | let f_optional_utuple ?(x = #(1,2)) () = x
                                 ^^^^^^
 Error: This expression has type "#('a * 'b)"
-       but an expression was expected of type "('c : value_or_null)"
-       The layout of #('a * 'b) is
+       but an expression was expected of type "'c"
+       The layout of "#('a * 'b)" is
            '_representable_layout_19 & '_representable_layout_20
          because it is an unboxed tuple.
-       But the layout of #('a * 'b) must be a sublayout of value
+       But the layout of "#('a * 'b)" must be a sublayout of value
          because the type argument of option has layout value_or_null.
 |}]
 
@@ -1882,10 +1876,10 @@ Line 2, characters 29-48:
 2 | let f_optional_urecord ?(x = #{ i1 = 1; i2 = 2 }) () = x
                                  ^^^^^^^^^^^^^^^^^^^
 Error: This expression has type "optional_record"
-       but an expression was expected of type "('a : value_or_null)"
-       The layout of optional_record is value & value
+       but an expression was expected of type "'a"
+       The layout of "optional_record" is value & value
          because of the definition of optional_record at line 1, characters 0-46.
-       But the layout of optional_record must be a sublayout of value
+       But the layout of "optional_record" must be a sublayout of value
          because the type argument of option has layout value_or_null.
 |}]
 
@@ -1913,23 +1907,14 @@ Line 1, characters 19-27:
 1 | type should_fail = string t needs_any_mod_global
                        ^^^^^^^^
 Error: This type "string t" = "#(string u * string u)"
-       should be an instance of type "('a : any mod global)"
-       The kind of string t is immutable_data & immutable_data
+       should be an instance of type "'a"
+       The kind of "string t" is immutable_data & immutable_data
          because it is an unboxed tuple.
-       But the kind of string t must be a subkind of any mod global
+       But the kind of "string t" must be a subkind of any mod global
          because of the definition of needs_any_mod_global at line 4, characters 0-47.
 |}, Principal{|
-Line 1, characters 19-27:
-1 | type should_fail = string t needs_any_mod_global
-                       ^^^^^^^^
-Error: This type "string t" = "#(string u * string u)"
-       should be an instance of type "('a : any mod global)"
-       The kind of string t is
-           immediate mod dynamic with string u
-           & immediate mod dynamic with string u
-         because it is an unboxed tuple.
-       But the kind of string t must be a subkind of any mod global
-         because of the definition of needs_any_mod_global at line 4, characters 0-47.
+Uncaught exception: Typetexp.Error(_, _, _)
+
 |}]
 (* CR layouts v7.1: The appearance of [immediate] above is regrettable. *)
 
@@ -1941,29 +1926,17 @@ type ('a : any mod external_) t
 Line 3, characters 9-30:
 3 | type s = #(int * string * int) t
              ^^^^^^^^^^^^^^^^^^^^^
-Error: This type "#(int * string * int)" should be an instance of type
-         "('a : any mod external_)"
-       The kind of #(int * string * int) is
+Error: This type "#(int * string * int)" should be an instance of type "'a"
+       The kind of "#(int * string * int)" is
            immutable_data & immutable_data & immutable_data
          because it is an unboxed tuple.
-       But the kind of #(int * string * int) must be a subkind of
+       But the kind of "#(int * string * int)" must be a subkind of
            any mod external_
          because of the definition of t at line 1, characters 0-31.
 |}, Principal{|
 type ('a : any mod external_) t
-Line 3, characters 9-30:
-3 | type s = #(int * string * int) t
-             ^^^^^^^^^^^^^^^^^^^^^
-Error: This type "#(int * string * int)" should be an instance of type
-         "('a : any mod external_)"
-       The kind of #(int * string * int) is
-           immediate mod dynamic with int with string
-           & immediate mod dynamic with int with string
-           & immediate mod dynamic with int with string
-         because it is an unboxed tuple.
-       But the kind of #(int * string * int) must be a subkind of
-           any mod external_
-         because of the definition of t at line 1, characters 0-31.
+Uncaught exception: Typetexp.Error(_, _, _)
+
 |}]
 (* CR layouts v7.1: The appearance of [immediate] above is regrettable. *)
 
@@ -1985,22 +1958,14 @@ type should_fail = string t needs_any_mod_global
 Line 1, characters 19-27:
 1 | type should_fail = string t needs_any_mod_global
                        ^^^^^^^^
-Error: This type "string t" should be an instance of type "('a : any mod global)"
-       The kind of string t is immutable_data & immutable_data
+Error: This type "string t" should be an instance of type "'a"
+       The kind of "string t" is immutable_data & immutable_data
          because of the definition of t at line 2, characters 0-47.
-       But the kind of string t must be a subkind of any mod global
+       But the kind of "string t" must be a subkind of any mod global
          because of the definition of needs_any_mod_global at line 4, characters 0-47.
 |}, Principal{|
-Line 1, characters 19-27:
-1 | type should_fail = string t needs_any_mod_global
-                       ^^^^^^^^
-Error: This type "string t" should be an instance of type "('a : any mod global)"
-       The kind of string t is
-           immediate mod dynamic with string u
-           & immediate mod dynamic with string u
-         because of the definition of t at line 2, characters 0-47.
-       But the kind of string t must be a subkind of any mod global
-         because of the definition of needs_any_mod_global at line 4, characters 0-47.
+Uncaught exception: Typetexp.Error(_, _, _)
+
 |}]
 
 type ('a : any mod external_) t
@@ -2013,12 +1978,11 @@ type s_record = #{ i1 : int; s : string; i2 : int; }
 Line 4, characters 9-17:
 4 | type s = s_record t
              ^^^^^^^^
-Error: This type "s_record" should be an instance of type
-         "('a : any mod external_)"
-       The kind of s_record is
+Error: This type "s_record" should be an instance of type "'a"
+       The kind of "s_record" is
            immutable_data & immutable_data & immutable_data
          because of the definition of s_record at line 3, characters 0-51.
-       But the kind of s_record must be a subkind of any mod external_
+       But the kind of "s_record" must be a subkind of any mod external_
          because of the definition of t at line 1, characters 0-31.
 |}]
 (* CR layouts v7.1: Both the above have very bad error messages. *)
@@ -2055,11 +2019,10 @@ val f :
 Line 3, characters 30-31:
 3 | let g (type a) (x : a) = f () x
                                   ^
-Error: This expression has type "a" but an expression was expected of type
-         "('a : '_representable_layout_21 & value_or_null mod separable)"
-       The layout of a is value
+Error: The value "x" has type "a" but an expression was expected of type "'a"
+       The layout of "a" is value
          because it is or unifies with an unannotated universal variable.
-       But the layout of a must be representable
+       But the layout of "a" must be representable
          because we must know concretely how to pass a function argument.
 |}]
 
@@ -2197,17 +2160,8 @@ type ('a : (value & value) mod portable, 'b) record : value mod portable =
     d : char }
   constraint 'b = int * string
 [%%expect{|
-Lines 1-6, characters 0-30:
-1 | type ('a : (value & value) mod portable, 'b) record : value mod portable =
-2 |   { a : 'a;
-3 |     b : string;
-4 |     c : #(int64# * #(float# * (bool -> bool) * 'b ));
-5 |     d : char }
-6 |   constraint 'b = int * string
-Error: The kind of type "record" is value mod immutable non_float with 'a
-         because it's a boxed record type.
-       But the kind of type "record" must be a subkind of value mod portable
-         because of the annotation on the declaration of the type record.
+Uncaught exception: Typedecl.Error(_, _)
+
 |}]
 
 (*******************************************************************************)
@@ -2316,9 +2270,9 @@ Line 3, characters 0-66:
 3 | type t : value_or_null & bits32 = #{ a : int; b : t s; c : int32 }
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Error:
-       The kind of t is value_or_null & bits32
+       The kind of "t" is value_or_null & bits32
          because of the annotation on the declaration of the type t.
-       But the kind of t must be a subkind of any mod non_null
+       But the kind of "t" must be a subkind of any mod non_null
          because of the definition of s at line 1, characters 0-30.
 |}]
 
@@ -2332,9 +2286,9 @@ Line 3, characters 0-66:
 3 | type t : value_or_null & bits32 = #{ a : int; b : t s; c : int32 }
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Error:
-       The kind of t is value_or_null & bits32
+       The kind of "t" is value_or_null & bits32
          because of the annotation on the declaration of the type t.
-       But the kind of t must be a subkind of any mod portable
+       But the kind of "t" must be a subkind of any mod portable
          because of the definition of s at line 1, characters 0-30.
 |}]
 

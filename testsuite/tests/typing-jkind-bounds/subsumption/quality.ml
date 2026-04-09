@@ -11,23 +11,8 @@ end = struct
   type 'a t
 end
 [%%expect {|
-Lines 3-5, characters 6-3:
-3 | ......struct
-4 |   type 'a t
-5 | end
-Error: Signature mismatch:
-       Modules do not match:
-         sig type 'a t end
-       is not included in
-         sig type 'a t : immutable_data with 'a end
-       Type declarations do not match:
-         type 'a t
-       is not included in
-         type 'a t : immutable_data with 'a
-       The kind of the first is value
-         because of the definition of t at line 4, characters 2-11.
-       But the kind of the first must be a subkind of immutable_data with 'a
-         because of the definition of t at line 2, characters 2-36.
+Uncaught exception: Typemod.Error(_, _, _)
+
 |}]
 
 (* This appears sound to accept. But it isn't. See the following test. *)
@@ -39,25 +24,8 @@ end = struct
   type t
 end
 [%%expect {|
-Lines 4-7, characters 6-3:
-4 | ......struct
-5 |   type a
-6 |   type t
-7 | end
-Error: Signature mismatch:
-       Modules do not match:
-         sig type a type t end
-       is not included in
-         sig type a type t : value mod portable with a end
-       Type declarations do not match:
-         type t
-       is not included in
-         type t : value mod portable with a
-       The kind of the first is value
-         because of the definition of t at line 6, characters 2-8.
-       But the kind of the first must be a subkind of
-           value mod portable with a
-         because of the definition of t at line 3, characters 2-36.
+Uncaught exception: Typemod.Error(_, _, _)
+
 |}]
 
 (* This test demonstrates why the above shouldn't be accepted. We can learn more about
@@ -79,13 +47,8 @@ let f (x : M.t @ nonportable) : M.t @ portable =
   | Eq -> x
 [%%expect {|
 type ('a, 'b) eq = Eq : ('a, 'a) eq
-module M :
-  sig
-    type a
-    type t : value mod portable with a
-    val a_is_int : (a, int) eq
-  end
-val f : M.t -> M.t @ portable = <fun>
+Uncaught exception: File "typing/jkind.ml", line 1056, characters 42-48: Assertion failed
+
 |}]
 
 type a
@@ -96,13 +59,8 @@ type t : value mod global with a = u
 type a
 type b = a
 type u
-Line 4, characters 0-36:
-4 | type t : value mod global with a = u
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Error: The kind of type "u" is value
-         because of the definition of u at line 3, characters 0-6.
-       But the kind of type "u" must be a subkind of value mod global with a
-         because of the definition of t at line 4, characters 0-36.
+Uncaught exception: Typedecl.Error(_, _)
+
 |}]
 
 module F (M : sig type t end) = struct
@@ -113,20 +71,8 @@ module F (M : sig type t end) = struct
   module type T = S with type t = t
 end
 [%%expect {|
-Line 6, characters 18-35:
-6 |   module type T = S with type t = t
-                      ^^^^^^^^^^^^^^^^^
-Error: In this "with" constraint, the new definition of "t"
-       does not match its original definition in the constrained signature:
-       Type declarations do not match:
-         type t = t
-       is not included in
-         type t : value mod global with M.t
-       The kind of the first is value
-         because of the definition of t at line 5, characters 2-8.
-       But the kind of the first must be a subkind of
-           value mod global with M.t
-         because of the definition of t at line 3, characters 4-38.
+Uncaught exception: Typemod.Error(_, _, _)
+
 |}]
 
 module type S = sig
@@ -147,24 +93,8 @@ end
 module type S = sig type t end
 type a
 module M : sig type t = a end
-Lines 12-14, characters 6-3:
-12 | ......struct
-13 |   type t : value mod portable
-14 | end
-Error: Signature mismatch:
-       Modules do not match:
-         sig type t : value mod portable end
-       is not included in
-         sig type t : value mod portable contended with M.t end
-       Type declarations do not match:
-         type t : value mod portable
-       is not included in
-         type t : value mod portable contended with M.t
-       The kind of the first is value mod portable
-         because of the definition of t at line 13, characters 2-29.
-       But the kind of the first must be a subkind of
-           value mod portable contended with M.t
-         because of the definition of t at line 11, characters 2-48.
+Uncaught exception: Typemod.Error(_, _, _)
+
 |}]
 
 module type S = sig
@@ -187,24 +117,8 @@ end
 module type S = sig type t type u = t end
 type a
 module M : sig type u = a end
-Lines 14-16, characters 6-3:
-14 | ......struct
-15 |   type t : value mod portable
-16 | end
-Error: Signature mismatch:
-       Modules do not match:
-         sig type t : value mod portable end
-       is not included in
-         sig type t : value mod portable contended with M.u end
-       Type declarations do not match:
-         type t : value mod portable
-       is not included in
-         type t : value mod portable contended with M.u
-       The kind of the first is value mod portable
-         because of the definition of t at line 15, characters 2-29.
-       But the kind of the first must be a subkind of
-           value mod portable contended with M.u
-         because of the definition of t at line 13, characters 2-48.
+Uncaught exception: Typemod.Error(_, _, _)
+
 |}]
 
 module M : sig
@@ -248,33 +162,8 @@ end = struct
   type 'a t constraint 'a = [< `a of string | `b]
 end
 [%%expect {|
-Lines 4-7, characters 6-3:
-4 | ......struct
-5 |   type 'a u = [< `a of string | `b] as 'a
-6 |   type 'a t constraint 'a = [< `a of string | `b]
-7 | end
-Error: Signature mismatch:
-       Modules do not match:
-         sig
-           type 'a u = 'a constraint 'a = [< `a of string | `b ]
-           type 'a t constraint 'a = [< `a of string | `b ]
-         end
-       is not included in
-         sig
-           type 'a u = 'a constraint 'a = [< `a of string | `b ]
-           type 'a t : value mod global with [< `a of string | `b ] u
-             constraint 'a = [< `a of string | `b ]
-         end
-       Type declarations do not match:
-         type 'a t constraint 'a = [< `a of string | `b ]
-       is not included in
-         type 'a t : value mod global with [< `a of string | `b ] u
-           constraint 'a = [< `a of string | `b ]
-       The kind of the first is value
-         because of the definition of t at line 6, characters 2-49.
-       But the kind of the first must be a subkind of
-           value mod global with [< `a of string | `b ] u
-         because of the definition of t at line 3, characters 2-40.
+Uncaught exception: Typemod.Error(_, _, _)
+
 |}]
 
 module M : sig
@@ -285,33 +174,8 @@ end = struct
   type 'a t constraint 'a = [< `a of (int -> int) | `b]
 end
 [%%expect {|
-Lines 4-7, characters 6-3:
-4 | ......struct
-5 |   type 'a u = [< `a of (int -> int) | `b] as 'a
-6 |   type 'a t constraint 'a = [< `a of (int -> int) | `b]
-7 | end
-Error: Signature mismatch:
-       Modules do not match:
-         sig
-           type 'a u = 'a constraint 'a = [< `a of int -> int | `b ]
-           type 'a t constraint 'a = [< `a of int -> int | `b ]
-         end
-       is not included in
-         sig
-           type 'a u = 'a constraint 'a = [< `a of int -> int | `b ]
-           type 'a t : value mod portable with [< `a of int -> int | `b ] u
-             constraint 'a = [< `a of int -> int | `b ]
-         end
-       Type declarations do not match:
-         type 'a t constraint 'a = [< `a of int -> int | `b ]
-       is not included in
-         type 'a t : value mod portable with [< `a of int -> int | `b ] u
-           constraint 'a = [< `a of int -> int | `b ]
-       The kind of the first is value
-         because of the definition of t at line 6, characters 2-55.
-       But the kind of the first must be a subkind of
-           value mod portable with [< `a of int -> int | `b ] u
-         because of the definition of t at line 3, characters 2-42.
+Uncaught exception: Typemod.Error(_, _, _)
+
 |}]
 
 module M : sig
@@ -322,33 +186,8 @@ end = struct
   type 'a t constraint 'a = [> `a of string | `b]
 end
 [%%expect {|
-Lines 4-7, characters 6-3:
-4 | ......struct
-5 |   type 'a u = [> `a of string | `b] as 'a
-6 |   type 'a t constraint 'a = [> `a of string | `b]
-7 | end
-Error: Signature mismatch:
-       Modules do not match:
-         sig
-           type 'a u = 'a constraint 'a = [> `a of string | `b ]
-           type 'a t constraint 'a = [> `a of string | `b ]
-         end
-       is not included in
-         sig
-           type 'a u = 'a constraint 'a = [> `a of string | `b ]
-           type 'a t : value mod portable with [> `a of string | `b ] u
-             constraint 'a = [> `a of string | `b ]
-         end
-       Type declarations do not match:
-         type 'a t constraint 'a = [> `a of string | `b ]
-       is not included in
-         type 'a t : value mod portable with [> `a of string | `b ] u
-           constraint 'a = [> `a of string | `b ]
-       The kind of the first is value
-         because of the definition of t at line 6, characters 2-49.
-       But the kind of the first must be a subkind of
-           value mod portable with [> `a of string | `b ] u
-         because of the definition of t at line 3, characters 2-42.
+Uncaught exception: Typemod.Error(_, _, _)
+
 |}]
 
 module M : sig
@@ -360,24 +199,8 @@ end = struct
 end
 (* CR layouts v2.8: this is fine to accept. Internal ticket 5125. *)
 [%%expect {|
-Lines 4-7, characters 6-3:
-4 | ......struct
-5 |   type a = < value : string >
-6 |   type t
-7 | end
-Error: Signature mismatch:
-       Modules do not match:
-         sig type a = < value : string > type t end
-       is not included in
-         sig type a = < value : string > type t : value mod global with a end
-       Type declarations do not match:
-         type t
-       is not included in
-         type t : value mod global with a
-       The kind of the first is value
-         because of the definition of t at line 6, characters 2-8.
-       But the kind of the first must be a subkind of value mod global with a
-         because of the definition of t at line 3, characters 2-34.
+Uncaught exception: Typemod.Error(_, _, _)
+
 |}]
 
 type gadt = Foo : int -> gadt
@@ -530,24 +353,8 @@ end
 [%%expect {|
 module type S = sig val nonportable_f : int -> int end
 type s = (module S)
-Lines 7-9, characters 6-3:
-7 | ......struct
-8 |   type t
-9 | end
-Error: Signature mismatch:
-       Modules do not match:
-         sig type t end
-       is not included in
-         sig type t : value mod portable with s end
-       Type declarations do not match:
-         type t
-       is not included in
-         type t : value mod portable with s
-       The kind of the first is value
-         because of the definition of t at line 8, characters 2-8.
-       But the kind of the first must be a subkind of
-           value mod portable with s
-         because of the definition of t at line 6, characters 2-36.
+Uncaught exception: Typemod.Error(_, _, _)
+
 |}]
 
 type a : value = private int

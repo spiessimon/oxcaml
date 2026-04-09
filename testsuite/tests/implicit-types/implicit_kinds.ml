@@ -41,8 +41,8 @@ end
 Line 2, characters 2-24:
 2 |   [@@@implicit_kind: 'a]
       ^^^^^^^^^^^^^^^^^^^^^^
-Warning 47 [attribute-payload]: illegal payload for attribute 'implicit_kind'.
-implicit_kind attribute expects: ('var1 : jkind1) * ('var2 : jkind2) ...
+Warning 47 [attribute-payload]: illegal payload for attribute "implicit_kind".
+  implicit_kind attribute expects: ('var1 : jkind1) * ('var2 : jkind2) ...
 
 module type S1 = sig end
 |}]
@@ -58,8 +58,8 @@ end
 Line 2, characters 2-25:
 2 |   [@@@implicit_kind: int]
       ^^^^^^^^^^^^^^^^^^^^^^^
-Warning 47 [attribute-payload]: illegal payload for attribute 'implicit_kind'.
-implicit_kind attribute expects: ('var1 : jkind1) * ('var2 : jkind2) ...
+Warning 47 [attribute-payload]: illegal payload for attribute "implicit_kind".
+  implicit_kind attribute expects: ('var1 : jkind1) * ('var2 : jkind2) ...
 
 module type S2 = sig end
 |}]
@@ -89,8 +89,8 @@ end
 Line 2, characters 2-34:
 2 |   [@@@implicit_kind: (_ : bits32)]
       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Warning 47 [attribute-payload]: illegal payload for attribute 'implicit_kind'.
-implicit_kind attribute expects: ('var1 : jkind1) * ('var2 : jkind2) ...
+Warning 47 [attribute-payload]: illegal payload for attribute "implicit_kind".
+  implicit_kind attribute expects: ('var1 : jkind1) * ('var2 : jkind2) ...
 
 module type S4 = sig val a : 'a -> 'b end
 |}]
@@ -396,10 +396,10 @@ Line 4, characters 26-27:
 4 |   val how : ([> `bad] as 'a) -> 'a
                               ^
 Error: This alias is bound to type "[> `bad ]"
-       but is used as an instance of type "('a : bits32)"
-       The layout of [> `bad ] is value
+       but is used as an instance of type "'a"
+       The layout of "[> `bad ]" is value
          because it's a polymorphic variant type.
-       But the layout of [> `bad ] must be a sublayout of bits32
+       But the layout of "[> `bad ]" must be a sublayout of bits32
          because of the annotation on the implicit kind of type variables named a.
 |}]
 
@@ -413,11 +413,10 @@ end
 Line 4, characters 36-37:
 4 |   val bad_alias : (('b : value) as 'a) -> 'a
                                         ^
-Error: This alias is bound to type "('b : value)"
-       but is used as an instance of type "('a : bits32)"
-       The layout of 'b is value
+Error: This alias is bound to type "'b" but is used as an instance of type "'a"
+       The layout of "'b" is value
          because of the annotation on the type variable 'b.
-       But the layout of 'b must overlap with bits32
+       But the layout of "'b" must overlap with bits32
          because of the annotation on the implicit kind of type variables named a.
 |}]
 
@@ -563,10 +562,10 @@ Line 4, characters 23-31:
 4 |   type 'w t constraint 'w = int
                            ^^^^^^^^
 Error: The type constraints are not consistent.
-       Type "('w : word)" is not compatible with type "int"
-       The layout of int is value
+       Type "'w" is not compatible with type "int"
+       The layout of "int" is value
          because it is the primitive type int.
-       But the layout of int must be a sublayout of word
+       But the layout of "int" must be a sublayout of word
          because of the annotation on the implicit kind of type variables named w.
 |}]
 

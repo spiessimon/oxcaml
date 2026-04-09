@@ -54,7 +54,7 @@ module type S = functor (_ : sig end) -> sig
 end
 [%%expect{|
 module type S =
-  sig end ->
+  functor sig end ->
     sig
       val foo : 'a -> 'a
       val bar : 'a -> 'a

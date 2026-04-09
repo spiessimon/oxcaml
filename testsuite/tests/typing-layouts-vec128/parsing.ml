@@ -39,10 +39,10 @@ type t = int64x2# list;;
 Line 1, characters 9-17:
 1 | type t = int64x2# list;;
              ^^^^^^^^
-Error: This type "int64x2#" should be an instance of type "('a : value_or_null)"
-       The layout of int64x2# is vec128
+Error: This type "int64x2#" should be an instance of type "'a"
+       The layout of "int64x2#" is vec128
          because it is the unboxed version of the primitive type int64x2.
-       But the layout of int64x2# must be a sublayout of value
+       But the layout of "int64x2#" must be a sublayout of value
          because the type argument of list has layout value_or_null.
 |}];;
 
@@ -51,10 +51,10 @@ let f (_ : int64x2# list) = ();;
 Line 1, characters 11-19:
 1 | let f (_ : int64x2# list) = ();;
                ^^^^^^^^
-Error: This type "int64x2#" should be an instance of type "('a : value_or_null)"
-       The layout of int64x2# is vec128
+Error: This type "int64x2#" should be an instance of type "'a"
+       The layout of "int64x2#" is vec128
          because it is the unboxed version of the primitive type int64x2.
-       But the layout of int64x2# must be a sublayout of value
+       But the layout of "int64x2#" must be a sublayout of value
          because the type argument of list has layout value_or_null.
 |}];;
 
@@ -63,10 +63,10 @@ type t = C of int64x2# list;;
 Line 1, characters 14-22:
 1 | type t = C of int64x2# list;;
                   ^^^^^^^^
-Error: This type "int64x2#" should be an instance of type "('a : value_or_null)"
-       The layout of int64x2# is vec128
+Error: This type "int64x2#" should be an instance of type "'a"
+       The layout of "int64x2#" is vec128
          because it is the unboxed version of the primitive type int64x2.
-       But the layout of int64x2# must be a sublayout of value
+       But the layout of "int64x2#" must be a sublayout of value
          because the type argument of list has layout value_or_null.
 |}];;
 
@@ -75,10 +75,10 @@ type t = C : int64x2# list -> t;;
 Line 1, characters 13-21:
 1 | type t = C : int64x2# list -> t;;
                  ^^^^^^^^
-Error: This type "int64x2#" should be an instance of type "('a : value_or_null)"
-       The layout of int64x2# is vec128
+Error: This type "int64x2#" should be an instance of type "'a"
+       The layout of "int64x2#" is vec128
          because it is the unboxed version of the primitive type int64x2.
-       But the layout of int64x2# must be a sublayout of value
+       But the layout of "int64x2#" must be a sublayout of value
          because the type argument of list has layout value_or_null.
 |}];;
 
@@ -97,10 +97,10 @@ type t = int64x2#c;;
 Line 1, characters 9-17:
 1 | type t = int64x2#c;;
              ^^^^^^^^
-Error: This type "int64x2#" should be an instance of type "('a : value)"
-       The layout of int64x2# is vec128
+Error: This type "int64x2#" should be an instance of type "'a"
+       The layout of "int64x2#" is vec128
          because it is the unboxed version of the primitive type int64x2.
-       But the layout of int64x2# must be a sublayout of value
+       But the layout of "int64x2#" must be a sublayout of value
          because it's a type argument to a class constructor.
 |}];;
 
@@ -109,10 +109,10 @@ let f (_ : int64x2#c) = ();;
 Line 1, characters 11-19:
 1 | let f (_ : int64x2#c) = ();;
                ^^^^^^^^
-Error: This type "int64x2#" should be an instance of type "('a : value)"
-       The layout of int64x2# is vec128
+Error: This type "int64x2#" should be an instance of type "'a"
+       The layout of "int64x2#" is vec128
          because it is the unboxed version of the primitive type int64x2.
-       But the layout of int64x2# must be a sublayout of value
+       But the layout of "int64x2#" must be a sublayout of value
          because it's a type argument to a class constructor.
 |}];;
 
@@ -121,10 +121,10 @@ type t = C of int64x2#c;;
 Line 1, characters 14-22:
 1 | type t = C of int64x2#c;;
                   ^^^^^^^^
-Error: This type "int64x2#" should be an instance of type "('a : value)"
-       The layout of int64x2# is vec128
+Error: This type "int64x2#" should be an instance of type "'a"
+       The layout of "int64x2#" is vec128
          because it is the unboxed version of the primitive type int64x2.
-       But the layout of int64x2# must be a sublayout of value
+       But the layout of "int64x2#" must be a sublayout of value
          because it's a type argument to a class constructor.
 |}];;
 
@@ -133,10 +133,10 @@ type t = C : int64x2#c -> t;;
 Line 1, characters 13-21:
 1 | type t = C : int64x2#c -> t;;
                  ^^^^^^^^
-Error: This type "int64x2#" should be an instance of type "('a : value)"
-       The layout of int64x2# is vec128
+Error: This type "int64x2#" should be an instance of type "'a"
+       The layout of "int64x2#" is vec128
          because it is the unboxed version of the primitive type int64x2.
-       But the layout of int64x2# must be a sublayout of value
+       But the layout of "int64x2#" must be a sublayout of value
          because it's a type argument to a class constructor.
 |}];;
 
@@ -148,10 +148,10 @@ type t = int64x2# c;;
 Line 1, characters 9-17:
 1 | type t = int64x2# c;;
              ^^^^^^^^
-Error: This type "int64x2#" should be an instance of type "('a : value)"
-       The layout of int64x2# is vec128
+Error: This type "int64x2#" should be an instance of type "'a"
+       The layout of "int64x2#" is vec128
          because it is the unboxed version of the primitive type int64x2.
-       But the layout of int64x2# must be a sublayout of value
+       But the layout of "int64x2#" must be a sublayout of value
          because it's a type argument to a class constructor.
 |}];;
 
@@ -160,10 +160,10 @@ let f (_ : int64x2# c) = ();;
 Line 1, characters 11-19:
 1 | let f (_ : int64x2# c) = ();;
                ^^^^^^^^
-Error: This type "int64x2#" should be an instance of type "('a : value)"
-       The layout of int64x2# is vec128
+Error: This type "int64x2#" should be an instance of type "'a"
+       The layout of "int64x2#" is vec128
          because it is the unboxed version of the primitive type int64x2.
-       But the layout of int64x2# must be a sublayout of value
+       But the layout of "int64x2#" must be a sublayout of value
          because it's a type argument to a class constructor.
 |}];;
 
@@ -172,10 +172,10 @@ type t = C of int64x2# c;;
 Line 1, characters 14-22:
 1 | type t = C of int64x2# c;;
                   ^^^^^^^^
-Error: This type "int64x2#" should be an instance of type "('a : value)"
-       The layout of int64x2# is vec128
+Error: This type "int64x2#" should be an instance of type "'a"
+       The layout of "int64x2#" is vec128
          because it is the unboxed version of the primitive type int64x2.
-       But the layout of int64x2# must be a sublayout of value
+       But the layout of "int64x2#" must be a sublayout of value
          because it's a type argument to a class constructor.
 |}];;
 
@@ -184,10 +184,10 @@ type t = C : int64x2# c -> t;;
 Line 1, characters 13-21:
 1 | type t = C : int64x2# c -> t;;
                  ^^^^^^^^
-Error: This type "int64x2#" should be an instance of type "('a : value)"
-       The layout of int64x2# is vec128
+Error: This type "int64x2#" should be an instance of type "'a"
+       The layout of "int64x2#" is vec128
          because it is the unboxed version of the primitive type int64x2.
-       But the layout of int64x2# must be a sublayout of value
+       But the layout of "int64x2#" must be a sublayout of value
          because it's a type argument to a class constructor.
 |}];;
 

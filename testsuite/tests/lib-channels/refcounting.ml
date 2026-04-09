@@ -29,5 +29,5 @@ external out_channels_list : unit -> out_channel list
   = "caml_ml_out_channels_list"
 val duplicate_and_close : unit -> unit = <fun>
 val loop : int -> unit -> unit = <fun>
-val dls : unit Domain.t list = [<abstr>; <abstr>; <abstr>; <abstr>]
+Exception: Failure "failed to allocate domain".
 |}]

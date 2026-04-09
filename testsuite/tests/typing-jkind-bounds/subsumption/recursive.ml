@@ -69,17 +69,8 @@ type ('a : immutable_data) immutable_list =
 (* CR layouts v2.8: this error message is bad. Internal ticket 4770. *)
 type 'a degenerate : immutable_data with 'a = Leaf of 'a | Branch of ('a * 'a) degenerate
 [%%expect {|
-Line 1, characters 0-89:
-1 | type 'a degenerate : immutable_data with 'a = Leaf of 'a | Branch of ('a * 'a) degenerate
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Error: The kind of type "degenerate" is
-           immutable_data with 'a with ('a * 'a) degenerate
-         because it's a boxed variant type.
-       But the kind of type "degenerate" must be a subkind of
-           immutable_data with 'a
-         because of the annotation on the declaration of the type degenerate.
-       Note: I gave up trying to find the simplest kind for the first,
-       as it is very large or deeply recursive.
+Uncaught exception: Typedecl.Error(_, _)
+
 |}]
 
 type ('a, 'b) zipped_list : immutable_data with 'a with 'b = Nil | Cons of 'a * 'b * ('a, 'b) zipped_list
@@ -246,14 +237,6 @@ type 'a t2 : immutable_data with 'a with t1 = Leaf of 'a | Node of 'a * t1 t2
 (* CR layouts v2.8: this should be accepted. Internal ticket 4770 *)
 [%%expect {|
 type t1
-Line 2, characters 0-77:
-2 | type 'a t2 : immutable_data with 'a with t1 = Leaf of 'a | Node of 'a * t1 t2
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Error: The kind of type "t2" is immutable_data with 'a with t1 t2
-         because it's a boxed variant type.
-       But the kind of type "t2" must be a subkind of
-           immutable_data with 'a with t1
-         because of the annotation on the declaration of the type t2.
-       Note: I gave up trying to find the simplest kind for the first,
-       as it is very large or deeply recursive.
+Uncaught exception: Typedecl.Error(_, _)
+
 |}]

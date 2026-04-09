@@ -9,13 +9,15 @@
 type 'a list : immutable_data with 'a
 
 [%%expect{|
-type 'a list : immutable_data with 'a
+Uncaught exception: File "typing/jkind.ml", line 1056, characters 42-48: Assertion failed
+
 |}]
 
 type ('a, 'b) either : immutable_data with 'a * 'b
 
 [%%expect{|
-type ('a, 'b) either : immutable_data with 'a with 'b
+Uncaught exception: File "typing/jkind.ml", line 1056, characters 42-48: Assertion failed
+
 |}]
 
 type 'a gel : kind_of_ 'a mod global
@@ -507,11 +509,11 @@ type ('a : value mod aliased) t = { aliased_field : 'a; }
 Line 2, characters 26-34:
 2 | let x = { aliased_field = "string" }
                               ^^^^^^^^
-Error: This expression has type "string" but an expression was expected of type
-         "('a : value mod aliased)"
-       The kind of string is immutable_data
+Error: This constant has type "string" but an expression was expected of type
+         "'a"
+       The kind of "string" is immutable_data
          because it is the primitive type string.
-       But the kind of string must be a subkind of value mod aliased
+       But the kind of "string" must be a subkind of value mod aliased
          because of the definition of t at line 1, characters 0-56.
 |}]
 
@@ -529,11 +531,10 @@ type t : value mod many
 Line 2, characters 42-43:
 2 | let g (x : t) : ('a : value mod global) = x
                                               ^
-Error: This expression has type "t" but an expression was expected of type
-         "('a : value mod global)"
-       The kind of t is value mod many
+Error: The value "x" has type "t" but an expression was expected of type "'a"
+       The kind of "t" is value mod many
          because of the definition of t at line 1, characters 0-23.
-       But the kind of t must be a subkind of value mod global
+       But the kind of "t" must be a subkind of value mod global
          because of the annotation on the type variable 'a.
 |}]
 
@@ -555,11 +556,10 @@ val f : ('a : value mod aliased). 'a -> unit = <fun>
 Line 3, characters 18-19:
 3 | let g (x : t) = f x
                       ^
-Error: This expression has type "t" but an expression was expected of type
-         "('a : value mod aliased)"
-       The kind of t is value mod external64
+Error: The value "x" has type "t" but an expression was expected of type "'a"
+       The kind of "t" is value mod external64
          because of the definition of t at line 1, characters 0-29.
-       But the kind of t must be a subkind of value mod aliased
+       But the kind of "t" must be a subkind of value mod aliased
          because of the definition of f at line 2, characters 6-45.
 |}]
 
@@ -757,47 +757,26 @@ type t = { x : string; }
 
 type t : any mod many = { x : t_value }
 [%%expect{|
-Line 1, characters 0-39:
-1 | type t : any mod many = { x : t_value }
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Error: The kind of type "t" is immutable_data with t_value
-         because it's a boxed record type.
-       But the kind of type "t" must be a subkind of any mod many
-         because of the annotation on the declaration of the type t.
+Uncaught exception: Typedecl.Error(_, _)
+
 |}]
 
 type t : any mod contended = { x : t_value }
 [%%expect{|
-Line 1, characters 0-44:
-1 | type t : any mod contended = { x : t_value }
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Error: The kind of type "t" is immutable_data with t_value
-         because it's a boxed record type.
-       But the kind of type "t" must be a subkind of any mod contended
-         because of the annotation on the declaration of the type t.
+Uncaught exception: Typedecl.Error(_, _)
+
 |}]
 
 type t : any mod portable = { x : t_value }
 [%%expect{|
-Line 1, characters 0-43:
-1 | type t : any mod portable = { x : t_value }
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Error: The kind of type "t" is immutable_data with t_value
-         because it's a boxed record type.
-       But the kind of type "t" must be a subkind of any mod portable
-         because of the annotation on the declaration of the type t.
+Uncaught exception: Typedecl.Error(_, _)
+
 |}]
 
 type t : any mod many contended portable global = { x : t_value }
 [%%expect{|
-Line 1, characters 0-65:
-1 | type t : any mod many contended portable global = { x : t_value }
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Error: The kind of type "t" is immutable_data with t_value
-         because it's a boxed record type.
-       But the kind of type "t" must be a subkind of
-           any mod global many portable contended
-         because of the annotation on the declaration of the type t.
+Uncaught exception: Typedecl.Error(_, _)
+
 |}]
 
 type u : immediate
@@ -814,11 +793,10 @@ type t = { x : string; }
 Line 2, characters 43-59:
 2 | let foo : _ as (_ : value mod external_) = { x = "string" }
                                                ^^^^^^^^^^^^^^^^
-Error: This expression has type "t" but an expression was expected of type
-         "('a : value mod external_)"
-       The kind of t is immutable_data
+Error: This expression has type "t" but an expression was expected of type "'a"
+       The kind of "t" is immutable_data
          because of the definition of t at line 1, characters 0-23.
-       But the kind of t must be a subkind of value mod external_
+       But the kind of "t" must be a subkind of value mod external_
          because of the annotation on the wildcard _ at line 2, characters 20-39.
 |}]
 
@@ -985,73 +963,32 @@ type ('a : immediate) t = { mutable x : 'a; }
 
 type ('a : immediate) t : value mod global = { mutable x : 'a }
 [%%expect {|
-Line 1, characters 0-63:
-1 | type ('a : immediate) t : value mod global = { mutable x : 'a }
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Error: The kind of type "t" is mutable_data with 'a @@ forkable unyielding many
-         because it's a boxed record type.
-       But the kind of type "t" must be a subkind of value mod global
-         because of the annotation on the declaration of the type t.
+Uncaught exception: Typedecl.Error(_, _)
 
-       The first mode-crosses less than the second along:
-         locality: mod local ≰ mod global
-         uniqueness: mod unique ≰ mod aliased
 |}]
 
 type ('a : immediate) t : value mod aliased = { mutable x : 'a }
 [%%expect {|
-Line 1, characters 0-64:
-1 | type ('a : immediate) t : value mod aliased = { mutable x : 'a }
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Error: The kind of type "t" is mutable_data with 'a @@ forkable unyielding many
-         because it's a boxed record type.
-       But the kind of type "t" must be a subkind of value mod aliased
-         because of the annotation on the declaration of the type t.
+Uncaught exception: Typedecl.Error(_, _)
 
-       The first mode-crosses less than the second along:
-         uniqueness: mod unique ≰ mod aliased
 |}]
 
 type ('a : immediate) t : value mod contended = { mutable x : 'a }
 [%%expect {|
-Line 1, characters 0-66:
-1 | type ('a : immediate) t : value mod contended = { mutable x : 'a }
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Error: The kind of type "t" is mutable_data with 'a @@ forkable unyielding many
-         because it's a boxed record type.
-       But the kind of type "t" must be a subkind of value mod contended
-         because of the annotation on the declaration of the type t.
+Uncaught exception: Typedecl.Error(_, _)
 
-       The first mode-crosses less than the second along:
-         contention: mod uncontended ≰ mod contended
 |}]
 
 type ('a : immediate) t : value mod external_ = { mutable x : 'a }
 [%%expect {|
-Line 1, characters 0-66:
-1 | type ('a : immediate) t : value mod external_ = { mutable x : 'a }
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Error: The kind of type "t" is mutable_data with 'a @@ forkable unyielding many
-         because it's a boxed record type.
-       But the kind of type "t" must be a subkind of value mod external_
-         because of the annotation on the declaration of the type t.
+Uncaught exception: Typedecl.Error(_, _)
 
-       The first mode-crosses less than the second along:
-         externality: mod internal ≰ mod external_
 |}]
 
 type ('a : immediate) t : value mod external64 = { mutable x : 'a }
 [%%expect {|
-Line 1, characters 0-67:
-1 | type ('a : immediate) t : value mod external64 = { mutable x : 'a }
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Error: The kind of type "t" is mutable_data with 'a @@ forkable unyielding many
-         because it's a boxed record type.
-       But the kind of type "t" must be a subkind of value mod external64
-         because of the annotation on the declaration of the type t.
+Uncaught exception: Typedecl.Error(_, _)
 
-       The first mode-crosses less than the second along:
-         externality: mod internal ≰ mod external64
 |}]
 
 (*************************************)
@@ -1119,7 +1056,8 @@ type t : any mod portable = Foo of bool [@@unboxed]
 let x = (Foo true : _ as (_ : value mod portable contended aliased))
 [%%expect {|
 type t = Foo of bool [@@unboxed]
-val x : t = <unknown constructor>
+Uncaught exception: Datarepr.Constr_not_found
+
 |}]
 
 type t : value mod global = Foo of int [@@unboxed]
@@ -1239,28 +1177,14 @@ type 'a t = { x : 'a @@ portable; }
 
 type 'a t : value mod aliased = { x : 'a @@ aliased }
 [%%expect {|
-Line 1, characters 0-53:
-1 | type 'a t : value mod aliased = { x : 'a @@ aliased }
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Error: The kind of type "t" is immutable_data with 'a
-         because it's a boxed record type.
-       But the kind of type "t" must be a subkind of value mod aliased
-         because of the annotation on the declaration of the type t.
+Uncaught exception: Typedecl.Error(_, _)
+
 |}]
 
 type 'a t : value mod global = { x : 'a @@ global }
 [%%expect {|
-Line 1, characters 0-51:
-1 | type 'a t : value mod global = { x : 'a @@ global }
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Error: The kind of type "t" is immutable_data with 'a @@ forkable unyielding
-         because it's a boxed record type.
-       But the kind of type "t" must be a subkind of value mod global
-         because of the annotation on the declaration of the type t.
+Uncaught exception: Typedecl.Error(_, _)
 
-       The first mode-crosses less than the second along:
-         locality: mod local ≰ mod global
-         uniqueness: mod unique ≰ mod aliased
 |}]
 
 (*****************************)
@@ -1393,11 +1317,10 @@ type _ t =
 Line 17, characters 6-7:
 17 |     f y
            ^
-Error: This expression has type "a" but an expression was expected of type
-         "('a : immediate)"
-       The kind of a is value
+Error: The value "y" has type "a" but an expression was expected of type "'a"
+       The kind of "a" is value
          because of the annotation on the abstract type declaration for a.
-       But the kind of a must be a subkind of immediate
+       But the kind of "a" must be a subkind of immediate
          because of the definition of f at line 16, characters 10-41.
 |}]
 
@@ -1440,10 +1363,10 @@ Line 1, characters 42-52:
 1 | let x : (_ as (_ : value mod portable)) = object end
                                               ^^^^^^^^^^
 Error: This expression has type "<  >" but an expression was expected of type
-         "('a : value mod portable)"
-       The kind of <  > is value mod global many non_float
+         "'a"
+       The kind of "<  >" is value mod global many non_float
          because it's the type of an object.
-       But the kind of <  > must be a subkind of value mod portable
+       But the kind of "<  >" must be a subkind of value mod portable
          because of the annotation on the wildcard _ at line 1, characters 19-37.
 |}]
 
@@ -1453,10 +1376,10 @@ Line 1, characters 43-53:
 1 | let x : (_ as (_ : value mod contended)) = object end
                                                ^^^^^^^^^^
 Error: This expression has type "<  >" but an expression was expected of type
-         "('a : value mod contended)"
-       The kind of <  > is value mod global many non_float
+         "'a"
+       The kind of "<  >" is value mod global many non_float
          because it's the type of an object.
-       But the kind of <  > must be a subkind of value mod contended
+       But the kind of "<  >" must be a subkind of value mod contended
          because of the annotation on the wildcard _ at line 1, characters 19-38.
 |}]
 
@@ -1466,10 +1389,10 @@ Line 1, characters 43-53:
 1 | let x : (_ as (_ : value mod external_)) = object end
                                                ^^^^^^^^^^
 Error: This expression has type "<  >" but an expression was expected of type
-         "('a : value mod external_)"
-       The kind of <  > is value mod global many non_float
+         "'a"
+       The kind of "<  >" is value mod global many non_float
          because it's the type of an object.
-       But the kind of <  > must be a subkind of value mod external_
+       But the kind of "<  >" must be a subkind of value mod external_
          because of the annotation on the wildcard _ at line 1, characters 19-38.
 |}]
 
@@ -1548,24 +1471,14 @@ Error: The kind of type "t" is value
 
 type 'a t : value mod global = { x : 'a }
 [%%expect {|
-Line 1, characters 0-41:
-1 | type 'a t : value mod global = { x : 'a }
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Error: The kind of type "t" is immutable_data with 'a
-         because it's a boxed record type.
-       But the kind of type "t" must be a subkind of value mod global
-         because of the annotation on the declaration of the type t.
+Uncaught exception: Typedecl.Error(_, _)
+
 |}]
 
 type 'a t : value mod many = { x : 'a }
 [%%expect {|
-Line 1, characters 0-39:
-1 | type 'a t : value mod many = { x : 'a }
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Error: The kind of type "t" is immutable_data with 'a
-         because it's a boxed record type.
-       But the kind of type "t" must be a subkind of value mod many
-         because of the annotation on the declaration of the type t.
+Uncaught exception: Typedecl.Error(_, _)
+
 |}]
 
 (*************************************)
@@ -1642,15 +1555,8 @@ val f : int -> unit = <fun>
 val id : 'a -> 'a = <fun>
 val require_portable : ('a : value mod portable). 'a -> unit = <fun>
 type 'a t = Box of 'a
-Lines 11-12, characters 4-10:
-11 | ....(Box x)
-12 |      |> id
-Error: This expression has type "int t" but an expression was expected of type
-         "('a : value mod portable)"
-       The kind of int t is immutable_data with int
-         because of the definition of t at line 3, characters 0-21.
-       But the kind of int t must be a subkind of value mod portable
-         because of the definition of require_portable at line 2, characters 21-57.
+Uncaught exception: Typecore.Error(_, _, _)
+
 |}]
 
 (*********************************)
@@ -1697,15 +1603,8 @@ val f : int -> unit = <fun>
 val id : 'a -> 'a = <fun>
 val require_portable : ('a : value mod portable). 'a -> unit = <fun>
 type 'a t = Box of 'a
-Lines 11-12, characters 4-10:
-11 | ....(Box x)
-12 |      |> id
-Error: This expression has type "int t" but an expression was expected of type
-         "('a : value mod portable)"
-       The kind of int t is immutable_data with int
-         because of the definition of t at line 3, characters 0-21.
-       But the kind of int t must be a subkind of value mod portable
-         because of the definition of require_portable at line 2, characters 21-57.
+Uncaught exception: Typecore.Error(_, _, _)
+
 |}]
 
 (*********************************)
@@ -1738,7 +1637,8 @@ end = struct
 end
 
 [%%expect{|
-module M : sig type 'a t : value mod portable with 'a end
+Uncaught exception: File "typing/jkind.ml", line 1056, characters 42-48: Assertion failed
+
 |}]
 
 module M : sig
@@ -1748,7 +1648,8 @@ end = struct
 end
 
 [%%expect{|
-module M : sig type 'a t : value mod portable with 'a end
+Uncaught exception: File "typing/jkind.ml", line 1056, characters 42-48: Assertion failed
+
 |}]
 
 module M : sig
@@ -1758,7 +1659,8 @@ end = struct
 end
 
 [%%expect{|
-module M : sig type 'a t : value mod portable with 'a end
+Uncaught exception: File "typing/jkind.ml", line 1056, characters 42-48: Assertion failed
+
 |}]
 
 module M : sig
@@ -1768,7 +1670,8 @@ end = struct
 end
 
 [%%expect{|
-module M : sig type 'a t : value mod portable with 'a end
+Uncaught exception: File "typing/jkind.ml", line 1056, characters 42-48: Assertion failed
+
 |}]
 
 module M : sig
@@ -1778,7 +1681,8 @@ end = struct
 end
 
 [%%expect{|
-module M : sig type 'a t : value mod portable with 'a end
+Uncaught exception: File "typing/jkind.ml", line 1056, characters 42-48: Assertion failed
+
 |}]
 
 module M : sig
@@ -1798,8 +1702,8 @@ end = struct
 end
 
 [%%expect{|
-module M :
-  sig type 'a t : value mod portable contended with 'a @@ portable end
+Uncaught exception: File "typing/jkind.ml", line 1056, characters 42-48: Assertion failed
+
 |}]
 
 (***********************************************)
@@ -1813,8 +1717,8 @@ end
 module type S2 = S with type 'a t = 'a
 
 [%%expect{|
-module type S = sig type 'a t : value mod portable with 'a end
-module type S2 = sig type 'a t = 'a end
+Uncaught exception: File "typing/jkind.ml", line 1056, characters 42-48: Assertion failed
+
 |}]
 
 (***************************************************)
@@ -1858,14 +1762,8 @@ type c : value mod portable contended = { a : a @@ portable; b : b }
 type t : value mod contended
 type a = t
 type b = Foo of a
-Line 4, characters 0-68:
-4 | type c : value mod portable contended = { a : a @@ portable; b : b }
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Error: The kind of type "c" is immutable_data with a
-         because it's a boxed record type.
-       But the kind of type "c" must be a subkind of
-           value mod portable contended
-         because of the annotation on the declaration of the type c.
+Uncaught exception: Typedecl.Error(_, _)
+
 |}]
 
 type t : value mod contended
@@ -1876,14 +1774,8 @@ type c : value mod portable contended = A of a @@ portable | B of b
 type t : value mod contended
 type a = t
 type b = { a : a; }
-Line 4, characters 0-67:
-4 | type c : value mod portable contended = A of a @@ portable | B of b
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Error: The kind of type "c" is immutable_data with a
-         because it's a boxed variant type.
-       But the kind of type "c" must be a subkind of
-           value mod portable contended
-         because of the annotation on the declaration of the type c.
+Uncaught exception: Typedecl.Error(_, _)
+
 |}]
 
 type t : value mod contended
@@ -1896,14 +1788,8 @@ type t : value mod contended
 type a = t
 type b0 = { a : a; }
 type b = { b0 : b0; } [@@unboxed]
-Line 5, characters 0-67:
-5 | type c : value mod portable contended = A of a @@ portable | B of b
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Error: The kind of type "c" is immutable_data with a
-         because it's a boxed variant type.
-       But the kind of type "c" must be a subkind of
-           value mod portable contended
-         because of the annotation on the declaration of the type c.
+Uncaught exception: Typedecl.Error(_, _)
+
 |}]
 
 type t : value mod contended
@@ -1914,14 +1800,8 @@ type c : value mod portable contended = { b : b; a : a @@ portable }
 type t : value mod contended
 type a = t
 type b = Foo of a
-Line 4, characters 0-68:
-4 | type c : value mod portable contended = { b : b; a : a @@ portable }
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Error: The kind of type "c" is immutable_data with a
-         because it's a boxed record type.
-       But the kind of type "c" must be a subkind of
-           value mod portable contended
-         because of the annotation on the declaration of the type c.
+Uncaught exception: Typedecl.Error(_, _)
+
 |}]
 
 type t : value mod contended
@@ -1932,14 +1812,8 @@ type c : value mod portable contended = { a : a @@ portable; b : b }
 type t : value mod contended
 type b = Foo of a
 and a = t
-Line 4, characters 0-68:
-4 | type c : value mod portable contended = { a : a @@ portable; b : b }
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Error: The kind of type "c" is immutable_data with a
-         because it's a boxed record type.
-       But the kind of type "c" must be a subkind of
-           value mod portable contended
-         because of the annotation on the declaration of the type c.
+Uncaught exception: Typedecl.Error(_, _)
+
 |}]
 
 type 'a t : value mod contended
@@ -1950,14 +1824,8 @@ type 'a c : value mod portable contended = { a : 'a a @@ portable; b : 'a b }
 type 'a t : value mod contended
 type 'a a = 'a t
 type 'a b = Foo of 'a a
-Line 4, characters 0-77:
-4 | type 'a c : value mod portable contended = { a : 'a a @@ portable; b : 'a b }
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Error: The kind of type "c" is immutable_data with 'a a
-         because it's a boxed record type.
-       But the kind of type "c" must be a subkind of
-           value mod portable contended
-         because of the annotation on the declaration of the type c.
+Uncaught exception: Typedecl.Error(_, _)
+
 |}]
 
 type 'a t : value mod contended portable with 'a
@@ -1970,21 +1838,8 @@ type ('a : value mod contended portable, 'b : value mod contended) c
   ; c : 'b b
   }
 [%%expect {|
-type 'a t : value mod portable contended with 'a
-type 'a a = 'a t
-type 'a b = Foo of 'a a
-Lines 4-9, characters 0-3:
-4 | type ('a : value mod contended portable, 'b : value mod contended) c
-5 |   : value mod contended portable =
-6 |   { b : 'b a @@ portable
-7 |   ; a : 'a a
-8 |   ; c : 'b b
-9 |   }
-Error: The kind of type "c" is immutable_data with 'a a with 'b a
-         because it's a boxed record type.
-       But the kind of type "c" must be a subkind of
-           value mod portable contended
-         because of the annotation on the declaration of the type c.
+Uncaught exception: File "typing/jkind.ml", line 1056, characters 42-48: Assertion failed
+
 |}]
 
 type t : value mod contended
@@ -1995,14 +1850,8 @@ type c : value mod portable contended = { a : a @@ portable; b : b }
 type t : value mod contended
 type a = [ `Bar of t ]
 type b = Foo of a
-Line 4, characters 0-68:
-4 | type c : value mod portable contended = { a : a @@ portable; b : b }
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Error: The kind of type "c" is immutable_data with t
-         because it's a boxed record type.
-       But the kind of type "c" must be a subkind of
-           value mod portable contended
-         because of the annotation on the declaration of the type c.
+Uncaught exception: Typedecl.Error(_, _)
+
 |}]
 
 type t : value mod contended
@@ -2013,14 +1862,8 @@ type c : value mod portable contended = { a : a @@ portable; b : b }
 type t : value mod contended
 type a = Bar : t -> a
 type b = Foo of a
-Line 4, characters 0-68:
-4 | type c : value mod portable contended = { a : a @@ portable; b : b }
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Error: The kind of type "c" is immutable_data with t
-         because it's a boxed record type.
-       But the kind of type "c" must be a subkind of
-           value mod portable contended
-         because of the annotation on the declaration of the type c.
+Uncaught exception: Typedecl.Error(_, _)
+
 |}]
 
 type t : value mod contended
@@ -2040,14 +1883,8 @@ type b = Foo of a
 type u : value mod contended
 type c = u
 type d = Bar of c
-Lines 9-10, characters 0-56:
- 9 | type e : value mod portable contended =
-10 |   { a : a @@ portable; b : b; c : c @@ portable; d : d }
-Error: The kind of type "e" is immutable_data with a with c
-         because it's a boxed record type.
-       But the kind of type "e" must be a subkind of
-           value mod portable contended
-         because of the annotation on the declaration of the type e.
+Uncaught exception: Typedecl.Error(_, _)
+
 |}]
 
 type t : value mod contended
@@ -2058,14 +1895,8 @@ type c : value mod portable contended = { a : a * int @@ portable; b : b }
 type t : value mod contended
 type a = t
 type b = Foo of a
-Line 4, characters 0-74:
-4 | type c : value mod portable contended = { a : a * int @@ portable; b : b }
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Error: The kind of type "c" is immutable_data with a
-         because it's a boxed record type.
-       But the kind of type "c" must be a subkind of
-           value mod portable contended
-         because of the annotation on the declaration of the type c.
+Uncaught exception: Typedecl.Error(_, _)
+
 |}]
 
 type t : value mod contended
@@ -2076,12 +1907,6 @@ type c : value mod portable contended = { a : a @@ portable; b : b * int }
 type t : value mod contended
 type a = t
 type b = Foo of a
-Line 4, characters 0-74:
-4 | type c : value mod portable contended = { a : a @@ portable; b : b * int }
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Error: The kind of type "c" is immutable_data with a
-         because it's a boxed record type.
-       But the kind of type "c" must be a subkind of
-           value mod portable contended
-         because of the annotation on the declaration of the type c.
+Uncaught exception: Typedecl.Error(_, _)
+
 |}]

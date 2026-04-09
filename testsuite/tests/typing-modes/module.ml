@@ -248,12 +248,12 @@ module F : functor (X : S @ portable) -> sig end @@ stateless
 
 module type S = functor () (M : S @ portable) (_ : S @ portable) -> S
 [%%expect{|
-module type S = functor () (M : S @ portable) -> S @ portable -> S
+module type S = functor () (M : S @ portable) -> functor S @ portable -> S
 |}]
 
 module type S = functor () (M : S) (_ : S) -> S @ portable
 [%%expect{|
-module type S = functor () (M : S) -> S -> S @ portable
+module type S = functor () (M : S) -> functor S -> S @ portable
 |}]
 
 module F () = struct
@@ -297,7 +297,7 @@ Error: This application of the functor "F" is ill-typed.
        These arguments:
          M N
        do not match these parameters:
-         functor (X : Empty) (Y : Empty) -> ...
+         (X : Empty) (Y : Empty) -> ...
        1. Module M matches the expected module type Empty
        2. Modules do not match:
             N : sig end @ local

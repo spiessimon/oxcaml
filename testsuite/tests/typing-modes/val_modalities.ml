@@ -17,7 +17,7 @@ let uncontended_use (_ @ uncontended) = ()
 [%%expect{|
 type r = { mutable x : string; }
 module type Empty = sig end
-module type E2E = Empty -> Empty
+module type E2E = functor Empty -> Empty
 val uncontended_use : 'a -> unit = <fun>
 |}]
 
@@ -49,27 +49,27 @@ end
 Line 2, characters 22-28:
 2 |     val x : string @@ global local unique aliased once many uncontended contended
                           ^^^^^^
-Warning 213: This locality is overriden by local later.
+Warning 213: This locality is overridden by local later.
 
 Line 2, characters 50-54:
 2 |     val x : string @@ global local unique aliased once many uncontended contended
                                                       ^^^^
-Warning 213: This linearity is overriden by many later.
+Warning 213: This linearity is overridden by many later.
 
 Line 3, characters 6-14:
 3 |       portable nonportable
           ^^^^^^^^
-Warning 213: This portability is overriden by nonportable later.
+Warning 213: This portability is overridden by nonportable later.
 
 Line 2, characters 35-41:
 2 |     val x : string @@ global local unique aliased once many uncontended contended
                                        ^^^^^^
-Warning 213: This uniqueness is overriden by aliased later.
+Warning 213: This uniqueness is overridden by aliased later.
 
 Line 2, characters 60-71:
 2 |     val x : string @@ global local unique aliased once many uncontended contended
                                                                 ^^^^^^^^^^^
-Warning 213: This contention is overriden by contended later.
+Warning 213: This contention is overridden by contended later.
 
 module type S = sig val x : string @@ many aliased contended end
 |}]
@@ -778,8 +778,9 @@ module F : (sig val foo : 'a -> 'a end) -> (sig val bar : 'a -> 'a @@ global man
 functor (M : sig val foo : 'a -> 'a @@ global many end) -> struct let bar = M.foo end
 [%%expect{|
 module F :
-  sig val foo : 'a -> 'a end -> sig val bar : 'a -> 'a @@ global many end @@
-  stateless
+  functor sig val foo : 'a -> 'a end ->
+    sig val bar : 'a -> 'a @@ global many end
+  @@ stateless
 |}]
 
 (* CR zqian: package subtyping doesn't look at the package mode for simplicity.
@@ -801,6 +802,9 @@ Line 1, characters 26-57:
 1 | let f (x : (module S')) = (x : (module S') :> (module S))
                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Error: Type "(module S')" is not a subtype of "(module S)"
+       Modules do not match: S' is not included in S
+       Modalities on foo do not match:
+       The second is global and the first is not.
 |}]
 
 (* module equality/substitution inclusion check doesn't look at modes of modules
@@ -971,8 +975,9 @@ end = struct
 end
 [%%expect{|
 module M :
-  sig module type F = sig val foo : 'a @@ global many end -> sig end end @@
-  stateless
+  sig
+    module type F = functor sig val foo : 'a @@ global many end -> sig end
+  end @@ stateless
 |}]
 
 module M : sig
@@ -983,7 +988,7 @@ end = struct
     (sig end) -> (sig val foo : 'a @@ global many end)
 end
 [%%expect{|
-module M : sig module type F = sig end -> sig val foo : 'a end end @@
+module M : sig module type F = functor sig end -> sig val foo : 'a end end @@
   stateless
 |}]
 
@@ -1372,7 +1377,7 @@ let (bar @ portable) () =
   let k = (module F : F) in
   k
 [%%expect{|
-module type F = sig end -> sig end
+module type F = functor sig end -> sig end
 module F : functor (X : sig end) -> sig end @@ stateless nonportable
 Line 4, characters 18-19:
 4 |   let k = (module F : F) in
@@ -1390,7 +1395,7 @@ let (bar @ portable) () =
   let k = (module F : F) in
   k
 [%%expect{|
-module type F = sig end -> sig end
+module type F = functor sig end -> sig end
 module F : functor (X : sig end) -> sig end @@ stateless
 val bar : unit -> (module F) = <fun>
 |}]
