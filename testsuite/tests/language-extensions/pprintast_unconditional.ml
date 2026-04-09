@@ -153,6 +153,7 @@ end = struct
   ;;
 
   let longident = test "longident" longident Example.longident
+  let constr = test "constr" constr Example.longident
   let expression = test "expression" expression Example.expression
   let pattern = test "pattern" pattern Example.pattern
   let core_type = test "core_type" core_type Example.core_type
@@ -185,6 +186,8 @@ end = struct
 
   module Doc = struct
     let longident = Doc.longident
+    let constr = Doc.constr
+    let nominal_exp = Doc.nominal_exp
     let tyvar = Doc.tyvar
     let jkind_annotation = Doc.jkind_annotation
   end
