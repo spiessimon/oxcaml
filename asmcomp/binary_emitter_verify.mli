@@ -56,8 +56,26 @@ type mismatch =
         actual : int
       }
   | Relocation of relocation_mismatch
+  | Instruction of
+      { section_name : string;
+        index : int;
+        assembler : string;
+        binary_emitter : string
+      }
+  | Instruction_count of
+      { section_name : string;
+        assembler : int;
+        binary_emitter : int
+      }
   | Missing_section of string
   | Missing_binary_sections_dir of string
+
+type comparison_mode =
+  | Exact  (** Byte-exact comparison of text sections. *)
+  | Disassembly
+      (** Disassemble both sides using objdump and compare instruction
+          mnemonics. Tolerates encoding differences that produce the same
+          decoded instructions. *)
 
 type result =
   | Match of
@@ -66,14 +84,20 @@ type result =
       }
   | Mismatch of mismatch
   | Object_file_error of string
+  | Error of string
 
 (** Compare binary emitter output against assembled object file.
 
+    @param comparison_mode
+      Controls how text section byte mismatches are handled. [Exact] reports any
+      byte difference immediately. [Disassembly] falls back to objdump-based
+      instruction comparison when bytes differ (but sizes match).
     @param unix The Unix module (as first-class module)
     @param obj_file Path to the .o file produced by the system assembler
     @param binary_sections_dir Path to the .binary-sections/ directory
     @return Comparison result *)
 val compare :
+  comparison_mode:comparison_mode ->
   (module Compiler_owee.Unix_intf.S) ->
   obj_file:string ->
   binary_sections_dir:string ->

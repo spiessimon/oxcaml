@@ -3029,6 +3029,30 @@ let emit_trap_notes () =
     (* Switch back to Data section *)
     D.data ())
 
+let save_binary_sections () =
+  let dir = Filename.temp_file "caml_binary_sections" "" in
+  Sys.remove dir;
+  Sys.mkdir dir 0o755;
+  Emitaux.binary_sections_dir := Some dir;
+  X86_proc.iter_sections (fun name instructions ->
+      let sec_name = X86_proc.Section_name.to_string name in
+      let buf =
+        X86_binary_emitter.assemble_section X64
+          { X86_binary_emitter.sec_name;
+            sec_instrs = Oxcaml_utils.Doubly_linked_list.to_array instructions
+          }
+      in
+      let bare_name =
+        if String.length sec_name > 0 && Char.equal (String.get sec_name 0) '.'
+        then String.sub sec_name 1 (String.length sec_name - 1)
+        else sec_name
+      in
+      let safe_name = "section_" ^ bare_name in
+      let bin_path = Filename.concat dir (safe_name ^ ".bin") in
+      let oc = open_out_bin bin_path in
+      output_string oc (X86_binary_emitter.contents buf);
+      close_out oc)
+
 let end_assembly () =
   if not (Misc.Stdlib.List.is_empty !float_constants)
   then (
@@ -3136,5 +3160,7 @@ let end_assembly () =
   then Emitaux.Dwarf_helpers.emit_dwarf ();
   invoke_expect_asm_callbacks ();
   X86_proc.generate_code asm;
+  if !Oxcaml_flags.verify_binary_emitter && not !Oxcaml_flags.internal_assembler
+  then save_binary_sections ();
   (* The internal assembler does not work if reset_all is called here *)
   if not !Oxcaml_flags.internal_assembler then reset_all ()

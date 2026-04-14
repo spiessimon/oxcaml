@@ -635,27 +635,37 @@ let compile_unit unix ~output_prefix ~asm_filename ~keep_asm ~obj_filename
      making it easier to debug mismatches. *)
   if !Oxcaml_flags.verify_binary_emitter
   then
-    let binary_sections_dir = output_prefix ^ ".binary-sections" in
-    match
-      Binary_emitter_verify.compare unix ~obj_file:obj_filename
-        ~binary_sections_dir
-    with
-    | Match { text_size; data_size } ->
-      if !Clflags.verbose
-      then
-        Format.eprintf "Binary emitter verified: text=%d data=%d bytes@."
-          text_size data_size
-    | Mismatch (Missing_binary_sections_dir _) ->
-      (* Binary sections dir missing - binary emitter didn't run (e.g.,
-         -stop-after linearization). Skip verification. *)
+    match !Emitaux.binary_sections_dir with
+    | None ->
+      (* Binary emitter didn't run (e.g., -stop-after linearization) *)
       if !Clflags.verbose
       then
         Format.eprintf
           "Binary emitter verification skipped (no binary sections)@."
-    | (Mismatch _ | Object_file_error _) as result ->
-      Binary_emitter_verify.print_result Format.err_formatter result;
-      Format.eprintf "Binary sections saved to: %s@." binary_sections_dir;
-      raise (Error (Binary_emitter_mismatch obj_filename))
+    | Some binary_sections_dir -> (
+      Emitaux.binary_sections_dir := None;
+      let comparison_mode : Binary_emitter_verify.comparison_mode =
+        match Target_system.architecture () with
+        | X86_64 -> Disassembly
+        | _ -> Exact
+      in
+      let result =
+        Binary_emitter_verify.compare ~comparison_mode unix
+          ~obj_file:obj_filename ~binary_sections_dir
+      in
+      match result with
+      | Match { text_size; data_size } ->
+        if !Clflags.verbose
+        then
+          Format.eprintf "Binary emitter verified: text=%d data=%d bytes@."
+            text_size data_size;
+        Misc.remove_dir binary_sections_dir
+      | Mismatch (Missing_binary_sections_dir _) ->
+        Misc.remove_dir binary_sections_dir
+      | (Mismatch _ | Object_file_error _ | Error _) as result ->
+        Binary_emitter_verify.print_result Format.err_formatter result;
+        Format.eprintf "Binary sections saved to: %s@." binary_sections_dir;
+        raise (Error (Binary_emitter_mismatch obj_filename)))
 
 let end_gen_implementation unix ?toplevel ~ppf_dump ~sourcefile make_cmm =
   (* CR spies: Debug information is disabled for the top-level, because the
