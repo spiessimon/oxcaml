@@ -1654,9 +1654,22 @@ let assemble_line b loc ins =
       let sym = Asm_symbol.encode target_symbol in
       record_reloc b (Buffer.length b.buf - 4)
         (Relocation.Kind.REL32 (sym, 0L))
-    | Directive (D.Reloc _)
-    | Directive (D.Sleb128 _)
-    | Directive (D.Uleb128 _) ->
+    | Directive (D.Uleb128 { constant; _ }) -> (
+      (* Uses the shared DWARF-standard encoder in
+         [Asm_targets.Asm_directives]. OCaml's DWARF emission path only
+         constructs these with integer literals, so we fatal out on symbolic
+         operands (matching the assumption already baked into
+         [increment_offset_in_bytes]). *)
+      match eval_const b (Buffer.length b.buf) constant with
+      | Rint n -> D.emit_uleb128 b.buf n
+      | Rabs _ | Rrel _ ->
+        Misc.fatal_error "x86_binary_emitter: non-integer uleb128")
+    | Directive (D.Sleb128 { constant; _ }) -> (
+      match eval_const b (Buffer.length b.buf) constant with
+      | Rint n -> D.emit_sleb128 b.buf n
+      | Rabs _ | Rrel _ ->
+        Misc.fatal_error "x86_binary_emitter: non-integer sleb128")
+    | Directive (D.Reloc _) ->
       let dll = Oxcaml_utils.Doubly_linked_list.make_single ins in
       X86_gas.generate_asm Out_channel.stderr dll;
       Misc.fatal_errorf "x86_binary_emitter: unsupported instruction"
