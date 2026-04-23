@@ -89,12 +89,19 @@ type symbol = {
   mutable sy_num : int option; (* position in .symtab *)
 }
 
+type global_patch = {
+  gp_pos : int;
+  gp_size : data_size;
+  gp_cst : C.t;
+}
+
 type buffer = {
   sec : section;
   buf : Buffer.t;
   labels : symbol String.Tbl.t;
   mutable patches : (int * data_size * int64) list;
   mutable relocations : Relocation.t list;
+  mutable global_patches : global_patch list;
 }
 
 type local_reloc =
@@ -193,6 +200,7 @@ let new_buffer sec =
     labels = String.Tbl.create 100;
     relocations = [];
     patches = [];
+    global_patches = [];
   }
 
 let label_pos b lbl =
@@ -200,10 +208,21 @@ let label_pos b lbl =
   | None -> raise Not_found
   | Some pos -> pos
 
+(* Result of a symbol lookup: which section the symbol is in, and its byte
+   offset within that section. *)
+type lookup_result = { lu_sec_id : string; lu_pos : int }
+
 (* Try to compute some statically computable arithmetic expressions
    in labels, or to simplify them to a form that is encodable by
-   relocations. *)
-let eval_const b current_pos cst =
+   relocations. [lookup] resolves a symbol name to its section-id and
+   byte-offset; [current_sec_id] names the section the expression is
+   being emitted into, so that same-section subtractions can be folded
+   to literals.
+
+   Parameterized over [lookup] so the same evaluator serves both the
+   in-pass path (lookup consults [b.labels]) and the post-pass path
+   (lookup consults a global symbol table built from all buffers). *)
+let eval_with_lookup ~lookup ~current_sec_id ~current_pos cst =
   let rec eval = function
     | C.Signed_int n -> Rint n
     | C.Unsigned_int n -> Rint (Numbers.Uint64.to_int64 n)
@@ -219,52 +238,76 @@ let eval_const b current_pos cst =
         | Rrel (s, n1), Rint n2 -> Rrel (s, Int64.sub n1 n2)
         | Rabs ("", n1), Rabs ("", n2) -> Rint (Int64.sub n1 n2)
         | Rabs ("", n1), Rabs (s2, n2) -> (
-            try
-              let sy2 = String.Tbl.find b.labels s2 in
-              match sy2.sy_pos with
-              | Some pos2 ->
+            (* [. - s2] *)
+            match lookup s2 with
+            | Some { lu_sec_id; lu_pos }
+              when String.equal lu_sec_id current_sec_id ->
+                let pos2 = Int64.of_int lu_pos in
+                Rint
+                  (Int64.sub
+                     (Int64.add n1 (Int64.of_int current_pos))
+                     (Int64.add pos2 n2))
+            | Some _ ->
+                Misc.fatal_errorf
+                  "x86_binary_emitter: cannot compute . - %s: target in \
+                   different section"
+                  s2
+            | None ->
+                Misc.fatal_errorf
+                  "x86_binary_emitter: cannot compute . - %s: symbol not \
+                   found"
+                  s2)
+        | Rabs (s, n1), Rabs ("", n2) -> (
+            (* [s - .] *)
+            match lookup s with
+            | Some { lu_sec_id; lu_pos }
+              when String.equal lu_sec_id current_sec_id ->
+                (* Same section: fold to literal. *)
+                let pos = Int64.of_int lu_pos in
+                Rint
+                  (Int64.sub (Int64.add pos n1)
+                     (Int64.add n2 (Int64.of_int current_pos)))
+            | _ ->
+                (* Different section or external: PC-relative relocation. *)
+                Rrel (s, Int64.sub n1 n2))
+        | Rabs (s1, n1), Rabs (s2, n2) -> (
+            (* [s1 - s2] *)
+            match (lookup s1, lookup s2) with
+            | ( Some { lu_sec_id = sec1; lu_pos = pos1 },
+                Some { lu_sec_id = sec2; lu_pos = pos2 } ) ->
+                if String.equal sec1 sec2
+                then
+                  let pos1 = Int64.of_int pos1 in
                   let pos2 = Int64.of_int pos2 in
                   Rint
-                    (Int64.sub
-                       (Int64.add n1 (Int64.of_int current_pos))
-                       (Int64.add pos2 n2))
-              | _ -> assert false
-            with Not_found -> assert false)
-        | Rabs (s, n1), Rabs ("", n2) -> (
-            try
-              let sy = String.Tbl.find b.labels s in
-              match sy.sy_pos with
-              | Some pos ->
-                  let pos = Int64.of_int pos in
-                  Rint
-                    (Int64.sub (Int64.add pos n1)
-                       (Int64.add n2 (Int64.of_int current_pos)))
-              | _ -> assert false
-            with Not_found -> Rrel (s, Int64.sub n1 n2))
-        | Rabs (s1, n1), Rabs (s2, n2) -> (
-            try
-              let sy2 = String.Tbl.find b.labels s2 in
-              try
-                let sy1 = String.Tbl.find b.labels s1 in
-                assert (sy1.sy_sec == sy2.sy_sec);
-                match (sy1.sy_pos, sy2.sy_pos) with
-                | Some pos1, Some pos2 ->
-                    let pos1 = Int64.of_int pos1 in
-                    let pos2 = Int64.of_int pos2 in
-                    Rint (Int64.sub (Int64.add pos1 n1) (Int64.add pos2 n2))
-                | _ -> assert false
-              with Not_found -> (
-                match sy2.sy_pos with
-                | Some pos2 ->
-                    let pos2 = Int64.of_int pos2 in
-                    Rrel
-                      ( s1,
-                        Int64.sub
-                          (Int64.add n1 (Int64.of_int current_pos))
-                          (Int64.add pos2 n2) )
-                | _ -> assert false)
-            with Not_found -> assert false)
-        | _ -> assert false)
+                    (Int64.sub (Int64.add pos1 n1) (Int64.add pos2 n2))
+                else
+                  Misc.fatal_errorf
+                    "x86_binary_emitter: true cross-section subtraction \
+                     %s - %s (%s vs %s) is unsupported"
+                    s1 s2 sec1 sec2
+            | None, Some { lu_pos = pos2; _ } ->
+                (* s1 external, s2 local: PC-relative to s1 with addend
+                   derived from s2's known offset. *)
+                let pos2 = Int64.of_int pos2 in
+                Rrel
+                  ( s1,
+                    Int64.sub
+                      (Int64.add n1 (Int64.of_int current_pos))
+                      (Int64.add pos2 n2) )
+            | Some _, None ->
+                Misc.fatal_errorf
+                  "x86_binary_emitter: subtraction of external symbol %s \
+                   from local symbol %s is unsupported"
+                  s2 s1
+            | None, None ->
+                Misc.fatal_errorf
+                  "x86_binary_emitter: subtraction of two external \
+                   symbols %s - %s is unsupported"
+                  s1 s2)
+        | _ ->
+            Misc.fatal_error
+              "x86_binary_emitter: unsupported form in Sub")
     | C.Add (c1, c2) -> (
         let c1 = eval c1 and c2 = eval c2 in
         match (c1, c2) with
@@ -277,20 +320,26 @@ let eval_const b current_pos cst =
            Rrel to a Rabs where the symbol is local, in which case it
            can be computed. *)
         | Rrel (s, n1), Rabs ("", n2) -> Rabs (s, Int64.add n1 n2)
-        | _ -> assert false)
+        | _ ->
+            Misc.fatal_error
+              "x86_binary_emitter: unsupported form in Add")
+  in
+  eval cst
+
+let eval_const b current_pos cst =
+  let lookup name =
+    match String.Tbl.find_opt b.labels name with
+    | Some sym -> (
+        match sym.sy_pos with
+        | Some pos -> Some { lu_sec_id = b.sec.sec_name; lu_pos = pos }
+        | None -> None)
+    | None -> None
   in
   try
-    let r = eval cst in
-    (*
-    if debug then
-      Printf.eprintf "eval_const (%s) = %s at @%d\n%!"
-        (X86_gas.string_of_constant cst)
-        (string_of_result r) current_pos;
-*)
-    r
+    eval_with_lookup ~lookup ~current_sec_id:b.sec.sec_name ~current_pos cst
   with e ->
     Printf.eprintf "Error in eval_const: exception %S\n%!"
-      (*(X86_gas.string_of_constant cst)*) (Printexc.to_string e);
+      (Printexc.to_string e);
     raise e
 
 let is_imm32L n = Int64.compare n 0x8000_0000L < 0 && Int64.compare n (-0x8000_0000L) >= 0
@@ -1749,29 +1798,13 @@ and assemble_section0 arch section =
           let target_pos = label_pos b label in
           let n = target_pos - source_pos + Int64.to_int addend in
           add_patch b pos B32 (Int64.of_int n)
-      (* TODO: here, we resolve all computations in each section, i.e. we can only
-         allow one external symbol per expression. We could tolerate more complex
-         expressions if we delay resolution later, i.e. after all sections have
-         been generated and all symbol positions are known. *)
-      | RelocConstant (cst, data_size) -> (
-          (* Printf.eprintf "RelocConstant (%s, %s)\n%!"
-             (X86_gas.string_of_constant cst)
-             (string_of_data_size data_size); *)
-          let v = eval_const b pos cst in
-          match (v, data_size) with
-          | Rint n, _ -> add_patch b pos data_size n
-          | Rabs (lbl, offset), B32 ->
-              record_reloc b pos (Relocation.Kind.DIR32 (lbl, offset))
-          | Rabs (lbl, offset), B64 ->
-              record_reloc b pos (Relocation.Kind.DIR64 (lbl, offset))
-          (* Relative relocation in data segment. We add an offset of 4 because
-              REL32 relocations are computed with a PC at the end, while here, it
-              is at the beginning. *)
-          | Rrel (lbl, offset), B32 ->
-              record_reloc b pos
-                (Relocation.Kind.REL32 (lbl, Int64.add offset 4L))
-          | Rrel _, _ -> assert false
-          | Rabs _, _ -> assert false)
+      | RelocConstant (cst, data_size) ->
+          (* Defer to the post-pass [resolve_global_patches], which sees all
+             sections' label offsets and can fold same-section as well as
+             cross-section subtractions uniformly. *)
+          b.global_patches <-
+            { gp_pos = pos; gp_size = data_size; gp_cst = cst }
+            :: b.global_patches
     in
 
     ListLabels.iter !local_relocs ~f:(fun (pos, local_reloc) ->
@@ -1787,6 +1820,64 @@ and assemble_section0 arch section =
    labels should be replaced by a relative computation. The goal is to make
    all computations either absolute, or relative to the current offset.
 *)
+
+(* Resolve every buffer's [global_patches] using a global symbol table
+   built from all buffers' labels. Each patch is converted into either a
+   literal (via [add_patch]) or an ELF relocation (via [record_reloc]),
+   exactly matching the dispatch the in-section [do_local_reloc] used to
+   perform for [RelocConstant].
+
+   Call this after every [assemble_section] has completed but before
+   reading [contents]/[relocations] from the buffers. *)
+let resolve_global_patches buffers =
+  let symbols : lookup_result String.Tbl.t = String.Tbl.create 256 in
+  ListLabels.iter buffers ~f:(fun b ->
+      let sec_id = b.sec.sec_name in
+      String.Tbl.iter
+        (fun name sym ->
+          match sym.sy_pos with
+          | None -> ()
+          | Some pos -> (
+              let entry = { lu_sec_id = sec_id; lu_pos = pos } in
+              match String.Tbl.find_opt symbols name with
+              | None -> String.Tbl.add symbols name entry
+              | Some existing ->
+                if not
+                     (String.equal existing.lu_sec_id entry.lu_sec_id
+                     && existing.lu_pos = entry.lu_pos)
+                then
+                  Misc.fatal_errorf
+                    "x86_binary_emitter.resolve_global_patches: symbol %s \
+                     defined twice (%s@%d vs %s@%d)"
+                    name existing.lu_sec_id existing.lu_pos entry.lu_sec_id
+                    entry.lu_pos))
+        b.labels);
+  let lookup name = String.Tbl.find_opt symbols name in
+  ListLabels.iter buffers ~f:(fun b ->
+      let current_sec_id = b.sec.sec_name in
+      ListLabels.iter b.global_patches
+        ~f:(fun { gp_pos = pos; gp_size; gp_cst = cst } ->
+          let v =
+            eval_with_lookup ~lookup ~current_sec_id ~current_pos:pos cst
+          in
+          match (v, gp_size) with
+          | Rint n, _ -> add_patch b pos gp_size n
+          | Rabs (lbl, offset), B32 ->
+            record_reloc b pos (Relocation.Kind.DIR32 (lbl, offset))
+          | Rabs (lbl, offset), B64 ->
+            record_reloc b pos (Relocation.Kind.DIR64 (lbl, offset))
+          (* Relative relocation in data segment. We add an offset of 4
+             because REL32 relocations are computed with a PC at the end,
+             while here it is at the beginning. *)
+          | Rrel (lbl, offset), B32 ->
+            record_reloc b pos
+              (Relocation.Kind.REL32 (lbl, Int64.add offset 4L))
+          | Rrel _, _ | Rabs _, _ ->
+            Misc.fatal_errorf
+              "x86_binary_emitter.resolve_global_patches: unsupported \
+               combination of result and data size in section %s at offset %d"
+              current_sec_id pos);
+      b.global_patches <- [])
 
 let size b = Buffer.length b.buf
 

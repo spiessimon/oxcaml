@@ -76,6 +76,11 @@ let register callback =
               else String_map.add name_str binary_section map)
             String_map.empty sections
         in
+        (* Resolve data-directive references that need a global view across
+           all assembled sections (e.g. same-section symbol subtractions
+           referenced from another section). *)
+        X86_binary_emitter.resolve_global_patches
+          (String_map.fold (fun _ buf acc -> buf :: acc) sections_map []);
         let packed =
           Packed
             { emitter = (module X86_binary_emitter.For_jit);

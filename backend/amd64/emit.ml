@@ -3066,6 +3066,10 @@ let save_binary_sections () =
   Sys.remove dir;
   Sys.mkdir dir 0o755;
   Emitaux.binary_sections_dir := Some dir;
+  (* Assemble every section first; defer writing until after
+     [resolve_global_patches] has resolved cross-section data-directive
+     references using a global view over all buffers' labels. *)
+  let assembled = ref [] in
   X86_proc.iter_sections (fun name instructions ->
       let sec_name = X86_proc.Section_name.to_string name in
       let buf =
@@ -3080,10 +3084,15 @@ let save_binary_sections () =
         else sec_name
       in
       let safe_name = "section_" ^ bare_name in
+      assembled := (safe_name, buf) :: !assembled);
+  X86_binary_emitter.resolve_global_patches (List.map snd !assembled);
+  List.iter
+    (fun (safe_name, buf) ->
       let bin_path = Filename.concat dir (safe_name ^ ".bin") in
       let oc = open_out_bin bin_path in
       output_string oc (X86_binary_emitter.contents buf);
       close_out oc)
+    !assembled
 
 let end_assembly () =
   if not (Misc.Stdlib.List.is_empty !float_constants)

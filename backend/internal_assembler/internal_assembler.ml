@@ -273,6 +273,13 @@ let write buf header section_table symbol_table relocation_tables string_table =
 
 let assemble unix ~delayed asm output_file =
   let compiler_sections = get_sections ~delayed asm in
+  (* Resolve data-directive references that need a global view across all
+     assembled sections (e.g. same-section symbol subtractions referenced
+     from another section). *)
+  X86_binary_emitter.resolve_global_patches
+    (Section_name.Map.fold
+       (fun _ (_align, raw_section) acc -> raw_section :: acc)
+       compiler_sections []);
   let string_table = String_table.create () in
   let sh_string_table = String_table.create () in
   let sections = Section_table.create () in

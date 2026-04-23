@@ -56,6 +56,16 @@ val relocations : buffer -> Relocation.t list
 
 val assemble_section : arch -> section -> buffer
 
+(** Resolve each buffer's deferred data-directive patches using a global
+    symbol table built from every buffer's labels. Must be called after
+    every section has been assembled and before [contents]/[relocations]
+    is consumed. Cross-section symbol differences that fold to a literal
+    (both operands in the same section) are patched as literal bytes;
+    external and cross-section absolute/PC-relative references produce
+    ELF relocations. Truly cross-section subtractions (operands in
+    different sections) are rejected with a fatal error. *)
+val resolve_global_patches : buffer list -> unit
+
 val get_symbol : buffer -> StringMap.key -> symbol
 
 val contents_mut : buffer -> bytes
