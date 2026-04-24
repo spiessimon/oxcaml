@@ -48,23 +48,33 @@ end
 
 module StringMap : Map.S with type key = string
 
+(** Output of [assemble_section]. Cannot be consumed directly; must be
+    passed through [resolve_global_patches] first. This type-level
+    distinction ensures callers cannot forget the global-resolution
+    pass, which folds cross-section symbol differences to literals and
+    emits ELF relocations for external references. *)
+type unresolved_buffer
+
+(** Fully resolved buffer. Once [resolve_global_patches] has run, the
+    bytes and relocation list are in their final form and can be
+    consumed via [contents]/[relocations]. *)
 type buffer
 
 val size : buffer -> int
 
 val relocations : buffer -> Relocation.t list
 
-val assemble_section : arch -> section -> buffer
+val assemble_section : arch -> section -> unresolved_buffer
 
-(** Resolve each buffer's deferred data-directive patches using a global
-    symbol table built from every buffer's labels. Must be called after
-    every section has been assembled and before [contents]/[relocations]
-    is consumed. Cross-section symbol differences that fold to a literal
-    (both operands in the same section) are patched as literal bytes;
-    external and cross-section absolute/PC-relative references produce
-    ELF relocations. Truly cross-section subtractions (operands in
-    different sections) are rejected with a fatal error. *)
-val resolve_global_patches : buffer list -> unit
+
+(** Resolve every buffer's deferred data-directive patches using a
+    global symbol table built from all the buffers' labels. Same-section
+    symbol differences fold to literal bytes; external or cross-section
+    absolute/PC-relative references produce ELF relocations. Truly
+    cross-section subtractions (operands in different sections) are
+    rejected with a fatal error. Returns the same buffers with their
+    type refined to [buffer]. *)
+val resolve_global_patches : unresolved_buffer list -> buffer list
 
 val get_symbol : buffer -> StringMap.key -> symbol
 

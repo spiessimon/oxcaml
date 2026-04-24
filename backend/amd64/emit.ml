@@ -1108,19 +1108,18 @@ let movsd src dst =
   | true, true, false -> I.simd vmovsd_X_m64 [| src; dst |]
 
 (* For an XMM-to-XMM register move, prefer the "load" form (reg operand is the
-   destination) when only the destination is a high register (R8-R15).  The
-   load form encodes the high register in the VEX-compatible REX.R bit,
-   allowing a 2-byte VEX prefix; the store form would need REX.B and force a
-   3-byte VEX.  Both forms are semantically identical for reg-reg moves. *)
-let regf_index = function
-  | X86_ast.XMM n | X86_ast.YMM n | X86_ast.ZMM n -> n
+   destination) when only the destination is a high register (R8-R15). The load
+   form encodes the high register in the VEX-compatible REX.R bit, allowing a
+   2-byte VEX prefix; the store form would need REX.B and force a 3-byte VEX.
+   Both forms are semantically identical for reg-reg moves. *)
+let regf_index = function X86_ast.XMM n | X86_ast.YMM n | X86_ast.ZMM n -> n
 
 let prefer_load_form (src : X86_ast.arg) (dst : X86_ast.arg) =
   match src, dst with
   | Regf s, Regf d -> regf_index d > 7 && regf_index s <= 7
-  | (Imm _ | Sym _ | Reg8L _ | Reg8H _ | Reg16 _ | Reg32 _ | Reg64 _ | Regf _
-    | Mem _ | Mem64_RIP _),
-    _ ->
+  | ( ( Imm _ | Sym _ | Reg8L _ | Reg8H _ | Reg16 _ | Reg32 _ | Reg64 _ | Regf _
+      | Mem _ | Mem64_RIP _ ),
+      _ ) ->
     false
 
 let movpd ~unaligned src dst =
@@ -3069,7 +3068,7 @@ let save_binary_sections () =
   (* Assemble every section first; defer writing until after
      [resolve_global_patches] has resolved cross-section data-directive
      references using a global view over all buffers' labels. *)
-  let assembled = ref [] in
+  let unresolved = ref [] in
   X86_proc.iter_sections (fun name instructions ->
       let sec_name = X86_proc.Section_name.to_string name in
       let buf =
@@ -3084,15 +3083,17 @@ let save_binary_sections () =
         else sec_name
       in
       let safe_name = "section_" ^ bare_name in
-      assembled := (safe_name, buf) :: !assembled);
-  X86_binary_emitter.resolve_global_patches (List.map snd !assembled);
-  List.iter
-    (fun (safe_name, buf) ->
+      unresolved := (safe_name, buf) :: !unresolved);
+  let resolved =
+    X86_binary_emitter.resolve_global_patches (List.map snd !unresolved)
+  in
+  List.iter2
+    (fun (safe_name, _) buf ->
       let bin_path = Filename.concat dir (safe_name ^ ".bin") in
       let oc = open_out_bin bin_path in
       output_string oc (X86_binary_emitter.contents buf);
       close_out oc)
-    !assembled
+    !unresolved resolved
 
 let end_assembly () =
   if not (Misc.Stdlib.List.is_empty !float_constants)

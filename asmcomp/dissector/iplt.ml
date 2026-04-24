@@ -82,7 +82,15 @@ let plt_entry_template =
         |]
     }
   in
-  let buffer = X86_binary_emitter.assemble_section X86_ast.X64 section in
+  let unresolved = X86_binary_emitter.assemble_section X86_ast.X64 section in
+  let buffer =
+    match X86_binary_emitter.resolve_global_patches [unresolved] with
+    | [b] -> b
+    | bs ->
+      Misc.fatal_errorf
+        "iplt: expected exactly one buffer to be resolve, found %d"
+        (List.length bs)
+  in
   let bytes = X86_binary_emitter.contents buffer in
   assert (String.length bytes = 8);
   bytes

@@ -104,6 +104,12 @@ type buffer = {
   mutable global_patches : global_patch list;
 }
 
+(* At the implementation level, [unresolved_buffer] and [buffer] are the
+   same record; [resolve_global_patches] acts as the identity on values
+   while refining the type at the interface boundary to prevent callers
+   from consuming unresolved buffers via [contents]/[relocations]. *)
+type unresolved_buffer = buffer
+
 type local_reloc =
   | RelocCall of string
   | RelocShortJump of string * int (* loc *)
@@ -1877,7 +1883,11 @@ let resolve_global_patches buffers =
               "x86_binary_emitter.resolve_global_patches: unsupported \
                combination of result and data size in section %s at offset %d"
               current_sec_id pos);
-      b.global_patches <- [])
+      b.global_patches <- []);
+  (* Identity at the value level; the signature refines the type from
+     [unresolved_buffer list] to [buffer list], enforcing the invariant
+     that [contents]/[relocations] are only called after resolution. *)
+  buffers
 
 let size b = Buffer.length b.buf
 
