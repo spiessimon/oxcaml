@@ -215,6 +215,61 @@ class circle r = object
   method area = 3.14159 *. r *. r
 end
 
+(* {1 Deep nesting: module -> named fn -> local module -> named fn} *)
+
+module Deep_nest = struct
+  module Layer1 = struct
+    let do_thing x =
+      let module Local_in_fn = struct
+        let[@inline never] helper y = y * 2
+        let[@inline never] combine z = helper z + z
+      end in
+      Local_in_fn.combine x
+
+    module Layer2 = struct
+      let down_we_go x =
+        (* Local module declared inside a named function inside a
+           nested module: exercises [M] / [F] / [S] interleaving in
+           the structured path. *)
+        let module Way_down = struct
+          let[@inline never] bump n = n + 1
+          let[@inline never] twice n = bump (bump n)
+        end in
+        Way_down.twice x
+    end
+  end
+end
+
+(* {1 Alternation of named and anonymous functions} *)
+
+(* Named outer -> anonymous -> named -> anonymous -> named, with
+   each layer closing over the previous. This is the corner case the
+   structured mangling has the most room to improve on: each [fun]
+   produces a separate anonymous-function path-item ([L]), and the
+   reference here pins how those currently print. *)
+module Alternating = struct
+  let[@inline never] outer_named x =
+    let[@inline never] middle_named y =
+      (fun z ->
+         let[@inline never] inner_named w =
+           (fun v -> x + y + z + w + v)
+         in
+         (inner_named z) y)
+    in
+    (fun y -> middle_named y) x
+
+  (* Same idea but the named/anonymous order is flipped, so the
+     mangling alternates [L]-[F]-[L]-[F] instead of [F]-[L]-[F]-[L]. *)
+  let[@inline never] anon_first =
+    fun x ->
+      let[@inline never] named1 y =
+        (fun z ->
+           let[@inline never] named2 w = x + y + z + w in
+           named2 z)
+      in
+      named1 x
+end
+
 (* {1 Force evaluation so the symbols are not stripped} *)
 
 let _ =
@@ -239,4 +294,8 @@ let _ =
   pt#translate 1 1;
   ignore (pt#get_x + pt#get_y);
   let c = new circle 2.0 in
-  ignore c#area
+  ignore c#area;
+  ignore (Deep_nest.Layer1.do_thing 7);
+  ignore (Deep_nest.Layer1.Layer2.down_we_go 11);
+  ignore (Alternating.outer_named 2 3);
+  ignore (Alternating.anon_first 4 5)
