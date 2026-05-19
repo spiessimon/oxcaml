@@ -19,9 +19,14 @@
 # [(error)]. Compiler-generated stamps ([_NN_NN_code], [_NN_code],
 # trailing [_NN], [PmakeblockNN], [const_blockNN], [iarrNN]) are
 # masked so the reference stays stable across builds.
-set -e
+set -eu
+set -o pipefail
 
 OBJ=${1:?"missing object file argument"}
+# The pattern only needs the flat (lowercase [caml]) prefix: stdlib
+# is built with the flat scheme, so its symbol names show up
+# flat-mangled in the relocation table regardless of the scheme used
+# to compile this test.
 EXCLUDE=${2:?"missing exclude-pattern argument"}
 
 OCAMLFILT="${ocamlsrcdir}/tools/ocamlfilt"
