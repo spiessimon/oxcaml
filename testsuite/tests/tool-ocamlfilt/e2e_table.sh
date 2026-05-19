@@ -2,10 +2,19 @@
 # Demangle every OCaml-mangled symbol in an object file with each
 # ocamlfilt format and print a column-aligned table to stdout.
 #
-# Usage: sh e2e_table.sh <obj-file>
+# Usage: sh e2e_table.sh <obj-file> <exclude-pattern>
 #
-# The table has four columns: the raw linker symbol followed by its
-# demangling under [--format flat1], [--format structured], and
+# <exclude-pattern> is an extended regex; nm lines matching it are
+# dropped before symbol extraction. Tests typically pass
+# [camlStdlib|camlCamlinternal] to drop references to stdlib --
+# their names belong to other compilation units and would make
+# this reference fragile to unrelated compiler changes. Non-
+# excluded undefined references are kept because that's how
+# cross-module inlining shows up: the caller's object holds a stub
+# for a closure that lives in the inlined callee's unit.
+#
+# The table has four columns: the raw linker symbol followed by
+# its demangling under [--format flat1], [--format structured], and
 # [--format auto]. Cells where ocamlfilt refuses the symbol show
 # [(error)]. Compiler-generated stamps ([_NN_NN_code], [_NN_code],
 # trailing [_NN], [PmakeblockNN], [const_blockNN], [iarrNN]) are
@@ -13,6 +22,8 @@
 set -e
 
 OBJ=${1:?"missing object file argument"}
+EXCLUDE=${2:?"missing exclude-pattern argument"}
+
 OCAMLFILT="${ocamlsrcdir}/tools/ocamlfilt"
 TAB="$(printf '\t')"
 
@@ -22,16 +33,11 @@ ocamlfilt_or_error () {
 
 SYMS="${test_build_directory}/e2e_table.syms"
 
-# Keep only OCaml-mangled symbols that this object defines:
-# flat ([caml] + uppercase) or structured ([_Caml] + uppercase),
-# each optionally with the macOS leading underscore. Undefined
-# references (nm type [U] or weak [u]) are dropped because their
-# names are owned by other units (stdlib, Camlinternal*, etc.),
-# not by the test source -- including them would make this
-# reference more fragile to unrelated changes in the compiler.
-nm "$OBJ" | awk '
-  $(NF - 1) != "U" && $(NF - 1) != "u" \
-    && ($NF ~ /^_?caml[A-Z]/ || $NF ~ /^_?_Caml[A-Z]/) { print $NF }
+# Drop excluded lines, then keep OCaml-mangled symbols: flat
+# ([caml] + uppercase) or structured ([_Caml] + uppercase), each
+# optionally with the macOS leading underscore.
+nm "$OBJ" | grep -Ev "$EXCLUDE" | awk '
+  $NF ~ /^_?(caml|_Caml)[A-Z]/ { print $NF }
 ' | sort -u > "$SYMS"
 
 if [ ! -s "$SYMS" ]; then

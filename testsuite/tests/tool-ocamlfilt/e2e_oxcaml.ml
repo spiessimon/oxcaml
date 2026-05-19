@@ -9,7 +9,8 @@
    check-ocamlopt.byte-output;
    output = "e2e_oxcaml.plain.table";
    script = "sh ${test_source_directory}/e2e_table.sh \
-             ${test_build_directory}/e2e_oxcaml.o";
+             ${test_build_directory}/e2e_oxcaml.o \
+             'camlStdlib|camlCamlinternal'";
    script;
    reference = "${test_source_directory}/e2e_oxcaml.plain.reference";
    check-program-output;
@@ -26,7 +27,8 @@
    check-ocamlopt.byte-output;
    output = "e2e_oxcaml.packed.table";
    script = "sh ${test_source_directory}/e2e_table.sh \
-             ${test_build_directory}/e2e_oxcaml.o";
+             ${test_build_directory}/e2e_oxcaml.o \
+             'camlStdlib|camlCamlinternal'";
    script;
    reference = "${test_source_directory}/e2e_oxcaml.packed.reference";
    check-program-output;
