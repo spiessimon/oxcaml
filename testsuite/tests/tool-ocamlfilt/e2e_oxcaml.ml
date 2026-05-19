@@ -1,23 +1,36 @@
 (* TEST
  native-compiler;
- setup-ocamlopt.byte-build-env;
- (* First step: compile normally with the structured scheme. *)
- flags = "-name-mangling-scheme structured -extension comprehensions -S -c";
- ocamlopt_byte_exit_status = "0";
- ocamlopt.byte;
- check-ocamlopt.byte-output;
- script = "sh ${test_source_directory}/e2e_oxcaml.sh plain";
- script;
- (* Second step: rebuild with -for-pack. This exercises the code path
-    that embeds the pack prefix (joined by [__]) inside the U payload
-    of the structured mangling. *)
- flags = "-name-mangling-scheme structured -extension comprehensions \
-          -for-pack Ox_pack -S -c";
- ocamlopt_byte_exit_status = "0";
- ocamlopt.byte;
- check-ocamlopt.byte-output;
- script = "sh ${test_source_directory}/e2e_oxcaml.sh packed";
- script;
+ {
+   compiler_directory_suffix = ".plain";
+   setup-ocamlopt.byte-build-env;
+   flags = "-name-mangling-scheme structured -extension comprehensions -c";
+   ocamlopt_byte_exit_status = "0";
+   ocamlopt.byte;
+   check-ocamlopt.byte-output;
+   output = "e2e_oxcaml.plain.table";
+   script = "sh ${test_source_directory}/e2e_table.sh \
+             ${test_build_directory}/e2e_oxcaml.o";
+   script;
+   reference = "${test_source_directory}/e2e_oxcaml.plain.reference";
+   check-program-output;
+ }{
+   (* Rebuild with -for-pack. Exercises the path that embeds the pack
+      prefix (joined by [__]) inside the U payload of the structured
+      mangling. *)
+   compiler_directory_suffix = ".packed";
+   setup-ocamlopt.byte-build-env;
+   flags = "-name-mangling-scheme structured -extension comprehensions \
+            -for-pack Ox_pack -c";
+   ocamlopt_byte_exit_status = "0";
+   ocamlopt.byte;
+   check-ocamlopt.byte-output;
+   output = "e2e_oxcaml.packed.table";
+   script = "sh ${test_source_directory}/e2e_table.sh \
+             ${test_build_directory}/e2e_oxcaml.o";
+   script;
+   reference = "${test_source_directory}/e2e_oxcaml.packed.reference";
+   check-program-output;
+ }
 *)
 
 (* Comprehensive exercise of OxCaml-specific constructs. The goal is

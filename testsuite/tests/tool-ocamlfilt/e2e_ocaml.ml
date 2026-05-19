@@ -3,36 +3,29 @@
  {
    compiler_directory_suffix = ".structured";
    setup-ocamlopt.byte-build-env;
-   flags = "-name-mangling-scheme structured -S -c";
+   flags = "-name-mangling-scheme structured -c";
    ocamlopt_byte_exit_status = "0";
    ocamlopt.byte;
    check-ocamlopt.byte-output;
-   script = "sh ${test_source_directory}/e2e_ocaml.sh";
+   output = "e2e_ocaml.structured.table";
+   script = "sh ${test_source_directory}/e2e_table.sh \
+             ${test_build_directory}/e2e_ocaml.o";
    script;
+   reference = "${test_source_directory}/e2e_ocaml.structured.reference";
+   check-program-output;
  }{
    compiler_directory_suffix = ".flat";
    setup-ocamlopt.byte-build-env;
-   flags = "-name-mangling-scheme flat -S -c";
+   flags = "-name-mangling-scheme flat -c";
    ocamlopt_byte_exit_status = "0";
    ocamlopt.byte;
    check-ocamlopt.byte-output;
-   script = "sh ${test_source_directory}/e2e_flat.sh";
+   output = "e2e_ocaml.flat.table";
+   script = "sh ${test_source_directory}/e2e_table.sh \
+             ${test_build_directory}/e2e_ocaml.o";
    script;
- }{
-   compiler_directory_suffix = ".auto";
-   setup-ocamlopt.byte-build-env;
-   flags = "-name-mangling-scheme structured -S -c";
-   ocamlopt_byte_exit_status = "0";
-   ocamlopt.byte;
-   check-ocamlopt.byte-output;
-   script = "sh ${test_source_directory}/e2e_auto.sh structured";
-   script;
-   flags = "-name-mangling-scheme flat -S -c";
-   ocamlopt_byte_exit_status = "0";
-   ocamlopt.byte;
-   check-ocamlopt.byte-output;
-   script = "sh ${test_source_directory}/e2e_auto.sh flat";
-   script;
+   reference = "${test_source_directory}/e2e_ocaml.flat.reference";
+   check-program-output;
  }
 *)
 
