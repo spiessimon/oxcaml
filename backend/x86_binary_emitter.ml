@@ -195,6 +195,15 @@ let local_labels = String.Tbl.create 100
 
 let forced_long_jumps = ref IntSet.empty
 
+(* When [OXCAML_BINEMIT_LOG_PASSES] is set in the environment, the binary
+   emitter prints one line per section to stderr reporting how many
+   fixed-point passes were needed for jump-size convergence. Intended for
+   aggregating statistics across a whole compiler build. *)
+let log_passes =
+  match Sys.getenv_opt "OXCAML_BINEMIT_LOG_PASSES" with
+  | Some ("1" | "true") -> true
+  | _ -> false
+
 let instr_size = ref 4
 
 let new_buffer sec =
@@ -1895,7 +1904,11 @@ and assemble_section0 arch section =
 
     if !retry then iter_assemble () else b
   in
-  iter_assemble ()
+  let result = iter_assemble () in
+  if log_passes then
+    Printf.eprintf "[binemit-passes] passes=%d section=%s\n%!"
+      !passes (Section_name.to_string section.sec_name);
+  result
 
 (* Relocations: we should compute all non-local relocations completely at the
    end. We should keep the last string/bytes couple to avoid duplication.
