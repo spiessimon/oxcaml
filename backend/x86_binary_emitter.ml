@@ -1247,7 +1247,9 @@ let emit_reloc_jump near_opcodes far_opcodes b loc symbol =
       else
         Printf.printf "%s/%i: short\n%!" symbol loc;
 *)
-      let force_far = IntSet.mem loc !forced_long_jumps in
+      let force_far =
+        (target_loc - loc > 127)
+        || IntSet.mem loc !forced_long_jumps in
       if force_far then (
         buf_opcodes b far_opcodes;
         record_local_reloc b (RelocLongJump symbol);
