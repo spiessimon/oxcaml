@@ -325,7 +325,8 @@ let save_import penv crc modname impl flags filename =
     (function
         | Rectypes -> ()
         | Alerts _ -> ()
-        | Opaque -> register_import_as_opaque penv modname)
+        | Opaque -> register_import_as_opaque penv modname
+        | Has_laws -> Subst.enable_value_substitution ())
     flags;
   Consistbl.check crc_units modname impl crc filename;
   add_import penv modname
@@ -349,7 +350,8 @@ let acknowledge_import penv ~check modname pers_sig =
             if not !Clflags.recursive_types then
               error (Need_recursive_types(modname))
         | Alerts _ -> ()
-        | Opaque -> register_import_as_opaque penv modname)
+        | Opaque -> register_import_as_opaque penv modname
+        | Has_laws -> Subst.enable_value_substitution ())
     flags;
   begin match kind, Current_unit.get_cu () with
   | Normal { cmi_impl = imported_unit }, Some current_unit ->
@@ -1145,12 +1147,13 @@ let implemented_parameter penv modname =
   | Some { pn_import = { imp_arg_for; _ }; _ } -> imp_arg_for
   | None -> None
 
-let make_cmi penv modname kind sign alerts =
+let make_cmi penv modname kind sign alerts ~has_laws =
   let flags =
     List.concat [
       if !Clflags.recursive_types then [Cmi_format.Rectypes] else [];
       if !Clflags.opaque then [Cmi_format.Opaque] else [];
       [Alerts alerts];
+      if has_laws then [Cmi_format.Has_laws] else [];
     ]
   in
   let params =
