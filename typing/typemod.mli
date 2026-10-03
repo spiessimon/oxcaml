@@ -200,7 +200,8 @@ type error =
       old_source_file: Misc.filepath;
     }
   | Duplicate_parameter_name of Global_module.Parameter_name.t
-  | Laws_not_supported
+  | Law_parameter_not_representable of type_expr * Jkind.Violation.t
+  | Law_duplicate_parameter of string
 
 exception Error of Location.t * Env.t * error
 exception Error_forward of Location.error
