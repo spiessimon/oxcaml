@@ -465,7 +465,9 @@ let poly_ cycle payload =
 Line 2, characters 17-41:
 2 |   let rec node = { payload; next = node } in
                      ^^^^^^^^^^^^^^^^^^^^^^^^
-Error: Recursive definitions of layout-polymorphic blocks are not currently supported.
+Error: This kind of expression is not allowed as right-hand side of "let rec".
+       It refers to "node", but only functions ("fun" or "function")
+       may refer to the names bound by a "let rec".
 |}]
 
 type ('a : any) pair = #('a * 'a)

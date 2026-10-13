@@ -39,12 +39,22 @@ and ubx = #{ ubx : bx; }
 
 let rec t = #{ ubx = { bx = t } }
 [%%expect{|
-val t : ubx = #{ubx = {bx = <cycle>}}
+Line 1, characters 12-33:
+1 | let rec t = #{ ubx = { bx = t } }
+                ^^^^^^^^^^^^^^^^^^^^^
+Error: This kind of expression is not allowed as right-hand side of "let rec".
+       It refers to "t", but only functions ("fun" or "function")
+       may refer to the names bound by a "let rec".
 |}]
 
 let rec t = { bx = #{ ubx = t } }
 [%%expect{|
-val t : bx = {bx = <cycle>}
+Line 1, characters 12-33:
+1 | let rec t = { bx = #{ ubx = t } }
+                ^^^^^^^^^^^^^^^^^^^^^
+Error: This kind of expression is not allowed as right-hand side of "let rec".
+       It refers to "t", but only functions ("fun" or "function")
+       may refer to the names bound by a "let rec".
 |}]
 
 type bx = { bx : bx2# }
@@ -56,12 +66,22 @@ and bx2 = { bx2 : bx; }
 
 let rec t = #{ bx2 = { bx = t } }
 [%%expect{|
-val t : bx2# = #{bx2 = {bx = <cycle>}}
+Line 1, characters 12-33:
+1 | let rec t = #{ bx2 = { bx = t } }
+                ^^^^^^^^^^^^^^^^^^^^^
+Error: This kind of expression is not allowed as right-hand side of "let rec".
+       It refers to "t", but only functions ("fun" or "function")
+       may refer to the names bound by a "let rec".
 |}]
 
 let rec t = { bx = #{ bx2 = t } }
 [%%expect{|
-val t : bx = {bx = <cycle>}
+Line 1, characters 12-33:
+1 | let rec t = { bx = #{ bx2 = t } }
+                ^^^^^^^^^^^^^^^^^^^^^
+Error: This kind of expression is not allowed as right-hand side of "let rec".
+       It refers to "t", but only functions ("fun" or "function")
+       may refer to the names bound by a "let rec".
 |}]
 
 (* The cycle-finding algorithm in genprintval does not store non-values in its
@@ -91,7 +111,9 @@ type t = #{ x : int64; }
 Line 2, characters 12-20:
 2 | let rec x = #{x = y} and y = 3L;;
                 ^^^^^^^^
-Error: This kind of expression is not allowed as right-hand side of "let rec"
+Error: This kind of expression is not allowed as right-hand side of "let rec".
+       It refers to "y", but only functions ("fun" or "function")
+       may refer to the names bound by a "let rec".
 |}];;
 
 type t = {x: int64}
@@ -101,7 +123,9 @@ type t = { x : int64; }
 Line 2, characters 12-20:
 2 | let rec x = #{x = y} and y = 3L;;
                 ^^^^^^^^
-Error: This kind of expression is not allowed as right-hand side of "let rec"
+Error: This kind of expression is not allowed as right-hand side of "let rec".
+       It refers to "y", but only functions ("fun" or "function")
+       may refer to the names bound by a "let rec".
 |}];;
 
 (* This test is not allowed if 'a' is unboxed, but should be accepted
@@ -118,7 +142,15 @@ let rec a =
 [%%expect{|
 type a = { a : b; }
 and b = X of a | Y
-val a : a = {a = X <cycle>}
+Lines 5-9, characters 2-10:
+5 | ..{a=
+6 |     (if Sys.opaque_identity true then
+7 |        X a
+8 |      else
+9 |        Y)}..
+Error: This kind of expression is not allowed as right-hand side of "let rec".
+       It refers to "a", but only functions ("fun" or "function")
+       may refer to the names bound by a "let rec".
 |}];;
 
 type a = #{ a: b }
@@ -139,7 +171,9 @@ Lines 5-9, characters 2-10:
 7 |        X a
 8 |      else
 9 |        Y)}..
-Error: This kind of expression is not allowed as right-hand side of "let rec"
+Error: This kind of expression is not allowed as right-hand side of "let rec".
+       It refers to "a", but only functions ("fun" or "function")
+       may refer to the names bound by a "let rec".
 |}];;
 
 type a = { a: b }
@@ -160,5 +194,7 @@ Lines 5-9, characters 2-10:
 7 |        X a
 8 |      else
 9 |        Y)}..
-Error: This kind of expression is not allowed as right-hand side of "let rec"
+Error: This kind of expression is not allowed as right-hand side of "let rec".
+       It refers to "a", but only functions ("fun" or "function")
+       may refer to the names bound by a "let rec".
 |}];;

@@ -84,10 +84,14 @@ let rec iter_interval f l (start, stop) =
              iter_interval f ll (start-1, stop-1)
 ;;
 
-let rec hamming = lazy (Cons (nn1, merge cmp ham2 (merge cmp ham3 ham5)))
-    and ham2 = lazy (force (map x2 hamming))
-    and ham3 = lazy (force (map x3 hamming))
-    and ham5 = lazy (force (map x5 hamming))
-;;
+(* [hamming] refers to itself through [ham2], [ham3] and [ham5]; the knot is
+   tied through a reference. *)
+let hamming_ref = ref None;;
+let hamming_lazy () = Option.get !hamming_ref;;
+let ham2 = lazy (force (map x2 (hamming_lazy ())));;
+let ham3 = lazy (force (map x3 (hamming_lazy ())));;
+let ham5 = lazy (force (map x5 (hamming_lazy ())));;
+let hamming = lazy (Cons (nn1, merge cmp ham2 (merge cmp ham3 ham5)));;
+hamming_ref := Some hamming;;
 
 iter_interval pr hamming (88000, 88100);;

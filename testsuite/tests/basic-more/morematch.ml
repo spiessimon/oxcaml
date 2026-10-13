@@ -954,7 +954,7 @@ type  habert_a=
   | A of habert_c
   | B of habert_c
 
-and habert_c= {lvar:int; lassoc: habert_c;lnb:int}
+and habert_c= {lvar:int; mutable lassoc: habert_c;lnb:int}
 
 
 let habert=function
@@ -963,8 +963,8 @@ let habert=function
   | _ -> 3
 ;;
 
-let rec ex0 = {lvar=0 ; lnb=0 ; lassoc=ex1}
-and ex1 = {lvar=1 ; lnb=1 ; lassoc=ex0} in
+let ex0 = {lvar=0 ; lnb=0 ; lassoc=Obj.magic ()} in
+let ex1 = {lvar=1 ; lnb=1 ; lassoc=ex0} in ex0.lassoc <- ex1;
 
 test "habert" habert (A ex0) 1 ;
 test "habert" habert (B ex0) 1 ;

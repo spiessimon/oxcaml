@@ -475,11 +475,13 @@ let rec p13 =
   end : F)
 [%%expect{|
 module type F = functor (X : sig end @ static) -> sig val f : unit -> int end
-Lines 7-9, characters 18-5:
-7 | ..................(X : sig end @ static) -> struct
+Lines 7-9, characters 2-10:
+7 | ..(module functor (X : sig end @ static) -> struct
 8 |     let f () = ignore p13; 1
-9 |   end.....
-Error: Recursive static functors are not supported
+9 |   end : F)
+Error: This kind of expression is not allowed as right-hand side of "let rec".
+       It refers to "p13", but only functions ("fun" or "function")
+       may refer to the names bound by a "let rec".
 |}]
 
 (* A static functor taking another static functor as its argument *)

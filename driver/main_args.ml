@@ -952,10 +952,6 @@ let mk_dblambda f =
   "-dblambda", Arg.Unit f,
   " Dump Blambda terms before bytecode generation"
 
-let mk_dletreclambda f =
-  "-dletreclambda", Arg.Unit f,
-  " Dump Lambda terms going into Value_rec_compiler"
-
 let mk_drawclambda f =
   "-drawclambda", Arg.Unit f, " (undocumented)"
 
@@ -1258,7 +1254,6 @@ module type Core_options = sig
   val _drawlambda : unit -> unit
   val _dlambda : unit -> unit
   val _dblambda : unit -> unit
-  val _dletreclambda : unit -> unit
 
 end
 
@@ -1666,7 +1661,6 @@ struct
     mk_dslambda F._dslambda;
     mk_dlambda F._dlambda;
     mk_dblambda F._dblambda;
-    mk_dletreclambda F._dletreclambda;
     mk_dinstr F._dinstr;
     mk_dcamlprimc F._dcamlprimc;
     mk_dtimings F._dtimings;
@@ -1777,7 +1771,6 @@ struct
     mk_drawlambda F._drawlambda;
     mk_dlambda F._dlambda;
     mk_dblambda F._dblambda;
-    mk_dletreclambda F._dletreclambda;
     mk_dinstr F._dinstr;
     mk_debug_ocaml F._debug_ocaml;
 
@@ -1964,7 +1957,6 @@ struct
     mk_drawlambda F._drawlambda;
     mk_dlambda F._dlambda;
     mk_dblambda F._dblambda;
-    mk_dletreclambda F._dletreclambda;
     mk_drawclambda F._drawclambda;
     mk_dclambda F._dclambda;
     mk_dcmm_invariants F._dcmm_invariants;
@@ -2132,7 +2124,6 @@ module Make_opttop_options (F : Opttop_options) = struct
     mk_drawlambda F._drawlambda;
     mk_dlambda F._dlambda;
     mk_dblambda F._dblambda;
-    mk_dletreclambda F._dletreclambda;
     mk_drawclambda F._drawclambda;
     mk_dclambda F._dclambda;
     mk_dcmm_invariants F._dcmm_invariants;
@@ -2282,7 +2273,6 @@ struct
     mk_drawlambda F._drawlambda;
     mk_dlambda F._dlambda;
     mk_dblambda F._dblambda;
-    mk_dletreclambda F._dletreclambda;
     mk_dtimings F._dtimings;
     mk_dtimings_precision F._dtimings_precision;
     mk_dcounters F._dcounters;
@@ -2516,7 +2506,6 @@ module Default = struct
     let _color = Misc.set_or_ignore color_reader.parse color
     let _dlambda = set dump_lambda
     let _dblambda = set dump_blambda
-    let _dletreclambda = set dump_letreclambda
     let _dparsetree = set dump_parsetree
     let _dtlambda = set dump_tlambda
     let _dslambda = set dump_slambda

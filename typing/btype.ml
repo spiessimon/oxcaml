@@ -125,11 +125,17 @@ let lowest_level = Ident.lowest_scope
    the only function returning the contents of a pool is [with_new_pool],
    so that the initial pool can be added to, but never read from. *)
 
-type pool = {level: int; mutable pool: transient_expr list; next: pool}
+type pool =
+  {level: int; mutable pool: transient_expr list; mutable next: pool}
 (* To avoid an indirection we choose to add a dummy level at the end of
    the list. It will never be accessed, as [pool_of_level] is always called
    with [level >= 0]. *)
-let rec dummy = {level = max_int; pool = []; next = dummy}
+let dummy =
+  (* The dummy pool is its own successor; the placeholder is overwritten
+     immediately. *)
+  let pool = {level = max_int; pool = []; next = Obj.magic ()} in
+  pool.next <- pool;
+  pool
 let pool_stack = s_table (fun () -> {level = 0; pool = []; next = dummy}) ()
 
 (* Lookup in the stack is linear, but the depth is the number of nested

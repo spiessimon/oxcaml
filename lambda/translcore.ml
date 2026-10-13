@@ -2520,9 +2520,32 @@ and transl_let ~scopes ~return_layout ?(add_regions=false) ?(in_structure=false)
         let def =
           if add_regions then maybe_region_layout vb_layout def else def
         in
-        ( id, id_duid, rkind, def ) in
-      let lam_bds = List.map2 transl_case pat_expr_list idlist in
-      fun body -> Value_rec_compiler.compile_letrec lam_bds body
+        match (rkind : Value_rec_types.recursive_binding_kind), def with
+        | Recursive_function, Lfunction def ->
+          Either.Left { id; debug_uid = id_duid; def }
+        | Recursive_function, _ ->
+          Misc.fatal_errorf
+            "Translcore.transl_let: recursive definition of %a is not a \
+             function:@ %a"
+            Ident.print id Printlambda.lambda def
+        | Not_recursive, _ -> Either.Right (id, id_duid, vb_layout, def)
+      in
+      (* [Value_rec_check] guarantees that the non-function bindings do not
+         refer to the group, so they are evaluated first, in order, followed
+         by the mutually recursive functions. *)
+      let functions, non_recursive =
+        List.partition_map Fun.id (List.map2 transl_case pat_expr_list idlist)
+      in
+      fun body ->
+        let body =
+          match functions with
+          | [] -> body
+          | _ :: _ -> Lletrec (functions, body)
+        in
+        List.fold_right
+          (fun (id, id_duid, layout, def) body ->
+             Llet (Strict, layout, id, id_duid, def, body))
+          non_recursive body
 
 and transl_letmutable ~scopes ~return_layout
       {vb_pat=pat; vb_expr=expr; vb_attributes=attr; vb_loc; vb_sort} body =

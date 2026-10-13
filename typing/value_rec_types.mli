@@ -12,17 +12,14 @@
 (*                                                                        *)
 (**************************************************************************)
 
-(** Types related to the compilation of value let-recs (non-functional
-     recursive definitions) *)
+(** Types related to the compilation of recursive value bindings *)
 
-(** The kind of recursive bindings, as computed by
-    [Value_rec_check.classify_expression] *)
+(** The kind of a binding in a [let rec] group, as computed by
+    [Value_rec_check.classify_recursive_binding]. *)
 type recursive_binding_kind =
-| Static
-  (** Bindings for which some kind of pre-allocation scheme is possible.
-      The expression is allowed to be recursive, as long as its definition does
-      not inspect recursively defined values.
-      See [Value_rec_compiler] for more details on the compilation scheme. *)
-| Dynamic
-  (** Bindings for which pre-allocation is not possible.
-      The expression is not allowed to refer to any recursive variable. *)
+| Recursive_function
+  (** A syntactic function. It may refer to the other bindings of the group
+      and is compiled as part of a [Lletrec]. *)
+| Not_recursive
+  (** A binding that does not refer to any binding of the group. It is
+      compiled as a regular let-binding, evaluated before the functions. *)

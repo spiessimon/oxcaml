@@ -336,7 +336,6 @@
   slambdaeval
   slambdaident
   switch
-  value_rec_compiler
   translmode
   transl_comprehension_utils
   transl_array_comprehension

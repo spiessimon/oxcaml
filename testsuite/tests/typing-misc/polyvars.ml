@@ -228,8 +228,12 @@ val x : ([> `X ] as '_weak1) -> unit = <fun>
 
 let x = let rec x = `X (`Y (fun y -> x = y)) in !(ref x)
 [%%expect {|
-val x : [> `X of [> `Y of '_weak2 -> bool ] as '_weak3 ] as '_weak2 =
-  `X (`Y <fun>)
+Line 1, characters 20-44:
+1 | let x = let rec x = `X (`Y (fun y -> x = y)) in !(ref x)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^
+Error: This kind of expression is not allowed as right-hand side of "let rec".
+       It refers to "x", but only functions ("fun" or "function")
+       may refer to the names bound by a "let rec".
 |}]
 
 (** Code coverage for [unify_row_field] errors *)
