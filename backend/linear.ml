@@ -164,24 +164,18 @@ type fundecl =
 
 (* The "end" instruction *)
 
-(* [end_instr] is its own successor; the placeholder is overwritten
-   immediately. *)
-let end_instr =
-  let instr =
-    { desc = Lend;
-      next = Obj.magic ();
-      arg = [||];
-      res = [||];
-      dbg = Debuginfo.none;
-      fdo = Fdo_info.none;
-      live = Reg.Set.empty;
-      available_before = Unreachable;
-      available_across = Unreachable;
-      phantom_available_before = None
-    }
-  in
-  instr.next <- instr;
-  instr
+let rec end_instr =
+  { desc = Lend;
+    next = end_instr;
+    arg = [||];
+    res = [||];
+    dbg = Debuginfo.none;
+    fdo = Fdo_info.none;
+    live = Reg.Set.empty;
+    available_before = Unreachable;
+    available_across = Unreachable;
+    phantom_available_before = None
+  }
 
 (* Cons an instruction (live, debug empty) *)
 

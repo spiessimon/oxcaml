@@ -62,14 +62,9 @@ module Make (Slot : Lru_slot) :
 
   let create ~capacity =
     assert (capacity > 0);
-    (* The sentinel is its own neighbour; the placeholders are overwritten
-       immediately. *)
-    let sentinel =
-      { previous = Obj.magic (); next = Obj.magic (); data = None;
-        cached_data = None }
+    let rec sentinel =
+      { previous = sentinel; next = sentinel; data = None; cached_data = None }
     in
-    sentinel.previous <- sentinel;
-    sentinel.next <- sentinel;
     { remaining_slots = capacity; sentinel }
 
   let insert_after ~slot ~to_insert =

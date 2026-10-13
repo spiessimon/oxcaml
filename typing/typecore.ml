@@ -5640,8 +5640,8 @@ let annotate_recursive_bindings env valbinds =
   List.map
     (fun {vb_pat; vb_expr; vb_rec_kind = _; vb_sort; vb_attributes; vb_loc} ->
        match Value_rec_check.classify_recursive_binding ids vb_expr with
-       | Error id ->
-         raise(Error(vb_expr.exp_loc, env, Illegal_letrec_expr id))
+       | Error (loc, id) ->
+         raise(Error(loc, env, Illegal_letrec_expr id))
        | Ok vb_rec_kind ->
          { vb_pat; vb_expr; vb_rec_kind; vb_sort; vb_attributes; vb_loc})
     valbinds
@@ -13801,12 +13801,11 @@ let report_error ~loc env =
   | Illegal_letrec_expr id ->
       Location.errorf ~loc
         "This kind of expression is not allowed as right-hand side of %a.@ \
-         It refers to %a,@ but only functions (%a or %a)@ may refer to the \
-         names bound by a %a."
+         It refers to %a,@ but the names bound by a %a@ may only be used@ \
+         by the functions it binds@ or, through constructors,@ in the \
+         mutable fields@ of the records it binds."
         Style.inline_code "let rec"
         Style.inline_code (Ident.name id)
-        Style.inline_code "fun"
-        Style.inline_code "function"
         Style.inline_code "let rec"
   | Illegal_class_expr id ->
       Location.errorf ~loc

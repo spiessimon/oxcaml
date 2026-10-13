@@ -70,12 +70,7 @@ type \#mutable = { mutable \#mutable : \#mutable }
 let rec \#rec = { \#mutable = \#rec }
 [%%expect{|
 type \#mutable = { mutable \#mutable : \#mutable; }
-Line 2, characters 16-37:
-2 | let rec \#rec = { \#mutable = \#rec }
-                    ^^^^^^^^^^^^^^^^^^^^^
-Error: This kind of expression is not allowed as right-hand side of "let rec".
-       It refers to "rec", but only functions ("fun" or "function")
-       may refer to the names bound by a "let rec".
+val \#rec : \#mutable = {\#mutable = <cycle>}
 |}]
 
 type \#and = ..

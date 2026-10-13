@@ -1508,6 +1508,10 @@ and value_binding rec_flag i ppf x =
   | Nonrecursive, _ -> line i ppf "<def>\n"
   | Recursive, Recursive_function -> line i ppf "<def_rec>\n"
   | Recursive, Not_recursive -> line i ppf "<def_rec_nonrec>\n"
+  | Recursive, Recursive_record patched ->
+    line i ppf "<def_rec_record %a>\n"
+      (Format.pp_print_list ~pp_sep:Format.pp_print_space Format.pp_print_int)
+      patched
   end;
   attributes (i+1) ppf x.vb_attributes;
   pattern (i+1) ppf x.vb_pat;

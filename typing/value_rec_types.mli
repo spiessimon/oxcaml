@@ -23,3 +23,8 @@ type recursive_binding_kind =
 | Not_recursive
   (** A binding that does not refer to any binding of the group. It is
       compiled as a regular let-binding, evaluated before the functions. *)
+| Recursive_record of int list
+  (** A record literal, possibly the inline record of a constructor, whose
+      fields at the given positions are mutable and refer to the group. The
+      record is allocated before the functions with placeholders in these
+      fields, which are assigned once the whole group is defined. *)

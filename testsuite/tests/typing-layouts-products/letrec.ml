@@ -43,18 +43,20 @@ Line 1, characters 12-33:
 1 | let rec t = #{ ubx = { bx = t } }
                 ^^^^^^^^^^^^^^^^^^^^^
 Error: This kind of expression is not allowed as right-hand side of "let rec".
-       It refers to "t", but only functions ("fun" or "function")
-       may refer to the names bound by a "let rec".
+       It refers to "t", but the names bound by a "let rec" may only be used
+       by the functions it binds or, through constructors,
+       in the mutable fields of the records it binds.
 |}]
 
 let rec t = { bx = #{ ubx = t } }
 [%%expect{|
-Line 1, characters 12-33:
+Line 1, characters 19-31:
 1 | let rec t = { bx = #{ ubx = t } }
-                ^^^^^^^^^^^^^^^^^^^^^
+                       ^^^^^^^^^^^^
 Error: This kind of expression is not allowed as right-hand side of "let rec".
-       It refers to "t", but only functions ("fun" or "function")
-       may refer to the names bound by a "let rec".
+       It refers to "t", but the names bound by a "let rec" may only be used
+       by the functions it binds or, through constructors,
+       in the mutable fields of the records it binds.
 |}]
 
 type bx = { bx : bx2# }
@@ -70,18 +72,20 @@ Line 1, characters 12-33:
 1 | let rec t = #{ bx2 = { bx = t } }
                 ^^^^^^^^^^^^^^^^^^^^^
 Error: This kind of expression is not allowed as right-hand side of "let rec".
-       It refers to "t", but only functions ("fun" or "function")
-       may refer to the names bound by a "let rec".
+       It refers to "t", but the names bound by a "let rec" may only be used
+       by the functions it binds or, through constructors,
+       in the mutable fields of the records it binds.
 |}]
 
 let rec t = { bx = #{ bx2 = t } }
 [%%expect{|
-Line 1, characters 12-33:
+Line 1, characters 19-31:
 1 | let rec t = { bx = #{ bx2 = t } }
-                ^^^^^^^^^^^^^^^^^^^^^
+                       ^^^^^^^^^^^^
 Error: This kind of expression is not allowed as right-hand side of "let rec".
-       It refers to "t", but only functions ("fun" or "function")
-       may refer to the names bound by a "let rec".
+       It refers to "t", but the names bound by a "let rec" may only be used
+       by the functions it binds or, through constructors,
+       in the mutable fields of the records it binds.
 |}]
 
 (* The cycle-finding algorithm in genprintval does not store non-values in its
@@ -112,8 +116,9 @@ Line 2, characters 12-20:
 2 | let rec x = #{x = y} and y = 3L;;
                 ^^^^^^^^
 Error: This kind of expression is not allowed as right-hand side of "let rec".
-       It refers to "y", but only functions ("fun" or "function")
-       may refer to the names bound by a "let rec".
+       It refers to "y", but the names bound by a "let rec" may only be used
+       by the functions it binds or, through constructors,
+       in the mutable fields of the records it binds.
 |}];;
 
 type t = {x: int64}
@@ -124,8 +129,9 @@ Line 2, characters 12-20:
 2 | let rec x = #{x = y} and y = 3L;;
                 ^^^^^^^^
 Error: This kind of expression is not allowed as right-hand side of "let rec".
-       It refers to "y", but only functions ("fun" or "function")
-       may refer to the names bound by a "let rec".
+       It refers to "y", but the names bound by a "let rec" may only be used
+       by the functions it binds or, through constructors,
+       in the mutable fields of the records it binds.
 |}];;
 
 (* This test is not allowed if 'a' is unboxed, but should be accepted
@@ -142,15 +148,15 @@ let rec a =
 [%%expect{|
 type a = { a : b; }
 and b = X of a | Y
-Lines 5-9, characters 2-10:
-5 | ..{a=
-6 |     (if Sys.opaque_identity true then
+Lines 6-9, characters 4-9:
+6 | ....(if Sys.opaque_identity true then
 7 |        X a
 8 |      else
-9 |        Y)}..
+9 |        Y)...
 Error: This kind of expression is not allowed as right-hand side of "let rec".
-       It refers to "a", but only functions ("fun" or "function")
-       may refer to the names bound by a "let rec".
+       It refers to "a", but the names bound by a "let rec" may only be used
+       by the functions it binds or, through constructors,
+       in the mutable fields of the records it binds.
 |}];;
 
 type a = #{ a: b }
@@ -172,8 +178,9 @@ Lines 5-9, characters 2-10:
 8 |      else
 9 |        Y)}..
 Error: This kind of expression is not allowed as right-hand side of "let rec".
-       It refers to "a", but only functions ("fun" or "function")
-       may refer to the names bound by a "let rec".
+       It refers to "a", but the names bound by a "let rec" may only be used
+       by the functions it binds or, through constructors,
+       in the mutable fields of the records it binds.
 |}];;
 
 type a = { a: b }
@@ -195,6 +202,7 @@ Lines 5-9, characters 2-10:
 8 |      else
 9 |        Y)}..
 Error: This kind of expression is not allowed as right-hand side of "let rec".
-       It refers to "a", but only functions ("fun" or "function")
-       may refer to the names bound by a "let rec".
+       It refers to "a", but the names bound by a "let rec" may only be used
+       by the functions it binds or, through constructors,
+       in the mutable fields of the records it binds.
 |}];;

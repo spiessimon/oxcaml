@@ -60,8 +60,9 @@ Line 2, characters 8-33:
 2 | and g = let h = f in fun x -> h x;;
             ^^^^^^^^^^^^^^^^^^^^^^^^^
 Error: This kind of expression is not allowed as right-hand side of "let rec".
-       It refers to "f", but only functions ("fun" or "function")
-       may refer to the names bound by a "let rec".
+       It refers to "f", but the names bound by a "let rec" may only be used
+       by the functions it binds or, through constructors,
+       in the mutable fields of the records it binds.
 |}];;
 
 (* Non-function bindings may not refer to the recursive group: no cyclic
@@ -73,8 +74,9 @@ Line 1, characters 12-18:
 1 | let rec x = 1 :: x;;
                 ^^^^^^
 Error: This kind of expression is not allowed as right-hand side of "let rec".
-       It refers to "x", but only functions ("fun" or "function")
-       may refer to the names bound by a "let rec".
+       It refers to "x", but the names bound by a "let rec" may only be used
+       by the functions it binds or, through constructors,
+       in the mutable fields of the records it binds.
 |}];;
 
 type tup = T of tup * int
@@ -85,8 +87,9 @@ Line 2, characters 12-20:
 2 | let rec x = T (x, 0);;
                 ^^^^^^^^
 Error: This kind of expression is not allowed as right-hand side of "let rec".
-       It refers to "x", but only functions ("fun" or "function")
-       may refer to the names bound by a "let rec".
+       It refers to "x", but the names bound by a "let rec" may only be used
+       by the functions it binds or, through constructors,
+       in the mutable fields of the records it binds.
 |}];;
 
 type 'a stream = Cons of 'a * 'a stream
@@ -97,8 +100,9 @@ Line 2, characters 12-23:
 2 | let rec s = Cons (1, s);;
                 ^^^^^^^^^^^
 Error: This kind of expression is not allowed as right-hand side of "let rec".
-       It refers to "s", but only functions ("fun" or "function")
-       may refer to the names bound by a "let rec".
+       It refers to "s", but the names bound by a "let rec" may only be used
+       by the functions it binds or, through constructors,
+       in the mutable fields of the records it binds.
 |}];;
 
 type tree = Node of tree array
@@ -109,20 +113,22 @@ Line 2, characters 12-24:
 2 | let rec t = Node [| t |];;
                 ^^^^^^^^^^^^
 Error: This kind of expression is not allowed as right-hand side of "let rec".
-       It refers to "t", but only functions ("fun" or "function")
-       may refer to the names bound by a "let rec".
+       It refers to "t", but the names bound by a "let rec" may only be used
+       by the functions it binds or, through constructors,
+       in the mutable fields of the records it binds.
 |}];;
 
 type t = { f : unit -> t }
 let rec r = { f = (fun () -> r) };;
 [%%expect{|
 type t = { f : unit -> t; }
-Line 2, characters 12-33:
+Line 2, characters 18-31:
 2 | let rec r = { f = (fun () -> r) };;
-                ^^^^^^^^^^^^^^^^^^^^^
+                      ^^^^^^^^^^^^^
 Error: This kind of expression is not allowed as right-hand side of "let rec".
-       It refers to "r", but only functions ("fun" or "function")
-       may refer to the names bound by a "let rec".
+       It refers to "r", but the names bound by a "let rec" may only be used
+       by the functions it binds or, through constructors,
+       in the mutable fields of the records it binds.
 |}];;
 
 let rec x = lazy (Lazy.force x);;
@@ -131,8 +137,9 @@ Line 1, characters 12-31:
 1 | let rec x = lazy (Lazy.force x);;
                 ^^^^^^^^^^^^^^^^^^^
 Error: This kind of expression is not allowed as right-hand side of "let rec".
-       It refers to "x", but only functions ("fun" or "function")
-       may refer to the names bound by a "let rec".
+       It refers to "x", but the names bound by a "let rec" may only be used
+       by the functions it binds or, through constructors,
+       in the mutable fields of the records it binds.
 |}];;
 
 let rec x = (x; ());;
@@ -141,8 +148,9 @@ Line 1, characters 12-19:
 1 | let rec x = (x; ());;
                 ^^^^^^^
 Error: This kind of expression is not allowed as right-hand side of "let rec".
-       It refers to "x", but only functions ("fun" or "function")
-       may refer to the names bound by a "let rec".
+       It refers to "x", but the names bound by a "let rec" may only be used
+       by the functions it binds or, through constructors,
+       in the mutable fields of the records it binds.
 |}];;
 
 let rec x = let _ = x in 0;;
@@ -151,8 +159,9 @@ Line 1, characters 12-26:
 1 | let rec x = let _ = x in 0;;
                 ^^^^^^^^^^^^^^
 Error: This kind of expression is not allowed as right-hand side of "let rec".
-       It refers to "x", but only functions ("fun" or "function")
-       may refer to the names bound by a "let rec".
+       It refers to "x", but the names bound by a "let rec" may only be used
+       by the functions it binds or, through constructors,
+       in the mutable fields of the records it binds.
 |}];;
 
 type cell = C of cell ref
@@ -163,8 +172,9 @@ Line 2, characters 12-21:
 2 | let rec c = C (ref c);;
                 ^^^^^^^^^
 Error: This kind of expression is not allowed as right-hand side of "let rec".
-       It refers to "c", but only functions ("fun" or "function")
-       may refer to the names bound by a "let rec".
+       It refers to "c", but the names bound by a "let rec" may only be used
+       by the functions it binds or, through constructors,
+       in the mutable fields of the records it binds.
 |}];;
 
 let rec x = let module M = struct let y = x end in M.y;;
@@ -173,8 +183,9 @@ Line 1, characters 12-54:
 1 | let rec x = let module M = struct let y = x end in M.y;;
                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Error: This kind of expression is not allowed as right-hand side of "let rec".
-       It refers to "x", but only functions ("fun" or "function")
-       may refer to the names bound by a "let rec".
+       It refers to "x", but the names bound by a "let rec" may only be used
+       by the functions it binds or, through constructors,
+       in the mutable fields of the records it binds.
 |}];;
 
 module type S = sig val y : int end
@@ -185,8 +196,9 @@ Line 2, characters 12-55:
 2 | let rec x = (module struct let y = ignore x; 1 end : S);;
                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Error: This kind of expression is not allowed as right-hand side of "let rec".
-       It refers to "x", but only functions ("fun" or "function")
-       may refer to the names bound by a "let rec".
+       It refers to "x", but the names bound by a "let rec" may only be used
+       by the functions it binds or, through constructors,
+       in the mutable fields of the records it binds.
 |}];;
 
 type a = A of b * int
@@ -200,8 +212,9 @@ Line 3, characters 12-20:
 3 | let rec x = A (y, 0)
                 ^^^^^^^^
 Error: This kind of expression is not allowed as right-hand side of "let rec".
-       It refers to "y", but only functions ("fun" or "function")
-       may refer to the names bound by a "let rec".
+       It refers to "y", but the names bound by a "let rec" may only be used
+       by the functions it binds or, through constructors,
+       in the mutable fields of the records it binds.
 |}];;
 
 let rec x = object method m = x end;;
@@ -210,8 +223,9 @@ Line 1, characters 12-35:
 1 | let rec x = object method m = x end;;
                 ^^^^^^^^^^^^^^^^^^^^^^^
 Error: This kind of expression is not allowed as right-hand side of "let rec".
-       It refers to "x", but only functions ("fun" or "function")
-       may refer to the names bound by a "let rec".
+       It refers to "x", but the names bound by a "let rec" may only be used
+       by the functions it binds or, through constructors,
+       in the mutable fields of the records it binds.
 |}];;
 
 (* Functions that are not syntactically functions are rejected too. *)
@@ -222,8 +236,9 @@ Line 1, characters 12-30:
 1 | let rec f = let g x = f x in g;;
                 ^^^^^^^^^^^^^^^^^^
 Error: This kind of expression is not allowed as right-hand side of "let rec".
-       It refers to "f", but only functions ("fun" or "function")
-       may refer to the names bound by a "let rec".
+       It refers to "f", but the names bound by a "let rec" may only be used
+       by the functions it binds or, through constructors,
+       in the mutable fields of the records it binds.
 |}];;
 
 let rec f = let count = ref 0 in fun x -> incr count; f x;;
@@ -232,8 +247,9 @@ Line 1, characters 12-57:
 1 | let rec f = let count = ref 0 in fun x -> incr count; f x;;
                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Error: This kind of expression is not allowed as right-hand side of "let rec".
-       It refers to "f", but only functions ("fun" or "function")
-       may refer to the names bound by a "let rec".
+       It refers to "f", but the names bound by a "let rec" may only be used
+       by the functions it binds or, through constructors,
+       in the mutable fields of the records it binds.
 |}];;
 
 let rec f x = x
@@ -243,8 +259,9 @@ Line 2, characters 8-9:
 2 | and g = f;;
             ^
 Error: This kind of expression is not allowed as right-hand side of "let rec".
-       It refers to "f", but only functions ("fun" or "function")
-       may refer to the names bound by a "let rec".
+       It refers to "f", but the names bound by a "let rec" may only be used
+       by the functions it binds or, through constructors,
+       in the mutable fields of the records it binds.
 |}];;
 
 let rec f = fun x -> x
@@ -254,8 +271,9 @@ Line 2, characters 8-11:
 2 | and y = f 0;;
             ^^^
 Error: This kind of expression is not allowed as right-hand side of "let rec".
-       It refers to "f", but only functions ("fun" or "function")
-       may refer to the names bound by a "let rec".
+       It refers to "f", but the names bound by a "let rec" may only be used
+       by the functions it binds or, through constructors,
+       in the mutable fields of the records it binds.
 |}];;
 
 let rec f = Fun.id (fun x -> f x);;
@@ -264,8 +282,9 @@ Line 1, characters 12-33:
 1 | let rec f = Fun.id (fun x -> f x);;
                 ^^^^^^^^^^^^^^^^^^^^^
 Error: This kind of expression is not allowed as right-hand side of "let rec".
-       It refers to "f", but only functions ("fun" or "function")
-       may refer to the names bound by a "let rec".
+       It refers to "f", but the names bound by a "let rec" may only be used
+       by the functions it binds or, through constructors,
+       in the mutable fields of the records it binds.
 |}];;
 
 let rec f = (fun x -> x) |> fun g -> g;;
@@ -283,8 +302,9 @@ Line 2, characters 12-44:
 2 | let rec f = let* x = 1 in fun () -> x + f ();;
                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Error: This kind of expression is not allowed as right-hand side of "let rec".
-       It refers to "f", but only functions ("fun" or "function")
-       may refer to the names bound by a "let rec".
+       It refers to "f", but the names bound by a "let rec" may only be used
+       by the functions it binds or, through constructors,
+       in the mutable fields of the records it binds.
 |}];;
 
 let rec ( let* ) x f = f x
@@ -294,8 +314,9 @@ Line 2, characters 8-23:
 2 | and y = let* x = 1 in x;;
             ^^^^^^^^^^^^^^^
 Error: This kind of expression is not allowed as right-hand side of "let rec".
-       It refers to "let*", but only functions ("fun" or "function")
-       may refer to the names bound by a "let rec".
+       It refers to "let*", but the names bound by a "let rec" may only be used
+       by the functions it binds or, through constructors,
+       in the mutable fields of the records it binds.
 |}];;
 
 (* Recursive bindings in classes. *)
@@ -311,6 +332,7 @@ Line 1, characters 22-28:
 1 | class c = let rec x = 1 :: x in object method m = x end;;
                           ^^^^^^
 Error: This kind of expression is not allowed as right-hand side of "let rec".
-       It refers to "x", but only functions ("fun" or "function")
-       may refer to the names bound by a "let rec".
+       It refers to "x", but the names bound by a "let rec" may only be used
+       by the functions it binds or, through constructors,
+       in the mutable fields of the records it binds.
 |}];;

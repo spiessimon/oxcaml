@@ -18,21 +18,26 @@
 
 (** Static checking of recursive declarations.
 
-    A [let rec] only defines functions. In a group
+    The names bound by a [let rec] may only be used by the functions it
+    binds, or in the mutable fields of the records it binds. In a group
     {[
       let rec x1 = e1 and ... and xn = en
     ]}
-    each right-hand side [ei] must either be a syntactic function ([fun] or
-    [function]), which may refer freely to [x1 ... xn] because those
-    references are only evaluated when the function is called, or not
-    mention any of [x1 ... xn] at all, in which case it is an ordinary
-    definition that merely shares the [let rec] with the functions.
+    each right-hand side [ei] is thus one of:
+    - a syntactic function ([fun] or [function]), whose body may refer
+      freely to [x1 ... xn] because it is only evaluated when the function
+      is called;
+    - a record literal, possibly the inline record of a constructor, whose
+      fields referring to [x1 ... xn] are mutable constructions (see
+      [construction_iterator]). Such a record is allocated with placeholders
+      in these fields, which are assigned once the whole group is defined;
+    - an expression that does not mention [x1 ... xn] at all, which is an
+      ordinary definition that merely shares the [let rec] with the others.
 
-    Recursive non-function values such as [let rec xs = 0 :: xs] or
-    [let rec r = { f = fun () -> r }] are rejected: no cyclic data can be
-    created without mutation, and every [let rec] is compiled as ordinary
-    let-bindings followed by a single recursive definition of closures (see
-    [Translcore.transl_let]).
+    Hence every cycle in the data created by a [let rec] goes through a
+    mutable field: no cyclic data is created without mutation. Definitions
+    such as [let rec xs = 0 :: xs] or [let rec r = { f = fun () -> r }] are
+    rejected. See [Translcore.transl_let] for the compilation scheme.
 
     Recursive class definitions follow the same principle: the let-bindings
     in the spine of a class expression are evaluated when the class is
@@ -92,15 +97,76 @@ let find_reference iterator traverse =
   | () -> None
   | exception Found id -> Some id
 
+let find_value_reference ids e =
+  let iterator = value_reference_iterator ids in
+  find_reference iterator (fun (it : Tast_iterator.iterator) -> it.expr it e)
+
+(* Constructions only allocate, so they can be evaluated once the group is
+   defined without reading through it: variables, constants, functions,
+   lazy expressions, and constructors, tuples, arrays and records of
+   constructions. *)
+exception Not_a_construction
+
+let construction_iterator =
+  let open Tast_iterator in
+  let expr sub e =
+    match e.exp_desc with
+    | Texp_function _ | Texp_lazy _ -> ()
+    | Texp_ident _ | Texp_constant _ | Texp_apply_layout _ | Texp_construct _
+    | Texp_tuple _ | Texp_variant _ | Texp_array _
+    | Texp_record { extended_expression = None; _ } ->
+      default_iterator.expr sub e
+    | _ -> raise Not_a_construction
+  in
+  { default_iterator with expr }
+
+let is_construction e =
+  match construction_iterator.expr construction_iterator e with
+  | () -> true
+  | exception Not_a_construction -> false
+
+(* The fields of a record literal, looking through the constructor of an
+   inline record. *)
+let record_fields e =
+  let fields e =
+    match e.exp_desc with
+    | Texp_record { fields; extended_expression = None; _ } -> Some fields
+    | _ -> None
+  in
+  match e.exp_desc with
+  | Texp_construct (_, cstr, _, [ (_, arg) ], _)
+    when Option.is_some cstr.cstr_inlined -> fields arg
+  | _ -> fields e
+
+(* A field that refers to the group must be a mutable construction; it is
+   assigned once the group is defined. *)
+let classify_field ids
+      ((lbl : Data_types.label_description), _, definition) patched =
+  match patched, definition with
+  | Error _, _ | _, Kept _ -> patched
+  | Ok patched, Overridden (_, e) ->
+    match find_value_reference ids e with
+    | None -> Ok patched
+    | Some id ->
+      if Types.is_mutable lbl.lbl_mut && is_construction e then begin
+        Env.mark_label_used Mutation lbl.lbl_uid;
+        Ok (lbl.lbl_pos :: patched)
+      end
+      else Error (e.exp_loc, id)
+
 let classify_recursive_binding ids expr =
-  match expr.exp_desc with
-  | Texp_function _ -> Ok Value_rec_types.Recursive_function
-  | _ ->
-    let iterator = value_reference_iterator ids in
-    let traverse (it : Tast_iterator.iterator) = it.expr it expr in
-    match find_reference iterator traverse with
+  match expr.exp_desc, record_fields expr with
+  | Texp_function _, _ -> Ok Value_rec_types.Recursive_function
+  | _, Some fields ->
+    begin match Array.fold_right (classify_field ids) fields (Ok []) with
+    | Ok [] -> Ok Value_rec_types.Not_recursive
+    | Ok patched -> Ok (Value_rec_types.Recursive_record patched)
+    | Error _ as error -> error
+    end
+  | _, None ->
+    match find_value_reference ids expr with
     | None -> Ok Value_rec_types.Not_recursive
-    | Some id -> Error id
+    | Some id -> Error (expr.exp_loc, id)
 
 let check_class_expr ids ce =
   let iterator = class_reference_iterator ids in

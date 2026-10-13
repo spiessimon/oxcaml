@@ -50,24 +50,19 @@ type checkpoint = {
 
 (*** Pseudo-checkpoint `root'. ***)
 (* --- Parents of all checkpoints which have no parent. *)
-(* [root] is its own parent; the placeholder is overwritten immediately. *)
-let root =
-  let root = {
-    c_time = _0;
-    c_pid = -2;
-    c_fd = std_io;
-    c_valid = false;
-    c_report = None;
-    c_state = C_stopped;
-    c_parent = Obj.magic ();
-    c_breakpoint_version = 0;
-    c_breakpoints = [];
-    c_trap_barrier = Sp.null;
-    c_code_fragments = [main_frag]
-    }
-  in
-  root.c_parent <- root;
-  root
+let rec root = {
+  c_time = _0;
+  c_pid = -2;
+  c_fd = std_io;
+  c_valid = false;
+  c_report = None;
+  c_state = C_stopped;
+  c_parent = root;
+  c_breakpoint_version = 0;
+  c_breakpoints = [];
+  c_trap_barrier = Sp.null;
+  c_code_fragments = [main_frag]
+  }
 
 (*** Current state ***)
 let checkpoints =

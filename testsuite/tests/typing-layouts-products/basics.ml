@@ -1545,8 +1545,9 @@ Line 2, characters 21-31:
 2 | let e2 = let rec x = #{ i = y } and y = 42 in ()
                          ^^^^^^^^^^
 Error: This kind of expression is not allowed as right-hand side of "let rec".
-       It refers to "y", but only functions ("fun" or "function")
-       may refer to the names bound by a "let rec".
+       It refers to "y", but the names bound by a "let rec" may only be used
+       by the functions it binds or, through constructors,
+       in the mutable fields of the records it binds.
 |}]
 
 (* These examples motivate having a check in [type_let], because

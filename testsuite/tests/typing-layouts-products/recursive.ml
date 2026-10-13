@@ -454,8 +454,9 @@ Line 14, characters 14-20:
 14 |   let rec u = #{ u }
                    ^^^^^^
 Error: This kind of expression is not allowed as right-hand side of "let rec".
-       It refers to "u", but only functions ("fun" or "function")
-       may refer to the names bound by a "let rec".
+       It refers to "u", but the names bound by a "let rec" may only be used
+       by the functions it binds or, through constructors,
+       in the mutable fields of the records it binds.
 |}]
 
 

@@ -963,8 +963,8 @@ let habert=function
   | _ -> 3
 ;;
 
-let ex0 = {lvar=0 ; lnb=0 ; lassoc=Obj.magic ()} in
-let ex1 = {lvar=1 ; lnb=1 ; lassoc=ex0} in ex0.lassoc <- ex1;
+let rec ex0 = {lvar=0 ; lnb=0 ; lassoc=ex1}
+and ex1 = {lvar=1 ; lnb=1 ; lassoc=ex0} in
 
 test "habert" habert (A ex0) 1 ;
 test "habert" habert (B ex0) 1 ;

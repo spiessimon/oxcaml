@@ -160,8 +160,9 @@ Line 1, characters 12-35:
 1 | let rec l = ~lbl: 5, ~lbl2: 10 :: l
                 ^^^^^^^^^^^^^^^^^^^^^^^
 Error: This kind of expression is not allowed as right-hand side of "let rec".
-       It refers to "l", but only functions ("fun" or "function")
-       may refer to the names bound by a "let rec".
+       It refers to "l", but the names bound by a "let rec" may only be used
+       by the functions it binds or, through constructors,
+       in the mutable fields of the records it binds.
 |}]
 
 (* Tuple containing labeled tuples *)
