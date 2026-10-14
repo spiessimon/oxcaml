@@ -2479,8 +2479,14 @@ and transl_let ~scopes ~return_layout ?(add_regions=false) ?(in_structure=false)
         in
         match (rkind : Value_rec_types.recursive_binding_kind) with
         | Recursive_function ->
-          begin match transl_def () with
-          | Lfunction def -> Either.Left { id; debug_uid = id_duid; def }
+          (* The class tables of the immediate objects of the function are
+             bound before the group rather than around the function. *)
+          let wrap, def =
+            Translobj.oo_wrap_split expr.exp_env true transl_def ()
+          in
+          begin match def with
+          | Lfunction def ->
+            Either.Left (wrap, { id; debug_uid = id_duid; def })
           | def ->
             Misc.fatal_errorf
               "Translcore.transl_let: recursive definition of %a is not a \
@@ -2515,7 +2521,10 @@ and transl_let ~scopes ~return_layout ?(add_regions=false) ?(in_structure=false)
         let body =
           match functions with
           | [] -> body
-          | _ :: _ -> Lletrec (functions, body)
+          | _ :: _ ->
+            List.fold_left (fun body (wrap, _) -> wrap body)
+              (Lletrec (List.map snd functions, body))
+              functions
         in
         List.fold_right
           (fun (id, id_duid, layout, def, _) body ->
