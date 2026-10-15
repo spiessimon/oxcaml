@@ -1331,29 +1331,8 @@ and transl_exp0 ~in_new_scope ~scopes (layout : Lambda.layout) e =
       | `Other ->
          (* other cases compile to a lazy block holding a function.  The
             typechecker enforces that e has jkind value.  *)
-         let scopes = enter_lazy ~scopes in
-         let fn = lfunction ~kind:(Curried {nlocal=0})
-                            ~params:[{ name = Ident.create_local "param";
-                                       debug_uid = Lambda.debug_uid_none;
-                                       layout = Lambda.layout_unit;
-                                       attributes = Lambda.default_param_attribute;
-                                       mode = alloc_heap}]
-                            ~return:Lambda.layout_lazy_contents
-                            (* The translation of [e] may be a function, in
-                               which case disallowing arity fusion gives a very
-                               small performance improvement.
-                            *)
-                            ~attr:function_attribute_disallowing_arity_fusion
-                            ~loc:(of_location ~scopes e.exp_loc)
-                            ~mode:alloc_heap
-                            ~ret_mode:not_alloc_stack
-                            ~body:(maybe_region_layout
-                                     Lambda.layout_lazy_contents
-                                     (transl_exp ~scopes
-                                        Lambda.layout_lazy_contents e))
-         in
-          Lprim(Pmakelazyblock Lazy_tag, [fn],
-                of_location ~scopes e.exp_loc)
+         Lprim(Pmakelazyblock Lazy_tag, [transl_lazy_thunk ~scopes e],
+               of_location ~scopes e.exp_loc)
       end
   | Texp_object (cs, meths) ->
       let cty = cs.cstr_type in
@@ -2500,10 +2479,16 @@ and transl_let ~scopes ~return_layout ?(add_regions=false) ?(in_structure=false)
             transl_recursive_record ~scopes ~in_structure id expr patched
           in
           Either.Right (id, id_duid, vb_layout, with_region def, patches)
+        | Recursive_lazy ->
+          let def, patch =
+            transl_recursive_lazy ~scopes ~in_structure id expr
+          in
+          Either.Right (id, id_duid, vb_layout, def, [patch])
       in
       (* [Value_rec_check] guarantees that the non-function bindings do not
          read through the group. They are evaluated first, in order, with
-         placeholders in the fields of records that refer to the group; then
+         placeholders in the fields of records and the lazy blocks that refer
+         to the group; then
          the mutually recursive functions are defined; finally these fields
          are assigned. *)
       let functions, others =
@@ -2530,6 +2515,25 @@ and transl_let ~scopes ~return_layout ?(add_regions=false) ?(in_structure=false)
           (fun (id, id_duid, layout, def, _) body ->
              Llet (Strict, layout, id, id_duid, def, body))
           others body
+
+(* The thunk [fun () -> e] of a lazy block. *)
+and transl_lazy_thunk ~scopes e =
+  let scopes = enter_lazy ~scopes in
+  lfunction ~kind:(Curried {nlocal=0})
+    ~params:[{ name = Ident.create_local "param";
+               debug_uid = Lambda.debug_uid_none;
+               layout = Lambda.layout_unit;
+               attributes = Lambda.default_param_attribute;
+               mode = alloc_heap}]
+    ~return:Lambda.layout_lazy_contents
+    (* The translation of [e] may be a function, in which case disallowing
+       arity fusion gives a very small performance improvement. *)
+    ~attr:function_attribute_disallowing_arity_fusion
+    ~loc:(of_location ~scopes e.exp_loc)
+    ~mode:alloc_heap
+    ~ret_mode:not_alloc_stack
+    ~body:(maybe_region_layout Lambda.layout_lazy_contents
+             (transl_exp ~scopes Lambda.layout_lazy_contents e))
 
 and transl_letmutable ~scopes ~return_layout
       {vb_pat=pat; vb_expr=expr; vb_attributes=attr; vb_loc; vb_sort} body =
@@ -2676,6 +2680,29 @@ and transl_recursive_record ~scopes ~in_structure id expr patched =
   | _ ->
     Misc.fatal_errorf
       "Translcore.transl_recursive_record: %a is not a record literal"
+      Ident.print id
+
+(* A [lazy] expression bound by [let rec] that refers to the group (see
+   [Value_rec_check]). Returns the allocation of the lazy block, with a
+   placeholder instead of its thunk, and the assignment of the thunk once the
+   whole group is defined. The shortcuts of [Texp_lazy] do not apply, since
+   the block must exist before its contents can be computed. *)
+and transl_recursive_lazy ~scopes ~in_structure id expr =
+  match expr.exp_desc with
+  | Texp_lazy e ->
+    let scopes =
+      if in_structure then
+        let assume_zero_alloc = Zero_alloc_utils.Assume_info.none in
+        enter_value_definition ~scopes ~assume_zero_alloc id
+      else scopes
+    in
+    let loc = of_location ~scopes e.exp_loc in
+    Lprim (Pmakelazyblock Lazy_tag, [lambda_unit], loc),
+    Lprim (Psetfield (0, Pointer, Assignment modify_heap),
+           [Lvar id; transl_lazy_thunk ~scopes e], loc)
+  | _ ->
+    Misc.fatal_errorf
+      "Translcore.transl_recursive_lazy: %a is not a lazy expression"
       Ident.print id
 
 (* CR layouts v5: Invariant - this is only called on values.  Relax that. *)

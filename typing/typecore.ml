@@ -13802,8 +13802,8 @@ let report_error ~loc env =
       Location.errorf ~loc
         "This kind of expression is not allowed as right-hand side of %a.@ \
          It refers to %a,@ but the names bound by a %a@ may only be used@ \
-         by the functions it binds@ or, through constructors,@ in the \
-         mutable fields@ of the records it binds."
+         by the functions@ and lazy values it binds@ or, through \
+         constructors,@ in the mutable fields@ of the records it binds."
         Style.inline_code "let rec"
         Style.inline_code (Ident.name id)
         Style.inline_code "let rec"

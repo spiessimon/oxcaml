@@ -28,3 +28,7 @@ type recursive_binding_kind =
       fields at the given positions are mutable and refer to the group. The
       record is allocated before the functions with placeholders in these
       fields, which are assigned once the whole group is defined. *)
+| Recursive_lazy
+  (** A [lazy] expression that refers to the group. The lazy block is
+      allocated before the functions with a placeholder instead of its
+      thunk, which is assigned once the whole group is defined. *)

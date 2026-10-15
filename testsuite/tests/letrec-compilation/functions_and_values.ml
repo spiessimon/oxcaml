@@ -18,3 +18,17 @@ let () =
   and local_x = (print_endline "local_x evaluated"; "local")
   and local_g () = local_f () ^ "!" in
   print_endline (local_g ())
+
+(* Lazy values may refer to the group, and are only evaluated when forced. *)
+
+let rec squares = lazy (print_endline "squares forced"; List.map square [1; 2])
+and square n = n * n
+and sum () = List.fold_left ( + ) 0 (Lazy.force squares)
+
+let () = print_endline "before sum"; Printf.printf "%d %d\n" (sum ()) (sum ())
+
+let () =
+  let rec loop = lazy (Lazy.force loop + 1) in
+  match Lazy.force loop with
+  | _ -> assert false
+  | exception CamlinternalLazy.Undefined -> print_endline "undefined"

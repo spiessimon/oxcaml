@@ -31,11 +31,16 @@
       fields referring to [x1 ... xn] are mutable constructions (see
       [construction_iterator]). Such a record is allocated with placeholders
       in these fields, which are assigned once the whole group is defined;
+    - a [lazy] expression, whose body may refer freely to [x1 ... xn]
+      because it is only evaluated when forced. The lazy block is allocated
+      with a placeholder, and its thunk is assigned once the whole group is
+      defined;
     - an expression that does not mention [x1 ... xn] at all, which is an
       ordinary definition that merely shares the [let rec] with the others.
 
     Hence every cycle in the data created by a [let rec] goes through a
-    mutable field: no cyclic data is created without mutation. Definitions
+    mutable field or a lazy block: no cyclic data is created without
+    mutation. Definitions
     such as [let rec xs = 0 :: xs] or [let rec r = { f = fun () -> r }] are
     rejected. See [Translcore.transl_let] for the compilation scheme.
 
@@ -157,6 +162,11 @@ let classify_field ids
 let classify_recursive_binding ids expr =
   match expr.exp_desc, record_fields expr with
   | Texp_function _, _ -> Ok Value_rec_types.Recursive_function
+  | Texp_lazy e, _ ->
+    begin match find_value_reference ids e with
+    | None -> Ok Value_rec_types.Not_recursive
+    | Some _ -> Ok Value_rec_types.Recursive_lazy
+    end
   | _, Some fields ->
     begin match Array.fold_right (classify_field ids) fields (Ok []) with
     | Ok [] -> Ok Value_rec_types.Not_recursive
