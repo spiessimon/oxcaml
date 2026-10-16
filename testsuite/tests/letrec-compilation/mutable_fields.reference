@@ -8,3 +8,6 @@ fr = (1, 2), mx = (3, 4)
 len evaluated
 f called
 r.len = 3, r.s = abc
+renamed
+local = 0
+atomic = 1

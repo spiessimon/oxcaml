@@ -62,7 +62,7 @@ Line 2, characters 8-33:
 Error: This kind of expression is not allowed as right-hand side of "let rec".
        It refers to "f", but the names bound by a "let rec" may only be used
        by the functions and lazy values it binds or, through constructors,
-       in the mutable fields of the records it binds.
+       in the mutable fields of the records and references it binds.
 |}];;
 
 (* Non-function bindings may not refer to the recursive group: no cyclic
@@ -76,7 +76,7 @@ Line 1, characters 12-18:
 Error: This kind of expression is not allowed as right-hand side of "let rec".
        It refers to "x", but the names bound by a "let rec" may only be used
        by the functions and lazy values it binds or, through constructors,
-       in the mutable fields of the records it binds.
+       in the mutable fields of the records and references it binds.
 |}];;
 
 type tup = T of tup * int
@@ -89,7 +89,7 @@ Line 2, characters 12-20:
 Error: This kind of expression is not allowed as right-hand side of "let rec".
        It refers to "x", but the names bound by a "let rec" may only be used
        by the functions and lazy values it binds or, through constructors,
-       in the mutable fields of the records it binds.
+       in the mutable fields of the records and references it binds.
 |}];;
 
 type 'a stream = Cons of 'a * 'a stream
@@ -102,7 +102,7 @@ Line 2, characters 12-23:
 Error: This kind of expression is not allowed as right-hand side of "let rec".
        It refers to "s", but the names bound by a "let rec" may only be used
        by the functions and lazy values it binds or, through constructors,
-       in the mutable fields of the records it binds.
+       in the mutable fields of the records and references it binds.
 |}];;
 
 type tree = Node of tree array
@@ -115,7 +115,7 @@ Line 2, characters 12-24:
 Error: This kind of expression is not allowed as right-hand side of "let rec".
        It refers to "t", but the names bound by a "let rec" may only be used
        by the functions and lazy values it binds or, through constructors,
-       in the mutable fields of the records it binds.
+       in the mutable fields of the records and references it binds.
 |}];;
 
 type t = { f : unit -> t }
@@ -128,7 +128,7 @@ Line 2, characters 18-31:
 Error: This kind of expression is not allowed as right-hand side of "let rec".
        It refers to "r", but the names bound by a "let rec" may only be used
        by the functions and lazy values it binds or, through constructors,
-       in the mutable fields of the records it binds.
+       in the mutable fields of the records and references it binds.
 |}];;
 
 (* Lazy values are accepted: their bodies are only evaluated when forced. *)
@@ -184,7 +184,7 @@ Line 2, characters 12-28:
 Error: This kind of expression is not allowed as right-hand side of "let rec".
        It refers to "s", but the names bound by a "let rec" may only be used
        by the functions and lazy values it binds or, through constructors,
-       in the mutable fields of the records it binds.
+       in the mutable fields of the records and references it binds.
 |}];;
 
 let rec x = (x; ());;
@@ -195,7 +195,7 @@ Line 1, characters 12-19:
 Error: This kind of expression is not allowed as right-hand side of "let rec".
        It refers to "x", but the names bound by a "let rec" may only be used
        by the functions and lazy values it binds or, through constructors,
-       in the mutable fields of the records it binds.
+       in the mutable fields of the records and references it binds.
 |}];;
 
 let rec x = let _ = x in 0;;
@@ -206,7 +206,7 @@ Line 1, characters 12-26:
 Error: This kind of expression is not allowed as right-hand side of "let rec".
        It refers to "x", but the names bound by a "let rec" may only be used
        by the functions and lazy values it binds or, through constructors,
-       in the mutable fields of the records it binds.
+       in the mutable fields of the records and references it binds.
 |}];;
 
 type cell = C of cell ref
@@ -219,7 +219,7 @@ Line 2, characters 12-21:
 Error: This kind of expression is not allowed as right-hand side of "let rec".
        It refers to "c", but the names bound by a "let rec" may only be used
        by the functions and lazy values it binds or, through constructors,
-       in the mutable fields of the records it binds.
+       in the mutable fields of the records and references it binds.
 |}];;
 
 let rec x = let module M = struct let y = x end in M.y;;
@@ -230,7 +230,7 @@ Line 1, characters 12-54:
 Error: This kind of expression is not allowed as right-hand side of "let rec".
        It refers to "x", but the names bound by a "let rec" may only be used
        by the functions and lazy values it binds or, through constructors,
-       in the mutable fields of the records it binds.
+       in the mutable fields of the records and references it binds.
 |}];;
 
 module type S = sig val y : int end
@@ -243,7 +243,7 @@ Line 2, characters 12-55:
 Error: This kind of expression is not allowed as right-hand side of "let rec".
        It refers to "x", but the names bound by a "let rec" may only be used
        by the functions and lazy values it binds or, through constructors,
-       in the mutable fields of the records it binds.
+       in the mutable fields of the records and references it binds.
 |}];;
 
 type a = A of b * int
@@ -259,7 +259,7 @@ Line 3, characters 12-20:
 Error: This kind of expression is not allowed as right-hand side of "let rec".
        It refers to "y", but the names bound by a "let rec" may only be used
        by the functions and lazy values it binds or, through constructors,
-       in the mutable fields of the records it binds.
+       in the mutable fields of the records and references it binds.
 |}];;
 
 let rec x = object method m = x end;;
@@ -270,7 +270,7 @@ Line 1, characters 12-35:
 Error: This kind of expression is not allowed as right-hand side of "let rec".
        It refers to "x", but the names bound by a "let rec" may only be used
        by the functions and lazy values it binds or, through constructors,
-       in the mutable fields of the records it binds.
+       in the mutable fields of the records and references it binds.
 |}];;
 
 (* Functions that are not syntactically functions are rejected too. *)
@@ -283,7 +283,7 @@ Line 1, characters 12-30:
 Error: This kind of expression is not allowed as right-hand side of "let rec".
        It refers to "f", but the names bound by a "let rec" may only be used
        by the functions and lazy values it binds or, through constructors,
-       in the mutable fields of the records it binds.
+       in the mutable fields of the records and references it binds.
 |}];;
 
 let rec f = let count = ref 0 in fun x -> incr count; f x;;
@@ -294,7 +294,7 @@ Line 1, characters 12-57:
 Error: This kind of expression is not allowed as right-hand side of "let rec".
        It refers to "f", but the names bound by a "let rec" may only be used
        by the functions and lazy values it binds or, through constructors,
-       in the mutable fields of the records it binds.
+       in the mutable fields of the records and references it binds.
 |}];;
 
 let rec f x = x
@@ -306,7 +306,7 @@ Line 2, characters 8-9:
 Error: This kind of expression is not allowed as right-hand side of "let rec".
        It refers to "f", but the names bound by a "let rec" may only be used
        by the functions and lazy values it binds or, through constructors,
-       in the mutable fields of the records it binds.
+       in the mutable fields of the records and references it binds.
 |}];;
 
 let rec f = fun x -> x
@@ -318,7 +318,7 @@ Line 2, characters 8-11:
 Error: This kind of expression is not allowed as right-hand side of "let rec".
        It refers to "f", but the names bound by a "let rec" may only be used
        by the functions and lazy values it binds or, through constructors,
-       in the mutable fields of the records it binds.
+       in the mutable fields of the records and references it binds.
 |}];;
 
 let rec f = Fun.id (fun x -> f x);;
@@ -329,7 +329,7 @@ Line 1, characters 12-33:
 Error: This kind of expression is not allowed as right-hand side of "let rec".
        It refers to "f", but the names bound by a "let rec" may only be used
        by the functions and lazy values it binds or, through constructors,
-       in the mutable fields of the records it binds.
+       in the mutable fields of the records and references it binds.
 |}];;
 
 let rec f = (fun x -> x) |> fun g -> g;;
@@ -349,7 +349,7 @@ Line 2, characters 12-44:
 Error: This kind of expression is not allowed as right-hand side of "let rec".
        It refers to "f", but the names bound by a "let rec" may only be used
        by the functions and lazy values it binds or, through constructors,
-       in the mutable fields of the records it binds.
+       in the mutable fields of the records and references it binds.
 |}];;
 
 let rec ( let* ) x f = f x
@@ -361,7 +361,7 @@ Line 2, characters 8-23:
 Error: This kind of expression is not allowed as right-hand side of "let rec".
        It refers to "let*", but the names bound by a "let rec" may only be used
        by the functions and lazy values it binds or, through constructors,
-       in the mutable fields of the records it binds.
+       in the mutable fields of the records and references it binds.
 |}];;
 
 (* Recursive bindings in classes. *)
@@ -379,5 +379,5 @@ Line 1, characters 22-28:
 Error: This kind of expression is not allowed as right-hand side of "let rec".
        It refers to "x", but the names bound by a "let rec" may only be used
        by the functions and lazy values it binds or, through constructors,
-       in the mutable fields of the records it binds.
+       in the mutable fields of the records and references it binds.
 |}];;

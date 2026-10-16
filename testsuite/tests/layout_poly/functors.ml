@@ -482,7 +482,7 @@ Lines 7-9, characters 2-10:
 Error: This kind of expression is not allowed as right-hand side of "let rec".
        It refers to "p13", but the names bound by a "let rec" may only be used
        by the functions and lazy values it binds or, through constructors,
-       in the mutable fields of the records it binds.
+       in the mutable fields of the records and references it binds.
 |}]
 
 (* A static functor taking another static functor as its argument *)

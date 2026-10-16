@@ -212,6 +212,12 @@ let maybe_region get_layout lam =
 let maybe_region_layout layout lam =
   maybe_region (fun () -> layout) lam
 
+(* The assignment of the single field of a block bound by [let rec], which
+   was allocated with a placeholder. *)
+let recursive_patch_field0 ~modify_mode id contents loc =
+  Lprim (Psetfield (0, Pointer, Assignment modify_mode),
+         [Lvar id; contents], loc)
+
 (* A value of the right representation for the field at position [pos] of a
    record bound by [let rec], which is assigned once the group is defined;
    see [transl_recursive_record]. Such fields have layout value, because
@@ -2484,6 +2490,11 @@ and transl_let ~scopes ~return_layout ?(add_regions=false) ?(in_structure=false)
             transl_recursive_lazy ~scopes ~in_structure id expr
           in
           Either.Right (id, id_duid, vb_layout, def, [patch])
+        | Recursive_ref ->
+          let def, patch =
+            transl_recursive_ref ~scopes ~in_structure id vb_layout expr
+          in
+          Either.Right (id, id_duid, vb_layout, def, [patch])
       in
       (* [Value_rec_check] guarantees that the non-function bindings do not
          read through the group. They are evaluated first, in order, with
@@ -2641,12 +2652,7 @@ and transl_recursive_record ~scopes ~in_structure id expr patched =
   | Texp_record
       { fields; representation; extended_expression = None; locality_mode } ->
     let loc = record.exp_loc and env = record.exp_env in
-    let scopes =
-      if in_structure then
-        let assume_zero_alloc = Zero_alloc_utils.Assume_info.none in
-        enter_value_definition ~scopes ~assume_zero_alloc id
-      else scopes
-    in
+    let scopes = recursive_definition_scopes ~scopes ~in_structure id in
     let repres =
       Typeopt.transl_record_representation env loc representation
     in
@@ -2682,6 +2688,32 @@ and transl_recursive_record ~scopes ~in_structure id expr patched =
       "Translcore.transl_recursive_record: %a is not a record literal"
       Ident.print id
 
+(* The scopes of a recursive definition that is not translated through
+   [transl_bound_exp]. *)
+and recursive_definition_scopes ~scopes ~in_structure id =
+  if in_structure then
+    let assume_zero_alloc = Zero_alloc_utils.Assume_info.none in
+    enter_value_definition ~scopes ~assume_zero_alloc id
+  else scopes
+
+(* A reference cell bound by [let rec] whose contents refer to the group
+   (see [Value_rec_check]). Returns the allocation of the cell, with a
+   placeholder instead of its contents, and the assignment of the contents
+   once the whole group is defined. *)
+and transl_recursive_ref ~scopes ~in_structure id layout expr =
+  let scopes = recursive_definition_scopes ~scopes ~in_structure id in
+  match transl_exp ~scopes layout expr with
+  | Lprim (Pmakeblock (0, Mutable, shape, mode), [contents], loc) ->
+    let modify_mode =
+      if is_heap_mode mode then modify_heap else modify_maybe_stack
+    in
+    Lprim (Pmakeblock (0, Mutable, shape, mode), [lambda_unit], loc),
+    recursive_patch_field0 ~modify_mode id contents loc
+  | def ->
+    Misc.fatal_errorf
+      "Translcore.transl_recursive_ref: %a is not a reference cell:@ %a"
+      Ident.print id Printlambda.lambda def
+
 (* A [lazy] expression bound by [let rec] that refers to the group (see
    [Value_rec_check]). Returns the allocation of the lazy block, with a
    placeholder instead of its thunk, and the assignment of the thunk once the
@@ -2690,16 +2722,11 @@ and transl_recursive_record ~scopes ~in_structure id expr patched =
 and transl_recursive_lazy ~scopes ~in_structure id expr =
   match expr.exp_desc with
   | Texp_lazy e ->
-    let scopes =
-      if in_structure then
-        let assume_zero_alloc = Zero_alloc_utils.Assume_info.none in
-        enter_value_definition ~scopes ~assume_zero_alloc id
-      else scopes
-    in
+    let scopes = recursive_definition_scopes ~scopes ~in_structure id in
     let loc = of_location ~scopes e.exp_loc in
     Lprim (Pmakelazyblock Lazy_tag, [lambda_unit], loc),
-    Lprim (Psetfield (0, Pointer, Assignment modify_heap),
-           [Lvar id; transl_lazy_thunk ~scopes e], loc)
+    recursive_patch_field0 ~modify_mode:modify_heap id
+      (transl_lazy_thunk ~scopes e) loc
   | _ ->
     Misc.fatal_errorf
       "Translcore.transl_recursive_lazy: %a is not a lazy expression"

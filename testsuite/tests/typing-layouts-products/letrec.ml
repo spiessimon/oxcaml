@@ -45,7 +45,7 @@ Line 1, characters 12-33:
 Error: This kind of expression is not allowed as right-hand side of "let rec".
        It refers to "t", but the names bound by a "let rec" may only be used
        by the functions and lazy values it binds or, through constructors,
-       in the mutable fields of the records it binds.
+       in the mutable fields of the records and references it binds.
 |}]
 
 let rec t = { bx = #{ ubx = t } }
@@ -56,7 +56,7 @@ Line 1, characters 19-31:
 Error: This kind of expression is not allowed as right-hand side of "let rec".
        It refers to "t", but the names bound by a "let rec" may only be used
        by the functions and lazy values it binds or, through constructors,
-       in the mutable fields of the records it binds.
+       in the mutable fields of the records and references it binds.
 |}]
 
 type bx = { bx : bx2# }
@@ -74,7 +74,7 @@ Line 1, characters 12-33:
 Error: This kind of expression is not allowed as right-hand side of "let rec".
        It refers to "t", but the names bound by a "let rec" may only be used
        by the functions and lazy values it binds or, through constructors,
-       in the mutable fields of the records it binds.
+       in the mutable fields of the records and references it binds.
 |}]
 
 let rec t = { bx = #{ bx2 = t } }
@@ -85,7 +85,7 @@ Line 1, characters 19-31:
 Error: This kind of expression is not allowed as right-hand side of "let rec".
        It refers to "t", but the names bound by a "let rec" may only be used
        by the functions and lazy values it binds or, through constructors,
-       in the mutable fields of the records it binds.
+       in the mutable fields of the records and references it binds.
 |}]
 
 (* The cycle-finding algorithm in genprintval does not store non-values in its
@@ -118,7 +118,7 @@ Line 2, characters 12-20:
 Error: This kind of expression is not allowed as right-hand side of "let rec".
        It refers to "y", but the names bound by a "let rec" may only be used
        by the functions and lazy values it binds or, through constructors,
-       in the mutable fields of the records it binds.
+       in the mutable fields of the records and references it binds.
 |}];;
 
 type t = {x: int64}
@@ -131,7 +131,7 @@ Line 2, characters 12-20:
 Error: This kind of expression is not allowed as right-hand side of "let rec".
        It refers to "y", but the names bound by a "let rec" may only be used
        by the functions and lazy values it binds or, through constructors,
-       in the mutable fields of the records it binds.
+       in the mutable fields of the records and references it binds.
 |}];;
 
 (* This test is not allowed if 'a' is unboxed, but should be accepted
@@ -156,7 +156,7 @@ Lines 6-9, characters 4-9:
 Error: This kind of expression is not allowed as right-hand side of "let rec".
        It refers to "a", but the names bound by a "let rec" may only be used
        by the functions and lazy values it binds or, through constructors,
-       in the mutable fields of the records it binds.
+       in the mutable fields of the records and references it binds.
 |}];;
 
 type a = #{ a: b }
@@ -180,7 +180,7 @@ Lines 5-9, characters 2-10:
 Error: This kind of expression is not allowed as right-hand side of "let rec".
        It refers to "a", but the names bound by a "let rec" may only be used
        by the functions and lazy values it binds or, through constructors,
-       in the mutable fields of the records it binds.
+       in the mutable fields of the records and references it binds.
 |}];;
 
 type a = { a: b }
@@ -204,5 +204,5 @@ Lines 5-9, characters 2-10:
 Error: This kind of expression is not allowed as right-hand side of "let rec".
        It refers to "a", but the names bound by a "let rec" may only be used
        by the functions and lazy values it binds or, through constructors,
-       in the mutable fields of the records it binds.
+       in the mutable fields of the records and references it binds.
 |}];;

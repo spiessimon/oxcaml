@@ -32,3 +32,8 @@ type recursive_binding_kind =
   (** A [lazy] expression that refers to the group. The lazy block is
       allocated before the functions with a placeholder instead of its
       thunk, which is assigned once the whole group is defined. *)
+| Recursive_ref
+  (** An application of the [%makemutable] primitive, such as [ref], whose
+      argument refers to the group. The cell is allocated before the
+      functions with a placeholder, which is replaced by the argument once
+      the whole group is defined. *)

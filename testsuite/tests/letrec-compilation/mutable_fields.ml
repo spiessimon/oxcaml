@@ -78,3 +78,25 @@ let () =
   f ();
   assert (r.self == r);
   Printf.printf "r.len = %d, r.s = %s\n" r.len r.s
+
+(* Reference cells are records with a single mutable field. *)
+
+type named = { name : string; parent : named ref option }
+
+let rec root = ref { name = "root"; parent = Some root }
+and rename name = root := { !root with name }
+
+let () =
+  rename "renamed";
+  match !root with
+  | { name; parent = Some parent } ->
+    assert (parent == root);
+    print_endline name
+  | { parent = None; _ } -> assert false
+
+let () =
+  let rec count = ref (fun n -> if n = 0 then 0 else !count (n - 1)) in
+  Printf.printf "local = %d\n" (!count 3)
+
+let rec cell = Atomic.make (fun n -> if n = 0 then 1 else (Atomic.get cell) 0)
+let () = Printf.printf "atomic = %d\n" ((Atomic.get cell) 5)

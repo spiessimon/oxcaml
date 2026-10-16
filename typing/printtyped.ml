@@ -1513,6 +1513,7 @@ and value_binding rec_flag i ppf x =
       (Format.pp_print_list ~pp_sep:Format.pp_print_space Format.pp_print_int)
       patched
   | Recursive, Recursive_lazy -> line i ppf "<def_rec_lazy>\n"
+  | Recursive, Recursive_ref -> line i ppf "<def_rec_ref>\n"
   end;
   attributes (i+1) ppf x.vb_attributes;
   pattern (i+1) ppf x.vb_pat;

@@ -31,6 +31,9 @@
       fields referring to [x1 ... xn] are mutable constructions (see
       [construction_iterator]). Such a record is allocated with placeholders
       in these fields, which are assigned once the whole group is defined;
+    - a reference cell [ref e] (or another application of the
+      [%makemutable] primitive), where [e] is a construction if it refers to
+      [x1 ... xn]. Like a record, it is allocated with a placeholder;
     - a [lazy] expression, whose body may refer freely to [x1 ... xn]
       because it is only evaluated when forced. The lazy block is allocated
       with a placeholder, and its thunk is assigned once the whole group is
@@ -143,21 +146,43 @@ let record_fields e =
     when Option.is_some cstr.cstr_inlined -> fields arg
   | _ -> fields e
 
-(* A field that refers to the group must be a mutable construction; it is
-   assigned once the group is defined. *)
+(* The contents of a reference cell allocated by a direct application of
+   the [%makemutable] primitive, such as [ref] or [Atomic.make]. Its single
+   field is mutable, like that of [{ contents }]. *)
+let ref_contents e =
+  match e.exp_desc with
+  | Texp_apply
+      ({ exp_desc =
+           Texp_ident
+             { desc = { val_kind = Val_prim { prim_name = "%makemutable"; _ };
+                        _ };
+               _ };
+         _ },
+       [ (_, Arg (contents, _)) ], _, _, _, _) ->
+    Some contents
+  | _ -> None
+
+(* Contents that refer to the group, in a record field or a reference cell,
+   must be a mutable construction; they are assigned once the group is
+   defined. Returns whether they need to be assigned. *)
+let classify_contents ids ~mutable_ e =
+  match find_value_reference ids e with
+  | None -> Ok false
+  | Some id ->
+    if mutable_ && is_construction e then Ok true else Error (e.exp_loc, id)
+
 let classify_field ids
       ((lbl : Data_types.label_description), _, definition) patched =
   match patched, definition with
   | Error _, _ | _, Kept _ -> patched
   | Ok patched, Overridden (_, e) ->
-    match find_value_reference ids e with
-    | None -> Ok patched
-    | Some id ->
-      if Types.is_mutable lbl.lbl_mut && is_construction e then begin
-        Env.mark_label_used Mutation lbl.lbl_uid;
-        Ok (lbl.lbl_pos :: patched)
-      end
-      else Error (e.exp_loc, id)
+    let mutable_ = Types.is_mutable lbl.lbl_mut in
+    match classify_contents ids ~mutable_ e with
+    | Ok false -> Ok patched
+    | Ok true ->
+      Env.mark_label_used Mutation lbl.lbl_uid;
+      Ok (lbl.lbl_pos :: patched)
+    | Error _ as error -> error
 
 let classify_recursive_binding ids expr =
   match expr.exp_desc, record_fields expr with
@@ -174,9 +199,17 @@ let classify_recursive_binding ids expr =
     | Error _ as error -> error
     end
   | _, None ->
-    match find_value_reference ids expr with
-    | None -> Ok Value_rec_types.Not_recursive
-    | Some id -> Error (expr.exp_loc, id)
+    match ref_contents expr with
+    | Some contents ->
+      Result.map
+        (fun patched ->
+           if patched then Value_rec_types.Recursive_ref
+           else Value_rec_types.Not_recursive)
+        (classify_contents ids ~mutable_:true contents)
+    | None ->
+      match find_value_reference ids expr with
+      | None -> Ok Value_rec_types.Not_recursive
+      | Some id -> Error (expr.exp_loc, id)
 
 let check_class_expr ids ce =
   let iterator = class_reference_iterator ids in
