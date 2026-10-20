@@ -3495,6 +3495,7 @@ module Format_history = struct
     | Structure_item ->
       fprintf ppf "it's the type of something stored in a module"
     | Signature_item -> fprintf ppf "it's the type of something in a signature"
+    | Law_parameter -> fprintf ppf "it's the type of a law parameter"
     | Layout_poly -> fprintf ppf "it's the layout polymorphic type"
     | Typing_recovery ->
       fprintf ppf "it's a fake kind created during error recovery"
@@ -4713,6 +4714,7 @@ module Debug_printers = struct
     | Field_in_indexed_record -> fprintf ppf "Field_in_indexed_record"
     | Structure_item -> fprintf ppf "Structure_item"
     | Signature_item -> fprintf ppf "Signature_item"
+    | Law_parameter -> fprintf ppf "Law_parameter"
     | Layout_poly -> fprintf ppf "Layout_poly"
     | Typing_recovery -> fprintf ppf "Typing_recovery"
 
