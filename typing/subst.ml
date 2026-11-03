@@ -1008,6 +1008,9 @@ let law_declaration' copy_scope s decl =
     law_loc = loc s decl.law_loc;
   }
 
+let law_declaration s decl =
+  For_copy.with_scope (fun copy_scope -> law_declaration' copy_scope s decl)
+
 let rec type_declaration' copy_scope s decl =
   let unsafe_mode_crossing =
     Option.map (unsafe_mode_crossing copy_scope s decl.type_loc)
