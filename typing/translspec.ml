@@ -126,33 +126,143 @@ let global loc (path : Path.t) =
    side effects. To be conservative, the builtin primitives are allowlisted.
    Other externals are allowed. *)
 let pure_builtin_primitives =
+  let boxed_integers =
+    List.concat_map
+      (fun ty ->
+        List.map
+          (fun op -> "%" ^ ty ^ "_" ^ op)
+          [ "of_int";
+            "to_int";
+            "neg";
+            "add";
+            "sub";
+            "mul";
+            "div";
+            "mod";
+            "and";
+            "or";
+            "xor";
+            "lsl";
+            "lsr";
+            "asr" ])
+      ["int32"; "int64"; "nativeint"]
+  in
   Misc.Stdlib.String.Set.of_list
-    [ "%ignore";
-      "%apply";
-      "%revapply";
-      (* Booleans and structural comparisons *)
-      "%sequand";
-      "%sequor";
-      "%boolnot";
-      "%equal";
-      "%notequal";
-      "%lessequal";
-      "%lessthan";
-      "%greaterequal";
-      "%greaterthan";
-      "%compare";
-      (* Integers *)
-      "%negint";
-      "%succint";
-      "%predint";
-      "%addint";
-      "%subint";
-      "%mulint";
-      "%divint";
-      "%modint" ]
+    (boxed_integers
+    @ [ "%identity";
+        "%ignore";
+        "%apply";
+        "%revapply";
+        (* Booleans and structural comparisons *)
+        "%sequand";
+        "%sequor";
+        "%boolnot";
+        "%equal";
+        "%notequal";
+        "%lessequal";
+        "%lessthan";
+        "%greaterequal";
+        "%greaterthan";
+        "%compare";
+        (* Reads of fields, including mutable ones such as [!] *)
+        "%field0";
+        "%field1";
+        "%field0_singleton";
+        "%field0_immut";
+        "%field1_immut";
+        "%field0_singleton_immut";
+        (* Integers *)
+        "%negint";
+        "%succint";
+        "%predint";
+        "%addint";
+        "%subint";
+        "%mulint";
+        "%divint";
+        "%modint";
+        "%andint";
+        "%orint";
+        "%xorint";
+        "%lslint";
+        "%lsrint";
+        "%asrint";
+        "%ltint";
+        "%leint";
+        "%gtint";
+        "%geint";
+        "%nativeint_of_int32";
+        "%nativeint_to_int32";
+        "%int64_of_int32";
+        "%int64_to_int32";
+        "%int64_of_nativeint";
+        "%int64_to_nativeint";
+        "%bswap16";
+        "%bswap_int32";
+        "%bswap_int64";
+        "%bswap_native";
+        (* Floats *)
+        "%negfloat";
+        "%absfloat";
+        "%addfloat";
+        "%subfloat";
+        "%mulfloat";
+        "%divfloat";
+        "%eqfloat";
+        "%noteqfloat";
+        "%ltfloat";
+        "%lefloat";
+        "%gtfloat";
+        "%gefloat";
+        "%intoffloat";
+        "%floatofint";
+        "%negfloat32";
+        "%absfloat32";
+        "%addfloat32";
+        "%subfloat32";
+        "%mulfloat32";
+        "%divfloat32";
+        "%eqfloat32";
+        "%noteqfloat32";
+        "%ltfloat32";
+        "%lefloat32";
+        "%gtfloat32";
+        "%gefloat32";
+        "%intoffloat32";
+        "%float32ofint";
+        "%floatoffloat32";
+        "%float32offloat";
+        (* Strings *)
+        "%string_length";
+        "%string_safe_get";
+        (* Arrays, e.g., [a.(i)] *)
+        "%array_length";
+        "%array_safe_get";
+        "%floatarray_length";
+        "%floatarray_safe_get";
+        (* Bytes *)
+        "%bytes_length";
+        "%bytes_safe_get";
+        (* Bigarrays *)
+        "%caml_ba_ref_1";
+        "%caml_ba_ref_2";
+        "%caml_ba_ref_3";
+        "%caml_ba_float32_ref_1";
+        "%caml_ba_float32_ref_2";
+        "%caml_ba_float32_ref_3";
+        "%caml_ba_dim_1";
+        "%caml_ba_dim_2";
+        "%caml_ba_dim_3";
+        (* Other reads and pure operations *)
+        "%atomic_load";
+        "%is_null";
+        "%opaque" ])
 
 let is_pure_builtin name =
   Misc.Stdlib.String.Set.mem name pure_builtin_primitives
+  ||
+  match Scalar.Operation.With_percent_prefix.of_string name with
+  | _ -> true
+  | exception Not_found -> false
 
 let unsupported_primitive (prim : Primitive.description) =
   let name = prim.prim_name in
