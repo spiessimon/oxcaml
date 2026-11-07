@@ -114,6 +114,11 @@ let rec of_unapplied = function
   | Uident id -> Pident id
   | Udot (p, s) -> Pdot (of_unapplied p, s)
 
+let rec contains_apply = function
+  | Pident _ -> false
+  | Pdot (p, _) | Pextra_ty (p, _) -> contains_apply p
+  | Papply _ -> true
+
 let rec scope = function
     Pident id -> Ident.scope id
   | Pdot(p, _) | Pextra_ty (p, _) -> scope p

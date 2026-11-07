@@ -75,8 +75,8 @@ let same_constant c1 c2 =
 let same_arg_label l1 l2 =
   match l1, l2 with
   | Nolabel, Nolabel -> true
-  | Labelled s1, Labelled s2 | Optional s1, Optional s2 -> String.equal s1 s2
-  | (Nolabel | Labelled _ | Optional _), _ -> false
+  | Labelled s1, Labelled s2 -> String.equal s1 s2
+  | (Nolabel | Labelled _), _ -> false
 
 let same_sort = Jkind_types.Sort.Const.equal
 
